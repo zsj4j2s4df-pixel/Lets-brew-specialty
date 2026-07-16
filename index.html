@@ -817,19 +817,12 @@ function save(){
     toast('⚠ opslaan mislukt — maak een back-up via profiel');
   }
 }
-// klein "✓ opgeslagen" label dat kort verschijnt bij elke opslag
+// "✓ opgeslagen" label bewust uitgezet: op verzoek niet meer tonen op het
+// startscherm/splash noch op andere pagina's. Opslaan gebeurt nog steeds
+// automatisch (zie save()), alleen zonder zichtbaar label.
 let savedT;
 function showSaved(){
-  // niet tonen op het startscherm (splash) — daar is het lelijk en verwarrend
-  if(typeof currentPage!=='undefined' && (currentPage==='welcome'||currentPage==='name'))return;
-  let el=document.getElementById('saved-dot');
-  if(!el){
-    el=document.createElement('div');el.id='saved-dot';
-    document.body.appendChild(el);
-  }
-  el.textContent='✓ opgeslagen';
-  el.classList.add('show');
-  clearTimeout(savedT);savedT=setTimeout(()=>el.classList.remove('show'),1200);
+  return;
 }
 function demoBrews(){
   return [
