@@ -588,7 +588,7 @@
 
       <div class="settings-card sketch soft">
         <div class="set-t hand">opslaan & back-up</div>
-        <div class="set-d" style="margin:4px 0 4px">de app slaat alles automatisch op bij elke actie — je ziet dan kort ‘✓ opgeslagen’ in beeld.</div>
+        <div class="set-d" style="margin:4px 0 4px">de app slaat alles automatisch op bij elke actie, veilig op je apparaat.</div>
         <div class="set-d" id="save-status" style="margin:0 0 12px;color:var(--ink)"></div>
         <button class="profile-btn" onclick="manualSave()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M5 4.5 Q11 4.1 16.5 4.5 Q18.2 6.2 19.6 8 Q20 13.5 19.6 19.4 Q12 19.9 4.6 19.4 Q4.2 12 5 4.5 Z M8 4.7 Q7.9 7 8 8.6 Q11.8 9 15.4 8.6 Q15.6 6.7 15.5 4.8"/><path d="M8 19.2 Q7.9 15 8.2 13 Q12 12.6 16 13 Q16.2 16 16.1 19.2" opacity="0.7"/></svg> alles nu opslaan</button>
         <button class="profile-btn" onclick="exportData()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.3 8.5 12 13 M8.4 9.6 Q10.2 11.6 12 13.4 Q13.8 11.5 15.6 9.4 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> exporteer mijn data (back-up bestand)</button>
@@ -773,9 +773,45 @@ const ICO={
 let state={methods:[],brews:[],beans:[]};
 const PRESET_TAGS=['fruity','chocolate','floral','nutty','caramel','citrus','berry','sweet','clean','juicy','balanced'];
 
-function load(){
-  try{const s=JSON.parse(localStorage.getItem('scc_state'));
-    if(s&&s.methods&&s.brews){state=s;if(!state.beans)state.beans=[];mergeMethodImages();return;}}catch(e){}
+/* ---------------- opslag: IndexedDB (grote quota) i.p.v. localStorage (~5MB) ---------------- */
+const IDB_DB='scc_db', IDB_STORE='kv', IDB_KEY='scc_state';
+function idbOpen(){
+  return new Promise((res,rej)=>{
+    let rq;
+    try{rq=indexedDB.open(IDB_DB,1);}catch(e){return rej(e);}
+    rq.onupgradeneeded=()=>{const db=rq.result;if(!db.objectStoreNames.contains(IDB_STORE))db.createObjectStore(IDB_STORE);};
+    rq.onsuccess=()=>res(rq.result);
+    rq.onerror=()=>rej(rq.error);
+  });
+}
+function idbGet(key){
+  return idbOpen().then(db=>new Promise((res,rej)=>{
+    const rq=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(key);
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  }));
+}
+function idbSet(key,val){
+  return idbOpen().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(val,key);
+    tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error||new Error('idb-set'));
+  }));
+}
+async function load(){
+  let s=null;
+  try{s=await idbGet(IDB_KEY);}catch(e){s=null;}
+  // eenmalige migratie vanuit oude localStorage-opslag; daarna localStorage
+  // leegmaken zodat de ~5MB-limiet daar geen schrijfacties meer blokkeert
+  if(!(s&&s.methods&&s.brews)){
+    try{
+      const ls=JSON.parse(localStorage.getItem('scc_state'));
+      if(ls&&ls.methods&&ls.brews){
+        s=ls;
+        try{await idbSet(IDB_KEY,s);localStorage.removeItem('scc_state');}catch(e){}
+      }
+    }catch(e){}
+  }
+  if(s&&s.methods&&s.brews){state=s;if(!state.beans)state.beans=[];mergeMethodImages();return;}
   state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans()};
   save();
 }
@@ -809,11 +845,13 @@ function mergeMethodImages(){
   if(changed)save();
 }
 function save(){
+  // schrijf naar IndexedDB: veel grotere quota dan localStorage, geschikt voor foto's
+  showSaved();
   try{
-    localStorage.setItem('scc_state',JSON.stringify(state));
-    showSaved();                      // zichtbare bevestiging: opgeslagen
+    idbSet(IDB_KEY,state).catch(()=>{
+      toast('⚠ opslaan mislukt — maak een back-up via profiel');
+    });
   }catch(e){
-    // opslag vol of geblokkeerd — waarschuw duidelijk i.p.v. stil falen
     toast('⚠ opslaan mislukt — maak een back-up via profiel');
   }
 }
@@ -1300,7 +1338,8 @@ function fileToDataURL(file,maxW,removeBg){
             return;
           }catch(e){/* val terug op ruwe afbeelding */}
         }
-        res(c.toDataURL('image/png'));
+        // foto's zonder transparantie als JPEG bewaren: ~10x kleiner dan PNG
+        res(c.toDataURL('image/jpeg',0.72));
       };
       img.onerror=rej;img.src=r.result;
     };
@@ -1852,13 +1891,13 @@ let toastT;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600);}
 
-load();
+const loadPromise=load();
 // vraag de browser om de opslag permanent te maken (beschermt tegen
 // automatisch opruimen van lokale data door iOS/Safari bij weinig gebruik)
 if(navigator.storage&&navigator.storage.persist){
   navigator.storage.persist().catch(()=>{});
 }
-try{applyAIVisibility();}catch(e){}
+loadPromise.then(()=>{try{applyAIVisibility();}catch(e){}});
 
 // swipe van links naar rechts = terug (iOS-stijl)
 (function(){
@@ -1888,7 +1927,8 @@ try{applyAIVisibility();}catch(e){}
 setTimeout(()=>{
   const ph=document.querySelector('.phone');
   ph.classList.add('fading');
-  setTimeout(()=>{
+  setTimeout(async ()=>{
+    try{await loadPromise;}catch(e){}   // data uit IndexedDB geladen voor home rendert
     ph.classList.remove('fading');
     go('home');
   },750);
