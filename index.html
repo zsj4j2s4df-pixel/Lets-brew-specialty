@@ -158,6 +158,13 @@
   .tag-add-btn{flex:none;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;padding:0 18px;font-family:'Caveat',cursive;font-weight:700;font-size:24px;color:var(--ink);cursor:pointer;}
   .note-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
   .note-tags .nt{background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 13px;font-size:17px;color:var(--ink);}
+  .gear-add{display:flex;gap:8px;align-items:stretch;}
+  .gear-add select{flex:none;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:0 8px;font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink);}
+  .gear-add input{flex:1;min-width:0;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:'Patrick Hand',cursive;font-size:17px;color:var(--ink);}
+  .gear-cat-lbl{color:var(--ink-soft);font-size:15px;margin:12px 2px 6px;}
+  .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
+  .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
+  .gear-chip button{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;}
 
   /* beans */
   .bean-card{padding:15px 18px;margin-bottom:14px;}
@@ -601,6 +608,21 @@
       </div>
 
       <div class="settings-card sketch soft">
+        <div class="set-t hand">mijn uitrusting</div>
+        <div class="set-d" style="margin:4px 0 10px">voeg je molen, machine en tools toe — dan maakt de AI de brew-suggestie specifieker (maalgraad voor jouw molen, techniek voor jouw tools).</div>
+        <div id="gear-list"></div>
+        <div class="gear-add">
+          <select id="gear-cat">
+            <option value="espresso">espresso</option>
+            <option value="filter">filter</option>
+            <option value="algemeen">algemeen</option>
+          </select>
+          <input id="gear-name" placeholder="bv. Eureka Libra 65" onkeydown="if(event.key==='Enter')addGear()">
+          <button class="tag-add-btn" onclick="addGear()">＋</button>
+        </div>
+      </div>
+
+      <div class="settings-card sketch soft">
         <div class="set-row">
           <div class="set-body"><div class="set-t hand">dagelijkse brew-suggestie</div>
             <div class="set-d">een melding met een voorgestelde brew, elke dag op jouw tijd</div></div>
@@ -801,7 +823,7 @@ const ICO={
   // gloeilamp (tip)
   bulb:'<svg viewBox="0 0 24 24" class="acic"><path d="M12 3.6 Q17 3.6 17.6 8.4 Q18 11.4 15.6 13.6 Q15 14.2 14.8 16 Q12 16.4 9.2 16 Q9 14.2 8.4 13.6 Q6 11.4 6.4 8.4 Q7 3.6 12 3.6 Z"/><path d="M9.8 18.5 Q12 18.8 14.2 18.5 M10.4 20.6 Q12 20.9 13.6 20.6" opacity="0.7"/></svg>',
 };
-let state={methods:[],brews:[],beans:[]};
+let state={methods:[],brews:[],beans:[],gear:[]};
 const PRESET_TAGS=['fruity','chocolate','floral','nutty','caramel','citrus','berry','sweet','clean','juicy','balanced'];
 
 /* ---------------- opslag: IndexedDB (grote quota) i.p.v. localStorage (~5MB) ---------------- */
@@ -847,8 +869,8 @@ async function load(){
       }
     }catch(e){}
   }
-  if(s&&s.methods&&s.brews){state=s;if(!state.beans)state.beans=[];mergeMethodImages();return;}
-  state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans()};
+  if(s&&s.methods&&s.brews){state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();return;}
+  state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[]};
   save();
 }
 // vul standaard-afbeeldingen aan voor methodes die al opgeslagen waren zonder img
@@ -1020,6 +1042,7 @@ async function quickBrew(){
     const prompt=`Je bent een specialty-barista. Bedenk één concrete, nieuwe brew voor de methode "${method.name}".`+
       (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept:\n${beansList}\n`
                      :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
+      gearPromptBlock()+
       `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","dose":"","yield":"","ratio":"","grind":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
       `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam voor deze brew. dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
@@ -1123,7 +1146,7 @@ async function suggestGuide(){
   try{
     const info=bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:'';
     const txt=await callClaude([{role:"user",content:
-      `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${info}. In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}],500);
+      `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${info}.${gearPromptBlock()} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}],500);
     ta.value=txt.trim();
   }catch(e){ta.value=prev;toast('AI niet beschikbaar — vul je sleutel in bij profile');}
 }
@@ -1777,7 +1800,7 @@ async function aiRecipe(beanId,methodId){
   if(box)box.innerHTML='<div class="recipe-card sketch soft"><span class="spin"></span>recept bedenken voor '+esc(m.name)+'…</div>';
   try{
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
-    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\nGeef ALLEEN JSON terug zonder markdown: {"dose":"","yield":"","ratio":"","grind":"","temp":"","time":"","steps":["",""],"tip":""}. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
+    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}Geef ALLEEN JSON terug zonder markdown: {"dose":"","yield":"","ratio":"","grind":"","temp":"","time":"","steps":["",""],"tip":""}. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
@@ -1959,7 +1982,50 @@ function renderProfile(){
   const ss=document.getElementById('save-status');
   if(ss)ss.textContent='nu opgeslagen: '+state.brews.length+' brews · '+state.beans.length+' bonen · '+state.methods.length+' methodes';
   renderReminder();
+  renderGear();
   applyAIVisibility();
+}
+/* ---------------- mijn uitrusting (gear) ---------------- */
+const GEAR_CATS=[['espresso','espresso'],['filter','filter'],['algemeen','algemeen']];
+function addGear(){
+  const inp=document.getElementById('gear-name');
+  const name=(inp.value||'').trim();if(!name){toast('vul een naam in');return;}
+  const category=document.getElementById('gear-cat').value||'algemeen';
+  if(!Array.isArray(state.gear))state.gear=[];
+  state.gear.push({id:uid(),name,category});
+  inp.value='';save();renderGear();
+}
+function delGear(id){state.gear=(state.gear||[]).filter(g=>g.id!==id);save();renderGear();}
+function renderGear(){
+  const el=document.getElementById('gear-list');if(!el)return;
+  const g=state.gear||[];
+  if(!g.length){el.innerHTML='<div class="set-d" style="margin-bottom:4px">nog niets toegevoegd.</div>';return;}
+  let html='';
+  GEAR_CATS.forEach(([cat,label])=>{
+    const items=g.filter(x=>x.category===cat);
+    if(!items.length)return;
+    html+='<div class="gear-cat-lbl">'+esc(label)+'</div><div class="gear-items">'+
+      items.map(it=>'<span class="gear-chip">'+esc(it.name)+'<button onclick="delGear(\''+it.id+'\')" aria-label="verwijder">×</button></span>').join('')+
+      '</div>';
+  });
+  // items met onbekende categorie tonen onder 'algemeen'
+  const known=GEAR_CATS.map(c=>c[0]);
+  const rest=g.filter(x=>!known.includes(x.category));
+  if(rest.length){html+='<div class="gear-cat-lbl">overig</div><div class="gear-items">'+
+    rest.map(it=>'<span class="gear-chip">'+esc(it.name)+'<button onclick="delGear(\''+it.id+'\')">×</button></span>').join('')+'</div>';}
+  el.innerHTML=html;
+}
+// beschrijvend blokje van de uitrusting voor in AI-prompts (leeg als er niets is)
+function gearPromptBlock(){
+  const g=state.gear||[];if(!g.length)return '';
+  const cats={espresso:[],filter:[],algemeen:[]};
+  g.forEach(it=>{(cats[it.category]||cats.algemeen).push(it.name);});
+  const parts=[];
+  if(cats.espresso.length)parts.push('espresso: '+cats.espresso.join(', '));
+  if(cats.filter.length)parts.push('filter: '+cats.filter.join(', '));
+  if(cats.algemeen.length)parts.push('algemeen: '+cats.algemeen.join(', '));
+  if(!parts.length)return '';
+  return '\nDe gebruiker heeft deze uitrusting; stem het recept en de tips hierop af (bv. concreet maalgraad-advies voor deze molen, techniek passend bij deze tools/machine):\n- '+parts.join('\n- ')+'\n';
 }
 /* ---------------- dagelijkse brew-suggestie (melding) ---------------- */
 function getReminder(){try{return JSON.parse(localStorage.getItem('scc_reminder'))||{};}catch(e){return{};}}
