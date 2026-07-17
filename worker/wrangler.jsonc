@@ -1,0 +1,30 @@
+{
+  // Cloudflare Worker voor de dagelijkse brew-push van Lets Brew Specialty.
+  // Vul de KV-namespace-id en de VAPID-publieke sleutel in (zie README.md).
+  "name": "lets-brew-push",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+
+  // cron: elke 5 minuten kijken wie er (in zijn eigen tijdzone) aan de beurt is
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+
+  // KV-namespace met de push-abonnementen. Maak 'm aan met:
+  //   npx wrangler kv namespace create SUBS
+  // en plak de teruggegeven id hieronder.
+  "kv_namespaces": [
+    { "binding": "SUBS", "id": "PLAK_HIER_JE_KV_NAMESPACE_ID" }
+  ],
+
+  "vars": {
+    // publieke VAPID-sleutel (base64url) — dezelfde die de app als
+    // applicationServerKey gebruikt. Genereer met: node generate-vapid.mjs
+    "VAPID_PUBLIC_KEY": "PLAK_HIER_JE_VAPID_PUBLIEKE_SLEUTEL",
+    // contact voor de push-service (mailto: of https:)
+    "VAPID_SUBJECT": "mailto:jij@voorbeeld.nl"
+  }
+
+  // De privé-sleutel NIET hier zetten. Bewaar 'm als secret:
+  //   npx wrangler secret put VAPID_PRIVATE_JWK
+}

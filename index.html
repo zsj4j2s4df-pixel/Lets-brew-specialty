@@ -1987,12 +1987,15 @@ async function toggleReminder(){
     if(perm==='default'){try{perm=await Notification.requestPermission();}catch(e){}}
     if(perm==='denied'){toast('sta meldingen toe in je instellingen');}
     r.on=true;if(!r.time)r.time='08:00';setReminder(r);
-  }else{r.on=false;setReminder(r);}
+    if(Notification.permission==='granted')syncPushSubscription();   // achtergrond-push (indien server ingesteld)
+  }else{r.on=false;setReminder(r);disablePushSubscription();}
   renderReminder();scheduleReminder();
 }
 function saveReminderTime(){
   const r=getReminder();r.time=document.getElementById('reminder-time').value||'08:00';r.lastShown='';setReminder(r);
-  renderReminder();scheduleReminder();toast('tijd opgeslagen: '+r.time);
+  renderReminder();scheduleReminder();
+  if(r.on&&('Notification'in window)&&Notification.permission==='granted')syncPushSubscription();
+  toast('tijd opgeslagen: '+r.time);
 }
 function testReminder(){
   if(('Notification'in window)&&Notification.permission!=='granted'){toast('zet meldingen eerst aan');return;}
@@ -2031,6 +2034,51 @@ function checkReminderOnOpen(){
   const now=new Date(),t=new Date();t.setHours(h||0,m||0,0,0);
   if(now>=t&&r.lastShown!==todayKey())showBrewSuggestion();
   scheduleReminder();
+}
+/* echte achtergrond-push via de Cloudflare Worker (optioneel).
+   laat PUSH_ENDPOINT leeg -> alleen lokale meldingen (app open / bij openen).
+   vul de Worker-URL in -> ook een push op je tijd als de app dicht is. */
+const PUSH_ENDPOINT='';
+function urlBase64ToUint8Array(base64){
+  const pad='='.repeat((4-base64.length%4)%4);
+  const b=(base64+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(b);const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+function currentTz(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';}catch(e){return 'UTC';}}
+async function syncPushSubscription(){
+  if(!PUSH_ENDPOINT)return;                       // geen server ingesteld
+  if(!('serviceWorker'in navigator)||!('PushManager'in window))return;
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+      const res=await fetch(PUSH_ENDPOINT.replace(/\/$/,'')+'/vapidPublicKey');
+      const {key}=await res.json();
+      if(!key)return;
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(key)});
+    }
+    const r=getReminder();
+    await fetch(PUSH_ENDPOINT.replace(/\/$/,'')+'/subscribe',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({subscription:sub,time:r.time||'08:00',tz:currentTz()})
+    });
+  }catch(e){/* stil: lokale meldingen blijven werken */}
+}
+async function disablePushSubscription(){
+  if(!PUSH_ENDPOINT)return;
+  if(!('serviceWorker'in navigator)||!('PushManager'in window))return;
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.getSubscription();
+    if(!sub)return;
+    await fetch(PUSH_ENDPOINT.replace(/\/$/,'')+'/unsubscribe',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({endpoint:sub.endpoint})
+    }).catch(()=>{});
+    await sub.unsubscribe().catch(()=>{});
+  }catch(e){}
 }
 function manualSave(){
   save();
