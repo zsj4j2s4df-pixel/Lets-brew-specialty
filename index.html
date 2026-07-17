@@ -254,6 +254,7 @@
   .set-t{font-size:25px;line-height:1;}
   .set-d{color:var(--ink-soft);font-size:16px;line-height:1.4;}
   #ai-key{width:100%;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:11px 14px;font-family:monospace;font-size:15px;color:var(--ink);}
+  #reminder-time{background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:9px 14px;font-family:'Patrick Hand',cursive;font-size:19px;color:var(--ink);}
   #ai-key:focus{outline:none;border-color:var(--ink);}
   .profile-btn{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:10px;}
   .profile-btn:active{background:var(--card-2);}
@@ -597,6 +598,23 @@
           <div class="set-d" id="ai-key-status" style="margin-top:6px"></div>
         </div>
         <div class="set-d" id="ai-off-note" style="margin-top:8px">AI staat uit. zet aan en vul een sleutel in om etiket-scannen en recepten te gebruiken. zonder sleutel werkt de rest van de app gewoon.</div>
+      </div>
+
+      <div class="settings-card sketch soft">
+        <div class="set-row">
+          <div class="set-body"><div class="set-t hand">dagelijkse brew-suggestie</div>
+            <div class="set-d">een melding met een voorgestelde brew, elke dag op jouw tijd</div></div>
+          <div class="toggle" id="reminder-toggle" onclick="toggleReminder()"><div class="knob"></div></div>
+        </div>
+        <div id="reminder-wrap" class="hidden">
+          <div class="set-row" style="margin-top:14px">
+            <div class="set-d" style="margin:0">tijd van de dag</div>
+            <input id="reminder-time" type="time" value="08:00" onchange="saveReminderTime()" style="margin-left:auto">
+          </div>
+          <div class="set-d" id="reminder-status" style="margin-top:10px"></div>
+          <button class="profile-btn" onclick="testReminder()" style="margin-top:8px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.6 Q12.7 3.6 12.9 4.4 Q16.6 5.3 16.9 9.6 Q17.1 13 19 16 Q12 16.6 5 16 Q6.9 13 7.1 9.6 Q7.4 5.3 11.1 4.4 Q11.3 3.6 12 3.6 Z"/><path d="M10 18 Q12 20.2 14 18" opacity="0.7"/></svg> stuur een testmelding nu</button>
+          <div class="set-d" style="margin-top:10px;font-size:14px">let op: op iOS wordt een melding op een vast tijdstip alleen betrouwbaar afgeleverd als de app op je beginscherm staat. staat de app helemaal dicht, dan zie je de suggestie zodra je ’m weer opent.</div>
+        </div>
       </div>
 
       <div class="settings-card sketch soft">
@@ -1891,7 +1909,79 @@ function renderProfile(){
   document.getElementById('ai-key-status').textContent=getKey()?'✓ sleutel opgeslagen':'nog geen sleutel ingevuld';
   const ss=document.getElementById('save-status');
   if(ss)ss.textContent='nu opgeslagen: '+state.brews.length+' brews · '+state.beans.length+' bonen · '+state.methods.length+' methodes';
+  renderReminder();
   applyAIVisibility();
+}
+/* ---------------- dagelijkse brew-suggestie (melding) ---------------- */
+function getReminder(){try{return JSON.parse(localStorage.getItem('scc_reminder'))||{};}catch(e){return{};}}
+function setReminder(r){localStorage.setItem('scc_reminder',JSON.stringify(r));}
+function renderReminder(){
+  const r=getReminder(),on=!!r.on;
+  const tg=document.getElementById('reminder-toggle');if(!tg)return;
+  tg.classList.toggle('on',on);
+  document.getElementById('reminder-wrap').classList.toggle('hidden',!on);
+  document.getElementById('reminder-time').value=r.time||'08:00';
+  const st=document.getElementById('reminder-status');
+  if(st){
+    if(!('Notification'in window))st.textContent='meldingen worden niet ondersteund op dit apparaat.';
+    else if(Notification.permission==='denied')st.textContent='meldingen staan uit in je systeeminstellingen — zet ze aan voor Lets Brew.';
+    else if(on&&Notification.permission==='granted')st.textContent='aan — elke dag rond '+(r.time||'08:00')+' stellen we een brew voor.';
+    else if(on)st.textContent='geef nog even toestemming voor meldingen (tik op de knop hieronder of zet opnieuw aan).';
+    else st.textContent='';
+  }
+}
+async function toggleReminder(){
+  const r=getReminder();
+  if(!r.on){
+    if(!('Notification'in window)){toast('meldingen niet ondersteund op dit apparaat');return;}
+    let perm=Notification.permission;
+    if(perm==='default'){try{perm=await Notification.requestPermission();}catch(e){}}
+    if(perm==='denied'){toast('sta meldingen toe in je instellingen');}
+    r.on=true;if(!r.time)r.time='08:00';setReminder(r);
+  }else{r.on=false;setReminder(r);}
+  renderReminder();scheduleReminder();
+}
+function saveReminderTime(){
+  const r=getReminder();r.time=document.getElementById('reminder-time').value||'08:00';r.lastShown='';setReminder(r);
+  renderReminder();scheduleReminder();toast('tijd opgeslagen: '+r.time);
+}
+function testReminder(){
+  if(('Notification'in window)&&Notification.permission!=='granted'){toast('zet meldingen eerst aan');return;}
+  showBrewSuggestion(true);
+}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+let reminderTimer=null;
+function scheduleReminder(){
+  if(reminderTimer){clearTimeout(reminderTimer);reminderTimer=null;}
+  const r=getReminder();if(!r.on)return;
+  const [h,m]=(r.time||'08:00').split(':').map(Number);
+  const now=new Date(),t=new Date();t.setHours(h||0,m||0,0,0);
+  if(t<=now)t.setTime(t.getTime()+86400000);
+  reminderTimer=setTimeout(()=>{showBrewSuggestion();scheduleReminder();},t-now);
+}
+async function showBrewSuggestion(force){
+  const r=getReminder();
+  if(!force){if(!r.on)return;if(r.lastShown===todayKey())return;}
+  const reco=recommendBrew();
+  const body=reco?('vandaag: '+reco.method.name+(reco.bean?' met '+reco.bean.name:'')+' — tik om te starten')
+                 :'tijd voor een verse bak — tik om te starten';
+  r.lastShown=todayKey();setReminder(r);
+  try{
+    if('serviceWorker'in navigator&&('Notification'in window)&&Notification.permission==='granted'){
+      // niet oneindig wachten als de service worker (nog) niet klaar is
+      const reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),1500))]);
+      if(reg){await reg.showNotification('tijd voor koffie ☕',{body,icon:'icon-192.png',badge:'icon-192.png',tag:'daily-brew',data:{action:'quickbrew'}});return;}
+    }
+  }catch(e){}
+  if(document.visibilityState==='visible')toast('☕ '+body);
+}
+// suggestie tonen als het tijdstip vandaag al voorbij is en nog niet getoond
+function checkReminderOnOpen(){
+  const r=getReminder();if(!r.on)return;
+  const [h,m]=(r.time||'08:00').split(':').map(Number);
+  const now=new Date(),t=new Date();t.setHours(h||0,m||0,0,0);
+  if(now>=t&&r.lastShown!==todayKey())showBrewSuggestion();
+  scheduleReminder();
 }
 function manualSave(){
   save();
@@ -1949,7 +2039,19 @@ const loadPromise=load();
 if(navigator.storage&&navigator.storage.persist){
   navigator.storage.persist().catch(()=>{});
 }
-loadPromise.then(()=>{try{applyAIVisibility();}catch(e){}});
+loadPromise.then(()=>{try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}});
+
+// app geopend vanuit een melding? -> pas na het laden/splash een nieuwe brew voorstellen
+let pendingQuickBrew=/[?&]quickbrew=1/.test(location.search);
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.addEventListener('message',e=>{
+    if(e&&e.data&&e.data.type==='quick-brew'){
+      if(currentPage==='welcome')pendingQuickBrew=true; else quickBrew();
+    }
+  });
+}
+// suggestie opnieuw checken wanneer de app naar de voorgrond komt
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{checkReminderOnOpen();}catch(e){}}});
 
 // swipe van links naar rechts = terug (iOS-stijl)
 (function(){
@@ -1983,6 +2085,7 @@ setTimeout(()=>{
     try{await loadPromise;}catch(e){}   // data uit IndexedDB geladen voor home rendert
     ph.classList.remove('fading');
     go('home');
+    if(pendingQuickBrew){pendingQuickBrew=false;try{quickBrew();}catch(e){}}
   },750);
 },3000);
 </script>
