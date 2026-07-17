@@ -1,4 +1,4 @@
-const CACHE = 'scc-v40';
+const CACHE = 'scc-v41';
 const ASSETS = [
   './','./index.html','./manifest.json',
   './icon-192.png','./icon-512.png','./logo.png',
@@ -23,4 +23,27 @@ self.addEventListener('fetch', (e) => {
       return res;
     }).catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
   );
+});
+
+// melding aangetikt -> app openen/focussen en een nieuwe brew voorstellen
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of all) {
+      if ('focus' in c) { c.postMessage({ type: 'quick-brew' }); return c.focus(); }
+    }
+    if (self.clients.openWindow) return self.clients.openWindow('./index.html?quickbrew=1');
+  })());
+});
+
+// server-push (optioneel, voor echte achtergrond-meldingen via een backend)
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) {}
+  const title = d.title || 'tijd voor koffie ☕';
+  const body = d.body || 'een verse brew-suggestie staat klaar — tik om te starten';
+  e.waitUntil(self.registration.showNotification(title, {
+    body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'daily-brew', data: { action: 'quickbrew' }
+  }));
 });
