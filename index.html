@@ -344,7 +344,7 @@
       <div class="subtitle">what are we brewing today?</div>
       <button class="btn-reco" onclick="quickBrew()">
         <span class="reco-ic"><svg viewBox="0 0 32 32"><path d="M7 12 L7 22 Q7 26 12 26 L19 26 Q24 26 24 22 L24 12 Z M24 14 Q29 14 29 18 Q29 22 24 22 M6 30 L26 30"/><path d="M11 6 Q10 8 11.5 9.5 M16 5 Q15 7 16.5 8.5 M21 6 Q20 8 21.5 9.5" opacity="0.8"/></svg></span>
-        <span class="reco-txt"><span class="reco-h hand">verras me</span><span class="reco-sub">aanbevolen methode + boon uit voorraad</span></span>
+        <span class="reco-txt"><span class="reco-h hand">verras me</span><span class="reco-sub">een verrassende brew met een boon uit je kast</span></span>
       </button>
       <div class="eyebrow"><span>recent brews</span><a class="hand" onclick="go('brews')">see all</a></div>
       <div id="recent-list"></div>
@@ -996,12 +996,61 @@ function recommendBrew(){
           || inStock[0] || null;
   return {method,bean};
 }
-function quickBrew(){
+async function quickBrew(){
   const r=recommendBrew();
   if(!r){toast('zet eerst een methode aan bij methods');return;}
-  openForm(r.method.id);
-  if(r.bean){formBean=r.bean.id;renderFormBeans();}
-  toast('aanbevolen: '+r.method.name+(r.bean?' met '+r.bean.name:''));
+  const method=r.method;
+  openForm(method.id);
+  // zonder AI: eenvoudige voorvulling (methode + boon uit voorraad)
+  if(!aiReady()){
+    if(r.bean){formBean=r.bean.id;renderFormBeans();}
+    toast(r.bean?('aanbevolen: '+method.name+' met '+r.bean.name+' — zet AI aan voor een verzonnen recept')
+                :('aanbevolen: '+method.name+' — zet AI aan voor een verzonnen recept'));
+    return;
+  }
+  // met AI: laat Claude een nieuwe brew verzinnen en de best passende boon uit voorraad kiezen
+  const ft=document.getElementById('form-title');const ftOld=ft?ft.textContent:'';
+  if(ft)ft.textContent='AI verzint…';
+  toast('AI verzint een brew voor '+method.name+'…');
+  const inStock=state.beans.filter(b=>b.inStock);
+  try{
+    const beansList=inStock.length
+      ? inStock.map(b=>`- ${b.name}${b.origin?' — '+b.origin:''}${b.process?' ('+b.process+')':''}${b.roasternotes?'; smaak: '+b.roasternotes:''}`).join('\n')
+      : '(geen bonen in voorraad)';
+    const prompt=`Je bent een specialty-barista. Bedenk één concrete, nieuwe brew voor de methode "${method.name}".`+
+      (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept:\n${beansList}\n`
+                     :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
+      `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","dose":"","yield":"","ratio":"","grind":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
+      `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam voor deze brew. dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
+    const txt=await callClaude([{role:"user",content:prompt}],900);
+    const d=extractJSON(txt);
+    // gekozen boon koppelen aan een boon in voorraad (op naam)
+    let bean=null;
+    if(d.bean){
+      const bn=(''+d.bean).toLowerCase().trim();
+      bean=inStock.find(b=>b.name.toLowerCase()===bn)
+        || inStock.find(b=>bn.includes(b.name.toLowerCase())||b.name.toLowerCase().includes(bn));
+    }
+    if(!bean)bean=r.bean||inStock[0]||null;
+    if(bean){formBean=bean.id;renderFormBeans();}
+    const num=v=>{const m=(''+v).match(/[\d.]+/);return m?m[0]:'';};
+    setText('f-title',d.title||'');
+    setText('f-dose',num(d.dose));setText('f-yield',num(d.yield));
+    if(d.ratio)setText('f-ratio',num((''+d.ratio).split(':').pop()));
+    setText('f-time',(''+(d.time||'')).replace(/[^\d:]/g,''));setText('f-temp',num(d.temp));
+    if(Array.isArray(d.tags)){formTags=d.tags.filter(Boolean).map(t=>(''+t).toLowerCase());renderFormTags();}
+    let guide='';
+    if(Array.isArray(d.steps)&&d.steps.length)guide=d.steps.map((st,i)=>(i+1)+'. '+st).join('\n');
+    if(d.grind)guide=(guide?guide+'\n\n':'')+'maling: '+d.grind;
+    if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
+    if(guide){const g=document.getElementById('f-guide');if(g)g.value=guide;}
+    if(ft)ft.textContent='nieuwe brew (AI)';
+    toast('✓ '+method.name+(bean?' met '+bean.name:'')+' — controleer & sla op');
+  }catch(e){
+    if(ft)ft.textContent=ftOld||'new brew';
+    if(r.bean){formBean=r.bean.id;renderFormBeans();}
+    toast('kon geen AI-brew maken — methode ingevuld, vul de rest zelf in');
+  }
 }
 let brewSort='new', filterMethod='all';
 function setSort(s){brewSort=s;document.querySelectorAll('.sortc').forEach(b=>b.classList.toggle('on',b.dataset.s===s));renderAll();}
