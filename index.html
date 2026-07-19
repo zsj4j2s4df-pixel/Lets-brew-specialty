@@ -390,7 +390,7 @@
       <div class="calc-hint">vul er twee in — de derde rekent zichzelf uit.</div>
 
       <div class="field-row">
-        <div class="field"><label>time (mm:ss)</label><input id="f-time" placeholder="2:30"></div>
+        <div class="field"><label>time (mm:ss)</label><input id="f-time" placeholder="2:30" oninput="renderDialInHint()"></div>
         <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
       </div>
 
@@ -1051,8 +1051,8 @@ async function quickBrew(){
       (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept:\n${beansList}\n`
                      :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
       gearPromptBlock()+
-      `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","dose":"","yield":"","ratio":"","grind":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
-      `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam voor deze brew. dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
+      `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
+      `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam. grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, bv. "18 klik", "1.8" of "medium-fijn" — GEEN uitleg of merknaam). grindNote = korte uitleg over de maling (mag molen noemen). dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     // gekozen boon koppelen aan een boon in voorraad (op naam)
@@ -1068,13 +1068,16 @@ async function quickBrew(){
     setText('f-dose',numOf(d.dose));setText('f-yield',numOf(d.yield));
     if(d.ratio)setText('f-ratio',numOf((''+d.ratio).split(':').pop()));
     setText('f-time',cleanTime(d.time));setText('f-temp',numOf(d.temp));
-    if(d.grind)setText('f-grind',(''+d.grind).trim());
+    const gShort=conciseGrind(d.grind);
+    const gNote=(d.grindNote||'').trim()||((''+(d.grind||'')).trim()!==gShort?(''+d.grind).trim():'');
+    if(gShort)setText('f-grind',gShort);
     if(Array.isArray(d.tags)){formTags=d.tags.filter(Boolean).map(t=>(''+t).toLowerCase());renderFormTags();}
     // doel van de AI onthouden (dose/maling/tijd/yield) voor de dial-in
-    pendingTarget={dose:numOf(d.dose),grind:(''+(d.grind||'')).trim(),time:cleanTime(d.time),yield:numOf(d.yield)};
+    pendingTarget={dose:numOf(d.dose),grind:gShort,time:cleanTime(d.time),yield:numOf(d.yield)};
     renderDialInHint();
     let guide='';
     if(Array.isArray(d.steps)&&d.steps.length)guide=d.steps.map((st,i)=>(i+1)+'. '+st).join('\n');
+    if(gNote)guide=(guide?guide+'\n\n':'')+'maling: '+gNote;
     if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
     if(guide){const g=document.getElementById('f-guide');if(g){g.value=guide;autoGrow(g);}}
     if(ft)ft.textContent='nieuwe brew (AI)';
@@ -1122,6 +1125,12 @@ function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==nu
 function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(el.scrollHeight+4,190)+'px';}
 function numOf(v){const m=(''+(v==null?'':v)).match(/[\d.]+/);return m?m[0]:'';}
 function cleanTime(v){return (''+(v==null?'':v)).replace(/[^\d:]/g,'');}
+// tijd "mm:ss" of "ss" -> seconden
+function parseTimeSec(t){if(t==null)return null;const s=(''+t).trim();if(!s)return null;
+  if(s.includes(':')){const[m,ss]=s.split(':');return (+m||0)*60+(+ss||0);}const n=+s;return isNaN(n)?null:n;}
+// korte maalstand voor het maling-veld (knip lange uitleg eraf)
+function conciseGrind(v){v=(''+(v==null?'':v)).trim();if(!v)return v;
+  let s=v.split(/\s+op\s+|\s*[(,;]/)[0].trim();return s.length<=28?s:s.slice(0,28).trim();}
 // korte weergave van een doel-shot, bv. "18g in · maling 1.3 · 27s · 36g uit"
 function fmtShot(t){
   if(!t)return '';
@@ -1148,13 +1157,27 @@ function brewAgain(id){
   renderDialInHint();
   toast('nieuwe poging — meet je tijd, pas aan en sla op');
 }
-// toon het doel + het laatste AI-maaladvies voor deze boon+methode
+// toon het doel + een LIVE maaltip (tijd vs doel) + het laatste AI-advies
 function renderDialInHint(){
   const el=document.getElementById('dialin-hint');if(!el)return;
   let html='';
   if(pendingTarget && fmtShot(pendingTarget)){
     html+='<div class="di-t">doel</div>'+esc(fmtShot(pendingTarget));
   }
+  // live: vergelijk je ingevulde tijd met de doel-tijd terwijl je typt
+  if(pendingTarget && pendingTarget.time){
+    const actual=parseTimeSec(document.getElementById('f-time')?.value);
+    const target=parseTimeSec(pendingTarget.time);
+    if(actual&&target){
+      const diff=actual-target, tol=target<=60?3:Math.max(8,Math.round(target*0.1));
+      let tip;
+      if(diff>tol)tip='langzamer dan doel → maal iets grover';
+      else if(diff<-tol)tip='sneller dan doel → maal iets fijner';
+      else tip='mooi op doel ✓';
+      html+='<div class="di-tip">⏱ '+esc(document.getElementById('f-time').value)+' vs doel '+esc(pendingTarget.time)+' → '+tip+'</div>';
+    }
+  }
+  // opgeslagen AI-advies van de vorige poging(en)
   const bean=beanById(formBean);
   if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
     html+='<div class="di-tip">✦ AI-tip: probeer maling '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'')+'</div>';
@@ -1173,11 +1196,11 @@ async function updateDialIn(beanId,method){
     const prompt=`Je bent een espresso/koffie dial-in expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
       (grinder?` Molen(s) van de gebruiker: ${grinder} — als je de molen kent, gebruik de juiste richting (welk getal fijner/grover is).`:'')+
       `\nPogingen (oud→nieuw):\n${lines}\n`+
-      `Bepaal op basis van doel vs. werkelijk (m.n. shot-tijd) de beste maalstand voor de volgende keer. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = concrete maalstand op dezelfde schaal als de molen. reason = één korte zin (bv. "shot liep te traag → iets grover"). Nederlands.`;
+      `Bepaal op basis van doel vs. werkelijk (m.n. shot-tijd) de beste maalstand voor de volgende keer. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = KORTE maalstand (alleen getal/klikken of één woord op de schaal van de molen, GEEN uitleg). reason = één korte zin (bv. "shot liep te traag → iets grover"). Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],250);
     const d=extractJSON(txt);
     if(d&&d.grind){
-      bean.dialIn={method,grind:(''+d.grind).trim(),reason:(d.reason||'').trim(),ts:Date.now()};
+      bean.dialIn={method,grind:conciseGrind(d.grind),reason:(d.reason||'').trim(),ts:Date.now()};
       save();
       toast('✦ AI-maaltip: volgende keer maling '+bean.dialIn.grind+(bean.dialIn.reason?' — '+bean.dialIn.reason:''));
     }
@@ -1203,7 +1226,7 @@ function openEdit(b){
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
   formCustom=Array.isArray(b.custom)?JSON.parse(JSON.stringify(b.custom)):[];
-  pendingTarget=null;
+  pendingTarget=b.target||null;
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
 function renderCustomFields(){
@@ -1921,14 +1944,15 @@ async function aiRecipe(beanId,methodId){
   if(box)box.innerHTML='<div class="recipe-card sketch soft"><span class="spin"></span>recept bedenken voor '+esc(m.name)+'…</div>';
   try{
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
-    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}Geef ALLEEN JSON terug zonder markdown: {"dose":"","yield":"","ratio":"","grind":"","temp":"","time":"","steps":["",""],"tip":""}. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
+    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}Geef ALLEEN JSON terug zonder markdown: {"dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
     html+='<div class="hand" style="font-size:26px">recept · '+esc(m.name)+'</div>';
     html+='<div class="rk">parameters</div>';
     html+='<div class="rstep">dose '+esc(d.dose)+' · yield '+esc(d.yield)+' · ratio '+esc(d.ratio)+'</div>';
-    html+='<div class="rstep">maling '+esc(d.grind)+' · '+esc(d.temp)+'°? · '+esc(d.time)+'</div>';
+    html+='<div class="rstep">maling '+esc(conciseGrind(d.grind))+' · '+esc(d.temp)+'° · '+esc(d.time)+'</div>';
+    if(d.grindNote)html+='<div class="rstep" style="color:var(--ink-soft)">'+esc(d.grindNote)+'</div>';
     if(d.steps&&d.steps.length){html+='<div class="rk">stappen</div>';d.steps.forEach((st,i)=>html+='<div class="rstep">'+(i+1)+'. '+esc(st)+'</div>');}
     if(d.tip)html+='<div class="rk">tip</div><div class="rstep">'+esc(d.tip)+'</div>';
     window._lastRecipe=window._lastRecipe||{};window._lastRecipe[beanId]={d,methodId:m.id};
@@ -1946,15 +1970,18 @@ function useRecipe(beanId){
     setText('f-dose',numOf(d.dose));setText('f-yield',numOf(d.yield));
     if(d.ratio){const r2=(''+d.ratio).split(':').pop();setText('f-ratio',numOf(r2));}
     setText('f-time',cleanTime(d.time));setText('f-temp',numOf(d.temp));
-    if(d.grind)setText('f-grind',(''+d.grind).trim());
+    const gShort=conciseGrind(d.grind);
+    const gNote=(d.grindNote||'').trim()||((''+(d.grind||'')).trim()!==gShort?(''+d.grind).trim():'');
+    if(gShort)setText('f-grind',gShort);
     // doel onthouden voor de dial-in
-    pendingTarget={dose:numOf(d.dose),grind:(''+(d.grind||'')).trim(),time:cleanTime(d.time),yield:numOf(d.yield)};
+    pendingTarget={dose:numOf(d.dose),grind:gShort,time:cleanTime(d.time),yield:numOf(d.yield)};
     renderDialInHint();
     // "hoe zet je dit": stappen + tip overnemen naar het stappenplan-veld
     let guide='';
     if(d.steps&&d.steps.length){
       guide=d.steps.map((st,i)=>(i+1)+'. '+st).join('\n');
     }
+    if(gNote)guide=(guide?guide+'\n\n':'')+'maling: '+gNote;
     if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
     const g=document.getElementById('f-guide');
     if(g&&guide){g.value=guide;autoGrow(g);}
