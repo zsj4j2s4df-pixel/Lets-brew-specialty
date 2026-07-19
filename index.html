@@ -165,6 +165,9 @@
   .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
   .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
   .gear-chip button{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;}
+  .dialin-hint{background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;padding:12px 14px;margin-bottom:16px;font-size:17px;color:var(--ink);line-height:1.4;}
+  .dialin-hint .di-t{color:var(--ink-soft);font-size:15px;margin-bottom:3px;}
+  .dialin-hint .di-tip{margin-top:7px;color:var(--accent);}
 
   /* beans */
   .bean-card{padding:15px 18px;margin-bottom:14px;}
@@ -377,6 +380,8 @@
       <div class="field"><label>beans</label>
         <div class="link-pick" id="form-beans"></div></div>
 
+      <div id="dialin-hint" class="dialin-hint" style="display:none"></div>
+
       <div class="field-row">
         <div class="field"><label>dose (g)</label><input id="f-dose" type="number" inputmode="decimal" step="0.1" oninput="calc('dose')"></div>
         <div class="field"><label>yield (g)</label><input id="f-yield" type="number" inputmode="decimal" step="0.1" oninput="calc('yield')"></div>
@@ -388,6 +393,8 @@
         <div class="field"><label>time (mm:ss)</label><input id="f-time" placeholder="2:30"></div>
         <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
       </div>
+
+      <div class="field"><label>maling (stand)</label><input id="f-grind" placeholder="bv. 1.3 of medium-fijn"></div>
 
       <div class="field"><label>score</label>
         <div class="score-row"><input id="f-score" type="range" min="0" max="10" step="0.1" value="8" oninput="document.getElementById('score-big').textContent=(+this.value).toFixed(1)">
@@ -404,7 +411,7 @@
       </div>
 
       <div class="field"><label>hoe zet je dit? (eigen stappen)</label>
-        <textarea id="f-guide" placeholder="laat leeg voor het standaard recept" style="min-height:90px"></textarea>
+        <textarea id="f-guide" placeholder="laat leeg voor het standaard recept" style="min-height:190px"></textarea>
         <button class="profile-btn ai-only hidden" onclick="suggestGuide()" style="margin-top:6px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> laat AI een voorstel doen</button>
       </div>
 
@@ -1056,15 +1063,17 @@ async function quickBrew(){
     }
     if(!bean)bean=r.bean||inStock[0]||null;
     if(bean){formBean=bean.id;renderFormBeans();}
-    const num=v=>{const m=(''+v).match(/[\d.]+/);return m?m[0]:'';};
     setText('f-title',d.title||'');
-    setText('f-dose',num(d.dose));setText('f-yield',num(d.yield));
-    if(d.ratio)setText('f-ratio',num((''+d.ratio).split(':').pop()));
-    setText('f-time',(''+(d.time||'')).replace(/[^\d:]/g,''));setText('f-temp',num(d.temp));
+    setText('f-dose',numOf(d.dose));setText('f-yield',numOf(d.yield));
+    if(d.ratio)setText('f-ratio',numOf((''+d.ratio).split(':').pop()));
+    setText('f-time',cleanTime(d.time));setText('f-temp',numOf(d.temp));
+    if(d.grind)setText('f-grind',(''+d.grind).trim());
     if(Array.isArray(d.tags)){formTags=d.tags.filter(Boolean).map(t=>(''+t).toLowerCase());renderFormTags();}
+    // doel van de AI onthouden (dose/maling/tijd/yield) voor de dial-in
+    pendingTarget={dose:numOf(d.dose),grind:(''+(d.grind||'')).trim(),time:cleanTime(d.time),yield:numOf(d.yield)};
+    renderDialInHint();
     let guide='';
     if(Array.isArray(d.steps)&&d.steps.length)guide=d.steps.map((st,i)=>(i+1)+'. '+st).join('\n');
-    if(d.grind)guide=(guide?guide+'\n\n':'')+'maling: '+d.grind;
     if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
     if(guide){const g=document.getElementById('f-guide');if(g)g.value=guide;}
     if(ft)ft.textContent='nieuwe brew (AI)';
@@ -1106,15 +1115,78 @@ function renderStats_DISABLED(){
 
 
 /* ---------------- formulier + calculator ---------------- */
-let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[];
+let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null;
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
+function numOf(v){const m=(''+(v==null?'':v)).match(/[\d.]+/);return m?m[0]:'';}
+function cleanTime(v){return (''+(v==null?'':v)).replace(/[^\d:]/g,'');}
+// korte weergave van een doel-shot, bv. "18g in · maling 1.3 · 27s · 36g uit"
+function fmtShot(t){
+  if(!t)return '';
+  const parts=[];
+  if(t.dose)parts.push(t.dose+'g in');
+  if(t.grind)parts.push('maling '+t.grind);
+  if(t.time)parts.push(t.time);
+  if(t.yield)parts.push(t.yield+'g uit');
+  return parts.join(' · ');
+}
+/* ---------------- dial-in: doel, nieuwe poging & AI-maaladvies ---------------- */
+// open een nieuwe poging op basis van een eerdere brew (methode, boon, dose,
+// maling, doel) — je meet alleen je nieuwe tijd en slaat op
+function brewAgain(id){
+  const src=state.brews.find(x=>x.id===id);
+  if(!src){openForm();return;}
+  openForm(src.method);
+  setVal('f-dose',src.dose);setVal('f-yield',src.yield);setVal('f-ratio',src.ratio);
+  setVal('f-grind',src.grind||'');setVal('f-temp',src.temp);setVal('f-guide',src.guide||'');
+  formBean=src.beanId||null;renderFormBeans();
+  formTags=Array.isArray(src.tags)?[...src.tags]:[];renderFormTags();
+  // doel meenemen: de vorige target, anders de vorige brew zelf als richtlijn
+  pendingTarget=src.target||{dose:src.dose,grind:src.grind||'',time:src.time||'',yield:src.yield};
+  renderDialInHint();
+  toast('nieuwe poging — meet je tijd, pas aan en sla op');
+}
+// toon het doel + het laatste AI-maaladvies voor deze boon+methode
+function renderDialInHint(){
+  const el=document.getElementById('dialin-hint');if(!el)return;
+  let html='';
+  if(pendingTarget && fmtShot(pendingTarget)){
+    html+='<div class="di-t">doel</div>'+esc(fmtShot(pendingTarget));
+  }
+  const bean=beanById(formBean);
+  if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
+    html+='<div class="di-tip">✦ AI-tip: probeer maling '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'')+'</div>';
+  }
+  el.innerHTML=html;el.style.display=html?'block':'none';
+}
+// leer op de achtergrond van alle pogingen van deze boon en bereken de volgende maalstand
+async function updateDialIn(beanId,method){
+  const bean=beanById(beanId);if(!bean)return;
+  const attempts=state.brews.filter(b=>b.beanId===beanId&&b.method===method&&(b.time||b.grind))
+    .sort((a,b)=>a.ts-b.ts);
+  if(!attempts.length||!aiReady())return;   // zonder AI: gewoon opgeslagen, geen berekening
+  try{
+    const grinder=(state.gear||[]).filter(g=>g.name).map(g=>g.name).join(', ');
+    const lines=attempts.map((a,i)=>`${i+1}) doel: ${fmtShot(a.target)||'—'} | werkelijk: ${a.dose||'?'}g in, maling ${a.grind||'?'}, tijd ${a.time||'?'}, ${a.yield||'?'}g uit${a.score?', score '+a.score+'/10':''}`).join('\n');
+    const prompt=`Je bent een espresso/koffie dial-in expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
+      (grinder?` Molen(s) van de gebruiker: ${grinder} — als je de molen kent, gebruik de juiste richting (welk getal fijner/grover is).`:'')+
+      `\nPogingen (oud→nieuw):\n${lines}\n`+
+      `Bepaal op basis van doel vs. werkelijk (m.n. shot-tijd) de beste maalstand voor de volgende keer. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = concrete maalstand op dezelfde schaal als de molen. reason = één korte zin (bv. "shot liep te traag → iets grover"). Nederlands.`;
+    const txt=await callClaude([{role:"user",content:prompt}],250);
+    const d=extractJSON(txt);
+    if(d&&d.grind){
+      bean.dialIn={method,grind:(''+d.grind).trim(),reason:(d.reason||'').trim(),ts:Date.now()};
+      save();
+      toast('✦ AI-maaltip: volgende keer maling '+bean.dialIn.grind+(bean.dialIn.reason?' — '+bean.dialIn.reason:''));
+    }
+  }catch(e){/* stil: volgende keer weer proberen */}
+}
 function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
-  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-notes','f-tagnew','f-guide'].forEach(i=>setVal(i,''));
+  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide'].forEach(i=>setVal(i,''));
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
-  formBean=null;formTags=[];formCustom=[];
-  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();applyAIVisibility();go('form');
+  formBean=null;formTags=[];formCustom=[];pendingTarget=null;
+  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
 function openEdit(b){
   if(!b)return;
@@ -1123,11 +1195,13 @@ function openEdit(b){
   setVal('f-title',b.title||'');
   setVal('f-dose',b.dose);setVal('f-yield',b.yield);setVal('f-ratio',b.ratio);
   setVal('f-time',b.time);setVal('f-temp',b.temp);setVal('f-notes',b.notes);
+  setVal('f-grind',b.grind||'');
   setVal('f-score',b.score||8);setVal('f-guide',b.guide||'');
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
   formCustom=Array.isArray(b.custom)?JSON.parse(JSON.stringify(b.custom)):[];
-  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();applyAIVisibility();go('form');
+  pendingTarget=null;
+  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
 function renderCustomFields(){
   const el=document.getElementById('custom-fields');if(!el)return;
@@ -1142,20 +1216,27 @@ function addCustomField(){formCustom.push({k:'',v:''});renderCustomFields();}
 async function suggestGuide(){
   const m=methodById(formMethod);const bean=beanById(formBean);
   const ta=document.getElementById('f-guide');
-  const prev=ta.value;ta.value='AI denkt na…';
+  const prev=ta.value;const prevPh=ta.placeholder;
+  ta.value='';ta.placeholder='AI denkt na…';
+  const msg=[{role:"user",content:
+    `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:''}.${gearPromptBlock()} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}];
   try{
-    const info=bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:'';
-    const txt=await callClaude([{role:"user",content:
-      `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${info}.${gearPromptBlock()} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}],500);
-    ta.value=txt.trim();
-  }catch(e){ta.value=prev;toast('AI niet beschikbaar — vul je sleutel in bij profile');}
+    // streamen: tekst verschijnt direct en groeit mee -> voelt veel sneller
+    await callClaudeStream(msg,500,(full)=>{ta.value=full;});
+    ta.value=ta.value.trim();
+  }catch(e){
+    // val terug op de gewone (niet-streamende) aanroep
+    try{const txt=await callClaude(msg,500);ta.value=txt.trim();}
+    catch(e2){ta.value=prev;toast('AI niet beschikbaar — vul je sleutel in bij profile');}
+  }
+  ta.placeholder=prevPh;
 }
 function renderFormMethods(){
   document.getElementById('form-methods').innerHTML=state.methods.filter(m=>m.on).map(m=>
     `<button class="mp ${m.id===formMethod?'sel':''}" onclick="pickMethod('${m.id}')"><span class="mp-ic">${iconHTML(m,30)}</span> ${esc(m.name)}</button>`
   ).join('');
 }
-function pickMethod(id){formMethod=id;renderFormMethods();}
+function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
 function renderFormBeans(){
   const el=document.getElementById('form-beans');
   let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickBean(null)">geen</button>';
@@ -1167,6 +1248,7 @@ function pickBean(id){formBean=id;renderFormBeans();
   // auto-vul bean-naam als beans-veld leeg/zelfde; en stel methode voor
   const b=beanById(id);
   if(b&&b.method&&state.methods.find(m=>m.id===b.method&&m.on)){formMethod=b.method;renderFormMethods();}
+  renderDialInHint();
 }
 function renderFormTags(){
   const el=document.getElementById('form-tags');
@@ -1196,15 +1278,21 @@ function saveBrew(){
     temp:parseFloat(document.getElementById('f-temp').value)||null,
     score:parseFloat(document.getElementById('f-score').value)||0,
     notes:document.getElementById('f-notes').value.trim(),
+    grind:document.getElementById('f-grind').value.trim(),
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[...formTags],
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
     guide:document.getElementById('f-guide').value.trim(),
+    target:editingId?(state.brews.find(x=>x.id===editingId)?.target||null):(pendingTarget||null),
     ts:editingId?(state.brews.find(x=>x.id===editingId)?.ts||Date.now()):Date.now()
   };
   if(editingId){const i=state.brews.findIndex(x=>x.id===editingId);state.brews[i]=b;}
   else state.brews.push(b);
-  save();toast(editingId?'✓ brew bijgewerkt':'✓ brew opgeslagen');go('home');
+  save();toast(editingId?'✓ brew bijgewerkt':'✓ brew opgeslagen');
+  pendingTarget=null;
+  // op de achtergrond: leer van deze poging en bereken de volgende maalstand
+  if(b.beanId && (b.time||b.grind)) updateDialIn(b.beanId,b.method);
+  go('home');
 }
 function cancelForm(){go(editingId?'detail':'home');if(editingId)openDetail(editingId);}
 
@@ -1227,13 +1315,16 @@ function openDetail(id){
       <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
       <div class="stat"><div class="k">score</div><div class="v hand">${(+b.score).toFixed(1)}/10</div></div>
     </div></div>
+    ${(b.grind||b.target)?`<div class="notes-card sketch soft"><div class="k">dial-in</div>
+      ${b.grind?'<div class="v">maling: '+esc(b.grind)+'</div>':''}
+      ${b.target&&fmtShot(b.target)?'<div class="rstep" style="color:var(--ink-soft);margin-top:4px">doel: '+esc(fmtShot(b.target))+'</div>':''}</div>`:''}
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'geen notities'))}</div>
       ${(b.tags&&b.tags.length)?'<div class="note-tags">'+b.tags.map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${(b.custom&&b.custom.length)?'<div style="margin-top:10px">'+b.custom.map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
     ${b.guide?customGuideHTML(b.guide):guideHTML(b.method)}
     <div class="detail-actions sketch soft">
       <button class="act" onclick="delBrew('${id}')"><span class="ic">${ICO.del}</span>verwijder</button>
-      <button class="act primary hand" onclick="openForm('${b.method}')">brew again</button>
+      <button class="act primary hand" onclick="brewAgain('${id}')">brew again</button>
       <button class="act" onclick="shareOneBrew('${id}')"><span class="ic">${ICO.send}</span>stuur</button>
       <button class="act" onclick="shareBrew('${id}')"><span class="ic">${ICO.chat}</span>tekst</button>
     </div>`;
@@ -1680,6 +1771,33 @@ async function callClaude(messages, maxTokens){
   if(!out)throw new Error('leeg antwoord');
   return out;
 }
+// streamende variant: roept onDelta(volledigeTekst) aan terwijl het antwoord binnenkomt
+async function callClaudeStream(messages, maxTokens, onDelta){
+  if(!aiEnabled()||!getKey())throw new Error('AI uit of geen sleutel');
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true",
+      "x-api-key":getKey(),"anthropic-version":"2023-06-01"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:maxTokens||600,stream:true,messages})
+  });
+  if(!res.ok||!res.body)throw new Error('api '+res.status);
+  const reader=res.body.getReader();const dec=new TextDecoder();let buf='',full='';
+  while(true){
+    const {done,value}=await reader.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    let nl;
+    while((nl=buf.indexOf('\n'))>=0){
+      const line=buf.slice(0,nl).trim();buf=buf.slice(nl+1);
+      if(!line.startsWith('data:'))continue;
+      const payload=line.slice(5).trim();if(!payload||payload==='[DONE]')continue;
+      try{const ev=JSON.parse(payload);
+        if(ev.type==='content_block_delta'&&ev.delta&&ev.delta.text){full+=ev.delta.text;if(onDelta)onDelta(full);}
+      }catch(e){}
+    }
+  }
+  if(!full)throw new Error('leeg antwoord');
+  return full;
+}
 function extractJSON(txt){
   let t=txt.replace(/```json|```/g,'').trim();
   const a=t.indexOf('{'), b=t.lastIndexOf('}');
@@ -1822,16 +1940,18 @@ function useRecipe(beanId){
   const r=(window._lastRecipe||{})[beanId];if(!r)return;const d=r.d;
   openForm(r.methodId);setTimeout(()=>{
     pickBean(beanId);
-    const num=v=>{const m=(''+v).match(/[\d.]+/);return m?m[0]:'';};
-    setText('f-dose',num(d.dose));setText('f-yield',num(d.yield));
-    if(d.ratio){const r2=(''+d.ratio).split(':').pop();setText('f-ratio',num(r2));}
-    setText('f-time',(''+(d.time||'')).replace(/[^\d:]/g,''));setText('f-temp',num(d.temp));
+    setText('f-dose',numOf(d.dose));setText('f-yield',numOf(d.yield));
+    if(d.ratio){const r2=(''+d.ratio).split(':').pop();setText('f-ratio',numOf(r2));}
+    setText('f-time',cleanTime(d.time));setText('f-temp',numOf(d.temp));
+    if(d.grind)setText('f-grind',(''+d.grind).trim());
+    // doel onthouden voor de dial-in
+    pendingTarget={dose:numOf(d.dose),grind:(''+(d.grind||'')).trim(),time:cleanTime(d.time),yield:numOf(d.yield)};
+    renderDialInHint();
     // "hoe zet je dit": stappen + tip overnemen naar het stappenplan-veld
     let guide='';
     if(d.steps&&d.steps.length){
       guide=d.steps.map((st,i)=>(i+1)+'. '+st).join('\n');
     }
-    if(d.grind)guide=(guide?guide+'\n\n':'')+'maling: '+d.grind;
     if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
     const g=document.getElementById('f-guide');
     if(g&&guide)g.value=guide;
