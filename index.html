@@ -411,7 +411,7 @@
       </div>
 
       <div class="field"><label>hoe zet je dit? (eigen stappen)</label>
-        <textarea id="f-guide" placeholder="laat leeg voor het standaard recept" style="min-height:190px"></textarea>
+        <textarea id="f-guide" placeholder="laat leeg voor het standaard recept" style="min-height:190px;overflow:hidden" oninput="autoGrow(this)"></textarea>
         <button class="profile-btn ai-only hidden" onclick="suggestGuide()" style="margin-top:6px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> laat AI een voorstel doen</button>
       </div>
 
@@ -968,6 +968,7 @@ function go(p,isBack){
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLesson('latte-content',LESSONS.latte);
   if(p==='profile')renderProfile();
+  if(p==='form')requestAnimationFrame(()=>autoGrow(document.getElementById('f-guide')));
   applyAIVisibility();
   document.querySelector('.phone').scrollTop=0;
 }
@@ -1075,7 +1076,7 @@ async function quickBrew(){
     let guide='';
     if(Array.isArray(d.steps)&&d.steps.length)guide=d.steps.map((st,i)=>(i+1)+'. '+st).join('\n');
     if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
-    if(guide){const g=document.getElementById('f-guide');if(g)g.value=guide;}
+    if(guide){const g=document.getElementById('f-guide');if(g){g.value=guide;autoGrow(g);}}
     if(ft)ft.textContent='nieuwe brew (AI)';
     toast('✓ '+method.name+(bean?' met '+bean.name:'')+' — controleer & sla op');
   }catch(e){
@@ -1117,6 +1118,8 @@ function renderStats_DISABLED(){
 /* ---------------- formulier + calculator ---------------- */
 let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null;
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
+// laat een tekstvak meegroeien met de inhoud (geen klein scroll-vakje meer)
+function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(el.scrollHeight+4,190)+'px';}
 function numOf(v){const m=(''+(v==null?'':v)).match(/[\d.]+/);return m?m[0]:'';}
 function cleanTime(v){return (''+(v==null?'':v)).replace(/[^\d:]/g,'');}
 // korte weergave van een doel-shot, bv. "18g in · maling 1.3 · 27s · 36g uit"
@@ -1222,8 +1225,8 @@ async function suggestGuide(){
     `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:''}.${gearPromptBlock()} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}];
   try{
     // streamen: tekst verschijnt direct en groeit mee -> voelt veel sneller
-    await callClaudeStream(msg,500,(full)=>{ta.value=full;});
-    ta.value=ta.value.trim();
+    await callClaudeStream(msg,500,(full)=>{ta.value=full;autoGrow(ta);});
+    ta.value=ta.value.trim();autoGrow(ta);
   }catch(e){
     // val terug op de gewone (niet-streamende) aanroep
     try{const txt=await callClaude(msg,500);ta.value=txt.trim();}
@@ -1954,7 +1957,7 @@ function useRecipe(beanId){
     }
     if(d.tip)guide=(guide?guide+'\n':'')+'💡 tip: '+d.tip;
     const g=document.getElementById('f-guide');
-    if(g&&guide)g.value=guide;
+    if(g&&guide){g.value=guide;autoGrow(g);}
     toast('✓ recept overgenomen');
   },30);
 }
