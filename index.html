@@ -1982,7 +1982,7 @@ function renderBeans(){
   let html='';
   html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">geen bonen in huis.<br>tik op ＋ add of kijk in je extra kast.</div>';
   if(outBeans.length){
-    html+=`<button class="extra-kast" onclick="toggleExtraKast()">📦 extra kast · ${outBeans.length} ${outBeans.length===1?'boon':'bonen'} "op" ${extraKastOpen?'▾':'▸'}</button>`;
+    html+=`<button class="extra-kast" onclick="toggleExtraKast()"><svg viewBox="0 0 24 24" class="acic"><path d="M6.6 8.4 Q6.4 6.9 7.9 6.7 Q12 6.4 16.1 6.7 Q17.6 6.9 17.4 8.4 L16.7 19 Q12 19.5 7.3 19 Z"/><path d="M7.9 6.7 Q7.3 5.4 7.6 4.4 Q12 4.1 16.4 4.4 Q16.7 5.4 16.1 6.7" opacity="0.85"/><path d="M8.6 12 Q12 11.7 15.4 12" opacity="0.4"/></svg> lege bonen zak · ${outBeans.length} ${outBeans.length===1?'boon':'bonen'} "op" ${extraKastOpen?'▾':'▸'}</button>`;
     if(extraKastOpen){
       html+='<div class="kast-head">niet meer in huis — tik ✓ in huis om terug te zetten</div>';
       html+=outBeans.map(beanCardHTML).join('');
