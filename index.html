@@ -49,8 +49,8 @@
   .brew-main .meta{color:var(--ink-soft);font-size:17px;margin-top:4px;line-height:1.35;}
   .brew-side{text-align:right;}
   .brew-side .when{color:var(--ink-soft);font-size:16px;}
-  .brew-side .score{font-size:30px;margin-top:2px;}
-  .brew-side .score span{font-size:16px;color:var(--ink-soft);}
+  .brew-side .score{font-size:16px;color:var(--ink-soft);margin-top:4px;}
+  .brew-side .score span{font-size:14px;color:var(--ink-soft);}
 
   .methods{padding:16px 12px;margin-bottom:16px;}
   .methods .lbl{color:var(--ink-soft);font-size:19px;padding:0 8px 12px;display:flex;justify-content:space-between;align-items:center;}
@@ -1237,7 +1237,7 @@ function setFilter(m){filterMethod=m;renderAll();}
 function renderFilterChips(){
   const used=[...new Set(state.brews.map(b=>b.method))];
   const methodChips=state.methods.filter(m=>used.includes(m.id));
-  let html=`<button class="fc ${filterMethod==='all'?'sel':''}" onclick="setFilter('all')">alle</button>`;
+  let html=`<button class="fc ${filterMethod==='all'?'sel':''}" onclick="setFilter('all')">all</button>`;
   html+=methodChips.map(m=>
     `<button class="fc ${m.id===filterMethod?'sel':''}" onclick="setFilter('${m.id}')"><span class="fc-ic">${iconHTML(m,22)}</span>${esc(m.name)}</button>`).join('');
   document.getElementById('filter-methods').innerHTML=html;
@@ -1680,14 +1680,13 @@ function openDetail(id){
         <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
       </div>` : `
-      <div class="stat-ratio">ratio ${ratioTxt}</div>
+      <div class="stat-ratio">ratio ${ratioTxt} · score ${scoreTxt}/10</div>
       <div class="stat-grid">
         <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
         <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
         <div class="stat"><div class="k">shot time</div><div class="v hand">${esc(b.time||'—')}</div></div>
         <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
-        <div class="stat"><div class="k">score</div><div class="v hand">${scoreTxt}/10</div></div>
       </div>`;
   document.getElementById('detail-body').innerHTML=`
     <div class="detail-top"><button onclick="go('home')">‹</button>

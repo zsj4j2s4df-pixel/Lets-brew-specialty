@@ -1,4 +1,4 @@
-const CACHE = 'scc-v47';
+const CACHE = 'scc-v48';
 const ASSETS = [
   './','./index.html','./manifest.json',
   './icon-192.png','./icon-512.png','./logo.png',
@@ -41,8 +41,8 @@ self.addEventListener('notificationclick', (e) => {
 self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) {}
-  const title = d.title || 'tijd voor koffie ☕';
-  const body = d.body || 'een verse brew-suggestie staat klaar — tik om te starten';
+  const title = d.title || 'time for coffee ☕';
+  const body = d.body || 'a fresh brew suggestion is ready — tap to start';
   e.waitUntil(self.registration.showNotification(title, {
     body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'daily-brew', data: { action: 'quickbrew' }
   }));
