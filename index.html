@@ -201,6 +201,16 @@
   .bean-card .brow-btns{display:flex;gap:4px;flex:none;}
   .bean-card .bdel,.bean-card .bedit{background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-soft);padding:2px 4px;}
   .bean-card .bedit{font-size:18px;}
+  .bean-card.collapsed{cursor:pointer;}
+  .bean-head{display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer;}
+  .bchev{color:var(--ink-soft);font-size:19px;flex:none;}
+  .bean-meta{color:var(--ink-soft);font-size:16px;margin-top:6px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .bean-meta .dot{opacity:.5;}
+  .bean-meta .fresh{color:var(--ink-soft);}
+  .bean-mic{display:inline-flex;align-items:center;height:18px;}
+  .bean-mic img,.bean-mic .glyph{max-height:17px;}
+  .kast-head{color:var(--ink-soft);font-size:17px;margin:14px 2px 10px;}
+  .extra-kast{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink-soft);font-size:18px;margin:2px 0 14px;padding:13px;border:2px dashed var(--line);filter:url(#wobble);border-radius:16px;cursor:pointer;background:none;width:100%;font-family:inherit;}
   .acic{width:20px;height:20px;fill:none;stroke:var(--ink-soft);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);vertical-align:middle;}
   .icon-btn{background:none;border:none;cursor:pointer;padding:3px 4px;display:inline-flex;align-items:center;}
   .icon-btn:active .acic{stroke:var(--ink);}
@@ -540,8 +550,7 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">＋ add</button></div>
-      <div class="subtitle">je bonenkast — gekoppeld aan je brews.</div>
-      <div class="filter-chips" id="beans-filter" style="margin-bottom:12px"></div>
+      <div class="subtitle" id="beans-sub">je bonenkast — gekoppeld aan je brews.</div>
       <div id="beans-list"></div>
       <div class="share-block sketch soft">
         <div class="set-t hand">delen met vrienden</div>
@@ -1894,55 +1903,92 @@ function addMethod(){
 }
 
 /* ---------------- beans ---------------- */
-let beansFilter='all'; // all | in | out
-function setBeansFilter(f){beansFilter=f;renderBeans();}
+let expandedBeans=new Set();
+let extraKastOpen=false;
+function toggleBeanCard(id){ if(expandedBeans.has(id))expandedBeans.delete(id); else expandedBeans.add(id); renderBeans(); }
+function toggleExtraKast(){ extraKastOpen=!extraKastOpen; renderBeans(); }
+// subtiele versheid op basis van roastdate (YYYY-MM-DD)
+function beanFreshness(b){
+  if(!b.roastdate)return null;
+  const d=new Date(b.roastdate+'T00:00:00');if(isNaN(d.getTime()))return null;
+  const days=Math.floor((Date.now()-d.getTime())/86400000);
+  if(days<0)return null;
+  let label;
+  if(days===0)label='vandaag gebrand — laat rusten';
+  else if(days<=3)label=days+' dagen — rust nog';
+  else if(days<=21)label=days+' dagen vers';
+  else if(days<=35)label=days+' dagen — over piek';
+  else label=days+' dagen — over de top';
+  return {days,label};
+}
+// start een brew met deze boon (respecteert espresso -> dial-in, filter -> formulier)
+function brewBean(beanId){
+  const b=beanById(beanId);if(!b)return;
+  const mList=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[]));
+  const mid=mList.find(id=>state.methods.find(m=>m.id===id&&m.on))||mList[0]||(state.methods.filter(m=>m.on)[0]?.id)||null;
+  if(methodFamily(mid)==='espresso'){pendingTarget=null;formPrep={};pendingRecipe=null;openDialIn(mid);setTimeout(()=>pickDiBean(beanId),0);}
+  else{openForm(mid);setTimeout(()=>pickBean(beanId),0);}
+}
+function beanCardHTML(b){
+  const expanded=expandedBeans.has(b.id);
+  const mList=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).map(id=>methodById(id)).filter(Boolean);
+  const m=mList[0]||null;
+  const cnt=state.brews.filter(x=>x.beanId===b.id).length;
+  const tint=m?('var('+m.tint+')'):'var(--card)';
+  const inStock=b.inStock!==false; // standaard: in huis
+  const fresh=beanFreshness(b);
+  if(!expanded){
+    const bits=[];
+    if(m)bits.push('<span class="bean-mic">'+iconHTML(m,18)+'</span> '+esc(m.name));
+    bits.push(inStock?'✓ in huis':'○ op');
+    if(fresh)bits.push('<span class="fresh">'+fresh.label+'</span>');
+    return `<div class="bean-card sketch soft collapsed" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
+      <div class="brow"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▸</span></div>
+      <div class="bean-meta">${bits.join(' <span class="dot">·</span> ')}</div>
+    </div>`;
+  }
+  const methodLine=mList.length?('<br>methode'+(mList.length>1?'s':'')+': '+mList.map(x=>'<span class="bean-method"><span class="bean-method-ic">'+iconHTML(x,18)+'</span>'+esc(x.name)+'</span>').join(' ')):'';
+  return `<div class="bean-card sketch soft" style="background:${tint};${inStock?'':'opacity:.7'}">
+    <div class="brow">
+      <div class="bean-head" onclick="toggleBeanCard('${b.id}')"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▾</span></div>
+      <div class="brow-btns">
+        <button class="icon-btn" title="stuur deze boon" onclick="shareOneBean('${b.id}')">${ICO.send}</button>
+        <button class="icon-btn" title="bewerken" onclick="editBean('${b.id}')">${ICO.edit}</button>
+        <button class="icon-btn" title="verwijderen" onclick="delBean('${b.id}')">${ICO.del}</button>
+      </div></div>
+    ${b.photo?'<img src="'+b.photo+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:14px;border:2px solid var(--line);margin:6px 0">':''}
+    <div class="bm">${[b.roaster,b.origin,b.process,b.variety].filter(Boolean).map(esc).join(' · ')||'—'}
+      ${b.altitude?'<br>hoogte: '+esc(b.altitude)+' m':''}
+      ${b.roastdate?'<br>roast: '+esc(b.roastdate)+(fresh?' · '+esc(fresh.label):''):''}
+      ${b.roasternotes?'<br>brander: '+esc(b.roasternotes):''}
+      ${methodLine}
+      ${b.notes?'<br>'+esc(b.notes):''}
+      ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">bekijk online</a>':''}
+      <br>${cnt} brew${cnt===1?'':'s'} gekoppeld</div>
+    <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
+      ${inStock?'✓ in huis':'○ op — niet meer in huis'}</button>
+    <div style="margin-top:10px"><button class="lp sel" onclick="brewBean('${b.id}')">brew deze boon →</button></div>
+    <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" onclick="aiRecipe('${b.id}')"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> vraag AI om een brew-recept</button>
+    <div id="recipe-${b.id}"></div>
+  </div>`;
+}
 function renderBeans(){
   const el=document.getElementById('beans-list');
-  // filter-chips
-  const fc=document.getElementById('beans-filter');
-  if(fc){
-    const inCnt=state.beans.filter(b=>b.inStock!==false).length;
-    const outCnt=state.beans.filter(b=>b.inStock===false).length;
-    fc.innerHTML=
-      `<button class="fc ${beansFilter==='all'?'sel':''}" onclick="setBeansFilter('all')">alle (${state.beans.length})</button>`+
-      `<button class="fc ${beansFilter==='in'?'sel':''}" onclick="setBeansFilter('in')">✓ in huis (${inCnt})</button>`+
-      `<button class="fc ${beansFilter==='out'?'sel':''}" onclick="setBeansFilter('out')">○ op (${outCnt})</button>`;
-  }
+  const inBeans=state.beans.filter(b=>b.inStock!==false);
+  const outBeans=state.beans.filter(b=>b.inStock===false);
+  const sub=document.getElementById('beans-sub');
+  if(sub)sub.textContent=state.beans.length?('je bonenkast · in huis ('+inBeans.length+')'):'je bonenkast — gekoppeld aan je brews.';
   if(!state.beans.length){el.innerHTML='<div class="empty-note">nog geen bonen.<br>tik op ＋ add om je eerste boon toe te voegen.</div>';return;}
-  let beans=state.beans;
-  if(beansFilter==='in')beans=beans.filter(b=>b.inStock!==false);
-  else if(beansFilter==='out')beans=beans.filter(b=>b.inStock===false);
-  if(!beans.length){el.innerHTML='<div class="empty-note">geen bonen in deze lijst.</div>';return;}
-  el.innerHTML=beans.map(b=>{
-    const mList=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).map(id=>methodById(id)).filter(Boolean);
-    const m=mList[0]||null;
-    const cnt=state.brews.filter(x=>x.beanId===b.id).length;
-    const tint=m?('var('+m.tint+')'):'var(--card)';
-    const inStock=b.inStock!==false; // standaard: in huis
-    const methodLine=mList.length?('<br>methode'+(mList.length>1?'s':'')+': '+mList.map(x=>'<span class="bean-method"><span class="bean-method-ic">'+iconHTML(x,18)+'</span>'+esc(x.name)+'</span>').join(' ')):'';
-    return `<div class="bean-card sketch soft" style="background:${tint};${inStock?'':'opacity:.6'}">
-      <div class="brow"><div class="bn hand">${esc(b.name)}</div>
-        <div class="brow-btns">
-          <button class="icon-btn" title="stuur deze boon" onclick="shareOneBean('${b.id}')">${ICO.send}</button>
-          <button class="icon-btn" title="bewerken" onclick="editBean('${b.id}')">${ICO.edit}</button>
-          <button class="icon-btn" title="verwijderen" onclick="delBean('${b.id}')">${ICO.del}</button>
-        </div></div>
-      ${b.photo?'<img src="'+b.photo+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:14px;border:2px solid var(--line);margin:6px 0">':''}
-      <div class="bm">${[b.roaster,b.origin,b.process,b.variety].filter(Boolean).map(esc).join(' · ')||'—'}
-        ${b.altitude?'<br>hoogte: '+esc(b.altitude)+' m':''}
-        ${b.roastdate?'<br>roast: '+esc(b.roastdate):''}
-        ${b.roasternotes?'<br>brander: '+esc(b.roasternotes):''}
-        ${methodLine}
-        ${b.notes?'<br>'+esc(b.notes):''}
-        ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">bekijk online</a>':''}
-        <br>${cnt} brew${cnt===1?'':'s'} gekoppeld</div>
-      <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
-        ${inStock?'✓ in huis':'○ op — niet meer in huis'}</button>
-      <div style="margin-top:10px"><button class="lp sel" onclick="openForm(${m?"'"+m.id+"'":'null'});setTimeout(()=>pickBean('${b.id}'),0)">brew deze boon →</button></div>
-      <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" onclick="aiRecipe('${b.id}')"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> vraag AI om een brew-recept</button>
-      <div id="recipe-${b.id}"></div>
-    </div>`;
-  }).join('');
+  let html='';
+  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">geen bonen in huis.<br>tik op ＋ add of kijk in je extra kast.</div>';
+  if(outBeans.length){
+    html+=`<button class="extra-kast" onclick="toggleExtraKast()">📦 extra kast · ${outBeans.length} ${outBeans.length===1?'boon':'bonen'} "op" ${extraKastOpen?'▾':'▸'}</button>`;
+    if(extraKastOpen){
+      html+='<div class="kast-head">niet meer in huis — tik ✓ in huis om terug te zetten</div>';
+      html+=outBeans.map(beanCardHTML).join('');
+    }
+  }
+  el.innerHTML=html;
 }
 function toggleStock(id){
   const b=state.beans.find(x=>x.id===id);if(!b)return;
