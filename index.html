@@ -393,7 +393,10 @@
     #print-area .p-h1{font-family:'Caveat',cursive;font-weight:700;font-size:30px;margin:0 0 2px;}
     #print-area .p-sub{color:#555;font-size:14px;margin:0 0 18px;}
     #print-area .p-brew{border:1px solid #999;border-radius:10px;padding:12px 14px;margin:0 0 12px;page-break-inside:avoid;}
-    #print-area .p-bt{font-family:'Caveat',cursive;font-weight:700;font-size:22px;margin:0 0 2px;}
+    #print-area .p-bt{font-family:'Caveat',cursive;font-weight:700;font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:8px;}
+    #print-area .p-ic{display:inline-flex;align-items:center;flex:none;}
+    #print-area .p-ic img{height:30px;width:auto;}
+    #print-area .p-ic .glyph{font-size:26px;}
     #print-area .p-meta{color:#555;font-size:13px;margin:0 0 8px;}
     #print-area .p-grid{font-size:15px;line-height:1.6;}
     #print-area .p-grid b{font-weight:400;color:#333;}
@@ -430,7 +433,7 @@
       <div class="subtitle">what are we brewing today?</div>
       <button class="btn-reco" onclick="quickBrew()">
         <span class="reco-ic"><svg viewBox="0 0 32 32"><path d="M7 12 L7 22 Q7 26 12 26 L19 26 Q24 26 24 22 L24 12 Z M24 14 Q29 14 29 18 Q29 22 24 22 M6 30 L26 30"/><path d="M11 6 Q10 8 11.5 9.5 M16 5 Q15 7 16.5 8.5 M21 6 Q20 8 21.5 9.5" opacity="0.8"/></svg></span>
-        <span class="reco-txt"><span class="reco-h hand">verras me</span><span class="reco-sub">een verrassende brew met een boon uit je kast</span></span>
+        <span class="reco-txt"><span class="reco-h hand">surprise me</span><span class="reco-sub">a surprise brew with a bean from your shelf</span></span>
       </button>
       <div class="methods sketch soft">
         <div class="lbl"><span>brew methods</span><a class="hand" onclick="go('methods')">manage</a></div>
@@ -447,7 +450,7 @@
     <div class="screen">
       <div class="form-head"><div class="h hand" id="form-title">new brew</div><button onclick="cancelForm()">cancel</button></div>
 
-      <div class="field"><label>titel (optioneel)</label><input id="f-title" placeholder="bijv. zondagochtend v60" maxlength="60"></div>
+      <div class="field"><label>title (optional)</label><input id="f-title" placeholder="e.g. sunday morning v60" maxlength="60"></div>
 
       <div class="field"><label>method</label>
         <div class="method-pick" id="form-methods"></div></div>
@@ -464,12 +467,12 @@
       <div class="ratio-row">
         <span class="ratio-lbl">ratio 1:</span>
         <input id="f-ratio" class="ratio-input" type="number" inputmode="decimal" step="0.1" oninput="calc('ratio')">
-        <span class="ratio-hint" id="f-ratio-hint">rekent mee met dose + yield</span>
+        <span class="ratio-hint" id="f-ratio-hint">auto-calculates from dose + yield</span>
       </div>
 
       <div class="field-row" id="bloom-field" style="display:none">
-        <div class="field"><label>bloom (g)</label><input id="f-bloom-g" type="number" inputmode="decimal" step="1" placeholder="bv. 40"></div>
-        <div class="field"><label>bloom (s)</label><input id="f-bloom-s" type="number" inputmode="numeric" placeholder="bv. 30"></div>
+        <div class="field"><label>bloom (g)</label><input id="f-bloom-g" type="number" inputmode="decimal" step="1" placeholder="e.g. 40"></div>
+        <div class="field"><label>bloom (s)</label><input id="f-bloom-s" type="number" inputmode="numeric" placeholder="e.g. 30"></div>
       </div>
 
       <div class="field-row">
@@ -477,11 +480,11 @@
         <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
       </div>
 
-      <div class="field"><label>maling (stand)</label><input id="f-grind" placeholder="bv. 1.3 of medium-fijn"></div>
+      <div class="field"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine"></div>
 
       <div class="field" id="prep-field" style="display:none"><label>puck-prep &amp; machine</label>
         <div id="prep-list"></div>
-        <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ eigen stap</button>
+        <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
 
       <div class="field"><label>score</label>
@@ -490,17 +493,17 @@
 
       <div class="field"><label>taste notes</label>
         <div class="tags" id="form-tags"></div>
-        <div class="tag-new-row"><input id="f-tagnew" placeholder="eigen smaak toevoegen"><button class="tag-add-btn" onclick="addTag()">＋</button></div>
-        <textarea id="f-notes" placeholder="vrije notitie (optioneel)" style="margin-top:10px"></textarea></div>
+        <div class="tag-new-row"><input id="f-tagnew" placeholder="add your own taste"><button class="tag-add-btn" onclick="addTag()">＋</button></div>
+        <textarea id="f-notes" placeholder="free note (optional)" style="margin-top:10px"></textarea></div>
 
-      <div class="field"><label>eigen velden</label>
+      <div class="field"><label>custom fields</label>
         <div id="custom-fields"></div>
-        <button class="profile-btn" onclick="addCustomField()" style="margin-top:4px">＋ eigen veld toevoegen</button>
+        <button class="profile-btn" onclick="addCustomField()" style="margin-top:4px">＋ add custom field</button>
       </div>
 
-      <div class="field"><label>hoe zet je dit? (eigen stappen)</label>
-        <textarea id="f-guide" placeholder="laat leeg voor het standaard recept" style="min-height:190px;overflow:hidden" oninput="autoGrow(this)"></textarea>
-        <button class="profile-btn ai-only hidden" onclick="suggestGuide()" style="margin-top:6px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> laat AI een voorstel doen</button>
+      <div class="field"><label>how to brew this? (your own steps)</label>
+        <textarea id="f-guide" placeholder="leave empty for the default recipe" style="min-height:190px;overflow:hidden" oninput="autoGrow(this)"></textarea>
+        <button class="profile-btn ai-only hidden" onclick="suggestGuide()" style="margin-top:6px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> let AI suggest one</button>
       </div>
 
       <button class="save-btn" onclick="saveBrew()">save brew</button>
@@ -512,31 +515,31 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">espresso · dial-in</div><button onclick="cancelForm()">cancel</button></div>
-      <div class="subtitle" id="di-sub">machine-espresso — werk naar je doel toe</div>
+      <div class="subtitle" id="di-sub">machine espresso — work toward your target</div>
 
       <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
 
       <div class="di-goal sketch" id="di-goal"></div>
 
       <div class="di-card sketch soft">
-        <div class="di-lbl hand">jouw shot</div>
+        <div class="di-lbl hand">your shot</div>
         <div class="field-row">
           <div class="field"><label>dose in (g)</label><input id="di-dose" type="number" inputmode="decimal" step="0.1"></div>
-          <div class="field"><label>yield uit (g)</label><input id="di-yield" type="number" inputmode="decimal" step="0.1"></div>
+          <div class="field"><label>yield out (g)</label><input id="di-yield" type="number" inputmode="decimal" step="0.1"></div>
         </div>
-        <div class="field"><label>gemeten looptijd (m:ss)</label><input id="di-time" placeholder="0:28" inputmode="numeric" oninput="formatTime(this);diAdvice()" onblur="normalizeTime(this);diAdvice()"></div>
+        <div class="field"><label>measured shot time (m:ss)</label><input id="di-time" placeholder="0:28" inputmode="numeric" oninput="formatTime(this);diAdvice()" onblur="normalizeTime(this);diAdvice()"></div>
         <div class="di-advice" id="di-advice"></div>
       </div>
 
       <div class="di-card sketch soft">
         <div class="di-lbl hand">puck-prep &amp; machine</div>
         <div id="di-prep-list"></div>
-        <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ eigen stap</button>
+        <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
 
-      <button class="save-btn" onclick="saveDialInBrew(false)">dial-in gelukt → opslaan als brew</button>
-      <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">nog niet goed → volgende poging</button>
-      <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">bij "volgende poging" wordt je nieuwe maalstand het doel</div>
+      <button class="save-btn" onclick="saveDialInBrew(false)">dial-in nailed → save as brew</button>
+      <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">not quite yet → next attempt</button>
+      <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">on "next attempt" your new grind setting becomes the target</div>
     </div>
   </div>
 
@@ -551,13 +554,13 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <h1 class="title hand">your brews</h1>
-      <div class="subtitle">alles wat je hebt gezet</div>
+      <div class="subtitle">everything you've brewed</div>
 
-      <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ nieuwe brew</button>
+      <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ new brew</button>
 
       <div class="search-wrap" id="brew-search-wrap" style="display:none">
         <svg viewBox="0 0 24 24" class="acic search-ic"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15 Q17.5 17.5 20 20"/><path d="M7.5 9 Q8.5 7.3 10.5 7.2" opacity="0.5"/></svg>
-        <input id="brew-search" placeholder="zoek op boon, methode, notitie…" oninput="renderAll()">
+        <input id="brew-search" placeholder="search by bean, method, note…" oninput="renderAll()">
       </div>
 
       <div class="filter-bar">
@@ -571,21 +574,21 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">methods</div><button onclick="go('home')">done</button></div>
-      <div class="subtitle">zet aan of uit, of voeg je eigen methode toe.</div>
+      <div class="subtitle">turn on or off, or add your own method.</div>
       <div id="mm-list"></div>
-      <div class="field" style="margin-top:18px;"><label>nieuwe methode</label>
+      <div class="field" style="margin-top:18px;"><label>new method</label>
         <div class="field-row">
-          <input id="mm-new" placeholder="naam, bv. moka pot" style="background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:18px;padding:13px 16px;font-family:inherit;font-size:20px;color:var(--ink);flex:1;">
+          <input id="mm-new" placeholder="name, e.g. moka pot" style="background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:18px;padding:13px 16px;font-family:inherit;font-size:20px;color:var(--ink);flex:1;">
         </div>
       </div>
-      <div class="field"><label>familie</label>
+      <div class="field"><label>family</label>
         <div class="mm-fam">
           <button type="button" id="mm-fam-espresso" class="fampick" onclick="pickFamily('espresso')">espresso</button>
           <button type="button" id="mm-fam-filter" class="fampick sel" onclick="pickFamily('filter')">filter</button>
         </div>
-        <div class="set-d" style="margin-top:6px;font-size:14px">espresso = kort &amp; sterk (seconden) · filter = langer &amp; milder (minuten). Bepaalt het formulier + de maaltip.</div>
+        <div class="set-d" style="margin-top:6px;font-size:14px">espresso = short &amp; strong (seconds) · filter = longer &amp; milder (minutes). Sets the form + the grind tip.</div>
       </div>
-      <button class="profile-btn" onclick="document.getElementById('mm-img-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg><span id="mm-img-label">tekening toevoegen (optioneel)</span></button>
+      <button class="profile-btn" onclick="document.getElementById('mm-img-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg><span id="mm-img-label">add a drawing (optional)</span></button>
       <input type="file" id="mm-img-input" accept="image/*" style="display:none" onchange="pickMethodImg(event)">
       <div id="mm-img-preview" style="text-align:center;margin-bottom:10px"></div>
       <button class="save-btn" onclick="addMethod()">＋ add method</button>
@@ -597,7 +600,7 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">＋ add</button></div>
-      <div class="subtitle" id="beans-sub">je bonenkast — gekoppeld aan je brews.</div>
+      <div class="subtitle" id="beans-sub">your bean shelf — linked to your brews.</div>
       <div id="beans-list"></div>
     </div>
   </div>
@@ -609,35 +612,35 @@
       <div class="form-head"><div class="h hand" id="beanform-title">new bean</div><button onclick="go('beans')">cancel</button></div>
 
       <div class="photo-btns">
-        <button class="scan-btn half" onclick="document.getElementById('label-cam').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 8 Q7 7.7 8.6 7.8 Q9.4 6.4 10.2 5.5 Q12 5.3 13.8 5.5 Q14.6 6.5 15.4 7.8 Q17.3 7.7 19.5 8 Q19.9 13 19.5 18 Q12 18.4 4.5 18 Q4.1 13 4.5 8 Z"/><circle cx="12" cy="12.6" r="3.4"/><circle cx="12" cy="12.6" r="1.2" opacity="0.5"/></svg> foto maken</button>
-        <button class="scan-btn half" onclick="document.getElementById('label-file').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> uit galerij / bestanden</button>
+        <button class="scan-btn half" onclick="document.getElementById('label-cam').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 8 Q7 7.7 8.6 7.8 Q9.4 6.4 10.2 5.5 Q12 5.3 13.8 5.5 Q14.6 6.5 15.4 7.8 Q17.3 7.7 19.5 8 Q19.9 13 19.5 18 Q12 18.4 4.5 18 Q4.1 13 4.5 8 Z"/><circle cx="12" cy="12.6" r="3.4"/><circle cx="12" cy="12.6" r="1.2" opacity="0.5"/></svg> take photo</button>
+        <button class="scan-btn half" onclick="document.getElementById('label-file').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> from gallery / files</button>
       </div>
       <input type="file" id="label-cam" accept="image/*" capture="environment" style="display:none" onchange="scanLabel(event)">
       <input type="file" id="label-file" accept="image/*" style="display:none" onchange="scanLabel(event)">
       <div id="label-preview" style="text-align:center;margin-bottom:8px"></div>
       <div class="scan-status" id="scan-status"></div>
       <div id="enrich-row" class="ai-only" style="display:none;margin-bottom:10px">
-        <button class="recipe-btn" onclick="enrichBean()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> vul aan met meer info</button>
+        <button class="recipe-btn" onclick="enrichBean()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> enrich with more info</button>
       </div>
 
-      <div class="field"><label>naam</label><input id="b-name" placeholder="bv. Ethiopia Guji"></div>
-      <div class="field"><label>roaster</label><input id="b-roaster" placeholder="bv. Friedhats"></div>
+      <div class="field"><label>name</label><input id="b-name" placeholder="e.g. Ethiopia Guji"></div>
+      <div class="field"><label>roaster</label><input id="b-roaster" placeholder="e.g. Friedhats"></div>
       <div class="field-row">
-        <div class="field"><label>origin</label><input id="b-origin" placeholder="land / regio"></div>
-        <div class="field"><label>proces</label><input id="b-process" placeholder="washed / natural"></div>
+        <div class="field"><label>origin</label><input id="b-origin" placeholder="country / region"></div>
+        <div class="field"><label>process</label><input id="b-process" placeholder="washed / natural"></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>variëteit</label><input id="b-variety" placeholder="bv. heirloom"></div>
-        <div class="field"><label>hoogte (m)</label><input id="b-altitude" placeholder="bv. 1900-2100"></div>
+        <div class="field"><label>variety</label><input id="b-variety" placeholder="e.g. heirloom"></div>
+        <div class="field"><label>altitude (m)</label><input id="b-altitude" placeholder="e.g. 1900-2100"></div>
       </div>
       <div class="field"><label>roast date</label><input id="b-roastdate" type="date"></div>
-      <div class="field"><label>smaaknotities brander</label><textarea id="b-roasternotes" placeholder="zoals op de zak, bv. jasmine, peach, black tea"></textarea></div>
-      <div class="field"><label>website / link naar boon</label>
+      <div class="field"><label>roaster tasting notes</label><textarea id="b-roasternotes" placeholder="as on the bag, e.g. jasmine, peach, black tea"></textarea></div>
+      <div class="field"><label>website / link to bean</label>
         <input id="b-url" type="url" inputmode="url" placeholder="https://...">
-        <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M10 7.5 Q11.8 5.5 14 5.4 Q17 5.2 18.6 7.6 Q19.8 10 18 12 Q16.5 13.8 14.5 14.2 M14 16.5 Q12.2 18.5 10 18.6 Q7 18.8 5.4 16.4 Q4.2 14 6 12 Q7.5 10.2 9.5 9.8"/><path d="M9.5 14.5 Q12 12 14.5 9.5" opacity="0.6"/></svg> zoek deze boon (op brander-site)</button></div>
-      <div class="field"><label>zetmethodes voor deze boon (meerdere mogelijk)</label>
+        <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M10 7.5 Q11.8 5.5 14 5.4 Q17 5.2 18.6 7.6 Q19.8 10 18 12 Q16.5 13.8 14.5 14.2 M14 16.5 Q12.2 18.5 10 18.6 Q7 18.8 5.4 16.4 Q4.2 14 6 12 Q7.5 10.2 9.5 9.8"/><path d="M9.5 14.5 Q12 12 14.5 9.5" opacity="0.6"/></svg> search for this bean (on roaster site)</button></div>
+      <div class="field"><label>brew methods for this bean (multiple allowed)</label>
         <div class="link-pick" id="beanform-methods"></div></div>
-      <div class="field"><label>eigen notitie</label><textarea id="b-notes" placeholder="je eigen aantekening"></textarea></div>
+      <div class="field"><label>own note</label><textarea id="b-notes" placeholder="your own note"></textarea></div>
       <button class="save-btn" onclick="saveBean()">save bean</button>
     </div>
   </div>
@@ -645,34 +648,34 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <h1 class="title hand">learn</h1>
-      <div class="subtitle">slijp je skills, beker voor beker</div>
+      <div class="subtitle">sharpen your skills, cup by cup</div>
 
       <div class="learn-card sketch" style="background:var(--espresso)" onclick="go('learn-barista')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M7 4.5 Q12 4.1 17 4.5 Q16.4 8 15.8 11 Q12 11.4 8.2 11 Q7.6 8 7 4.5 Z M9 11.3 Q8.8 15.5 9 19.6 Q12 20 15 19.6 Q15.2 15.5 15 11.3"/><path d="M16.8 5 Q19.5 4.6 20.6 6.6 Q21 8 19.8 8.6" opacity="0.8"/><path d="M10.5 13.5 Q12 13.3 13.5 13.5" opacity="0.5"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">barista skills</div>
-          <div class="lc-d">grind, tamp, dose & extractie onder de knie</div></div>
+          <div class="lc-d">master grind, tamp, dose & extraction</div></div>
         <div class="lc-arr">›</div>
       </div>
 
       <div class="learn-card sketch" style="background:var(--v60)" onclick="go('learn-academy')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12 5.5 Q8.5 3.6 4.4 4.6 Q4 11.5 4.4 18.4 Q8.5 17.5 12 19.4 Q15.5 17.5 19.6 18.4 Q20 11.5 19.6 4.6 Q15.5 3.6 12 5.5 Z M12 5.5 Q12.2 12.5 12 19.4"/><path d="M6.5 8 Q9 7.5 10.5 8.2 M6.5 11 Q9 10.5 10.5 11.2 M13.5 8.2 Q15.5 7.5 17.5 8 M13.5 11.2 Q15.5 10.5 17.5 11" opacity="0.5"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">coffee academy</div>
-          <div class="lc-d">de kennis: bonen, water, malen, smaak</div></div>
+          <div class="lc-d">the knowledge: beans, water, grinding, taste</div></div>
         <div class="lc-arr">›</div>
       </div>
 
       <div class="learn-card sketch" style="background:var(--aeropress)" onclick="go('learn-latte')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M7 6 Q11.5 5.6 16 6 Q16.5 12.5 16 19 Q11.5 19.5 7.5 19 Q6.8 12.5 7 6 Z M7.2 7.5 Q5 8.5 4.6 11 Q4.4 13 6 13.5 M16 7 Q17.6 6 18.8 7.2 Q19.6 8.4 18.4 9.2"/><path d="M9.5 9 Q11.5 8.7 13.8 9" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">latte art & melk</div>
-          <div class="lc-d">opschuimen en giet-patronen trainen</div></div>
+        <div class="lc-body"><div class="lc-t hand">latte art & milk</div>
+          <div class="lc-d">practise steaming and pour patterns</div></div>
         <div class="lc-arr">›</div>
       </div>
 
       <div class="ask-box sketch soft ai-only hidden">
-        <div class="lc-t hand" style="font-size:24px">vraag de coffee coach</div>
-        <div class="lc-d" style="margin:4px 0 10px">stel een vraag over zetten, smaak of techniek — de coach kent je bonenkast en recente brews en geeft advies op maat.</div>
-        <input id="coach-q" placeholder="bv. welke boon zet ik het best op mijn V60?">
-        <button class="recipe-btn" style="margin-top:10px" onclick="askCoach()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> vraag het</button>
+        <div class="lc-t hand" style="font-size:24px">ask the coffee coach</div>
+        <div class="lc-d" style="margin:4px 0 10px">ask a question about brewing, taste or technique — the coach knows your bean shelf and recent brews and gives tailored advice.</div>
+        <input id="coach-q" placeholder="e.g. which bean is best on my V60?">
+        <button class="recipe-btn" style="margin-top:10px" onclick="askCoach()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> ask</button>
         <div id="coach-a"></div>
       </div>
     </div>
@@ -700,7 +703,7 @@
   <div id="page-learn-latte" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">latte art & melk</div><div style="width:24px"></div></div>
+      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">latte art & milk</div><div style="width:24px"></div></div>
       <div id="latte-content"></div>
     </div>
   </div>
@@ -708,84 +711,84 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <h1 class="title hand">profile</h1>
-      <div class="subtitle">instellingen & back-up</div>
+      <div class="subtitle">settings & back-up</div>
 
       <div class="settings-card sketch soft">
         <div class="set-row">
-          <div class="set-body"><div class="set-t hand">AI-functies</div>
-            <div class="set-d">etiket scannen, brew-recepten & coffee coach</div></div>
+          <div class="set-body"><div class="set-t hand">AI features</div>
+            <div class="set-d">label scanning, brew recipes & coffee coach</div></div>
           <div class="toggle" id="ai-toggle" onclick="toggleAI()"><div class="knob"></div></div>
         </div>
         <div id="ai-key-wrap" class="hidden">
-          <div class="set-d" style="margin:6px 0 8px">plak hier je eigen API-sleutel. die blijft alleen op dit apparaat.</div>
+          <div class="set-d" style="margin:6px 0 8px">paste your own API key here. it stays on this device only.</div>
           <input id="ai-key" type="password" placeholder="sk-ant-..." onchange="saveKey()">
           <div class="set-d" id="ai-key-status" style="margin-top:6px"></div>
         </div>
-        <div class="set-d" id="ai-off-note" style="margin-top:8px">AI staat uit. zet aan en vul een sleutel in om etiket-scannen en recepten te gebruiken. zonder sleutel werkt de rest van de app gewoon.</div>
+        <div class="set-d" id="ai-off-note" style="margin-top:8px">AI is off. turn it on and enter a key to use label scanning and recipes. without a key the rest of the app works fine.</div>
       </div>
 
       <div class="settings-card sketch soft">
-        <div class="set-t hand">mijn uitrusting</div>
-        <div class="set-d" style="margin:4px 0 10px">voeg je molen, machine en tools toe — dan maakt de AI de brew-suggestie specifieker (maalgraad voor jouw molen, techniek voor jouw tools).</div>
+        <div class="set-t hand">my gear</div>
+        <div class="set-d" style="margin:4px 0 10px">add your grinder, machine and tools — then the AI makes the brew suggestion more specific (grind setting for your grinder, technique for your tools).</div>
         <div id="gear-list"></div>
         <div class="gear-add">
           <select id="gear-cat">
             <option value="espresso">espresso</option>
             <option value="filter">filter</option>
-            <option value="algemeen">algemeen</option>
+            <option value="algemeen">general</option>
           </select>
-          <input id="gear-name" placeholder="bv. Eureka Libra 65" onkeydown="if(event.key==='Enter')addGear()">
+          <input id="gear-name" placeholder="e.g. Eureka Libra 65" onkeydown="if(event.key==='Enter')addGear()">
           <button class="tag-add-btn" onclick="addGear()">＋</button>
         </div>
       </div>
 
       <div class="settings-card sketch soft">
         <div class="set-row">
-          <div class="set-body"><div class="set-t hand">dagelijkse brew-suggestie</div>
-            <div class="set-d">een melding met een voorgestelde brew, elke dag op jouw tijd</div></div>
+          <div class="set-body"><div class="set-t hand">daily brew suggestion</div>
+            <div class="set-d">a notification with a suggested brew, every day at your time</div></div>
           <div class="toggle" id="reminder-toggle" onclick="toggleReminder()"><div class="knob"></div></div>
         </div>
         <div id="reminder-wrap" class="hidden">
           <div class="set-row" style="margin-top:14px">
-            <div class="set-d" style="margin:0">tijd van de dag</div>
+            <div class="set-d" style="margin:0">time of day</div>
             <input id="reminder-time" type="time" value="08:00" onchange="saveReminderTime()" style="margin-left:auto">
           </div>
           <div class="set-d" id="reminder-status" style="margin-top:10px"></div>
-          <button class="profile-btn" onclick="testReminder()" style="margin-top:8px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.6 Q12.7 3.6 12.9 4.4 Q16.6 5.3 16.9 9.6 Q17.1 13 19 16 Q12 16.6 5 16 Q6.9 13 7.1 9.6 Q7.4 5.3 11.1 4.4 Q11.3 3.6 12 3.6 Z"/><path d="M10 18 Q12 20.2 14 18" opacity="0.7"/></svg> stuur een testmelding nu</button>
-          <div class="set-d" style="margin-top:10px;font-size:14px">let op: op iOS wordt een melding op een vast tijdstip alleen betrouwbaar afgeleverd als de app op je beginscherm staat. staat de app helemaal dicht, dan zie je de suggestie zodra je ’m weer opent.</div>
+          <button class="profile-btn" onclick="testReminder()" style="margin-top:8px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.6 Q12.7 3.6 12.9 4.4 Q16.6 5.3 16.9 9.6 Q17.1 13 19 16 Q12 16.6 5 16 Q6.9 13 7.1 9.6 Q7.4 5.3 11.1 4.4 Q11.3 3.6 12 3.6 Z"/><path d="M10 18 Q12 20.2 14 18" opacity="0.7"/></svg> send a test notification now</button>
+          <div class="set-d" style="margin-top:10px;font-size:14px">note: on iOS a notification at a fixed time is only delivered reliably when the app is on your home screen. if the app is fully closed, you'll see the suggestion the moment you reopen it.</div>
         </div>
       </div>
 
       <div class="settings-card sketch soft">
-        <div class="set-t hand">delen & vrienden</div>
-        <div class="set-d" style="margin:4px 0 10px">stuur een losse brew of boon met het versturen-icoon op de kaart. of voeg toe wat een vriend jou stuurde — een meegestuurde boon komt automatisch mee.</div>
-        <button class="profile-btn ic-btn" onclick="document.getElementById('friend-import').click()"><svg viewBox="0 0 24 24" class="acic"><path d="M12 13.6 Q12.3 8 12 3.2 M8 10 Q10 12.4 12 14 Q14 12.2 16 9.7 M4 13 Q3.8 16.5 4.3 20 Q12 20.4 19.7 20 Q20.2 16.5 20 13"/><path d="M4.5 19.6 Q11.5 20 19.5 19.6" opacity="0.5"/></svg>voeg toe van vriend (brew of boon)</button>
+        <div class="set-t hand">sharing & friends</div>
+        <div class="set-d" style="margin:4px 0 10px">send a single brew or bean with the send icon on the card. or add what a friend sent you — an attached bean comes along automatically.</div>
+        <button class="profile-btn ic-btn" onclick="document.getElementById('friend-import').click()"><svg viewBox="0 0 24 24" class="acic"><path d="M12 13.6 Q12.3 8 12 3.2 M8 10 Q10 12.4 12 14 Q14 12.2 16 9.7 M4 13 Q3.8 16.5 4.3 20 Q12 20.4 19.7 20 Q20.2 16.5 20 13"/><path d="M4.5 19.6 Q11.5 20 19.5 19.6" opacity="0.5"/></svg>add from a friend (brew or bean)</button>
         <input type="file" id="friend-import" accept=".json,application/json" style="display:none" onchange="importFriend(event)">
-        <button class="profile-btn ic-btn" onclick="shareBeans()"><svg viewBox="0 0 24 24" class="acic"><path d="M4 6 Q3.7 4.4 5.4 4.2 Q12 3.7 18.6 4.2 Q20.3 4.4 20 6 Q20.3 10 20 14 Q20.2 15.6 18.5 15.8 Q13 16.1 9 15.9 Q7 18 5 19.6 Q5.4 17.6 5.4 15.8 Q3.8 15.6 4 14 Q3.7 10 4 6 Z"/><path d="M7.5 8.4 Q11.5 8.1 16 8.4 M7.5 11.6 Q10.5 11.4 13.5 11.6" opacity="0.6"/></svg>deel mijn bonenkast als berichtje</button>
+        <button class="profile-btn ic-btn" onclick="shareBeans()"><svg viewBox="0 0 24 24" class="acic"><path d="M4 6 Q3.7 4.4 5.4 4.2 Q12 3.7 18.6 4.2 Q20.3 4.4 20 6 Q20.3 10 20 14 Q20.2 15.6 18.5 15.8 Q13 16.1 9 15.9 Q7 18 5 19.6 Q5.4 17.6 5.4 15.8 Q3.8 15.6 4 14 Q3.7 10 4 6 Z"/><path d="M7.5 8.4 Q11.5 8.1 16 8.4 M7.5 11.6 Q10.5 11.4 13.5 11.6" opacity="0.6"/></svg>share my bean shelf as a message</button>
       </div>
 
       <div class="settings-card sketch soft">
-        <div class="set-t hand">back-up & overzetten</div>
+        <div class="set-t hand">back-up & transfer</div>
         <div class="set-d" id="save-status" style="margin:4px 0 0;color:var(--ink)"></div>
-        <div class="set-d" style="margin:4px 0 10px">de app bewaart alles automatisch op dit apparaat. maak af en toe een back-up — dan kun je alles terugzetten of naar een ander toestel overzetten.</div>
-        <button class="profile-btn ic-btn" onclick="exportData()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.3 8.5 12 13 M8.4 9.6 Q10.2 11.6 12 13.4 Q13.8 11.5 15.6 9.4 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> exporteer alles (back-up bestand)</button>
-        <button class="profile-btn ic-btn" onclick="printLogbook()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M7 9 Q7 5 7.3 4.4 Q12 4.1 16.7 4.4 Q17 8 17 9 M5.5 9.4 Q4.2 9.2 4.4 11 Q4.2 14.5 4.6 16.4 Q6 16.6 8 16.5 M18.5 9.4 Q19.8 9.2 19.6 11 Q19.8 14.5 19.4 16.4 Q18 16.6 16 16.5 M7.4 13.5 Q12 13.1 16.6 13.5 Q16.8 17 16.7 20 Q12 20.4 7.3 20 Q7.2 17 7.4 13.5 Z"/></svg> bewaar als PDF (om te lezen)</button>
-        <button class="profile-btn ic-btn" onclick="document.getElementById('import-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 13 Q12.3 8 12 3.6 M8.4 7.4 Q10.2 5.4 12 3.5 Q13.8 5.5 15.6 7.6 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> zet een back-up terug</button>
+        <div class="set-d" style="margin:4px 0 10px">the app saves everything automatically on this device. make a back-up now and then — so you can restore everything or move it to another device.</div>
+        <button class="profile-btn ic-btn" onclick="exportData()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.3 8.5 12 13 M8.4 9.6 Q10.2 11.6 12 13.4 Q13.8 11.5 15.6 9.4 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> export everything (back-up file)</button>
+        <button class="profile-btn ic-btn" onclick="printLogbook()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M7 9 Q7 5 7.3 4.4 Q12 4.1 16.7 4.4 Q17 8 17 9 M5.5 9.4 Q4.2 9.2 4.4 11 Q4.2 14.5 4.6 16.4 Q6 16.6 8 16.5 M18.5 9.4 Q19.8 9.2 19.6 11 Q19.8 14.5 19.4 16.4 Q18 16.6 16 16.5 M7.4 13.5 Q12 13.1 16.6 13.5 Q16.8 17 16.7 20 Q12 20.4 7.3 20 Q7.2 17 7.4 13.5 Z"/></svg> save as PDF (to read)</button>
+        <button class="profile-btn ic-btn" onclick="document.getElementById('import-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 13 Q12.3 8 12 3.6 M8.4 7.4 Q10.2 5.4 12 3.5 Q13.8 5.5 15.6 7.6 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> restore a back-up</button>
         <input type="file" id="import-input" accept="application/json,.json" style="display:none" onchange="importData(event)">
-        <div class="set-d" style="margin-top:8px;font-size:14px">let op: “zet een back-up terug” vervangt je huidige gegevens. “voeg toe van vriend” hierboven voegt juist toe.</div>
+        <div class="set-d" style="margin-top:8px;font-size:14px">note: “restore a back-up” replaces your current data. “add from a friend” above adds to it instead.</div>
       </div>
 
       <div class="settings-card sketch soft" id="adv-card">
-        <button class="adv-head" onclick="document.getElementById('adv-card').classList.toggle('open')"><span class="set-t hand">geavanceerd</span><span class="g-arr">▸</span></button>
+        <button class="adv-head" onclick="document.getElementById('adv-card').classList.toggle('open')"><span class="set-t hand">advanced</span><span class="g-arr">▸</span></button>
         <div class="adv-body">
-          <div class="set-d" style="margin:10px 0 10px">zie je de tekeningen niet? herstel de standaard-afbeeldingen.</div>
-          <button class="profile-btn ic-btn" onclick="restoreImages()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> herstel tekeningen</button>
+          <div class="set-d" style="margin:10px 0 10px">not seeing the drawings? restore the default images.</div>
+          <button class="profile-btn ic-btn" onclick="restoreImages()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> restore drawings</button>
         </div>
       </div>
 
       <div class="settings-card sketch soft">
-        <div class="set-t hand">over</div>
-        <div class="set-d" style="margin-top:4px">lets brew specialty · brew. record. share.<br>alles wordt lokaal op je apparaat bewaard.</div>
+        <div class="set-t hand">about</div>
+        <div class="set-d" style="margin-top:4px">lets brew specialty · brew. record. share.<br>everything is stored locally on your device.</div>
       </div>
     </div>
   </div>
@@ -805,11 +808,11 @@
 </div>
 <div id="img-picker" class="img-picker-overlay hidden" onclick="if(event.target===this)closeImgPicker()">
   <div class="img-picker-sheet sketch">
-    <div class="hand" style="font-size:26px;margin-bottom:4px">kies een tekening</div>
+    <div class="hand" style="font-size:26px;margin-bottom:4px">choose a drawing</div>
     <div id="img-picker-grid" class="img-picker-grid"></div>
-    <button class="profile-btn" onclick="document.getElementById('img-picker-file').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> eigen tekening uploaden</button>
+    <button class="profile-btn" onclick="document.getElementById('img-picker-file').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> upload your own drawing</button>
     <input type="file" id="img-picker-file" accept="image/*" style="display:none" onchange="pickerUpload(event)">
-    <button class="profile-btn" style="margin-bottom:0" onclick="closeImgPicker()">annuleren</button>
+    <button class="profile-btn" style="margin-bottom:0" onclick="closeImgPicker()">cancel</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -878,13 +881,13 @@ const DEFAULT_METHODS=[
   {id:'aeropress',name:'aeropress',glyph:'⬗',img:'m-aeropress.png',tint:'--aeropress',on:true,family:'filter'},
   {id:'v60',name:'v60',glyph:'◭',img:'m-v60.png',tint:'--v60',on:true,family:'filter'},
   {id:'chemex',name:'chemex',glyph:'⧖',img:'m-chemex.png',tint:'--chemex',on:true,family:'filter'},
-  {id:'perculator',name:'mokka pot',glyph:'🫖',img:'m-mokkapot.png',tint:'--perculator',on:true,family:'espresso'},
+  {id:'perculator',name:'moka pot',glyph:'🫖',img:'m-mokkapot.png',tint:'--perculator',on:true,family:'espresso'},
   {id:'senseo',name:'senseo',glyph:'⬗',img:'m-senseo.png',tint:'--espresso',on:true,family:'espresso'},
 ];
 // bekende familie per standaard-methode (voor migratie van bestaande gebruikers)
 const METHOD_FAMILY_DEFAULTS={espresso:'espresso',perculator:'espresso',senseo:'espresso',aeropress:'filter',v60:'filter',chemex:'filter',coldbrew:'filter'};
 // standaard puck-prep-lijst voor espresso (persoonlijk, zelf te beheren). unit -> waarde-veld
-const DEFAULT_PREP=[{id:'wdt',name:'WDT'},{id:'puckscreen',name:'puckscreen'},{id:'preinf',name:'pre-infusie',unit:'s'},{id:'temp',name:'watertemp',unit:'°C'}];
+const DEFAULT_PREP=[{id:'wdt',name:'WDT'},{id:'puckscreen',name:'puckscreen'},{id:'preinf',name:'pre-infusion',unit:'s'},{id:'temp',name:'water temp',unit:'°C'}];
 // welke familie hoort bij een methode? espresso of filter (val terug op filter)
 function methodFamily(idOrMethod){
   const m=(typeof idOrMethod==='object'&&idOrMethod)?idOrMethod:methodById(idOrMethod);
@@ -898,14 +901,14 @@ const TINTS=['--espresso','--aeropress','--v60','--chemex','--perculator'];
 const IMG_LIBRARY={
   espresso:[
     {src:'m-espresso.png',label:'ECM'},
-    {src:'m-espresso-2.png',label:'klassiek'},
-    {src:'m-espresso-3.png',label:'met molen'},
+    {src:'m-espresso-2.png',label:'classic'},
+    {src:'m-espresso-3.png',label:'with grinder'},
   ],
   senseo:[{src:'m-senseo.png',label:'senseo'}],
   aeropress:[{src:'m-aeropress.png',label:'aeropress'}],
   v60:[{src:'m-v60.png',label:'v60'}],
   chemex:[{src:'m-chemex.png',label:'chemex'}],
-  perculator:[{src:'m-mokkapot.png',label:'mokka pot'}],
+  perculator:[{src:'m-mokkapot.png',label:'moka pot'}],
 };
 function libraryFor(m){
   // match op id, anders op naam
@@ -1053,10 +1056,10 @@ function save(){
   showSaved();
   try{
     idbSet(IDB_KEY,state).catch(()=>{
-      toast('⚠ opslaan mislukt — maak een back-up via profiel');
+      toast('⚠ save failed — make a back-up via profile');
     });
   }catch(e){
-    toast('⚠ opslaan mislukt — maak een back-up via profiel');
+    toast('⚠ save failed — make a back-up via profile');
   }
 }
 // "✓ opgeslagen" label bewust uitgezet: op verzoek niet meer tonen op het
@@ -1070,12 +1073,12 @@ function demoBrews(){
   return [
     {id:uid(),method:'v60',beans:'Ethiopia',dose:18,yield:300,ratio:16.7,time:'3:42',temp:92,score:8.6,notes:'balanced & smooth. great clarity.',ts:Date.now()-3600e3},
     {id:uid(),method:'aeropress',beans:'Guatemala',dose:17,yield:270,ratio:15.9,time:'2:15',temp:85,score:8.2,notes:'clean & sweet. soft finish.',ts:Date.now()-9e7},
-    {id:uid(),method:'senseo',beans:'Classic rood',dose:15,yield:180,ratio:12,time:'0:30',temp:90,score:5.5,notes:'snel bakkie. doet wat het moet.',guide:'1. plaats pad in houder\n2. vul reservoir met water\n3. druk op de knop\n4. klaar',ts:Date.now()-18e7},
+    {id:uid(),method:'senseo',beans:'Classic Red',dose:15,yield:180,ratio:12,time:'0:30',temp:90,score:5.5,notes:'quick cup. does the job.',guide:'1. place pad in holder\n2. fill reservoir with water\n3. press the button\n4. done',ts:Date.now()-18e7},
   ];
 }
 function demoBeans(){return [
   {id:uid(),name:'Ethiopia Guji',roaster:'Friedhats',origin:'Guji, Ethiopia',process:'washed',variety:'heirloom',altitude:'1900-2100',roastdate:'',roasternotes:'jasmine, peach, black tea',method:'v60',methods:['v60'],inStock:true,notes:''},
-  {id:uid(),name:'Classic rood',roaster:'Senseo',origin:'Brazilië',process:'gestampt',variety:'',altitude:'',roastdate:'',roasternotes:'chocolade, noten, vol',method:'senseo',methods:['senseo'],inStock:true,notes:'huis-, tuin- en keukenkoffie. altijd op voorraad.'},
+  {id:uid(),name:'Classic Red',roaster:'Senseo',origin:'Brazil',process:'ground',variety:'',altitude:'',roastdate:'',roasternotes:'chocolate, nuts, full-bodied',method:'senseo',methods:['senseo'],inStock:true,notes:'everyday coffee. always in stock.'},
 ];}
 function uid(){return Math.random().toString(36).slice(2,9);}
 function beanById(id){return state.beans.find(b=>b.id===id);}
@@ -1138,7 +1141,7 @@ function renderHome(){
   const pool=state.brews.filter(b=>!brewBeanGone(b));
   const recent=[...(pool.length?pool:state.brews)].sort((a,b)=>b.ts-a.ts).slice(0,3);
   document.getElementById('recent-list').innerHTML =
-    recent.length?recent.map(brewCard).join(''):'<div class="empty-note">nog geen brews.<br>tik op ＋ add new brew om te beginnen.</div>';
+    recent.length?recent.map(brewCard).join(''):'<div class="empty-note">no brews yet.<br>tap ＋ new brew to get started.</div>';
   const ms=document.getElementById('methods-scroll');
   ms.innerHTML=state.methods.filter(m=>m.on).map(m=>
     `<button class="method" onclick="showMethodBrews('${m.id}')"><div class="ic">${iconHTML(m,46)}</div><div class="nm">${esc(m.name)}</div></button>`
@@ -1169,17 +1172,17 @@ function recommendBrew(){
 }
 async function quickBrew(){
   const r=recommendBrew();
-  if(!r){toast('zet eerst een methode aan bij methods');return;}
+  if(!r){toast('turn on a method first under methods');return;}
   const method=r.method; const esp=methodFamily(method)==='espresso';
   beginBrew(method.id);   // espresso -> dial-in-scherm, filter -> formulier (beide leeg)
   // zonder AI: eenvoudige voorvulling (methode + boon uit voorraad)
   if(!aiReady()){
     if(r.bean){formBean=r.bean.id;esp?renderDiBeans():renderFormBeans();}
-    toast(r.bean?('aanbevolen: '+method.name+' met '+r.bean.name+' — zet AI aan voor een verzonnen recept')
-                :('aanbevolen: '+method.name+' — zet AI aan voor een verzonnen recept'));
+    toast(r.bean?('recommended: '+method.name+' with '+r.bean.name+' — turn on AI for an invented recipe')
+                :('recommended: '+method.name+' — turn on AI for an invented recipe'));
     return;
   }
-  toast('AI verzint een brew voor '+method.name+'…');
+  toast('AI is inventing a brew for '+method.name+'…');
   const inStock=state.beans.filter(b=>b.inStock);
   try{
     const beansList=inStock.length
@@ -1211,7 +1214,7 @@ async function quickBrew(){
     if(esp){
       setVal('di-dose',numOf(d.dose));setVal('di-yield',numOf(d.yield));
       renderDialIn();
-      toast('✓ '+(drink||'espresso')+(bean?' · '+bean.name:'')+' — meet je shot & sla op');
+      toast('✓ '+(drink||'espresso')+(bean?' · '+bean.name:'')+' — measure your shot & save');
     }else{
       setText('f-title',d.title||'');renderFormBeans();
       setText('f-dose',numOf(d.dose));setText('f-yield',numOf(d.yield));
@@ -1221,11 +1224,11 @@ async function quickBrew(){
       if(Array.isArray(d.tags)){formTags=d.tags.filter(Boolean).map(t=>(''+t).toLowerCase());renderFormTags();}
       renderDialInHint();
       if(guide){const g=document.getElementById('f-guide');if(g){g.value=guide;autoGrow(g);}}
-      toast('✓ '+method.name+(bean?' met '+bean.name:'')+' — controleer & sla op');
+      toast('✓ '+method.name+(bean?' with '+bean.name:'')+' — check & save');
     }
   }catch(e){
     if(r.bean){formBean=r.bean.id;esp?renderDiBeans():renderFormBeans();}
-    toast('kon geen AI-brew maken — vul de rest zelf in');
+    toast('couldn\'t make an AI brew — fill in the rest yourself');
   }
 }
 let brewSort='new', filterMethod='all';
@@ -1264,11 +1267,11 @@ function renderAll(){
   const sorter=brewSort==='score'?(a,b)=>b.score-a.score||b.ts-a.ts:(a,b)=>b.ts-a.ts;
   const active=list.filter(b=>!brewBeanGone(b)).sort(sorter);
   const reserve=list.filter(brewBeanGone).sort(sorter);
-  let html=active.length?active.map(brewCard).join(''):(reserve.length?'':'<div class="empty-note">geen brews gevonden.</div>');
+  let html=active.length?active.map(brewCard).join(''):(reserve.length?'':'<div class="empty-note">no brews found.</div>');
   if(reserve.length){
-    html+=`<button class="extra-kast" onclick="toggleReserve()"><svg viewBox="0 0 24 24" class="acic"><path d="M6 9 Q5.7 7.3 7.4 7.1 Q12 6.7 16.6 7.1 Q18.3 7.3 18 9 Q18.3 13 18 17 Q18.2 18.6 16.5 18.8 Q12 19.1 7.5 18.9 Q5.8 18.7 6 17 Q5.7 13 6 9 Z"/><path d="M9.5 7 Q9.4 5.4 9.6 4.1 Q12 3.8 14.4 4.1 Q14.6 5.5 14.5 7" opacity="0.6"/><path d="M9 12.5 Q12 12.2 15 12.5" opacity="0.5"/></svg> uit de oude doos · ${reserve.length} brew${reserve.length===1?'':'s'} met boon die op is ${reserveOpen?'▾':'▸'}</button>`;
+    html+=`<button class="extra-kast" onclick="toggleReserve()"><svg viewBox="0 0 24 24" class="acic"><path d="M6 9 Q5.7 7.3 7.4 7.1 Q12 6.7 16.6 7.1 Q18.3 7.3 18 9 Q18.3 13 18 17 Q18.2 18.6 16.5 18.8 Q12 19.1 7.5 18.9 Q5.8 18.7 6 17 Q5.7 13 6 9 Z"/><path d="M9.5 7 Q9.4 5.4 9.6 4.1 Q12 3.8 14.4 4.1 Q14.6 5.5 14.5 7" opacity="0.6"/><path d="M9 12.5 Q12 12.2 15 12.5" opacity="0.5"/></svg> the vault · ${reserve.length} brew${reserve.length===1?'':'s'} with a bean that's gone ${reserveOpen?'▾':'▸'}</button>`;
     if(reserveOpen){
-      html+='<div class="kast-head">de boon is niet meer in huis — je recept blijft bewaard</div>';
+      html+='<div class="kast-head">the bean is no longer in stock — your recipe stays saved</div>';
       html+=reserve.map(brewCard).join('');
     }
   }
@@ -1311,9 +1314,9 @@ function fmtShot(t){
   if(!t)return '';
   const parts=[];
   if(t.dose)parts.push(t.dose+'g in');
-  if(t.grind)parts.push('maling '+t.grind);
+  if(t.grind)parts.push('grind '+t.grind);
   if(t.time)parts.push(t.time);
-  if(t.yield)parts.push(t.yield+'g uit');
+  if(t.yield)parts.push(t.yield+'g out');
   return parts.join(' · ');
 }
 /* ---------------- dial-in: doel, nieuwe poging & AI-maaladvies ---------------- */
@@ -1328,7 +1331,7 @@ function brewAgain(id){
     pendingTarget=src.target||{dose:src.dose?String(src.dose):'',yield:src.yield?String(src.yield):'',time:src.time||'',grind:src.grind||''};
     formPrep=src.prep?JSON.parse(JSON.stringify(src.prep)):{};
     openDialIn(src.method);
-    toast('nieuwe poging — meet je looptijd');
+    toast('new attempt — measure your shot time');
     return;
   }
   openForm(src.method);
@@ -1340,14 +1343,14 @@ function brewAgain(id){
   pendingTarget=src.target||{dose:src.dose,grind:src.grind||'',time:src.time||'',yield:src.yield};
   formPrep=src.prep?JSON.parse(JSON.stringify(src.prep)):{};renderPrep();
   renderDialInHint();
-  toast('nieuwe poging — meet je tijd, pas aan en sla op');
+  toast('new attempt — measure your time, adjust and save');
 }
 // toon het doel + een LIVE maaltip (tijd vs doel) + het laatste AI-advies
 function renderDialInHint(){
   const el=document.getElementById('dialin-hint');if(!el)return;
   let html='';
   if(pendingTarget && fmtShot(pendingTarget)){
-    html+='<div class="di-t">doel</div>'+esc(fmtShot(pendingTarget));
+    html+='<div class="di-t">target</div>'+esc(fmtShot(pendingTarget));
   }
   // live: vergelijk je ingevulde tijd met de doel-tijd terwijl je typt
   if(pendingTarget && pendingTarget.time){
@@ -1356,16 +1359,16 @@ function renderDialInHint(){
     if(actual&&target){
       const diff=actual-target, tol=target<=60?3:Math.max(8,Math.round(target*0.1));
       let tip;
-      if(diff>tol)tip='langzamer dan doel → maal iets grover';
-      else if(diff<-tol)tip='sneller dan doel → maal iets fijner';
-      else tip='mooi op doel ✓';
-      html+='<div class="di-tip">⏱ '+esc(document.getElementById('f-time').value)+' vs doel '+esc(pendingTarget.time)+' → '+tip+'</div>';
+      if(diff>tol)tip='slower than target → grind a bit coarser';
+      else if(diff<-tol)tip='faster than target → grind a bit finer';
+      else tip='right on target ✓';
+      html+='<div class="di-tip">⏱ '+esc(document.getElementById('f-time').value)+' vs target '+esc(pendingTarget.time)+' → '+tip+'</div>';
     }
   }
   // opgeslagen AI-advies van de vorige poging(en)
   const bean=beanById(formBean);
   if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
-    html+='<div class="di-tip">✦ AI-tip: probeer maling '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'')+'</div>';
+    html+='<div class="di-tip">✦ AI tip: try grind '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'')+'</div>';
   }
   el.innerHTML=html;el.style.display=html?'block':'none';
 }
@@ -1387,7 +1390,7 @@ async function updateDialIn(beanId,method){
     if(d&&d.grind){
       bean.dialIn={method,grind:conciseGrind(d.grind),reason:(d.reason||'').trim(),ts:Date.now()};
       save();
-      toast('✦ AI-maaltip: volgende keer maling '+bean.dialIn.grind+(bean.dialIn.reason?' — '+bean.dialIn.reason:''));
+      toast('✦ AI grind tip: next time grind '+bean.dialIn.grind+(bean.dialIn.reason?' — '+bean.dialIn.reason:''));
     }
   }catch(e){/* stil: volgende keer weer proberen */}
 }
@@ -1420,8 +1423,8 @@ function renderCustomFields(){
   const el=document.getElementById('custom-fields');if(!el)return;
   el.innerHTML=formCustom.map((c,i)=>
     `<div class="field-row" style="margin-bottom:8px">
-      <input value="${esc(c.k)}" placeholder="naam" oninput="formCustom[${i}].k=this.value" style="flex:1">
-      <input value="${esc(c.v)}" placeholder="waarde" oninput="formCustom[${i}].v=this.value" style="flex:1">
+      <input value="${esc(c.k)}" placeholder="name" oninput="formCustom[${i}].k=this.value" style="flex:1">
+      <input value="${esc(c.v)}" placeholder="value" oninput="formCustom[${i}].v=this.value" style="flex:1">
       <button class="tag-add-btn" onclick="formCustom.splice(${i},1);renderCustomFields()">×</button>
     </div>`).join('');
 }
@@ -1430,7 +1433,7 @@ async function suggestGuide(){
   const m=methodById(formMethod);const bean=beanById(formBean);
   const ta=document.getElementById('f-guide');
   const prev=ta.value;const prevPh=ta.placeholder;
-  ta.value='';ta.placeholder='AI denkt na…';
+  ta.value='';ta.placeholder='AI is thinking…';
   const msg=[{role:"user",content:
     `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:''}.${gearPromptBlock()} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}];
   try{
@@ -1440,7 +1443,7 @@ async function suggestGuide(){
   }catch(e){
     // val terug op de gewone (niet-streamende) aanroep
     try{const txt=await callClaude(msg,500);ta.value=txt.trim();}
-    catch(e2){ta.value=prev;toast('AI niet beschikbaar — vul je sleutel in bij profile');}
+    catch(e2){ta.value=prev;toast('AI not available — enter your key under profile');}
   }
   ta.placeholder=prevPh;
 }
@@ -1473,7 +1476,7 @@ function renderPrep(){
       <span class="prep-cb ${st.on?'on':''}" onclick="togglePrep('${it.id}')">✓</span>
       <span class="prep-name">${esc(it.name)}</span>
       ${it.unit?`<input class="prep-val" value="${esc(st.val||'')}" placeholder="${esc(it.unit)}" oninput="setPrepVal('${it.id}',this.value)">`:''}
-      <button class="prep-x" title="verwijderen" onclick="removePrepItem('${it.id}')">×</button>
+      <button class="prep-x" title="delete" onclick="removePrepItem('${it.id}')">×</button>
     </div>`;
   }).join('');
   ['prep-list','di-prep-list'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
@@ -1481,7 +1484,7 @@ function renderPrep(){
 function togglePrep(id){const st=formPrep[id]||(formPrep[id]={});st.on=!st.on;renderPrep();}
 function setPrepVal(id,v){const st=formPrep[id]||(formPrep[id]={});st.val=v;if(v&&!('on'in st))st.on=true;}
 function addPrepItem(){
-  const name=(prompt('naam van de stap (bv. "distributie-tool")')||'').trim();
+  const name=(prompt('name of the step (e.g. "distribution tool")')||'').trim();
   if(!name)return;
   if(!Array.isArray(state.prepItems))state.prepItems=[];
   state.prepItems.push({id:'p_'+uid().slice(0,5),name});
@@ -1509,7 +1512,7 @@ function openDialIn(methodId){
 function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();}
 function renderDiBeans(){
   const el=document.getElementById('di-beans');if(!el)return;
-  let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickDiBean(null)">geen</button>';
+  let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickDiBean(null)">none</button>';
   html+=state.beans.filter(b=>b.inStock!==false).map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickDiBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
   el.innerHTML=html;
 }
@@ -1520,12 +1523,12 @@ function renderDiGoal(){
   const bean=beanById(formBean);
   const aiGrind=(bean&&bean.dialIn&&bean.dialIn.method===formMethod)?bean.dialIn.grind:'';
   const grind=t.grind||aiGrind||'—';
-  el.innerHTML=`<div class="di-t"><span><svg class="acic" viewBox="0 0 24 24" style="width:19px;height:19px;vertical-align:-3px"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.4"/></svg> doel</span><span>ratio 1:2</span></div>
+  el.innerHTML=`<div class="di-t"><span><svg class="acic" viewBox="0 0 24 24" style="width:19px;height:19px;vertical-align:-3px"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.4"/></svg> target</span><span>ratio 1:2</span></div>
     <div class="di-grid">
       <div><div class="k">dose in</div><div class="v hand">${t.dose?esc(t.dose)+' <small>g</small>':'18 <small>g</small>'}</div></div>
-      <div><div class="k">yield uit</div><div class="v hand">${t.yield?esc(t.yield)+' <small>g</small>':'36 <small>g</small>'}</div></div>
-      <div><div class="k">looptijd</div><div class="v hand">${t.time?esc(t.time):'26–30 <small>s</small>'}</div></div>
-      <div><div class="k">maalstand</div><div class="v hand">${esc(grind)}</div>${(aiGrind&&aiGrind===grind)?'<div class="di-ai">✦ AI-tip</div>':''}</div>
+      <div><div class="k">yield out</div><div class="v hand">${t.yield?esc(t.yield)+' <small>g</small>':'36 <small>g</small>'}</div></div>
+      <div><div class="k">shot time</div><div class="v hand">${t.time?esc(t.time):'26–30 <small>s</small>'}</div></div>
+      <div><div class="k">grind</div><div class="v hand">${esc(grind)}</div>${(aiGrind&&aiGrind===grind)?'<div class="di-ai">✦ AI tip</div>':''}</div>
     </div>`;
 }
 function diAdvice(){
@@ -1539,13 +1542,13 @@ function diAdvice(){
   if(actual){
     const diff=actual-target, tol=3;
     let dir;
-    if(diff>tol)dir='trager dan doel → maal iets grover';
-    else if(diff<-tol)dir='sneller dan doel → maal iets fijner';
-    else dir='mooi op doel ✓';
-    html+='<svg class="acic" viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px"><circle cx="12" cy="12" r="8"/><path d="M12 7.2 L12 12 L15.4 14"/></svg> '+esc(document.getElementById('di-time').value)+' vs doel '+esc(t.time||('0:'+String(target).padStart(2,'0')))+' → '+dir+((grinder&&dir!=='mooi op doel ✓')?' op je '+esc(grinder):'');
+    if(diff>tol)dir='slower than target → grind a bit coarser';
+    else if(diff<-tol)dir='faster than target → grind a bit finer';
+    else dir='right on target ✓';
+    html+='<svg class="acic" viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px"><circle cx="12" cy="12" r="8"/><path d="M12 7.2 L12 12 L15.4 14"/></svg> '+esc(document.getElementById('di-time').value)+' vs target '+esc(t.time||('0:'+String(target).padStart(2,'0')))+' → '+dir+((grinder&&dir!=='right on target ✓')?' on your '+esc(grinder):'');
   }
   if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
-    html+=(html?'<br>':'')+'✦ AI-tip: probeer maling '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'');
+    html+=(html?'<br>':'')+'✦ AI tip: try grind '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'');
   }
   el.innerHTML=html;el.style.display=html?'block':'none';
 }
@@ -1570,13 +1573,13 @@ async function saveDialInBrew(next){
     const newGrind=(bean&&bean.dialIn&&bean.dialIn.method===b.method)?bean.dialIn.grind:(b.grind||'');
     pendingTarget={dose:dose?String(dose):(t.dose||''),yield:yld?String(yld):(t.yield||''),time:t.time||'',grind:newGrind};
     openDialIn(b.method);
-    toast('volgende poging — nieuw doel: maling '+(newGrind||'?'));
-  }else{toast('✓ dial-in opgeslagen');go('home');}
+    toast('next attempt — new target: grind '+(newGrind||'?'));
+  }else{toast('✓ dial-in saved');go('home');}
 }
 function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
 function renderFormBeans(){
   const el=document.getElementById('form-beans');
-  let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickBean(null)">geen</button>';
+  let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickBean(null)">none</button>';
   html+=state.beans.map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
   html+='<button class="lp" onclick="openBeanForm()">＋ nieuw</button>';
   el.innerHTML=html;
@@ -1628,7 +1631,7 @@ function saveBrew(){
   };
   if(editingId){const i=state.brews.findIndex(x=>x.id===editingId);state.brews[i]=b;}
   else state.brews.push(b);
-  save();toast(editingId?'✓ brew bijgewerkt':'✓ brew opgeslagen');
+  save();toast(editingId?'✓ brew updated':'✓ brew saved');
   pendingTarget=null;
   // op de achtergrond: leer van deze poging en bereken de volgende maalstand
   if(b.beanId && (b.time||b.grind)) updateDialIn(b.beanId,b.method);
@@ -1671,18 +1674,18 @@ function openDetail(id){
       <div class="stat-ratio">ratio ${ratioTxt} · score ${scoreTxt}/10</div>
       <div class="stat-grid">
         <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
-        <div class="stat"><div class="k">yield uit</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
+        <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
         <div class="stat"><div class="k">bloom</div><div class="v hand">${bloomTxt||'—'}</div></div>
-        <div class="stat"><div class="k">tijd</div><div class="v hand">${esc(b.time||'—')}</div></div>
-        <div class="stat"><div class="k">maling</div><div class="v hand">${malingVal}</div></div>
+        <div class="stat"><div class="k">time</div><div class="v hand">${esc(b.time||'—')}</div></div>
+        <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
       </div>` : `
       <div class="stat-ratio">ratio ${ratioTxt}</div>
       <div class="stat-grid">
         <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
-        <div class="stat"><div class="k">yield uit</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
-        <div class="stat"><div class="k">shot-tijd</div><div class="v hand">${esc(b.time||'—')}</div></div>
-        <div class="stat"><div class="k">maling</div><div class="v hand">${malingVal}</div></div>
+        <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
+        <div class="stat"><div class="k">shot time</div><div class="v hand">${esc(b.time||'—')}</div></div>
+        <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
         <div class="stat"><div class="k">score</div><div class="v hand">${scoreTxt}/10</div></div>
       </div>`;
@@ -1692,18 +1695,18 @@ function openDetail(id){
     ${subParts.length?'<div class="subtitle" style="text-align:center;margin:-8px 0 4px">'+subParts.join(' · ')+'</div>':''}
     <div class="hero-img"><span class="doodle steam" style="top:0;left:50%;">∿ ∿ ∿</span>${iconHTML(m,210)}</div>
     <div class="stat-card sketch" style="background:var(${m.tint});">${grid}</div>
-    ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">doel (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
-    ${advice?'<div class="notes-card sketch soft"><div class="k">maaltip'+(fam==='espresso'?'':' — gear-bewust')+'</div><div class="v">volgende keer: maling '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
-    ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'voorbereiding')+'</div>'+prepHtml+'</div>':''}
-    <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'geen notities'))}</div>
+    ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">target (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
+    ${advice?'<div class="notes-card sketch soft"><div class="k">grind tip'+(fam==='espresso'?'':' — gear-aware')+'</div><div class="v">next time: grind '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
+    ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'prep')+'</div>'+prepHtml+'</div>':''}
+    <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
       ${(b.tags&&b.tags.length)?'<div class="note-tags">'+b.tags.map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${(b.custom&&b.custom.length)?'<div style="margin-top:10px">'+b.custom.map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
     ${b.guide?customGuideHTML(b.guide):guideHTML(b.method)}
     <div class="detail-actions sketch soft">
-      <button class="act" onclick="delBrew('${id}')"><span class="ic">${ICO.del}</span>verwijder</button>
+      <button class="act" onclick="delBrew('${id}')"><span class="ic">${ICO.del}</span>delete</button>
       <button class="act primary hand" onclick="brewAgain('${id}')">brew again</button>
-      <button class="act" onclick="shareOneBrew('${id}')"><span class="ic">${ICO.send}</span>stuur</button>
-      <button class="act" onclick="shareBrew('${id}')"><span class="ic">${ICO.chat}</span>tekst</button>
+      <button class="act" onclick="shareOneBrew('${id}')"><span class="ic">${ICO.send}</span>send</button>
+      <button class="act" onclick="shareBrew('${id}')"><span class="ic">${ICO.chat}</span>text</button>
       <button class="act" onclick="printBrew('${id}')"><span class="ic"><svg viewBox="0 0 24 24" class="acic"><path d="M7 9 Q7 5 7.3 4.4 Q12 4.1 16.7 4.4 Q17 8 17 9 M5.5 9.4 Q4.2 9.2 4.4 11 Q4.2 14.5 4.6 16.4 Q6 16.6 8 16.5 M18.5 9.4 Q19.8 9.2 19.6 11 Q19.8 14.5 19.4 16.4 Q18 16.6 16 16.5 M7.4 13.5 Q12 13.1 16.6 13.5 Q16.8 17 16.7 20 Q12 20.4 7.3 20 Q7.2 17 7.4 13.5 Z"/></svg></span>PDF</button>
     </div>`;
   go('detail');
@@ -1728,8 +1731,8 @@ function guideHTML(methodId){
     </div></div>`;
 }
 function delBrew(id){
-  if(!confirm('deze brew verwijderen?'))return;
-  state.brews=state.brews.filter(x=>x.id!==id);save();toast('🗑 brew verwijderd');go('home');
+  if(!confirm('delete this brew?'))return;
+  state.brews=state.brews.filter(x=>x.id!==id);save();toast('🗑 brew deleted');go('home');
 }
 // één brew als importeerbaar bestand delen
 async function shareOneBrew(id){
@@ -1743,7 +1746,7 @@ async function shareOneBrew(id){
   const m=methodById(b.method);
   const fname=((m.name||'brew')+'-'+(b.beans||'')).replace(/[^a-z0-9]+/gi,'-').toLowerCase().replace(/^-|-$/g,'')+'.lbsbrew.json';
   const file=new File([json],fname,{type:'application/json'});
-  const tekst='Een brew uit Lets Brew Specialty — open in de app via profiel → voeg toe van vriend.';
+  const tekst='A brew from Lets Brew Specialty — open it in the app via profile → add from a friend.';
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:'Brew',text:tekst});return;}
     catch(e){if(e.name==='AbortError')return;}
@@ -1751,7 +1754,7 @@ async function shareOneBrew(id){
   const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download=fname;a.click();
   URL.revokeObjectURL(url);
-  toast('bestand opgeslagen — stuur het door');
+  toast('file saved — send it on');
 }
 // brew-bestand van iemand anders importeren (samenvoegen, niet vervangen)
 function importBrewsFile(ev){
@@ -1763,7 +1766,7 @@ function importBrewsFile(ev){
       const inkomend = d.type==='lbs-brews'&&Array.isArray(d.brews) ? d.brews
                      : Array.isArray(d.brews) ? d.brews : null;
       if(!inkomend)throw new Error('geen brews');
-      if(!inkomend.length){toast('geen brews in bestand');ev.target.value='';return;}
+      if(!inkomend.length){toast('no brews in file');ev.target.value='';return;}
       let toegevoegd=0;
       inkomend.forEach(nb=>{
         if(!nb||!nb.method)return;
@@ -1774,9 +1777,9 @@ function importBrewsFile(ev){
         state.brews.push(kopie);toegevoegd++;
       });
       save();
-      toast('✓ '+toegevoegd+' brew'+(toegevoegd===1?'':'s')+' toegevoegd');
+      toast('✓ '+toegevoegd+' brew'+(toegevoegd===1?'':'s')+' added');
       go('brews');
-    }catch(e){toast('kon bestand niet lezen');}
+    }catch(e){toast('couldn\'t read the file');}
     ev.target.value='';
   };
   r.readAsText(file);
@@ -1786,7 +1789,7 @@ function shareBrew(id){
   const txt=`${m.name} · ${b.beans||''}\n`+
     `ratio ${b.ratio?'1:'+(+b.ratio).toFixed(1):'-'} · dose ${b.dose||'-'}g · yield ${b.yield||'-'}g\n`+
     `time ${b.time||'-'} · ${b.temp||'-'}°C · score ${(+b.score).toFixed(1)}/10\n`+
-    `${b.notes||''}\n\nGemaakt met Lets Brew Specialty — probeer 'm zelf:`;
+    `${b.notes||''}\n\nMade with Lets Brew Specialty — try it yourself:`;
   const appUrl=location.origin+location.pathname;
   // native deelvenster (deelt tekst + link naar de web-app)
   if(navigator.share){
@@ -1799,7 +1802,7 @@ function shareBrew(id){
 // hele app / bonenlijst delen
 function shareApp(){
   const appUrl=location.origin+location.pathname;
-  const txt='Check mijn koffie-app Lets Brew Specialty ☕ — brews bijhouden, bonen, smaken scoren:';
+  const txt='Check out my coffee app Lets Brew Specialty ☕ — track brews, beans, score flavours:';
   if(navigator.share){
     navigator.share({title:'Lets Brew Specialty',text:txt,url:appUrl}).catch(()=>{});
   }else{
@@ -1808,24 +1811,24 @@ function shareApp(){
 }
 function shareBeans(){
   const inHuis=state.beans.filter(b=>b.inStock!==false);
-  let lijst=inHuis.map(b=>'• '+b.name+(b.roaster?' ('+b.roaster+')':'')).join('\n')||'(nog geen bonen in huis)';
+  let lijst=inHuis.map(b=>'• '+b.name+(b.roaster?' ('+b.roaster+')':'')).join('\n')||'(no beans in stock yet)';
   const appUrl=location.origin+location.pathname;
-  const txt='Mijn bonenkast in Lets Brew Specialty ☕\n\n'+lijst+'\n\nProbeer de app zelf:';
+  const txt='My bean shelf in Lets Brew Specialty ☕\n\n'+lijst+'\n\nTry the app yourself:';
   if(navigator.share){
-    navigator.share({title:'Mijn bonenkast',text:txt,url:appUrl}).catch(()=>{});
+    navigator.share({title:'My bean shelf',text:txt,url:appUrl}).catch(()=>{});
   }else{
     window.open('https://wa.me/?text='+encodeURIComponent(txt+'\n'+appUrl),'_blank');
   }
 }
 // bonen als importeerbaar bestand delen (generiek: 1 of meer bonen)
 async function shareBeansList(beans,titel){
-  if(!beans.length){toast('niets om te delen');return;}
+  if(!beans.length){toast('nothing to share');return;}
   const pakket={type:'lbs-beans',v:1,from:'',beans:beans};
   const json=JSON.stringify(pakket,null,2);
-  const naam=beans.length===1?beans[0].name:'bonen';
+  const naam=beans.length===1?beans[0].name:'beans';
   const fname=naam.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.lbsbeans.json';
   const file=new File([json],fname,{type:'application/json'});
-  const tekst=(beans.length===1?'Koffieboon':'Koffiebonen')+' uit Lets Brew Specialty — open in de app via profiel → voeg toe van vriend.';
+  const tekst=(beans.length===1?'A coffee bean':'Coffee beans')+' from Lets Brew Specialty — open in the app via profile → add from a friend.';
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:titel||'Bonen',text:tekst});return;}
     catch(e){if(e.name==='AbortError')return;}
@@ -1833,7 +1836,7 @@ async function shareBeansList(beans,titel){
   const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download=fname;a.click();
   URL.revokeObjectURL(url);
-  toast('bestand opgeslagen — stuur het door');
+  toast('file saved — send it on');
 }
 function shareOneBean(id){
   const b=state.beans.find(x=>x.id===id);if(!b)return;
@@ -1850,7 +1853,7 @@ function importBeansFile(ev){
       const inkomend = d.type==='lbs-beans'&&Array.isArray(d.beans) ? d.beans
                      : Array.isArray(d.beans) ? d.beans : null;
       if(!inkomend)throw new Error('geen bonen');
-      if(!inkomend.length){toast('geen bonen in bestand');ev.target.value='';return;}
+      if(!inkomend.length){toast('no beans in file');ev.target.value='';return;}
       let toegevoegd=0, overgeslagen=0;
       inkomend.forEach(nb=>{
         if(!nb||!nb.name)return;
@@ -1865,11 +1868,11 @@ function importBeansFile(ev){
         state.beans.push(kopie);toegevoegd++;
       });
       save();renderBeans();
-      let msg='✓ '+toegevoegd+' boon'+(toegevoegd===1?'':'en')+' toegevoegd';
-      if(overgeslagen)msg+=' · '+overgeslagen+' al aanwezig';
+      let msg='✓ '+toegevoegd+' bean'+(toegevoegd===1?'':'s')+' added';
+      if(overgeslagen)msg+=' · '+overgeslagen+' already present';
       toast(msg);
       go('beans');
-    }catch(e){toast('kon bestand niet lezen');}
+    }catch(e){toast('couldn\'t read the file');}
     ev.target.value='';
   };
   r.readAsText(file);
@@ -1910,16 +1913,16 @@ function importFriend(ev){
         delete kopie.bean;
         state.brews.push(kopie);addedBrews++;
       });
-      if(!addedBrews&&!addedBeans&&!skippedBeans){toast('geen brews of bonen in dit bestand');ev.target.value='';return;}
+      if(!addedBrews&&!addedBeans&&!skippedBeans){toast('no brews or beans in this file');ev.target.value='';return;}
       save();
       const parts=[];
       if(addedBrews)parts.push(addedBrews+' brew'+(addedBrews===1?'':'s'));
-      if(addedBeans)parts.push(addedBeans+' boon'+(addedBeans===1?'':'en'));
-      let msg='✓ '+(parts.join(' + ')||'niets nieuws')+' toegevoegd';
-      if(skippedBeans)msg+=' · '+skippedBeans+' boon al aanwezig';
+      if(addedBeans)parts.push(addedBeans+' bean'+(addedBeans===1?'':'s'));
+      let msg='✓ '+(parts.join(' + ')||'nothing new')+' added';
+      if(skippedBeans)msg+=' · '+skippedBeans+' bean'+(skippedBeans===1?'':'s')+' already present';
       toast(msg);
       go(addedBrews?'brews':'beans');
-    }catch(e){toast('kon bestand niet lezen');}
+    }catch(e){toast('couldn\'t read the file');}
     ev.target.value='';
   };
   r.readAsText(file);
@@ -1931,25 +1934,25 @@ function brewSheetHTML(b){
   const m=methodById(b.method);
   const bean=b.beanId?beanById(b.beanId):null;
   const titel=(b.title&&b.title.trim())?b.title:(m?m.name:'brew');
-  const datum=b.ts?new Date(b.ts).toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'}):'';
+  const datum=b.ts?new Date(b.ts).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'';
   const metaBits=[m?m.name:'',bean?bean.name:'',datum].filter(Boolean).map(pesc).join(' · ');
   const rows=[
     ['ratio',b.ratio?'1:'+(+b.ratio).toFixed(1):null],
     ['dose',b.dose?b.dose+' g':null],
     ['yield',b.yield?b.yield+' g':null],
     ['bloom',b.bloom?[b.bloom.g?b.bloom.g+' g':'',b.bloom.s?b.bloom.s+' s':''].filter(Boolean).join(' · '):null],
-    ['tijd',b.time||null],
+    ['time',b.time||null],
     ['temp',b.temp?b.temp+' °C':null],
-    ['maling',b.grind||null],
-    ['doel',(b.target&&fmtShot(b.target))?fmtShot(b.target):null],
+    ['grind',b.grind||null],
+    ['target',(b.target&&fmtShot(b.target))?fmtShot(b.target):null],
     ['score',(b.score!=null&&b.score!=='')?(+b.score).toFixed(1)+'/10':null]
   ].filter(r=>r[1]).map(r=>'<b>'+pesc(r[0])+':</b> '+pesc(r[1])).join(' &nbsp; ');
   let guideTxt='';
   if(b.guide){guideTxt=b.guide;}
   else{const g=guideFor(b.method);if(g){guideTxt='recept: '+g.recept+'\nmaling: '+g.grind+'\n'+g.steps.map((s,i)=>(i+1)+'. '+s).join('\n');}}
-  const tags=(b.tags&&b.tags.length)?('smaak: '+b.tags.join(', ')):'';
+  const tags=(b.tags&&b.tags.length)?('taste: '+b.tags.join(', ')):'';
   return `<div class="p-brew">
-    <div class="p-bt">${pesc(titel)}</div>
+    <div class="p-bt"><span class="p-ic">${iconHTML(m,34)}</span>${pesc(titel)}</div>
     <div class="p-meta">${metaBits||''}</div>
     <div class="p-grid">${rows||'—'}</div>
     ${b.notes?'<div class="p-notes">'+pesc(b.notes)+'</div>':''}
@@ -1967,14 +1970,14 @@ function runPrint(html){
 function printBrew(id){
   const b=state.brews.find(x=>x.id===id);if(!b)return;
   const html='<div class="p-h1">'+pesc((b.title&&b.title.trim())?b.title:(methodById(b.method)?.name||'brew'))+'</div>'+
-    '<div class="p-sub">lets brew specialty — brew-recept</div>'+brewSheetHTML(b);
+    '<div class="p-sub">lets brew specialty — brew recipe</div>'+brewSheetHTML(b);
   runPrint(html);
 }
 function printLogbook(){
-  if(!state.brews.length){toast('nog geen brews om te bewaren');return;}
+  if(!state.brews.length){toast('no brews to save yet');return;}
   const brews=[...state.brews].sort((a,b)=>(b.ts||0)-(a.ts||0));
   const html='<div class="p-h1">mijn brew-logboek</div>'+
-    '<div class="p-sub">lets brew specialty · '+brews.length+' brews · '+state.beans.length+' bonen · '+
+    '<div class="p-sub">lets brew specialty · '+brews.length+' brews · '+state.beans.length+' beans · '+
     new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'})+'</div>'+
     brews.map(brewSheetHTML).join('');
   runPrint(html);
@@ -1990,16 +1993,16 @@ function renderMethods(){
       <div style="flex:1">
         <div class="mm-name hand">${esc(m.name)}</div>
         <div style="font-size:14px;color:var(--ink-soft)">
-          ${cnt>0?`<a class="bean-link" onclick="showMethodBrews('${m.id}')">${cnt} brew${cnt===1?'':'s'} →</a>`:'nog geen brews'}
-          · <a class="bean-link" onclick="openImgPicker('${m.id}')">tekening</a>
+          ${cnt>0?`<a class="bean-link" onclick="showMethodBrews('${m.id}')">${cnt} brew${cnt===1?'':'s'} →</a>`:'no brews yet'}
+          · <a class="bean-link" onclick="openImgPicker('${m.id}')">drawing</a>
         </div>
-        <div style="font-size:14px;color:var(--ink-soft);margin-top:2px">familie: <a class="bean-link" onclick="toggleMethodFamily('${m.id}')">${methodFamily(m)} ⇄</a></div>
+        <div style="font-size:14px;color:var(--ink-soft);margin-top:2px">family: <a class="bean-link" onclick="toggleMethodFamily('${m.id}')">${methodFamily(m)} ⇄</a></div>
         <input type="file" id="mm-edit-img-${m.id}" accept="image/*" style="display:none" onchange="replaceMethodImg('${m.id}',event)">
       </div>
       <div class="toggle ${m.on?'on':''}" onclick="toggleMethod('${m.id}')"><div class="knob"></div></div>
     </div>`;}).join('');
 }
-function toggleMethod(id){const m=state.methods.find(x=>x.id===id);m.on=!m.on;save();renderMethods();toast(m.on?'✓ '+m.name+' aan':'○ '+m.name+' uit');}
+function toggleMethod(id){const m=state.methods.find(x=>x.id===id);m.on=!m.on;save();renderMethods();toast(m.on?'✓ '+m.name+' on':'○ '+m.name+' off');}
 function toggleMethodFamily(id){
   const m=state.methods.find(x=>x.id===id);if(!m)return;
   m.family=(methodFamily(m)==='espresso')?'filter':'espresso';
@@ -2016,21 +2019,21 @@ function openImgPicker(id){
   grid.innerHTML=lib.map(o=>
     `<div class="img-opt ${cur===o.src?'sel':''}" onclick="chooseLibImg('${o.src}')">
       <img src="${o.src}"><span class="lbl">${esc(o.label)}</span></div>`
-  ).join('')||'<div style="grid-column:1/3;color:var(--ink-soft);font-size:16px">geen ingebouwde tekeningen — upload je eigen.</div>';
+  ).join('')||'<div style="grid-column:1/3;color:var(--ink-soft);font-size:16px">no built-in drawings — upload your own.</div>';
   document.getElementById('img-picker').classList.remove('hidden');
 }
 function closeImgPicker(){document.getElementById('img-picker').classList.add('hidden');imgPickerMethod=null;}
 function chooseLibImg(src){
   const m=state.methods.find(x=>x.id===imgPickerMethod);if(!m)return;
   m.img=src;delete m.customImg;  // ingebouwde tekening, eigen upload weg
-  save();renderMethods();closeImgPicker();toast('✓ tekening gekozen');
+  save();renderMethods();closeImgPicker();toast('✓ drawing chosen');
 }
 async function pickerUpload(ev){
   const f=ev.target.files&&ev.target.files[0];if(!f||!imgPickerMethod)return;
   try{const d=await fileToDataURL(f,500);
     const m=state.methods.find(x=>x.id===imgPickerMethod);m.customImg=d;
-    save();renderMethods();closeImgPicker();toast('✓ eigen tekening ingesteld');
-  }catch(e){toast('kon afbeelding niet laden');}
+    save();renderMethods();closeImgPicker();toast('✓ your drawing set');
+  }catch(e){toast('couldn\'t load image');}
   ev.target.value='';
 }
 function showMethodBrews(id){ filterMethod=id; go('brews'); }
@@ -2093,15 +2096,15 @@ async function pickMethodImg(ev){
   const f=ev.target.files&&ev.target.files[0];if(!f)return;
   try{mmNewImg=await fileToDataURL(f,500);
     document.getElementById('mm-img-preview').innerHTML='<img src="'+mmNewImg+'" style="max-height:80px;mix-blend-mode:multiply">';
-    document.getElementById('mm-img-label').textContent='tekening gekozen ✓';
-  }catch(e){toast('kon afbeelding niet laden');}
+    document.getElementById('mm-img-label').textContent='drawing chosen ✓';
+  }catch(e){toast('couldn\'t load image');}
   ev.target.value='';
 }
 async function replaceMethodImg(id,ev){
   const f=ev.target.files&&ev.target.files[0];if(!f)return;
   try{const d=await fileToDataURL(f,500);
-    const m=state.methods.find(x=>x.id===id);m.customImg=d;save();renderMethods();toast('✓ tekening bijgewerkt');
-  }catch(e){toast('kon afbeelding niet laden');}
+    const m=state.methods.find(x=>x.id===id);m.customImg=d;save();renderMethods();toast('✓ drawing updated');
+  }catch(e){toast('couldn\'t load image');}
   ev.target.value='';
 }
 let mmFamily='filter';
@@ -2113,7 +2116,7 @@ function pickFamily(f){
 }
 function addMethod(){
   const name=document.getElementById('mm-new').value.trim();
-  if(!name){toast('geef een naam op');return;}
+  if(!name){toast('enter a name');return;}
   const id=name.toLowerCase().replace(/[^a-z0-9]/g,'')+'_'+uid().slice(0,3);
   const tint=TINTS[state.methods.length%TINTS.length];
   const m={id,name:name.toLowerCase(),glyph:'☕',tint,on:true,family:mmFamily};
@@ -2121,8 +2124,8 @@ function addMethod(){
   state.methods.push(m);
   document.getElementById('mm-new').value='';mmNewImg=null;mmFamily='filter';pickFamily('filter');
   document.getElementById('mm-img-preview').innerHTML='';
-  document.getElementById('mm-img-label').textContent='tekening toevoegen (optioneel)';
-  save();renderMethods();toast('✓ methode toegevoegd');
+  document.getElementById('mm-img-label').textContent='add a drawing (optional)';
+  save();renderMethods();toast('✓ method added');
 }
 
 /* ---------------- beans ---------------- */
@@ -2137,11 +2140,11 @@ function beanFreshness(b){
   const days=Math.floor((Date.now()-d.getTime())/86400000);
   if(days<0)return null;
   let label;
-  if(days===0)label='vandaag gebrand — laat rusten';
-  else if(days<=3)label=days+' dagen — rust nog';
-  else if(days<=21)label=days+' dagen vers';
-  else if(days<=35)label=days+' dagen — over piek';
-  else label=days+' dagen — over de top';
+  if(days===0)label='roasted today — let it rest';
+  else if(days<=3)label=days+' days — still resting';
+  else if(days<=21)label=days+' days fresh';
+  else if(days<=35)label=days+' days — past peak';
+  else label=days+' days — over the hill';
   return {days,label};
 }
 // start een brew met deze boon (respecteert espresso -> dial-in, filter -> formulier)
@@ -2163,35 +2166,35 @@ function beanCardHTML(b){
   if(!expanded){
     const bits=[];
     if(m)bits.push('<span class="bean-mic">'+iconHTML(m,18)+'</span> '+esc(m.name));
-    bits.push(inStock?'✓ in huis':'○ op');
+    bits.push(inStock?'✓ in stock':'○ empty');
     if(fresh)bits.push('<span class="fresh">'+fresh.label+'</span>');
     return `<div class="bean-card sketch soft collapsed" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
       <div class="brow"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▸</span></div>
       <div class="bean-meta">${bits.join(' <span class="dot">·</span> ')}</div>
     </div>`;
   }
-  const methodLine=mList.length?('<br>methode'+(mList.length>1?'s':'')+': '+mList.map(x=>'<span class="bean-method"><span class="bean-method-ic">'+iconHTML(x,18)+'</span>'+esc(x.name)+'</span>').join(' ')):'';
+  const methodLine=mList.length?('<br>method'+(mList.length>1?'s':'')+': '+mList.map(x=>'<span class="bean-method"><span class="bean-method-ic">'+iconHTML(x,18)+'</span>'+esc(x.name)+'</span>').join(' ')):'';
   return `<div class="bean-card sketch soft" style="background:${tint};${inStock?'':'opacity:.7'}">
     <div class="brow">
       <div class="bean-head" onclick="toggleBeanCard('${b.id}')"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▾</span></div>
       <div class="brow-btns">
-        <button class="icon-btn" title="stuur deze boon" onclick="shareOneBean('${b.id}')">${ICO.send}</button>
-        <button class="icon-btn" title="bewerken" onclick="editBean('${b.id}')">${ICO.edit}</button>
-        <button class="icon-btn" title="verwijderen" onclick="delBean('${b.id}')">${ICO.del}</button>
+        <button class="icon-btn" title="send this bean" onclick="shareOneBean('${b.id}')">${ICO.send}</button>
+        <button class="icon-btn" title="edit" onclick="editBean('${b.id}')">${ICO.edit}</button>
+        <button class="icon-btn" title="delete" onclick="delBean('${b.id}')">${ICO.del}</button>
       </div></div>
     ${b.photo?'<img src="'+b.photo+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:14px;border:2px solid var(--line);margin:6px 0">':''}
     <div class="bm">${[b.roaster,b.origin,b.process,b.variety].filter(Boolean).map(esc).join(' · ')||'—'}
-      ${b.altitude?'<br>hoogte: '+esc(b.altitude)+' m':''}
+      ${b.altitude?'<br>altitude: '+esc(b.altitude)+' m':''}
       ${b.roastdate?'<br>roast: '+esc(b.roastdate)+(fresh?' · '+esc(fresh.label):''):''}
-      ${b.roasternotes?'<br>brander: '+esc(b.roasternotes):''}
+      ${b.roasternotes?'<br>roaster: '+esc(b.roasternotes):''}
       ${methodLine}
       ${b.notes?'<br>'+esc(b.notes):''}
-      ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">bekijk online</a>':''}
-      <br>${cnt} brew${cnt===1?'':'s'} gekoppeld</div>
+      ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">view online</a>':''}
+      <br>${cnt} brew${cnt===1?'':'s'} linked</div>
     <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
-      ${inStock?'✓ in huis':'○ op — niet meer in huis'}</button>
-    <div style="margin-top:10px"><button class="lp sel" onclick="brewBean('${b.id}')">brew deze boon →</button></div>
-    <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" onclick="aiRecipe('${b.id}')"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> vraag AI om een brew-recept</button>
+      ${inStock?'✓ in stock':'○ empty — no longer in stock'}</button>
+    <div style="margin-top:10px"><button class="lp sel" onclick="brewBean('${b.id}')">brew this bean →</button></div>
+    <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" onclick="aiRecipe('${b.id}')"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/><path d="M18.5 4 Q18.8 5.4 19 6 Q19.7 6.3 21 6.6 Q19.7 7 19 7.2 Q18.7 8 18.5 9.2 Q18.2 8 18 7.2 Q17.2 6.9 16 6.6 Q17.3 6.2 18 6 Q18.3 5.2 18.5 4 Z" opacity="0.7"/></svg> ask AI for a brew recipe</button>
     <div id="recipe-${b.id}"></div>
   </div>`;
 }
@@ -2200,14 +2203,14 @@ function renderBeans(){
   const inBeans=state.beans.filter(b=>b.inStock!==false);
   const outBeans=state.beans.filter(b=>b.inStock===false);
   const sub=document.getElementById('beans-sub');
-  if(sub)sub.textContent=state.beans.length?('je bonenkast · in huis ('+inBeans.length+')'):'je bonenkast — gekoppeld aan je brews.';
-  if(!state.beans.length){el.innerHTML='<div class="empty-note">nog geen bonen.<br>tik op ＋ add om je eerste boon toe te voegen.</div>';return;}
+  if(sub)sub.textContent=state.beans.length?('your bean shelf · in stock ('+inBeans.length+')'):'your bean shelf — linked to your brews.';
+  if(!state.beans.length){el.innerHTML='<div class="empty-note">no beans yet.<br>tap ＋ add to add your first bean.</div>';return;}
   let html='';
-  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">geen bonen in huis.<br>tik op ＋ add of kijk in je extra kast.</div>';
+  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap ＋ add or check your empty bags.</div>';
   if(outBeans.length){
-    html+=`<button class="extra-kast" onclick="toggleExtraKast()"><svg viewBox="0 0 24 24" class="acic"><path d="M6.6 8.4 Q6.4 6.9 7.9 6.7 Q12 6.4 16.1 6.7 Q17.6 6.9 17.4 8.4 L16.7 19 Q12 19.5 7.3 19 Z"/><path d="M7.9 6.7 Q7.3 5.4 7.6 4.4 Q12 4.1 16.4 4.4 Q16.7 5.4 16.1 6.7" opacity="0.85"/><path d="M8.6 12 Q12 11.7 15.4 12" opacity="0.4"/></svg> lege bonen zak · ${outBeans.length} ${outBeans.length===1?'boon':'bonen'} "op" ${extraKastOpen?'▾':'▸'}</button>`;
+    html+=`<button class="extra-kast" onclick="toggleExtraKast()"><svg viewBox="0 0 24 24" class="acic"><path d="M6.6 8.4 Q6.4 6.9 7.9 6.7 Q12 6.4 16.1 6.7 Q17.6 6.9 17.4 8.4 L16.7 19 Q12 19.5 7.3 19 Z"/><path d="M7.9 6.7 Q7.3 5.4 7.6 4.4 Q12 4.1 16.4 4.4 Q16.7 5.4 16.1 6.7" opacity="0.85"/><path d="M8.6 12 Q12 11.7 15.4 12" opacity="0.4"/></svg> empty bags · ${outBeans.length} bean${outBeans.length===1?'':'s'} finished ${extraKastOpen?'▾':'▸'}</button>`;
     if(extraKastOpen){
-      html+='<div class="kast-head">niet meer in huis — tik ✓ in huis om terug te zetten</div>';
+      html+='<div class="kast-head">no longer in stock — tap ✓ in stock to put it back</div>';
       html+=outBeans.map(beanCardHTML).join('');
     }
   }
@@ -2218,7 +2221,7 @@ function toggleStock(id){
   const nowIn=(b.inStock!==false);      // huidige status (undefined = in huis)
   b.inStock=!nowIn;                       // omdraaien
   save();renderBeans();
-  toast(b.inStock?'✓ weer in huis':'○ gemarkeerd als op');
+  toast(b.inStock?'✓ back in stock':'○ marked as empty');
 }
 let editingBean=null;
 function openBeanForm(){
@@ -2233,7 +2236,7 @@ function openBeanForm(){
 function editBean(id){
   const b=state.beans.find(x=>x.id===id);if(!b)return;
   editingBean=id;
-  document.getElementById('beanform-title').textContent='boon bewerken';
+  document.getElementById('beanform-title').textContent='edit bean';
   const set=(f,v)=>{const el=document.getElementById(f);if(el)el.value=v||'';};
   set('b-name',b.name);set('b-roaster',b.roaster);set('b-origin',b.origin);
   set('b-process',b.process);set('b-variety',b.variety);set('b-altitude',b.altitude);
@@ -2251,7 +2254,7 @@ let beanFormMethods=[];
 function renderBeanFormMethods(){
   document.getElementById('beanform-methods').innerHTML=
     state.methods.filter(m=>m.on).map(m=>'<button class="lp '+(beanFormMethods.includes(m.id)?'sel':'')+'" onclick="toggleBeanMethod(\''+m.id+'\')"><span class="mp-ic">'+iconHTML(m,26)+'</span> '+esc(m.name)+'</button>').join('')
-    || '<span class="subtitle">geen methodes aan — zet ze aan bij methods.</span>';
+    || '<span class="subtitle">no methods on — turn them on under methods.</span>';
 }
 function toggleBeanMethod(id){
   if(beanFormMethods.includes(id))beanFormMethods=beanFormMethods.filter(x=>x!==id);
@@ -2260,7 +2263,7 @@ function toggleBeanMethod(id){
 }
 function saveBean(){
   const name=document.getElementById('b-name').value.trim();
-  if(!name){toast('geef de boon een naam');return;}
+  if(!name){toast('give the bean a name');return;}
   const data={name,
     roaster:document.getElementById('b-roaster').value.trim(),
     origin:document.getElementById('b-origin').value.trim(),
@@ -2276,18 +2279,18 @@ function saveBean(){
   if(editingBean){
     const ex=state.beans.find(b=>b.id===editingBean);
     if(ex){Object.assign(ex,data);if(beanPhoto)ex.photo=beanPhoto;}
-    toast('✓ boon bijgewerkt');
+    toast('✓ bean updated');
   }else{
     data.id=uid();data.photo=beanPhoto||null;data.inStock=true;
-    state.beans.push(data);toast('✓ boon opgeslagen');
+    state.beans.push(data);toast('✓ bean saved');
   }
   save();beanPhoto=null;go('beans');
 }
 function delBean(id){
-  if(!confirm('deze boon verwijderen?'))return;
+  if(!confirm('delete this bean?'))return;
   state.beans=state.beans.filter(b=>b.id!==id);
   state.brews.forEach(b=>{if(b.beanId===id){b.beanId=null;}});
-  save();renderBeans();toast('🗑 boon verwijderd');
+  save();renderBeans();toast('🗑 bean deleted');
 }
 
 /* ---------------- AI: etiket scannen ---------------- */
@@ -2356,7 +2359,7 @@ function domainOf(url){
 function fillSearchLink(){
   const g=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   const naam=g('b-name'),roaster=g('b-roaster'),huidigeUrl=g('b-url');
-  if(!naam&&!roaster){toast('vul eerst naam of brander in');return;}
+  if(!naam&&!roaster){toast('enter a name or roaster first');return;}
   // domein uit een al ingevulde (brander-)link halen, mits geen zoeklink
   let domein='';
   if(huidigeUrl && !/google\.[a-z.]+\/search/i.test(huidigeUrl)){
@@ -2370,7 +2373,7 @@ function fillSearchLink(){
     q=(roaster+' '+naam+' coffee').trim();
   }
   document.getElementById('b-url').value='https://www.google.com/search?q='+encodeURIComponent(q);
-  toast(domein?'✓ link naar '+domein:'✓ zoeklink ingevuld');
+  toast(domein?'✓ link to '+domein:'✓ search link filled in');
 }
 let beanPhoto=null;
 async function scanLabel(ev){
@@ -2383,11 +2386,11 @@ async function scanLabel(ev){
   }catch(e){}
   // 2) als AI uit staat of geen sleutel: stop hier, foto is bewaard
   if(!aiEnabled()||!getKey()){
-    status.textContent='foto bewaard. zet AI aan in profiel om het etiket automatisch te laten uitlezen.';
+    status.textContent='photo saved. turn on AI in profile to read the label automatically.';
     ev.target.value='';return;
   }
   // 3) AI aan: etiket uitlezen
-  status.innerHTML='<span class="spin"></span>etiket lezen…';
+  status.innerHTML='<span class="spin"></span>reading label…';
   try{
     const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
     const media=file.type||'image/jpeg';
@@ -2415,10 +2418,10 @@ async function scanLabel(ev){
       const q=encodeURIComponent((d.roaster+' '+(d.name||'')+' coffee').trim());
       setText('b-url','https://www.google.com/search?q='+q);
     }
-    status.innerHTML='✓ ingevuld — controleer en pas aan waar nodig';
+    status.innerHTML='✓ filled in — check and adjust where needed';
     document.getElementById('enrich-row').style.display='block';
   }catch(e){
-    status.textContent='kon het etiket niet automatisch lezen — vul handmatig in (de foto is bewaard)';
+    status.textContent='couldn\'t read the label automatically — fill in manually (the photo is saved)';
   }
   ev.target.value='';
 }
@@ -2427,8 +2430,8 @@ async function enrichBean(){
   const status=document.getElementById('scan-status');
   const get=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   const name=get('b-name'),roaster=get('b-roaster'),origin=get('b-origin'),url=get('b-url');
-  if(!name&&!roaster){toast('vul eerst minstens naam of roaster in');return;}
-  status.innerHTML='<span class="spin"></span>extra info zoeken…';
+  if(!name&&!roaster){toast('enter at least a name or roaster first');return;}
+  status.innerHTML='<span class="spin"></span>finding extra info…';
   try{
     const known=`naam: ${name||'?'}; roaster: ${roaster||'?'}; origin: ${origin||'?'}; website: ${url||'?'}; proces: ${get('b-process')||'?'}; variëteit: ${get('b-variety')||'?'}; hoogte: ${get('b-altitude')||'?'}`;
     const prompt=`Je bent een specialty-koffie expert. Voor deze specifieke boon van deze roaster, vul de ontbrekende informatie zo volledig mogelijk aan op basis van wat algemeen bekend is over deze boon, roaster en herkomst. Verzin niets: laat een veld leeg als je het echt niet weet. Bekend:\n${known}\nGeef ALLEEN JSON terug zonder markdown: {"origin":"","process":"","variety":"","altitude":"","roasternotes":"","notes":""}. roasternotes = smaakprofiel (komma-gescheiden). notes = korte extra omschrijving (max 2 zinnen) over deze boon/herkomst. Vul alleen velden in waar je iets aan toevoegt.`;
@@ -2441,9 +2444,9 @@ async function enrichBean(){
     if(d.altitude&&!get('b-altitude'))setText('b-altitude',d.altitude);
     if(d.roasternotes)setText('b-roasternotes',d.roasternotes);
     if(d.notes)setText('b-notes',d.notes);
-    status.textContent='✓ aangevuld — controleer alles even';
+    status.textContent='✓ enriched — please check everything';
   }catch(e){
-    status.textContent='kon geen extra info ophalen (werkt alleen in Claude met AI aan)';
+    status.textContent='couldn\'t fetch extra info (only works in Claude with AI on)';
   }
 }
 
@@ -2452,7 +2455,7 @@ async function aiRecipe(beanId,methodId){
   const bean=beanById(beanId);if(!bean)return;
   const m=methodById(methodId||bean.method||'v60');
   const box=document.getElementById('recipe-'+beanId);
-  if(box)box.innerHTML='<div class="recipe-card sketch soft"><span class="spin"></span>recept bedenken voor '+esc(m.name)+'…</div>';
+  if(box)box.innerHTML='<div class="recipe-card sketch soft"><span class="spin"></span>thinking up a recipe for '+esc(m.name)+'…</div>';
   try{
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
     const espM=methodFamily(m)==='espresso';
@@ -2469,11 +2472,11 @@ async function aiRecipe(beanId,methodId){
     if(d.steps&&d.steps.length){html+='<div class="rk">stappen</div>';d.steps.forEach((st,i)=>html+='<div class="rstep">'+(i+1)+'. '+esc(st)+'</div>');}
     if(d.tip)html+='<div class="rk">tip</div><div class="rstep">'+esc(d.tip)+'</div>';
     window._lastRecipe=window._lastRecipe||{};window._lastRecipe[beanId]={d,methodId:m.id};
-    html+='<button class="recipe-btn" onclick="useRecipe(\''+beanId+'\')">＋ gebruik als nieuwe brew</button>';
+    html+='<button class="recipe-btn" onclick="useRecipe(\''+beanId+'\')">＋ use as new brew</button>';
     html+='</div>';
     if(box)box.innerHTML=html;
   }catch(e){
-    if(box)box.innerHTML='<div class="recipe-card sketch soft">kon geen recept maken — dit werkt alleen als artifact in Claude.</div>';
+    if(box)box.innerHTML='<div class="recipe-card sketch soft">couldn\'t make a recipe — this only works as an artifact in Claude.</div>';
   }
 }
 function useRecipe(beanId){
@@ -2492,7 +2495,7 @@ function useRecipe(beanId){
   if(esp){
     beginBrew(r.methodId);pendingTarget={dose:numOf(d.dose),grind:gShort,time:cleanTime(d.time),yield:numOf(d.yield)};
     formBean=beanId;pendingRecipe={guide,drink,title:(d.title||'').trim()};
-    setTimeout(()=>{setVal('di-dose',numOf(d.dose));setVal('di-yield',numOf(d.yield));renderDialIn();toast('✓ '+(drink||'espresso')+' — meet je shot & sla op');},30);
+    setTimeout(()=>{setVal('di-dose',numOf(d.dose));setVal('di-yield',numOf(d.yield));renderDialIn();toast('✓ '+(drink||'espresso')+' — measure your shot & save');},30);
     return;
   }
   openForm(r.methodId);setTimeout(()=>{
@@ -2505,7 +2508,7 @@ function useRecipe(beanId){
     renderDialInHint();
     const g=document.getElementById('f-guide');
     if(g&&guide){g.value=guide;autoGrow(g);}
-    toast('✓ recept overgenomen');
+    toast('✓ recipe applied');
   },30);
 }
 
@@ -2555,7 +2558,7 @@ function lessonBlock(elId,bi){return (LESSONS[LESSON_MAP[elId]]||[])[bi];}
 function learnMoreKey(elId,bi){return 'scc_learn_more_'+elId+'_'+bi;}
 function renderLearnMore(elId,bi){
   const arr=JSON.parse(localStorage.getItem(learnMoreKey(elId,bi))||'[]');
-  return arr.map((item,i)=>`<div class="lm-item"><button class="lm-del" title="verwijder" onclick="learnMoreDel('${elId}',${bi},${i})">×</button><div class="lm-q hand">${esc(item.q)}</div><div class="lm-a">${esc(item.a).replace(/\n/g,'<br>')}</div></div>`).join('');
+  return arr.map((item,i)=>`<div class="lm-item"><button class="lm-del" title="delete" onclick="learnMoreDel('${elId}',${bi},${i})">×</button><div class="lm-q hand">${esc(item.q)}</div><div class="lm-a">${esc(item.a).replace(/\n/g,'<br>')}</div></div>`).join('');
 }
 const AISPARK='<svg viewBox="0 0 24 24" class="acic"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/></svg>';
 function renderLesson(elId,blocks){
@@ -2568,7 +2571,7 @@ function renderLesson(elId,blocks){
         <div class="lm-wrap ai-only ${aiReady()?'':'hidden'}">
           <button class="lm-btn" onclick="learnMoreToggle('${key}')">${AISPARK} leer meer</button>
           <div class="lm-panel hidden" id="lm-panel-${key}">
-            <input id="lm-input-${key}" placeholder="stel je eigen vraag hierover…" onkeydown="if(event.key==='Enter')learnMoreAsk('${elId}',${bi},false)">
+            <input id="lm-input-${key}" placeholder="ask your own question about this…" onkeydown="if(event.key==='Enter')learnMoreAsk('${elId}',${bi},false)">
             <div class="lm-actions">
               <button class="lm-go primary" onclick="learnMoreAsk('${elId}',${bi},true)">verdiep dit</button>
               <button class="lm-go" onclick="learnMoreAsk('${elId}',${bi},false)">vraag</button>
@@ -2590,7 +2593,7 @@ function renderLesson(elId,blocks){
 }
 function learnToDialIn(){
   const esp=state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0];
-  if(esp)beginBrew(esp.id); else toast('zet eerst een espresso-methode aan bij methods');
+  if(esp)beginBrew(esp.id); else toast('turn on an espresso method first under methods');
 }
 function learnMoreToggle(key){
   const p=document.getElementById('lm-panel-'+key);if(!p)return;
@@ -2602,10 +2605,10 @@ async function learnMoreAsk(elId,bi,deepen){
   const key=elId+'_'+bi;
   const inputEl=document.getElementById('lm-input-'+key);
   const vraag=deepen?'':((inputEl&&inputEl.value.trim())||'');
-  if(!deepen&&!vraag){toast('typ eerst een vraag');return;}
+  if(!deepen&&!vraag){toast('type a question first');return;}
   const savedEl=document.getElementById('lm-saved-'+key);
   const loadId='lm-load-'+Date.now();
-  savedEl.insertAdjacentHTML('beforeend','<div class="lm-item" id="'+loadId+'"><span class="spin"></span>de coach denkt na…</div>');
+  savedEl.insertAdjacentHTML('beforeend','<div class="lm-item" id="'+loadId+'"><span class="spin"></span>the coach is thinking…</div>');
   try{
     const sys="Je bent een specialty-koffiedocent. Onderwerp uit de academy — \""+block.h+"\": "+block.t+"\n\n"+
       (deepen?"Verdiep dit onderwerp met 3–5 concrete, extra inzichten die verder gaan dan de tekst hierboven.":
@@ -2618,10 +2621,10 @@ async function learnMoreAsk(elId,bi,deepen){
     localStorage.setItem(skey,JSON.stringify(arr));
     savedEl.innerHTML=renderLearnMore(elId,bi);
     if(inputEl)inputEl.value='';
-    toast('✓ toegevoegd aan je academy');
+    toast('✓ added to your academy');
   }catch(e){
     const l=document.getElementById(loadId);if(l)l.remove();
-    toast('kon de coach niet bereiken');
+    toast('couldn\'t reach the coach');
   }
 }
 function learnMoreDel(elId,bi,i){
@@ -2677,9 +2680,9 @@ function myCoffeeContext(){
 }
 async function askCoach(){
   const q=document.getElementById('coach-q').value.trim();
-  if(!q){toast('typ eerst een vraag');return;}
+  if(!q){toast('type a question first');return;}
   const a=document.getElementById('coach-a');
-  a.innerHTML='<div class="recipe-card sketch soft"><span class="spin"></span>de coach denkt na…</div>';
+  a.innerHTML='<div class="recipe-card sketch soft"><span class="spin"></span>the coach is thinking…</div>';
   try{
     const ctx=myCoffeeContext();
     const sys="Je bent een ervaren, vriendelijke specialty-barista en koffiecoach. "+
@@ -2703,7 +2706,7 @@ function restoreImages(){
     let def=DEFAULT_METHODS.find(d=>d.id===m.id)||DEFAULT_METHODS.find(d=>n.includes(d.name)||d.name.includes(n));
     if(def&&def.img&&!m.customImg){m.img=def.img;}
   });
-  save();toast('✓ tekeningen hersteld');go('home');
+  save();toast('✓ drawings restored');go('home');
 }
 
 /* ---------------- AI-instellingen ---------------- */
@@ -2716,18 +2719,18 @@ function renderProfile(){
   document.getElementById('ai-key-wrap').classList.toggle('hidden',!on);
   document.getElementById('ai-off-note').classList.toggle('hidden',on);
   document.getElementById('ai-key').value=getKey();
-  document.getElementById('ai-key-status').textContent=getKey()?'✓ sleutel opgeslagen':'nog geen sleutel ingevuld';
+  document.getElementById('ai-key-status').textContent=getKey()?'✓ key saved':'no key entered yet';
   const ss=document.getElementById('save-status');
-  if(ss)ss.textContent='nu opgeslagen: '+state.brews.length+' brews · '+state.beans.length+' bonen · '+state.methods.length+' methodes';
+  if(ss)ss.textContent='saved now: '+state.brews.length+' brews · '+state.beans.length+' beans · '+state.methods.length+' methods';
   renderReminder();
   renderGear();
   applyAIVisibility();
 }
 /* ---------------- mijn uitrusting (gear) ---------------- */
-const GEAR_CATS=[['espresso','espresso'],['filter','filter'],['algemeen','algemeen']];
+const GEAR_CATS=[['espresso','espresso'],['filter','filter'],['algemeen','general']];
 function addGear(){
   const inp=document.getElementById('gear-name');
-  const name=(inp.value||'').trim();if(!name){toast('vul een naam in');return;}
+  const name=(inp.value||'').trim();if(!name){toast('enter a name');return;}
   const category=document.getElementById('gear-cat').value||'algemeen';
   if(!Array.isArray(state.gear))state.gear=[];
   state.gear.push({id:uid(),name,category});
@@ -2743,7 +2746,7 @@ function renderGear(){
     const items=g.filter(x=>x.category===cat);
     if(!items.length)return;
     html+='<div class="gear-cat-lbl">'+esc(label)+'</div><div class="gear-items">'+
-      items.map(it=>'<span class="gear-chip">'+esc(it.name)+'<button onclick="delGear(\''+it.id+'\')" aria-label="verwijder">×</button></span>').join('')+
+      items.map(it=>'<span class="gear-chip">'+esc(it.name)+'<button onclick="delGear(\''+it.id+'\')" aria-label="delete">×</button></span>').join('')+
       '</div>';
   });
   // items met onbekende categorie tonen onder 'algemeen'
@@ -2761,7 +2764,7 @@ function gearPromptBlock(){
   const parts=[];
   if(cats.espresso.length)parts.push('espresso: '+cats.espresso.join(', '));
   if(cats.filter.length)parts.push('filter: '+cats.filter.join(', '));
-  if(cats.algemeen.length)parts.push('algemeen: '+cats.algemeen.join(', '));
+  if(cats.algemeen.length)parts.push('general: '+cats.algemeen.join(', '));
   if(!parts.length)return '';
   return '\nDe gebruiker heeft deze uitrusting; stem het recept en de tips hierop af (bv. concreet maalgraad-advies voor deze molen, techniek passend bij deze tools/machine):\n- '+parts.join('\n- ')+'\n';
 }
@@ -2776,20 +2779,20 @@ function renderReminder(){
   document.getElementById('reminder-time').value=r.time||'08:00';
   const st=document.getElementById('reminder-status');
   if(st){
-    if(!('Notification'in window))st.textContent='meldingen worden niet ondersteund op dit apparaat.';
-    else if(Notification.permission==='denied')st.textContent='meldingen staan uit in je systeeminstellingen — zet ze aan voor Lets Brew.';
-    else if(on&&Notification.permission==='granted')st.textContent='aan — elke dag rond '+(r.time||'08:00')+' stellen we een brew voor.';
-    else if(on)st.textContent='geef nog even toestemming voor meldingen (tik op de knop hieronder of zet opnieuw aan).';
+    if(!('Notification'in window))st.textContent='notifications aren\'t supported on this device.';
+    else if(Notification.permission==='denied')st.textContent='notifications are off in your system settings — turn them on for Lets Brew.';
+    else if(on&&Notification.permission==='granted')st.textContent='on — every day around '+(r.time||'08:00')+' we\'ll suggest a brew.';
+    else if(on)st.textContent='please allow notifications (tap the button below or turn it on again).';
     else st.textContent='';
   }
 }
 async function toggleReminder(){
   const r=getReminder();
   if(!r.on){
-    if(!('Notification'in window)){toast('meldingen niet ondersteund op dit apparaat');return;}
+    if(!('Notification'in window)){toast('notifications not supported on this device');return;}
     let perm=Notification.permission;
     if(perm==='default'){try{perm=await Notification.requestPermission();}catch(e){}}
-    if(perm==='denied'){toast('sta meldingen toe in je instellingen');}
+    if(perm==='denied'){toast('allow notifications in your settings');}
     r.on=true;if(!r.time)r.time='08:00';setReminder(r);
     if(Notification.permission==='granted')syncPushSubscription();   // achtergrond-push (indien server ingesteld)
   }else{r.on=false;setReminder(r);disablePushSubscription();}
@@ -2799,10 +2802,10 @@ function saveReminderTime(){
   const r=getReminder();r.time=document.getElementById('reminder-time').value||'08:00';r.lastShown='';setReminder(r);
   renderReminder();scheduleReminder();
   if(r.on&&('Notification'in window)&&Notification.permission==='granted')syncPushSubscription();
-  toast('tijd opgeslagen: '+r.time);
+  toast('time saved: '+r.time);
 }
 function testReminder(){
-  if(('Notification'in window)&&Notification.permission!=='granted'){toast('zet meldingen eerst aan');return;}
+  if(('Notification'in window)&&Notification.permission!=='granted'){toast('turn on notifications first');return;}
   showBrewSuggestion(true);
 }
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
@@ -2819,14 +2822,14 @@ async function showBrewSuggestion(force){
   const r=getReminder();
   if(!force){if(!r.on)return;if(r.lastShown===todayKey())return;}
   const reco=recommendBrew();
-  const body=reco?('vandaag: '+reco.method.name+(reco.bean?' met '+reco.bean.name:'')+' — tik om te starten')
-                 :'tijd voor een verse bak — tik om te starten';
+  const body=reco?('today: '+reco.method.name+(reco.bean?' with '+reco.bean.name:'')+' — tap to start')
+                 :'time for a fresh cup — tap to start';
   r.lastShown=todayKey();setReminder(r);
   try{
     if('serviceWorker'in navigator&&('Notification'in window)&&Notification.permission==='granted'){
       // niet oneindig wachten als de service worker (nog) niet klaar is
       const reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),1500))]);
-      if(reg){await reg.showNotification('tijd voor koffie ☕',{body,icon:'icon-192.png',badge:'icon-192.png',tag:'daily-brew',data:{action:'quickbrew'}});return;}
+      if(reg){await reg.showNotification('time for coffee ☕',{body,icon:'icon-192.png',badge:'icon-192.png',tag:'daily-brew',data:{action:'quickbrew'}});return;}
     }
   }catch(e){}
   if(document.visibilityState==='visible')toast('☕ '+body);
@@ -2887,13 +2890,13 @@ async function disablePushSubscription(){
 function toggleAI(){
   localStorage.setItem('scc_ai_on',aiEnabled()?'0':'1');
   renderProfile();
-  toast(aiEnabled()?'AI aan':'AI uit');
+  toast(aiEnabled()?'AI on':'AI off');
 }
 function saveKey(){
   const v=document.getElementById('ai-key').value.trim();
   localStorage.setItem('scc_ai_key',v);
-  document.getElementById('ai-key-status').textContent=v?'✓ sleutel opgeslagen':'nog geen sleutel ingevuld';
-  applyAIVisibility();toast('✓ sleutel opgeslagen');
+  document.getElementById('ai-key-status').textContent=v?'✓ key saved':'no key entered yet';
+  applyAIVisibility();toast('✓ key saved');
 }
 /* toont/verbergt alle AI-knoppen door .ai-only klassen */
 function applyAIVisibility(){
@@ -2906,7 +2909,7 @@ function exportData(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.download='lets-brew-specialty-backup.json';a.click();
-  URL.revokeObjectURL(url);toast('back-up gedownload');
+  URL.revokeObjectURL(url);toast('back-up downloaded');
 }
 function importData(ev){
   const file=ev.target.files&&ev.target.files[0];if(!file)return;
@@ -2915,9 +2918,9 @@ function importData(ev){
     try{const d=JSON.parse(r.result);
       if(!d.methods||!d.brews)throw new Error('ongeldig');
       if(!d.beans)d.beans=[];
-      if(!confirm('dit vervangt je huidige gegevens. doorgaan?')){ev.target.value='';return;}
-      state=d;save();toast('✓ data geïmporteerd');go('home');
-    }catch(e){toast('kon bestand niet lezen');}
+      if(!confirm('this replaces your current data. continue?')){ev.target.value='';return;}
+      state=d;save();toast('✓ data imported');go('home');
+    }catch(e){toast('couldn\'t read the file');}
     ev.target.value='';
   };
   r.readAsText(file);
