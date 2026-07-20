@@ -302,6 +302,11 @@
   #ai-key:focus{outline:none;border-color:var(--ink);}
   .profile-btn{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:10px;}
   .profile-btn:active{background:var(--card-2);}
+  .adv-head{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;color:inherit;}
+  .adv-head .g-arr{color:var(--ink-soft);font-size:22px;transition:transform .15s;}
+  .settings-card.open .adv-head .g-arr{transform:rotate(90deg);}
+  .adv-body{display:none;}
+  .settings-card.open .adv-body{display:block;}
 
   /* brew guide op detail */
   .guide-card{padding:4px 8px;margin-bottom:14px;}
@@ -358,6 +363,23 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   #saved-dot{position:fixed;top:60px;right:16px;background:var(--card);border:1.5px solid var(--line);filter:url(#wobble);border-radius:12px;padding:5px 12px;font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink-soft);opacity:0;transition:opacity .25s;z-index:60;pointer-events:none;}
   #saved-dot.show{opacity:1;}
+  /* PDF / print — verberg de app, toon alleen het printvel */
+  #print-area{display:none;}
+  @media print{
+    @page{margin:16mm;}
+    body{background:#fff;}
+    body>*{display:none!important;}
+    #print-area{display:block!important;color:#000;font-family:'Patrick Hand','Segoe Print',cursive;}
+    #print-area .p-h1{font-family:'Caveat',cursive;font-weight:700;font-size:30px;margin:0 0 2px;}
+    #print-area .p-sub{color:#555;font-size:14px;margin:0 0 18px;}
+    #print-area .p-brew{border:1px solid #999;border-radius:10px;padding:12px 14px;margin:0 0 12px;page-break-inside:avoid;}
+    #print-area .p-bt{font-family:'Caveat',cursive;font-weight:700;font-size:22px;margin:0 0 2px;}
+    #print-area .p-meta{color:#555;font-size:13px;margin:0 0 8px;}
+    #print-area .p-grid{font-size:15px;line-height:1.6;}
+    #print-area .p-grid b{font-weight:400;color:#333;}
+    #print-area .p-notes{font-size:14px;margin-top:6px;white-space:pre-wrap;}
+    #print-area .p-steps{font-size:13px;margin-top:6px;color:#333;line-height:1.5;}
+  }
 </style>
 </head>
 <body>
@@ -552,13 +574,6 @@
       <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">＋ add</button></div>
       <div class="subtitle" id="beans-sub">je bonenkast — gekoppeld aan je brews.</div>
       <div id="beans-list"></div>
-      <div class="share-block sketch soft">
-        <div class="set-t hand">delen met vrienden</div>
-        <div class="set-d" style="margin:2px 0 10px">stuur een losse boon met het versturen-icoon op de kaart, of voeg bonen van een vriend toe.</div>
-        <button class="profile-btn ic-btn" onclick="document.getElementById('beans-import').click()"><svg viewBox="0 0 24 24" class="acic"><path d="M12 13.6 Q12.3 8 12 3.2 M8 10 Q10 12.4 12 14 Q14 12.2 16 9.7 M4 13 Q3.8 16.5 4.3 20 Q12 20.4 19.7 20 Q20.2 16.5 20 13"/><path d="M4.5 19.6 Q11.5 20 19.5 19.6" opacity="0.5"/></svg>voeg bonen van vriend toe</button>
-        <input type="file" id="beans-import" accept=".json,application/json" style="display:none" onchange="importBeansFile(event)">
-        <button class="profile-btn ic-btn" onclick="shareBeans()"><svg viewBox="0 0 24 24" class="acic"><path d="M4 6 Q3.7 4.4 5.4 4.2 Q12 3.7 18.6 4.2 Q20.3 4.4 20 6 Q20.3 10 20 14 Q20.2 15.6 18.5 15.8 Q13 16.1 9 15.9 Q7 18 5 19.6 Q5.4 17.6 5.4 15.8 Q3.8 15.6 4 14 Q3.7 10 4 6 Z"/><path d="M7.5 8.4 Q11.5 8.1 16 8.4 M7.5 11.6 Q10.5 11.4 13.5 11.6" opacity="0.6"/></svg>deel lijstje als berichtje (tekst)</button>
-      </div>
     </div>
   </div>
 
@@ -717,20 +732,30 @@
       </div>
 
       <div class="settings-card sketch soft">
-        <div class="set-t hand">opslaan & back-up</div>
-        <div class="set-d" style="margin:4px 0 4px">de app slaat alles automatisch op bij elke actie, veilig op je apparaat.</div>
-        <div class="set-d" id="save-status" style="margin:0 0 12px;color:var(--ink)"></div>
-        <button class="profile-btn" onclick="manualSave()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M5 4.5 Q11 4.1 16.5 4.5 Q18.2 6.2 19.6 8 Q20 13.5 19.6 19.4 Q12 19.9 4.6 19.4 Q4.2 12 5 4.5 Z M8 4.7 Q7.9 7 8 8.6 Q11.8 9 15.4 8.6 Q15.6 6.7 15.5 4.8"/><path d="M8 19.2 Q7.9 15 8.2 13 Q12 12.6 16 13 Q16.2 16 16.1 19.2" opacity="0.7"/></svg> alles nu opslaan</button>
-        <button class="profile-btn" onclick="exportData()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.3 8.5 12 13 M8.4 9.6 Q10.2 11.6 12 13.4 Q13.8 11.5 15.6 9.4 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> exporteer mijn data (back-up bestand)</button>
-        <button class="profile-btn" onclick="document.getElementById('import-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 13 Q12.3 8 12 3.6 M8.4 7.4 Q10.2 5.4 12 3.5 Q13.8 5.5 15.6 7.6 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> importeer data</button>
-        <input type="file" id="import-input" accept="application/json,.json" style="display:none" onchange="importData(event)">
-        <div class="set-d" style="margin-top:10px;font-size:14px">tip: maak af en toe een export — dan heb je altijd een reservekopie, ook als je van link wisselt.</div>
+        <div class="set-t hand">delen & vrienden</div>
+        <div class="set-d" style="margin:4px 0 10px">stuur een losse brew of boon met het versturen-icoon op de kaart. of voeg toe wat een vriend jou stuurde — een meegestuurde boon komt automatisch mee.</div>
+        <button class="profile-btn ic-btn" onclick="document.getElementById('friend-import').click()"><svg viewBox="0 0 24 24" class="acic"><path d="M12 13.6 Q12.3 8 12 3.2 M8 10 Q10 12.4 12 14 Q14 12.2 16 9.7 M4 13 Q3.8 16.5 4.3 20 Q12 20.4 19.7 20 Q20.2 16.5 20 13"/><path d="M4.5 19.6 Q11.5 20 19.5 19.6" opacity="0.5"/></svg>voeg toe van vriend (brew of boon)</button>
+        <input type="file" id="friend-import" accept=".json,application/json" style="display:none" onchange="importFriend(event)">
+        <button class="profile-btn ic-btn" onclick="shareBeans()"><svg viewBox="0 0 24 24" class="acic"><path d="M4 6 Q3.7 4.4 5.4 4.2 Q12 3.7 18.6 4.2 Q20.3 4.4 20 6 Q20.3 10 20 14 Q20.2 15.6 18.5 15.8 Q13 16.1 9 15.9 Q7 18 5 19.6 Q5.4 17.6 5.4 15.8 Q3.8 15.6 4 14 Q3.7 10 4 6 Z"/><path d="M7.5 8.4 Q11.5 8.1 16 8.4 M7.5 11.6 Q10.5 11.4 13.5 11.6" opacity="0.6"/></svg>deel mijn bonenkast als berichtje</button>
       </div>
 
       <div class="settings-card sketch soft">
-        <div class="set-t hand">tekeningen</div>
-        <div class="set-d" style="margin:4px 0 12px">zie je de tekeningen niet? herstel de standaard-afbeeldingen.</div>
-        <button class="profile-btn" onclick="restoreImages()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> herstel tekeningen</button>
+        <div class="set-t hand">back-up & overzetten</div>
+        <div class="set-d" id="save-status" style="margin:4px 0 0;color:var(--ink)"></div>
+        <div class="set-d" style="margin:4px 0 10px">de app bewaart alles automatisch op dit apparaat. maak af en toe een back-up — dan kun je alles terugzetten of naar een ander toestel overzetten.</div>
+        <button class="profile-btn ic-btn" onclick="exportData()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.5 Q12.3 8.5 12 13 M8.4 9.6 Q10.2 11.6 12 13.4 Q13.8 11.5 15.6 9.4 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> exporteer alles (back-up bestand)</button>
+        <button class="profile-btn ic-btn" onclick="printLogbook()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M7 9 Q7 5 7.3 4.4 Q12 4.1 16.7 4.4 Q17 8 17 9 M5.5 9.4 Q4.2 9.2 4.4 11 Q4.2 14.5 4.6 16.4 Q6 16.6 8 16.5 M18.5 9.4 Q19.8 9.2 19.6 11 Q19.8 14.5 19.4 16.4 Q18 16.6 16 16.5 M7.4 13.5 Q12 13.1 16.6 13.5 Q16.8 17 16.7 20 Q12 20.4 7.3 20 Q7.2 17 7.4 13.5 Z"/></svg> bewaar als PDF (om te lezen)</button>
+        <button class="profile-btn ic-btn" onclick="document.getElementById('import-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 13 Q12.3 8 12 3.6 M8.4 7.4 Q10.2 5.4 12 3.5 Q13.8 5.5 15.6 7.6 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> zet een back-up terug</button>
+        <input type="file" id="import-input" accept="application/json,.json" style="display:none" onchange="importData(event)">
+        <div class="set-d" style="margin-top:8px;font-size:14px">let op: “zet een back-up terug” vervangt je huidige gegevens. “voeg toe van vriend” hierboven voegt juist toe.</div>
+      </div>
+
+      <div class="settings-card sketch soft" id="adv-card">
+        <button class="adv-head" onclick="document.getElementById('adv-card').classList.toggle('open')"><span class="set-t hand">geavanceerd</span><span class="g-arr">▸</span></button>
+        <div class="adv-body">
+          <div class="set-d" style="margin:10px 0 10px">zie je de tekeningen niet? herstel de standaard-afbeeldingen.</div>
+          <button class="profile-btn ic-btn" onclick="restoreImages()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg> herstel tekeningen</button>
+        </div>
       </div>
 
       <div class="settings-card sketch soft">
@@ -763,6 +788,7 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div id="print-area"></div>
 
 <script>
 /* ---------------- data + opslag ---------------- */
@@ -1591,6 +1617,7 @@ function openDetail(id){
       <button class="act primary hand" onclick="brewAgain('${id}')">brew again</button>
       <button class="act" onclick="shareOneBrew('${id}')"><span class="ic">${ICO.send}</span>stuur</button>
       <button class="act" onclick="shareBrew('${id}')"><span class="ic">${ICO.chat}</span>tekst</button>
+      <button class="act" onclick="printBrew('${id}')"><span class="ic"><svg viewBox="0 0 24 24" class="acic"><path d="M7 9 Q7 5 7.3 4.4 Q12 4.1 16.7 4.4 Q17 8 17 9 M5.5 9.4 Q4.2 9.2 4.4 11 Q4.2 14.5 4.6 16.4 Q6 16.6 8 16.5 M18.5 9.4 Q19.8 9.2 19.6 11 Q19.8 14.5 19.4 16.4 Q18 16.6 16 16.5 M7.4 13.5 Q12 13.1 16.6 13.5 Q16.8 17 16.7 20 Q12 20.4 7.3 20 Q7.2 17 7.4 13.5 Z"/></svg></span>PDF</button>
     </div>`;
   go('detail');
 }
@@ -1620,12 +1647,16 @@ function delBrew(id){
 // één brew als importeerbaar bestand delen
 async function shareOneBrew(id){
   const b=state.brews.find(x=>x.id===id);if(!b)return;
-  const pakket={type:'lbs-brews',v:1,brews:[b]};
+  // neem de gekoppelde boon mee, zodat de ontvanger 'm er automatisch bij krijgt
+  const brewCopy=Object.assign({},b);
+  const bean=b.beanId?beanById(b.beanId):null;
+  if(bean)brewCopy.bean=Object.assign({},bean);
+  const pakket={type:'lbs-brews',v:1,brews:[brewCopy]};
   const json=JSON.stringify(pakket,null,2);
   const m=methodById(b.method);
   const fname=((m.name||'brew')+'-'+(b.beans||'')).replace(/[^a-z0-9]+/gi,'-').toLowerCase().replace(/^-|-$/g,'')+'.lbsbrew.json';
   const file=new File([json],fname,{type:'application/json'});
-  const tekst='Een brew uit Lets Brew Specialty — open in de app via brews → voeg brew van vriend toe.';
+  const tekst='Een brew uit Lets Brew Specialty — open in de app via profiel → voeg toe van vriend.';
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:'Brew',text:tekst});return;}
     catch(e){if(e.name==='AbortError')return;}
@@ -1707,7 +1738,7 @@ async function shareBeansList(beans,titel){
   const naam=beans.length===1?beans[0].name:'bonen';
   const fname=naam.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.lbsbeans.json';
   const file=new File([json],fname,{type:'application/json'});
-  const tekst=(beans.length===1?'Koffieboon':'Koffiebonen')+' uit Lets Brew Specialty — open in de app via beans → voeg bonen van vriend toe.';
+  const tekst=(beans.length===1?'Koffieboon':'Koffiebonen')+' uit Lets Brew Specialty — open in de app via profiel → voeg toe van vriend.';
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:titel||'Bonen',text:tekst});return;}
     catch(e){if(e.name==='AbortError')return;}
@@ -1755,6 +1786,110 @@ function importBeansFile(ev){
     ev.target.value='';
   };
   r.readAsText(file);
+}
+// unieke importer: brews én/of bonen van een vriend (voegt toe, vervangt niet).
+// een bij een brew meegestuurde boon komt automatisch mee en blijft gekoppeld.
+function importFriend(ev){
+  const file=ev.target.files&&ev.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      let addedBrews=0,addedBeans=0,skippedBeans=0;
+      const idMap={};                         // oud boon-id -> nieuw boon-id
+      const addBean=(nb)=>{
+        if(!nb||!nb.name)return null;
+        const bestaand=state.beans.find(b=>
+          (b.name||'').toLowerCase().trim()===(nb.name||'').toLowerCase().trim() &&
+          (b.roaster||'').toLowerCase().trim()===(nb.roaster||'').toLowerCase().trim());
+        if(bestaand){skippedBeans++;if(nb.id)idMap[nb.id]=bestaand.id;return bestaand.id;}
+        const kopie=Object.assign({},nb);
+        const oud=kopie.id;kopie.id=uid();
+        if(kopie.inStock===undefined)kopie.inStock=true;
+        state.beans.push(kopie);addedBeans++;
+        if(oud)idMap[oud]=kopie.id;
+        return kopie.id;
+      };
+      // 1) losse bonen in het pakket
+      (Array.isArray(d.beans)?d.beans:[]).forEach(addBean);
+      // 2) brews (+ eventueel meegestuurde boon)
+      (Array.isArray(d.brews)?d.brews:[]).forEach(nb=>{
+        if(!nb||!nb.method)return;
+        const kopie=Object.assign({},nb);
+        kopie.id=uid();kopie.ts=Date.now();
+        if(kopie.bean&&kopie.bean.name){kopie.beanId=addBean(kopie.bean);}
+        else if(kopie.beanId&&idMap[kopie.beanId]){kopie.beanId=idMap[kopie.beanId];}
+        else{kopie.beanId=null;}
+        delete kopie.bean;
+        state.brews.push(kopie);addedBrews++;
+      });
+      if(!addedBrews&&!addedBeans&&!skippedBeans){toast('geen brews of bonen in dit bestand');ev.target.value='';return;}
+      save();
+      const parts=[];
+      if(addedBrews)parts.push(addedBrews+' brew'+(addedBrews===1?'':'s'));
+      if(addedBeans)parts.push(addedBeans+' boon'+(addedBeans===1?'':'en'));
+      let msg='✓ '+(parts.join(' + ')||'niets nieuws')+' toegevoegd';
+      if(skippedBeans)msg+=' · '+skippedBeans+' boon al aanwezig';
+      toast(msg);
+      go(addedBrews?'brews':'beans');
+    }catch(e){toast('kon bestand niet lezen');}
+    ev.target.value='';
+  };
+  r.readAsText(file);
+}
+
+/* ---------------- PDF / print (om te lezen, bibliotheekvrij) ---------------- */
+function pesc(s){return esc(s);} // korte alias voor de printvellen
+function brewSheetHTML(b){
+  const m=methodById(b.method);
+  const bean=b.beanId?beanById(b.beanId):null;
+  const titel=(b.title&&b.title.trim())?b.title:(m?m.name:'brew');
+  const datum=b.ts?new Date(b.ts).toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'}):'';
+  const metaBits=[m?m.name:'',bean?bean.name:'',datum].filter(Boolean).map(pesc).join(' · ');
+  const rows=[
+    ['ratio',b.ratio?'1:'+(+b.ratio).toFixed(1):null],
+    ['dose',b.dose?b.dose+' g':null],
+    ['yield',b.yield?b.yield+' g':null],
+    ['tijd',b.time||null],
+    ['temp',b.temp?b.temp+' °C':null],
+    ['maling',b.grind||null],
+    ['doel',(b.target&&fmtShot(b.target))?fmtShot(b.target):null],
+    ['score',(b.score!=null&&b.score!=='')?(+b.score).toFixed(1)+'/10':null]
+  ].filter(r=>r[1]).map(r=>'<b>'+pesc(r[0])+':</b> '+pesc(r[1])).join(' &nbsp; ');
+  let guideTxt='';
+  if(b.guide){guideTxt=b.guide;}
+  else{const g=guideFor(b.method);if(g){guideTxt='recept: '+g.recept+'\nmaling: '+g.grind+'\n'+g.steps.map((s,i)=>(i+1)+'. '+s).join('\n');}}
+  const tags=(b.tags&&b.tags.length)?('smaak: '+b.tags.join(', ')):'';
+  return `<div class="p-brew">
+    <div class="p-bt">${pesc(titel)}</div>
+    <div class="p-meta">${metaBits||''}</div>
+    <div class="p-grid">${rows||'—'}</div>
+    ${b.notes?'<div class="p-notes">'+pesc(b.notes)+'</div>':''}
+    ${tags?'<div class="p-notes">'+pesc(tags)+'</div>':''}
+    ${guideTxt?'<div class="p-steps">'+pesc(guideTxt).replace(/\n/g,'<br>')+'</div>':''}
+  </div>`;
+}
+function runPrint(html){
+  const area=document.getElementById('print-area');
+  area.innerHTML=html;
+  const after=()=>{area.innerHTML='';window.removeEventListener('afterprint',after);};
+  window.addEventListener('afterprint',after);
+  setTimeout(()=>window.print(),60);
+}
+function printBrew(id){
+  const b=state.brews.find(x=>x.id===id);if(!b)return;
+  const html='<div class="p-h1">'+pesc((b.title&&b.title.trim())?b.title:(methodById(b.method)?.name||'brew'))+'</div>'+
+    '<div class="p-sub">lets brew specialty — brew-recept</div>'+brewSheetHTML(b);
+  runPrint(html);
+}
+function printLogbook(){
+  if(!state.brews.length){toast('nog geen brews om te bewaren');return;}
+  const brews=[...state.brews].sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const html='<div class="p-h1">mijn brew-logboek</div>'+
+    '<div class="p-sub">lets brew specialty · '+brews.length+' brews · '+state.beans.length+' bonen · '+
+    new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'})+'</div>'+
+    brews.map(brewSheetHTML).join('');
+  runPrint(html);
 }
 
 /* ---------------- methodes beheren ---------------- */
@@ -2592,11 +2727,6 @@ async function disablePushSubscription(){
     }).catch(()=>{});
     await sub.unsubscribe().catch(()=>{});
   }catch(e){}
-}
-function manualSave(){
-  save();
-  renderProfile();
-  toast('✓ alles opgeslagen — '+state.brews.length+' brews, '+state.beans.length+' bonen');
 }
 function toggleAI(){
   localStorage.setItem('scc_ai_on',aiEnabled()?'0':'1');
