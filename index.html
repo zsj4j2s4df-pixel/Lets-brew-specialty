@@ -290,6 +290,22 @@
   .check .box{width:24px;height:24px;flex:none;border:2px solid var(--ink);border-radius:7px;filter:url(#wobble);display:flex;align-items:center;justify-content:center;font-size:16px;margin-top:1px;}
   .check.done .box{background:var(--accent);color:#f2ead9;}
   .check.done .ctxt{color:var(--ink-soft);text-decoration:line-through;}
+  .lesson .lm-wrap{margin-top:8px;}
+  .lm-btn{background:none;border:none;color:var(--accent);font-family:'Caveat',cursive;font-weight:700;font-size:19px;cursor:pointer;padding:2px 0;display:inline-flex;align-items:center;gap:6px;}
+  .lm-btn .acic{width:18px;height:18px;stroke:var(--accent);}
+  .lm-panel{margin-top:8px;}
+  .lm-panel input{width:100%;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:9px 13px;font-family:inherit;font-size:17px;color:var(--ink);}
+  .lm-panel input:focus{outline:none;border-color:var(--ink);}
+  .lm-actions{display:flex;gap:8px;margin-top:8px;}
+  .lm-go{flex:1;background:var(--card-2);border:2px solid var(--line);filter:url(#wobble);border-radius:13px;padding:9px;font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:var(--ink);cursor:pointer;}
+  .lm-go.primary{background:var(--accent);color:#f2ead9;border-color:var(--ink);}
+  .lm-item{position:relative;background:var(--paper);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:11px 14px 12px;margin-top:10px;}
+  .lm-item .lm-q{color:var(--accent);font-size:19px;margin-bottom:4px;padding-right:22px;}
+  .lm-item .lm-a{font-size:17px;line-height:1.5;color:var(--ink);}
+  .lm-del{position:absolute;top:5px;right:9px;background:none;border:none;color:var(--ink-soft);font-size:21px;cursor:pointer;line-height:1;}
+  .lesson-link{display:flex;align-items:center;gap:9px;background:var(--card-2);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;padding:13px 18px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:14px;width:100%;}
+  .lesson-link .acic{width:24px;height:24px;stroke:var(--ink);flex:none;}
+  .lesson-link .ll-arr{margin-left:auto;color:var(--ink-soft);font-size:24px;}
 
   /* profile / settings */
   .settings-card{padding:18px 20px;margin-bottom:16px;}
@@ -2442,6 +2458,9 @@ const LESSONS={
     {type:'p',h:'experimentele fermentatie',t:'Anaerobe fermentatie (in afgesloten tanks zonder zuurstof) en carbonic maceration geven heel uitgesproken, soms wilde smaken. Hoger risico en duurder — vandaar de prijs.'},
     {type:'p',h:'branden (roasting)',t:'Bij het branden verandert de groene boon in een aromatische boon. Tijdens het proces hoor je twee "cracks". Licht en medium branden behouden de natuurlijke smaken (citrus, bloem, fruit); donker branden maskeert nuance en wordt bitterder.'},
     {type:'p',h:'ontgassen (degassen)',t:'Net gebrande bonen geven CO₂ af. Daarom is koffie op zijn best tussen ~3 dagen en 6 weken na branden. Te verse koffie geeft belletjes en een onrustige extractie; te oude koffie smaakt vlak.'},
+    {type:'p',h:'versheid → maalgraad',t:'Hoe verser de boon, hoe meer CO₂: de extractie remt en de shot loopt trager. Vuistregel: net na de rustperiode iets fijner malen, en naarmate de boon ouder wordt (minder gas) stap voor stap grover. In je bonenkast zie je per boon "X dagen vers" — gebruik dat als hint bij het afstellen.'},
+    {type:'link',h:'meteen afstellen?',t:'Open het dial-in scherm en werk met doel vs. jouw shot naar de juiste maalstand toe.',label:'espresso afstellen (dial-in)',action:'learnToDialIn'},
+    {type:'p',h:'roast-niveau → maling & temp',t:'Donker gebrande bonen zijn brozer en lossen sneller op: maal iets grover en zet iets koeler om bitterheid te vermijden. Lichte roasts zijn dichter en trager: maal fijner en zet warmer om genoeg zoetheid en body los te maken.'},
     {type:'p',h:'extractie',t:'Koffie zetten is oplossen. Te weinig/te grof = onderextractie (zuur, dun, zout). Te veel/te fijn = overextractie (bitter, droog). De zoete balans zit ertussenin.'},
     {type:'p',h:'de vier knoppen',t:'Je stuurt smaak met vier dingen: maalgraad, dose/ratio, watertemperatuur en tijd. Verander er één tegelijk, anders weet je niet wat werkte.'},
     {type:'p',h:'water',t:'Koffie is ~98% water. Te zacht smaakt vlak, te hard maskeert en verkalkt je apparaat. Mineraalgehalte rond 75–150 ppm en gefilterd water werken het best.'},
@@ -2459,11 +2478,34 @@ const LESSONS={
       'koude verse melk','stretchen (korte lucht)','rollen tot glad','swirl tot glanzend','hoog beginnen','dicht afmaken','door het midden trekken']},
   ],
 };
+const LESSON_MAP={'barista-content':'barista','academy-content':'academy','latte-content':'latte'};
+function lessonBlock(elId,bi){return (LESSONS[LESSON_MAP[elId]]||[])[bi];}
+function learnMoreKey(elId,bi){return 'scc_learn_more_'+elId+'_'+bi;}
+function renderLearnMore(elId,bi){
+  const arr=JSON.parse(localStorage.getItem(learnMoreKey(elId,bi))||'[]');
+  return arr.map((item,i)=>`<div class="lm-item"><button class="lm-del" title="verwijder" onclick="learnMoreDel('${elId}',${bi},${i})">×</button><div class="lm-q hand">${esc(item.q)}</div><div class="lm-a">${esc(item.a).replace(/\n/g,'<br>')}</div></div>`).join('');
+}
+const AISPARK='<svg viewBox="0 0 24 24" class="acic"><path d="M12 3.5 Q12.6 8 13.2 9.8 Q15 10.6 19.5 11.4 Q15 12.4 13.2 13.2 Q12.5 15 12 20.5 Q11.4 15 10.8 13.2 Q9 12.3 4.5 11.4 Q9 10.5 10.8 9.8 Q11.5 8 12 3.5 Z"/></svg>';
 function renderLesson(elId,blocks){
   const el=document.getElementById(elId);
   el.innerHTML=blocks.map((b,bi)=>{
-    if(b.type==='p')return `<div class="lesson sketch soft"><h3>${esc(b.h)}</h3><p>${esc(b.t)}</p></div>`;
+    if(b.type==='p'){
+      const key=elId+'_'+bi;
+      return `<div class="lesson sketch soft"><h3>${esc(b.h)}</h3><p>${esc(b.t)}</p>
+        <div class="lm-saved" id="lm-saved-${key}">${renderLearnMore(elId,bi)}</div>
+        <div class="lm-wrap ai-only ${aiReady()?'':'hidden'}">
+          <button class="lm-btn" onclick="learnMoreToggle('${key}')">${AISPARK} leer meer</button>
+          <div class="lm-panel hidden" id="lm-panel-${key}">
+            <input id="lm-input-${key}" placeholder="stel je eigen vraag hierover…" onkeydown="if(event.key==='Enter')learnMoreAsk('${elId}',${bi},false)">
+            <div class="lm-actions">
+              <button class="lm-go primary" onclick="learnMoreAsk('${elId}',${bi},true)">verdiep dit</button>
+              <button class="lm-go" onclick="learnMoreAsk('${elId}',${bi},false)">vraag</button>
+            </div>
+          </div>
+        </div></div>`;
+    }
     if(b.type==='tip')return `<div class="lesson sketch soft" style="background:var(--v60)"><div class="tipbox">💡 ${esc(b.t)}</div></div>`;
+    if(b.type==='link')return `<button class="lesson-link sketch" onclick="${esc(b.action)}()"><svg viewBox="0 0 24 24" class="acic"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.4"/></svg><span>${esc(b.label)}</span><span class="ll-arr">›</span></button>`;
     if(b.type==='check'){
       const key=elId+'_'+bi;
       const done=JSON.parse(localStorage.getItem('scc_check_'+key)||'[]');
@@ -2473,6 +2515,48 @@ function renderLesson(elId,blocks){
     }
     return '';
   }).join('');
+}
+function learnToDialIn(){
+  const esp=state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0];
+  if(esp)beginBrew(esp.id); else toast('zet eerst een espresso-methode aan bij methods');
+}
+function learnMoreToggle(key){
+  const p=document.getElementById('lm-panel-'+key);if(!p)return;
+  p.classList.toggle('hidden');
+  if(!p.classList.contains('hidden')){const i=document.getElementById('lm-input-'+key);if(i)i.focus();}
+}
+async function learnMoreAsk(elId,bi,deepen){
+  const block=lessonBlock(elId,bi);if(!block)return;
+  const key=elId+'_'+bi;
+  const inputEl=document.getElementById('lm-input-'+key);
+  const vraag=deepen?'':((inputEl&&inputEl.value.trim())||'');
+  if(!deepen&&!vraag){toast('typ eerst een vraag');return;}
+  const savedEl=document.getElementById('lm-saved-'+key);
+  const loadId='lm-load-'+Date.now();
+  savedEl.insertAdjacentHTML('beforeend','<div class="lm-item" id="'+loadId+'"><span class="spin"></span>de coach denkt na…</div>');
+  try{
+    const sys="Je bent een specialty-koffiedocent. Onderwerp uit de academy — \""+block.h+"\": "+block.t+"\n\n"+
+      (deepen?"Verdiep dit onderwerp met 3–5 concrete, extra inzichten die verder gaan dan de tekst hierboven.":
+              ("Beantwoord deze vraag van de lerende: \""+vraag+"\"."))+
+      " Schrijf in het Nederlands, kort en praktisch, max 6 zinnen. Geen inleiding — direct de kennis.";
+    const txt=await callClaude([{role:"user",content:sys}],600);
+    const skey=learnMoreKey(elId,bi);
+    const arr=JSON.parse(localStorage.getItem(skey)||'[]');
+    arr.push({q:(deepen?'verdieping ✦':vraag),a:(txt||'').trim(),ts:Date.now()});
+    localStorage.setItem(skey,JSON.stringify(arr));
+    savedEl.innerHTML=renderLearnMore(elId,bi);
+    if(inputEl)inputEl.value='';
+    toast('✓ toegevoegd aan je academy');
+  }catch(e){
+    const l=document.getElementById(loadId);if(l)l.remove();
+    toast('kon de coach niet bereiken');
+  }
+}
+function learnMoreDel(elId,bi,i){
+  const skey=learnMoreKey(elId,bi);
+  const arr=JSON.parse(localStorage.getItem(skey)||'[]');
+  arr.splice(i,1);localStorage.setItem(skey,JSON.stringify(arr));
+  const el=document.getElementById('lm-saved-'+elId+'_'+bi);if(el)el.innerHTML=renderLearnMore(elId,bi);
 }
 function toggleCheck(key,i,row){
   const k='scc_check_'+key;
