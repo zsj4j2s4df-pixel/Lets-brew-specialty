@@ -165,6 +165,16 @@
   .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
   .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
   .gear-chip button{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;}
+  .di-goal{background:var(--espresso);padding:16px 18px;margin-bottom:16px;}
+  .di-goal .di-t{color:var(--ink-soft);font-size:16px;margin-bottom:8px;display:flex;justify-content:space-between;}
+  .di-goal .di-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+  .di-goal .k{color:var(--ink-soft);font-size:14px;}
+  .di-goal .v{font-size:26px;line-height:1.05;}
+  .di-goal .v small{font-size:15px;color:var(--ink-soft);}
+  .di-goal .di-ai{color:var(--accent);font-size:18px;margin-top:2px;}
+  .di-card{padding:14px 18px;margin-bottom:16px;}
+  .di-lbl{font-size:22px;color:var(--ink-soft);margin-bottom:6px;}
+  .di-advice{color:var(--accent);font-size:18px;line-height:1.4;margin-top:6px;}
   .prep-row{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:20px;}
   .prep-cb{width:26px;height:26px;border:2px solid var(--ink);filter:url(#wobble);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent;cursor:pointer;}
   .prep-cb.on{background:var(--accent);color:#f2ead9;}
@@ -376,7 +386,7 @@
         <div class="lbl"><span>brew methods</span><a class="hand" onclick="go('methods')">manage</a></div>
         <div class="methods-scroll" id="methods-scroll"></div>
       </div>
-      <button class="btn-add sketch soft" onclick="openForm()">＋ add new brew</button>
+      <button class="btn-add sketch soft" onclick="beginBrew()">＋ add new brew</button>
     </div>
   </div>
 
@@ -438,6 +448,39 @@
       </div>
 
       <button class="save-btn" onclick="saveBrew()">save brew</button>
+    </div>
+  </div>
+
+  <!-- ESPRESSO DIAL-IN -->
+  <div id="page-dialin" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand">espresso · dial-in</div><button onclick="cancelForm()">cancel</button></div>
+      <div class="subtitle" id="di-sub">machine-espresso — werk naar je doel toe</div>
+
+      <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
+
+      <div class="di-goal sketch" id="di-goal"></div>
+
+      <div class="di-card sketch soft">
+        <div class="di-lbl hand">jouw shot</div>
+        <div class="field-row">
+          <div class="field"><label>dose in (g)</label><input id="di-dose" type="number" inputmode="decimal" step="0.1"></div>
+          <div class="field"><label>yield uit (g)</label><input id="di-yield" type="number" inputmode="decimal" step="0.1"></div>
+        </div>
+        <div class="field"><label>gemeten looptijd (m:ss)</label><input id="di-time" placeholder="0:28" inputmode="numeric" oninput="formatTime(this);diAdvice()" onblur="normalizeTime(this);diAdvice()"></div>
+        <div class="di-advice" id="di-advice"></div>
+      </div>
+
+      <div class="di-card sketch soft">
+        <div class="di-lbl hand">puck-prep &amp; machine</div>
+        <div id="di-prep-list"></div>
+        <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ eigen stap</button>
+      </div>
+
+      <button class="save-btn" onclick="saveDialInBrew(false)">dial-in gelukt → opslaan als brew</button>
+      <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">nog niet goed → volgende poging</button>
+      <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">bij "volgende poging" wordt je nieuwe maalstand het doel</div>
     </div>
   </div>
 
@@ -990,8 +1033,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile'];
-const navMap={home:'home',form:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
+const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile'];
+const navMap={home:'home',form:'home',dialin:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -1047,7 +1090,7 @@ function renderHome(){
     recent.length?recent.map(brewCard).join(''):'<div class="empty-note">nog geen brews.<br>tik op ＋ add new brew om te beginnen.</div>';
   const ms=document.getElementById('methods-scroll');
   ms.innerHTML=state.methods.filter(m=>m.on).map(m=>
-    `<button class="method" onclick="openForm('${m.id}')"><div class="ic">${iconHTML(m,46)}</div><div class="nm">${esc(m.name)}</div></button>`
+    `<button class="method" onclick="beginBrew('${m.id}')"><div class="ic">${iconHTML(m,46)}</div><div class="nm">${esc(m.name)}</div></button>`
   ).join('');
 }
 // beveel een zetmethode (die aanstaat) + boon uit voorraad aan, op basis van
@@ -1207,7 +1250,16 @@ function fmtShot(t){
 // maling, doel) — je meet alleen je nieuwe tijd en slaat op
 function brewAgain(id){
   const src=state.brews.find(x=>x.id===id);
-  if(!src){openForm();return;}
+  if(!src){beginBrew();return;}
+  // espresso -> dial-in-scherm met het vorige als doel
+  if(methodFamily(src.method)==='espresso'){
+    formMethod=src.method;formBean=src.beanId||null;
+    pendingTarget=src.target||{dose:src.dose?String(src.dose):'',yield:src.yield?String(src.yield):'',time:src.time||'',grind:src.grind||''};
+    formPrep=src.prep?JSON.parse(JSON.stringify(src.prep)):{};
+    openDialIn(src.method);
+    toast('nieuwe poging — meet je looptijd');
+    return;
+  }
   openForm(src.method);
   setVal('f-dose',src.dose);setVal('f-yield',src.yield);setVal('f-ratio',src.ratio);
   setVal('f-grind',src.grind||'');setVal('f-temp',src.temp);setVal('f-guide',src.guide||'');
@@ -1339,9 +1391,8 @@ function applyFamilyToForm(){
 }
 /* ---------------- puck-prep (espresso) ---------------- */
 function renderPrep(){
-  const el=document.getElementById('prep-list');if(!el)return;
   const items=state.prepItems||[];
-  el.innerHTML=items.map(it=>{
+  const html=items.map(it=>{
     const st=formPrep[it.id]||{};
     return `<div class="prep-row">
       <span class="prep-cb ${st.on?'on':''}" onclick="togglePrep('${it.id}')">✓</span>
@@ -1350,6 +1401,7 @@ function renderPrep(){
       <button class="prep-x" title="verwijderen" onclick="removePrepItem('${it.id}')">×</button>
     </div>`;
   }).join('');
+  ['prep-list','di-prep-list'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
 }
 function togglePrep(id){const st=formPrep[id]||(formPrep[id]={});st.on=!st.on;renderPrep();}
 function setPrepVal(id,v){const st=formPrep[id]||(formPrep[id]={});st.val=v;if(v&&!('on'in st))st.on=true;}
@@ -1363,6 +1415,87 @@ function addPrepItem(){
 function removePrepItem(id){
   state.prepItems=(state.prepItems||[]).filter(x=>x.id!==id);
   delete formPrep[id];save();renderPrep();
+}
+/* ---------------- espresso dial-in (apart scherm) ---------------- */
+// kies waar een nieuwe brew begint: espresso -> dial-in-scherm, anders formulier
+function beginBrew(methodId){
+  const mid=methodId||(state.methods.filter(m=>m.on)[0]?.id);
+  if(methodFamily(mid)==='espresso'){pendingTarget=null;formBean=null;formPrep={};openDialIn(mid);}
+  else openForm(methodId);
+}
+function openDialIn(methodId){
+  editingId=null;
+  const valid=methodId&&state.methods.find(m=>m.id===methodId&&methodFamily(m)==='espresso');
+  formMethod=valid?methodId:(state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0]?.id||'espresso');
+  const t=pendingTarget||{};
+  setVal('di-dose',t.dose||'');setVal('di-yield',t.yield||'');setVal('di-time','');
+  renderDialIn();go('dialin');
+}
+function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();}
+function renderDiBeans(){
+  const el=document.getElementById('di-beans');if(!el)return;
+  let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickDiBean(null)">geen</button>';
+  html+=state.beans.filter(b=>b.inStock!==false).map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickDiBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
+  el.innerHTML=html;
+}
+function pickDiBean(id){formBean=id;renderDiBeans();renderDiGoal();diAdvice();}
+function renderDiGoal(){
+  const el=document.getElementById('di-goal');if(!el)return;
+  const t=pendingTarget||{};
+  const bean=beanById(formBean);
+  const aiGrind=(bean&&bean.dialIn&&bean.dialIn.method===formMethod)?bean.dialIn.grind:'';
+  const grind=t.grind||aiGrind||'—';
+  el.innerHTML=`<div class="di-t"><span>🎯 doel</span><span>ratio 1:2</span></div>
+    <div class="di-grid">
+      <div><div class="k">dose in</div><div class="v hand">${t.dose?esc(t.dose)+' <small>g</small>':'18 <small>g</small>'}</div></div>
+      <div><div class="k">yield uit</div><div class="v hand">${t.yield?esc(t.yield)+' <small>g</small>':'36 <small>g</small>'}</div></div>
+      <div><div class="k">looptijd</div><div class="v hand">${t.time?esc(t.time):'26–30 <small>s</small>'}</div></div>
+      <div><div class="k">maalstand</div><div class="v hand">${esc(grind)}</div>${(aiGrind&&aiGrind===grind)?'<div class="di-ai">✦ AI-tip</div>':''}</div>
+    </div>`;
+}
+function diAdvice(){
+  const el=document.getElementById('di-advice');if(!el)return;
+  const t=pendingTarget||{};
+  const actual=parseTimeSec(document.getElementById('di-time')?.value);
+  const target=parseTimeSec(t.time)||28;
+  const grinder=(state.gear||[]).filter(g=>g.category==='espresso'&&g.name).map(g=>g.name)[0];
+  const bean=beanById(formBean);
+  let html='';
+  if(actual){
+    const diff=actual-target, tol=3;
+    let dir;
+    if(diff>tol)dir='trager dan doel → maal iets grover';
+    else if(diff<-tol)dir='sneller dan doel → maal iets fijner';
+    else dir='mooi op doel ✓';
+    html+='⏱ '+esc(document.getElementById('di-time').value)+' vs doel '+esc(t.time||('0:'+String(target).padStart(2,'0')))+' → '+dir+((grinder&&dir!=='mooi op doel ✓')?' op je '+esc(grinder):'');
+  }
+  if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
+    html+=(html?'<br>':'')+'✦ AI-tip: probeer maling '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'');
+  }
+  el.innerHTML=html;el.style.display=html?'block':'none';
+}
+async function saveDialInBrew(next){
+  const dose=parseFloat(document.getElementById('di-dose').value)||null;
+  const yld=parseFloat(document.getElementById('di-yield').value)||null;
+  const t=pendingTarget||{};
+  const prep={};Object.keys(formPrep).forEach(k=>{const s=formPrep[k];if(s&&(s.on||s.val))prep[k]={on:!!s.on,val:s.val||''};});
+  const b={id:uid(),method:formMethod,title:'',
+    dose,yield:yld,ratio:(dose&&yld)?+(yld/dose).toFixed(1):null,
+    time:document.getElementById('di-time').value.trim(),
+    temp:(formPrep.temp&&formPrep.temp.val)?(parseFloat(formPrep.temp.val)||null):null,
+    score:0,notes:'',grind:t.grind||'',
+    beanId:formBean,beans:(beanById(formBean)?.name)||'',
+    tags:[],custom:[],guide:'',target:pendingTarget||null,
+    prep:Object.keys(prep).length?prep:null,ts:Date.now()};
+  state.brews.push(b);save();
+  if(b.beanId)try{await updateDialIn(b.beanId,b.method);}catch(e){}
+  if(next){
+    const bean=beanById(b.beanId);
+    const newGrind=(bean&&bean.dialIn&&bean.dialIn.method===b.method)?bean.dialIn.grind:(b.grind||'');
+    pendingTarget={dose:dose?String(dose):(t.dose||''),yield:yld?String(yld):(t.yield||''),time:t.time||'',grind:newGrind};
+    openDialIn(b.method);
+    toast('volgende poging — nieuw doel: maling '+(newGrind||'?'));
+  }else{toast('✓ dial-in opgeslagen');go('home');}
 }
 function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
 function renderFormBeans(){
