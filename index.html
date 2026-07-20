@@ -380,13 +380,12 @@
         <span class="reco-ic"><svg viewBox="0 0 32 32"><path d="M7 12 L7 22 Q7 26 12 26 L19 26 Q24 26 24 22 L24 12 Z M24 14 Q29 14 29 18 Q29 22 24 22 M6 30 L26 30"/><path d="M11 6 Q10 8 11.5 9.5 M16 5 Q15 7 16.5 8.5 M21 6 Q20 8 21.5 9.5" opacity="0.8"/></svg></span>
         <span class="reco-txt"><span class="reco-h hand">verras me</span><span class="reco-sub">een verrassende brew met een boon uit je kast</span></span>
       </button>
-      <div class="eyebrow"><span>recent brews</span><a class="hand" onclick="go('brews')">see all</a></div>
-      <div id="recent-list"></div>
       <div class="methods sketch soft">
         <div class="lbl"><span>brew methods</span><a class="hand" onclick="go('methods')">manage</a></div>
         <div class="methods-scroll" id="methods-scroll"></div>
       </div>
-      <button class="btn-add sketch soft" onclick="beginBrew()">＋ add new brew</button>
+      <div class="eyebrow"><span>recent brews</span><a class="hand" onclick="go('brews')">see all</a></div>
+      <div id="recent-list"></div>
     </div>
   </div>
 
@@ -1090,7 +1089,7 @@ function renderHome(){
     recent.length?recent.map(brewCard).join(''):'<div class="empty-note">nog geen brews.<br>tik op ＋ add new brew om te beginnen.</div>';
   const ms=document.getElementById('methods-scroll');
   ms.innerHTML=state.methods.filter(m=>m.on).map(m=>
-    `<button class="method" onclick="beginBrew('${m.id}')"><div class="ic">${iconHTML(m,46)}</div><div class="nm">${esc(m.name)}</div></button>`
+    `<button class="method" onclick="showMethodBrews('${m.id}')"><div class="ic">${iconHTML(m,46)}</div><div class="nm">${esc(m.name)}</div></button>`
   ).join('');
 }
 // beveel een zetmethode (die aanstaat) + boon uit voorraad aan, op basis van
