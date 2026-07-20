@@ -467,6 +467,11 @@
         <span class="ratio-hint" id="f-ratio-hint">rekent mee met dose + yield</span>
       </div>
 
+      <div class="field-row" id="bloom-field" style="display:none">
+        <div class="field"><label>bloom (g)</label><input id="f-bloom-g" type="number" inputmode="decimal" step="1" placeholder="bv. 40"></div>
+        <div class="field"><label>bloom (s)</label><input id="f-bloom-s" type="number" inputmode="numeric" placeholder="bv. 30"></div>
+      </div>
+
       <div class="field-row">
         <div class="field"><label>time (m:ss)</label><input id="f-time" placeholder="2:30" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)"></div>
         <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
@@ -1389,7 +1394,7 @@ async function updateDialIn(beanId,method){
 function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
-  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide'].forEach(i=>setVal(i,''));
+  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s'].forEach(i=>setVal(i,''));
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
@@ -1402,6 +1407,7 @@ function openEdit(b){
   setVal('f-dose',b.dose);setVal('f-yield',b.yield);setVal('f-ratio',b.ratio);
   setVal('f-time',b.time);setVal('f-temp',b.temp);setVal('f-notes',b.notes);
   setVal('f-grind',b.grind||'');
+  setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
   setVal('f-score',b.score||8);setVal('f-guide',b.guide||'');
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
@@ -1454,6 +1460,9 @@ function applyFamilyToForm(){
   // puck-prep alleen bij espresso tonen
   const pf=document.getElementById('prep-field');
   if(pf){pf.style.display=(fam==='espresso')?'block':'none';if(fam==='espresso')renderPrep();}
+  // bloom alleen bij filter tonen
+  const bf=document.getElementById('bloom-field');
+  if(bf)bf.style.display=(fam==='filter')?'flex':'none';
 }
 /* ---------------- puck-prep (espresso) ---------------- */
 function renderPrep(){
@@ -1608,6 +1617,7 @@ function saveBrew(){
     score:parseFloat(document.getElementById('f-score').value)||0,
     notes:document.getElementById('f-notes').value.trim(),
     grind:document.getElementById('f-grind').value.trim(),
+    bloom:(function(){const g=document.getElementById('f-bloom-g').value.trim();const s=document.getElementById('f-bloom-s').value.trim();return (g||s)?{g,s}:null;})(),
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[...formTags],
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
@@ -1651,22 +1661,37 @@ function openDetail(id){
   const prepHtml=prepSummaryHTML(b);
   // maling: eigen invoer, anders (bij filter) de door AI+gear berekende maalstand
   const malingVal=b.grind?esc(b.grind):(advice?esc(advice.grind)+' <small style="color:var(--ink-soft);font-size:15px">✦</small>':'—');
-  document.getElementById('detail-body').innerHTML=`
-    <div class="detail-top"><button onclick="go('home')">‹</button>
-      <div class="h hand">${esc((b.title&&b.title.trim())?b.title:m.name)}</div><div class="edit hand" onclick="openEdit(state.brews.find(x=>x.id==='${id}'))">edit</div></div>
-    ${(b.title&&b.title.trim())?'<div class="subtitle" style="text-align:center;margin:-8px 0 4px">'+esc(m.name)+'</div>':''}
-    <div class="hero-img"><span class="doodle steam" style="top:0;left:50%;">∿ ∿ ∿</span>${iconHTML(m,210)}</div>
-    <div class="stat-card sketch" style="background:var(${m.tint});">
+  const beanName=(b.beans&&b.beans.trim())?b.beans.trim():(bean?bean.name:'');
+  const scoreTxt=(+b.score).toFixed(1);
+  // ondertitel: bij eigen titel de methode + boon, anders (methode staat al als titel) alleen de boon
+  const subParts=[];if(b.title&&b.title.trim())subParts.push(esc(m.name));if(beanName)subParts.push(esc(beanName));
+  const bloomTxt=b.bloom?[b.bloom.g?b.bloom.g+' g':'',b.bloom.s?b.bloom.s+' s':''].filter(Boolean).join(' · '):'';
+  // filter-raster bevat bloom en zet score+ratio klein bovenaan; espresso houdt score in het raster
+  const grid = fam==='filter' ? `
+      <div class="stat-ratio">ratio ${ratioTxt} · score ${scoreTxt}/10</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
+        <div class="stat"><div class="k">yield uit</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
+        <div class="stat"><div class="k">bloom</div><div class="v hand">${bloomTxt||'—'}</div></div>
+        <div class="stat"><div class="k">tijd</div><div class="v hand">${esc(b.time||'—')}</div></div>
+        <div class="stat"><div class="k">maling</div><div class="v hand">${malingVal}</div></div>
+        <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
+      </div>` : `
       <div class="stat-ratio">ratio ${ratioTxt}</div>
       <div class="stat-grid">
         <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
         <div class="stat"><div class="k">yield uit</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
-        <div class="stat"><div class="k">${fam==='espresso'?'shot-tijd':'tijd'}</div><div class="v hand">${esc(b.time||'—')}</div></div>
+        <div class="stat"><div class="k">shot-tijd</div><div class="v hand">${esc(b.time||'—')}</div></div>
         <div class="stat"><div class="k">maling</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
-        <div class="stat"><div class="k">score</div><div class="v hand">${(+b.score).toFixed(1)}/10</div></div>
-      </div>
-    </div>
+        <div class="stat"><div class="k">score</div><div class="v hand">${scoreTxt}/10</div></div>
+      </div>`;
+  document.getElementById('detail-body').innerHTML=`
+    <div class="detail-top"><button onclick="go('home')">‹</button>
+      <div class="h hand">${esc((b.title&&b.title.trim())?b.title:m.name)}</div><div class="edit hand" onclick="openEdit(state.brews.find(x=>x.id==='${id}'))">edit</div></div>
+    ${subParts.length?'<div class="subtitle" style="text-align:center;margin:-8px 0 4px">'+subParts.join(' · ')+'</div>':''}
+    <div class="hero-img"><span class="doodle steam" style="top:0;left:50%;">∿ ∿ ∿</span>${iconHTML(m,210)}</div>
+    <div class="stat-card sketch" style="background:var(${m.tint});">${grid}</div>
     ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">doel (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
     ${advice?'<div class="notes-card sketch soft"><div class="k">maaltip'+(fam==='espresso'?'':' — gear-bewust')+'</div><div class="v">volgende keer: maling '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
     ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'voorbereiding')+'</div>'+prepHtml+'</div>':''}
@@ -1912,6 +1937,7 @@ function brewSheetHTML(b){
     ['ratio',b.ratio?'1:'+(+b.ratio).toFixed(1):null],
     ['dose',b.dose?b.dose+' g':null],
     ['yield',b.yield?b.yield+' g':null],
+    ['bloom',b.bloom?[b.bloom.g?b.bloom.g+' g':'',b.bloom.s?b.bloom.s+' s':''].filter(Boolean).join(' · '):null],
     ['tijd',b.time||null],
     ['temp',b.temp?b.temp+' °C':null],
     ['maling',b.grind||null],
