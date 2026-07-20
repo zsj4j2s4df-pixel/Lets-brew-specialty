@@ -84,8 +84,8 @@
   .stat-card{padding:20px 24px;margin-bottom:16px;}
   .stat-ratio{text-align:right;color:var(--ink-soft);font-size:15px;margin:-4px 0 12px;}
   .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 18px;}
-  .prep-done{display:flex;align-items:center;gap:9px;font-size:19px;padding:5px 0;color:var(--ink);}
-  .prep-done .pd-cb{width:22px;height:22px;flex:none;border:2px solid var(--ink);background:var(--accent);color:#f2ead9;border-radius:6px;filter:url(#wobble);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .prep-done{display:flex;align-items:center;gap:8px;font-size:19px;padding:4px 0;color:var(--ink);}
+  .prep-done:before{content:'·';color:var(--ink-soft);font-size:22px;line-height:1;}
   .prep-done .pd-val{margin-left:auto;color:var(--ink-soft);font-size:17px;}
   .stat .k{color:var(--ink-soft);font-size:17px;}
   .stat .v{font-size:28px;line-height:1;margin-top:4px;}
@@ -1129,7 +1129,9 @@ function brewCard(b){
 function renderHome(){
   const g=document.getElementById('home-greeting');
   if(g)g.textContent=state.userName?('hi '+state.userName):'hi there';
-  const recent=[...state.brews].sort((a,b)=>b.ts-a.ts).slice(0,3);
+  // recente brews: bonen-die-op-zijn niet prominent tonen (tenzij er niets anders is)
+  const pool=state.brews.filter(b=>!brewBeanGone(b));
+  const recent=[...(pool.length?pool:state.brews)].sort((a,b)=>b.ts-a.ts).slice(0,3);
   document.getElementById('recent-list').innerHTML =
     recent.length?recent.map(brewCard).join(''):'<div class="empty-note">nog geen brews.<br>tik op ＋ add new brew om te beginnen.</div>';
   const ms=document.getElementById('methods-scroll');
@@ -1232,6 +1234,15 @@ function renderFilterChips(){
     `<button class="fc ${m.id===filterMethod?'sel':''}" onclick="setFilter('${m.id}')"><span class="fc-ic">${iconHTML(m,22)}</span>${esc(m.name)}</button>`).join('');
   document.getElementById('filter-methods').innerHTML=html;
 }
+// een brew hoort in de "reservekast" als zijn boon niet meer in de kast staat
+function brewBeanGone(b){
+  if(!b.beanId)return false;
+  const bean=beanById(b.beanId);
+  if(!bean)return true;              // boon is verwijderd
+  return bean.inStock===false;       // boon is op
+}
+let reserveOpen=false;
+function toggleReserve(){reserveOpen=!reserveOpen;renderAll();}
 function renderAll(){
   renderFilterChips();
   // zoekbalk pas tonen vanaf 6 brews
@@ -1245,9 +1256,18 @@ function renderAll(){
     const hay=[m.name,b.beans,b.notes,(b.tags||[]).join(' ')].join(' ').toLowerCase();
     return hay.includes(q);
   });
-  list.sort(brewSort==='score'?(a,b)=>b.score-a.score||b.ts-a.ts:(a,b)=>b.ts-a.ts);
-  document.getElementById('all-list').innerHTML =
-    list.length?list.map(brewCard).join(''):'<div class="empty-note">geen brews gevonden.</div>';
+  const sorter=brewSort==='score'?(a,b)=>b.score-a.score||b.ts-a.ts:(a,b)=>b.ts-a.ts;
+  const active=list.filter(b=>!brewBeanGone(b)).sort(sorter);
+  const reserve=list.filter(brewBeanGone).sort(sorter);
+  let html=active.length?active.map(brewCard).join(''):(reserve.length?'':'<div class="empty-note">geen brews gevonden.</div>');
+  if(reserve.length){
+    html+=`<button class="extra-kast" onclick="toggleReserve()"><svg viewBox="0 0 24 24" class="acic"><path d="M6 9 Q5.7 7.3 7.4 7.1 Q12 6.7 16.6 7.1 Q18.3 7.3 18 9 Q18.3 13 18 17 Q18.2 18.6 16.5 18.8 Q12 19.1 7.5 18.9 Q5.8 18.7 6 17 Q5.7 13 6 9 Z"/><path d="M9.5 7 Q9.4 5.4 9.6 4.1 Q12 3.8 14.4 4.1 Q14.6 5.5 14.5 7" opacity="0.6"/><path d="M9 12.5 Q12 12.2 15 12.5" opacity="0.5"/></svg> uit de oude doos · ${reserve.length} brew${reserve.length===1?'':'s'} met boon die op is ${reserveOpen?'▾':'▸'}</button>`;
+    if(reserveOpen){
+      html+='<div class="kast-head">de boon is niet meer in huis — je recept blijft bewaard</div>';
+      html+=reserve.map(brewCard).join('');
+    }
+  }
+  document.getElementById('all-list').innerHTML = html;
 }
 function renderStats_DISABLED(){
 }
@@ -1617,7 +1637,7 @@ function prepSummaryHTML(b){
     const it=items.find(x=>x.id===k);
     const name=it?it.name:k;
     const val=st.val?(' <span class="pd-val">'+esc(st.val)+(it&&it.unit?' '+esc(it.unit):'')+'</span>'):'';
-    rows.push('<div class="prep-done"><span class="pd-cb">✓</span>'+esc(name)+val+'</div>');
+    rows.push('<div class="prep-done">'+esc(name)+val+'</div>');
   });
   return rows.join('');
 }
@@ -1629,6 +1649,8 @@ function openDetail(id){
   const bean=b.beanId?beanById(b.beanId):null;
   const advice=(bean&&bean.dialIn&&bean.dialIn.method===b.method&&bean.dialIn.grind)?bean.dialIn:null;
   const prepHtml=prepSummaryHTML(b);
+  // maling: eigen invoer, anders (bij filter) de door AI+gear berekende maalstand
+  const malingVal=b.grind?esc(b.grind):(advice?esc(advice.grind)+' <small style="color:var(--ink-soft);font-size:15px">✦</small>':'—');
   document.getElementById('detail-body').innerHTML=`
     <div class="detail-top"><button onclick="go('home')">‹</button>
       <div class="h hand">${esc((b.title&&b.title.trim())?b.title:m.name)}</div><div class="edit hand" onclick="openEdit(state.brews.find(x=>x.id==='${id}'))">edit</div></div>
@@ -1637,10 +1659,10 @@ function openDetail(id){
     <div class="stat-card sketch" style="background:var(${m.tint});">
       <div class="stat-ratio">ratio ${ratioTxt}</div>
       <div class="stat-grid">
-        <div class="stat"><div class="k">${fam==='espresso'?'dose in':'dose'}</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
-        <div class="stat"><div class="k">${fam==='espresso'?'yield uit':'water'}</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
+        <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
+        <div class="stat"><div class="k">yield uit</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
         <div class="stat"><div class="k">${fam==='espresso'?'shot-tijd':'tijd'}</div><div class="v hand">${esc(b.time||'—')}</div></div>
-        <div class="stat"><div class="k">maling</div><div class="v hand">${b.grind?esc(b.grind):'—'}</div></div>
+        <div class="stat"><div class="k">maling</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
         <div class="stat"><div class="k">score</div><div class="v hand">${(+b.score).toFixed(1)}/10</div></div>
       </div>
