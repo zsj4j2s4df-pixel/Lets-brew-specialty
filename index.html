@@ -1445,7 +1445,7 @@ function renderDiGoal(){
   const bean=beanById(formBean);
   const aiGrind=(bean&&bean.dialIn&&bean.dialIn.method===formMethod)?bean.dialIn.grind:'';
   const grind=t.grind||aiGrind||'—';
-  el.innerHTML=`<div class="di-t"><span>🎯 doel</span><span>ratio 1:2</span></div>
+  el.innerHTML=`<div class="di-t"><span><svg class="acic" viewBox="0 0 24 24" style="width:19px;height:19px;vertical-align:-3px"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.4"/></svg> doel</span><span>ratio 1:2</span></div>
     <div class="di-grid">
       <div><div class="k">dose in</div><div class="v hand">${t.dose?esc(t.dose)+' <small>g</small>':'18 <small>g</small>'}</div></div>
       <div><div class="k">yield uit</div><div class="v hand">${t.yield?esc(t.yield)+' <small>g</small>':'36 <small>g</small>'}</div></div>
@@ -1467,7 +1467,7 @@ function diAdvice(){
     if(diff>tol)dir='trager dan doel → maal iets grover';
     else if(diff<-tol)dir='sneller dan doel → maal iets fijner';
     else dir='mooi op doel ✓';
-    html+='⏱ '+esc(document.getElementById('di-time').value)+' vs doel '+esc(t.time||('0:'+String(target).padStart(2,'0')))+' → '+dir+((grinder&&dir!=='mooi op doel ✓')?' op je '+esc(grinder):'');
+    html+='<svg class="acic" viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px"><circle cx="12" cy="12" r="8"/><path d="M12 7.2 L12 12 L15.4 14"/></svg> '+esc(document.getElementById('di-time').value)+' vs doel '+esc(t.time||('0:'+String(target).padStart(2,'0')))+' → '+dir+((grinder&&dir!=='mooi op doel ✓')?' op je '+esc(grinder):'');
   }
   if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
     html+=(html?'<br>':'')+'✦ AI-tip: probeer maling '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'');
