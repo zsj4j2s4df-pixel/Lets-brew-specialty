@@ -82,7 +82,11 @@
   .hero-img img{max-height:100%;max-width:100%;mix-blend-mode:multiply;}
   .hero-img .glyph{font-size:90px;}
   .stat-card{padding:20px 24px;margin-bottom:16px;}
+  .stat-ratio{text-align:right;color:var(--ink-soft);font-size:15px;margin:-4px 0 12px;}
   .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 18px;}
+  .prep-done{display:flex;align-items:center;gap:9px;font-size:19px;padding:5px 0;color:var(--ink);}
+  .prep-done .pd-cb{width:22px;height:22px;flex:none;border:2px solid var(--ink);background:var(--accent);color:#f2ead9;border-radius:6px;filter:url(#wobble);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .prep-done .pd-val{margin-left:auto;color:var(--ink-soft);font-size:17px;}
   .stat .k{color:var(--ink-soft);font-size:17px;}
   .stat .v{font-size:28px;line-height:1;margin-top:4px;}
   .notes-card{padding:18px 24px;}
@@ -1604,26 +1608,46 @@ function cancelForm(){go(editingId?'detail':'home');if(editingId)openDetail(edit
 
 /* ---------------- detail ---------------- */
 let currentDetail=null;
+function prepSummaryHTML(b){
+  if(!b.prep)return '';
+  const items=(state.prepItems||[]);
+  const rows=[];
+  Object.keys(b.prep).forEach(k=>{
+    const st=b.prep[k];if(!st||(!st.on&&!st.val))return;
+    const it=items.find(x=>x.id===k);
+    const name=it?it.name:k;
+    const val=st.val?(' <span class="pd-val">'+esc(st.val)+(it&&it.unit?' '+esc(it.unit):'')+'</span>'):'';
+    rows.push('<div class="prep-done"><span class="pd-cb">✓</span>'+esc(name)+val+'</div>');
+  });
+  return rows.join('');
+}
 function openDetail(id){
   const b=state.brews.find(x=>x.id===id);if(!b)return;currentDetail=id;
   const m=methodById(b.method);
+  const fam=methodFamily(b.method);
   const ratioTxt=b.ratio?('1:'+(+b.ratio).toFixed(1)):'—';
+  const bean=b.beanId?beanById(b.beanId):null;
+  const advice=(bean&&bean.dialIn&&bean.dialIn.method===b.method&&bean.dialIn.grind)?bean.dialIn:null;
+  const prepHtml=prepSummaryHTML(b);
   document.getElementById('detail-body').innerHTML=`
     <div class="detail-top"><button onclick="go('home')">‹</button>
       <div class="h hand">${esc((b.title&&b.title.trim())?b.title:m.name)}</div><div class="edit hand" onclick="openEdit(state.brews.find(x=>x.id==='${id}'))">edit</div></div>
     ${(b.title&&b.title.trim())?'<div class="subtitle" style="text-align:center;margin:-8px 0 4px">'+esc(m.name)+'</div>':''}
     <div class="hero-img"><span class="doodle steam" style="top:0;left:50%;">∿ ∿ ∿</span>${iconHTML(m,210)}</div>
-    <div class="stat-card sketch" style="background:var(${m.tint});"><div class="stat-grid">
-      <div class="stat"><div class="k">brew ratio</div><div class="v hand">${ratioTxt}</div></div>
-      <div class="stat"><div class="k">dose</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
-      <div class="stat"><div class="k">yield</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
-      <div class="stat"><div class="k">time</div><div class="v hand">${esc(b.time||'—')}</div></div>
-      <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
-      <div class="stat"><div class="k">score</div><div class="v hand">${(+b.score).toFixed(1)}/10</div></div>
-    </div></div>
-    ${(b.grind||b.target)?`<div class="notes-card sketch soft"><div class="k">dial-in</div>
-      ${b.grind?'<div class="v">maling: '+esc(b.grind)+'</div>':''}
-      ${b.target&&fmtShot(b.target)?'<div class="rstep" style="color:var(--ink-soft);margin-top:4px">doel: '+esc(fmtShot(b.target))+'</div>':''}</div>`:''}
+    <div class="stat-card sketch" style="background:var(${m.tint});">
+      <div class="stat-ratio">ratio ${ratioTxt}</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="k">${fam==='espresso'?'dose in':'dose'}</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
+        <div class="stat"><div class="k">${fam==='espresso'?'yield uit':'water'}</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
+        <div class="stat"><div class="k">${fam==='espresso'?'shot-tijd':'tijd'}</div><div class="v hand">${esc(b.time||'—')}</div></div>
+        <div class="stat"><div class="k">maling</div><div class="v hand">${b.grind?esc(b.grind):'—'}</div></div>
+        <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
+        <div class="stat"><div class="k">score</div><div class="v hand">${(+b.score).toFixed(1)}/10</div></div>
+      </div>
+    </div>
+    ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">doel (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
+    ${advice?'<div class="notes-card sketch soft"><div class="k">maaltip'+(fam==='espresso'?'':' — gear-bewust')+'</div><div class="v">volgende keer: maling '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
+    ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'voorbereiding')+'</div>'+prepHtml+'</div>':''}
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'geen notities'))}</div>
       ${(b.tags&&b.tags.length)?'<div class="note-tags">'+b.tags.map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${(b.custom&&b.custom.length)?'<div style="margin-top:10px">'+b.custom.map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
