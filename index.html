@@ -392,16 +392,16 @@
 
       <div class="field-row">
         <div class="field"><label>dose (g)</label><input id="f-dose" type="number" inputmode="decimal" step="0.1" oninput="calc('dose')"></div>
-        <div class="field"><label>yield (g)</label><input id="f-yield" type="number" inputmode="decimal" step="0.1" oninput="calc('yield')"></div>
+        <div class="field"><label id="f-yield-label">yield (g)</label><input id="f-yield" type="number" inputmode="decimal" step="0.1" oninput="calc('yield')"></div>
       </div>
       <div class="ratio-row">
         <span class="ratio-lbl">ratio 1:</span>
         <input id="f-ratio" class="ratio-input" type="number" inputmode="decimal" step="0.1" oninput="calc('ratio')">
-        <span class="ratio-hint">rekent mee met dose + yield</span>
+        <span class="ratio-hint" id="f-ratio-hint">rekent mee met dose + yield</span>
       </div>
 
       <div class="field-row">
-        <div class="field"><label>time (mm:ss)</label><input id="f-time" placeholder="2:30" oninput="renderDialInHint()"></div>
+        <div class="field"><label>time (m:ss)</label><input id="f-time" placeholder="2:30" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)"></div>
         <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
       </div>
 
@@ -1163,6 +1163,20 @@ function parseTimeSec(t){if(t==null)return null;const s=(''+t).trim();if(!s)retu
 // korte maalstand voor het maling-veld (knip lange uitleg eraf)
 function conciseGrind(v){v=(''+(v==null?'':v)).trim();if(!v)return v;
   let s=v.split(/\s+op\s+|\s*[(,;]/)[0].trim();return s.length<=28?s:s.slice(0,28).trim();}
+// tijd altijd als m:ss — je typt alleen cijfers, de dubbelepunt komt vanzelf
+function formatTime(el){
+  let d=el.value.replace(/\D/g,'').slice(0,4);
+  el.value = !d ? '' : (d.length<=2 ? d : d.slice(0,d.length-2)+':'+d.slice(-2));
+  try{renderDialInHint();}catch(e){}
+}
+function normalizeTime(el){
+  let d=el.value.replace(/\D/g,'').slice(0,4);
+  if(!d){el.value='';return;}
+  const ss=d.length<=2?d.padStart(2,'0'):d.slice(-2);
+  const mm=d.length<=2?'0':d.slice(0,-2);
+  el.value=mm+':'+ss;
+  try{renderDialInHint();}catch(e){}
+}
 // korte weergave van een doel-shot, bv. "18g in · maling 1.3 · 27s · 36g uit"
 function fmtShot(t){
   if(!t)return '';
@@ -1293,6 +1307,15 @@ function renderFormMethods(){
   document.getElementById('form-methods').innerHTML=state.methods.filter(m=>m.on).map(m=>
     `<button class="mp ${m.id===formMethod?'sel':''}" onclick="pickMethod('${m.id}')"><span class="mp-ic">${iconHTML(m,30)}</span> ${esc(m.name)}</button>`
   ).join('');
+  applyFamilyToForm();
+}
+// pas het formulier aan de familie (espresso/filter) aan
+function applyFamilyToForm(){
+  const fam=methodFamily(formMethod);
+  const yl=document.getElementById('f-yield-label');
+  if(yl)yl.textContent=(fam==='filter')?'water (g)':'yield (g)';
+  const rh=document.getElementById('f-ratio-hint');
+  if(rh)rh.textContent=(fam==='filter')?'rekent mee met dose + water':'rekent mee met dose + yield';
 }
 function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
 function renderFormBeans(){
