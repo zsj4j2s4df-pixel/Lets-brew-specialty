@@ -165,6 +165,12 @@
   .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
   .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
   .gear-chip button{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;}
+  .prep-row{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:20px;}
+  .prep-cb{width:26px;height:26px;border:2px solid var(--ink);filter:url(#wobble);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent;cursor:pointer;}
+  .prep-cb.on{background:var(--accent);color:#f2ead9;}
+  .prep-name{flex:1;min-width:0;}
+  .prep-row .prep-val{flex:none;width:66px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:12px;padding:5px 8px;font-family:inherit;font-size:17px;color:var(--ink);text-align:center;}
+  .prep-x{background:none;border:none;color:var(--ink-soft);font-size:20px;cursor:pointer;padding:0 2px;}
   .ratio-row{display:flex;align-items:center;gap:8px;margin:2px 4px 16px;flex-wrap:wrap;}
   .ratio-lbl{color:var(--ink-soft);font-size:17px;}
   .ratio-input{width:76px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:12px;padding:7px 10px;font-family:inherit;font-size:18px;color:var(--ink);}
@@ -406,6 +412,11 @@
       </div>
 
       <div class="field"><label>maling (stand)</label><input id="f-grind" placeholder="bv. 1.3 of medium-fijn"></div>
+
+      <div class="field" id="prep-field" style="display:none"><label>puck-prep &amp; machine</label>
+        <div id="prep-list"></div>
+        <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ eigen stap</button>
+      </div>
 
       <div class="field"><label>score</label>
         <div class="score-row"><input id="f-score" type="range" min="0" max="10" step="0.1" value="8" oninput="document.getElementById('score-big').textContent=(+this.value).toFixed(1)">
@@ -780,6 +791,8 @@ const DEFAULT_METHODS=[
 ];
 // bekende familie per standaard-methode (voor migratie van bestaande gebruikers)
 const METHOD_FAMILY_DEFAULTS={espresso:'espresso',perculator:'espresso',senseo:'espresso',aeropress:'filter',v60:'filter',chemex:'filter',coldbrew:'filter'};
+// standaard puck-prep-lijst voor espresso (persoonlijk, zelf te beheren). unit -> waarde-veld
+const DEFAULT_PREP=[{id:'wdt',name:'WDT'},{id:'puckscreen',name:'puckscreen'},{id:'preinf',name:'pre-infusie',unit:'s'},{id:'temp',name:'watertemp',unit:'°C'}];
 // welke familie hoort bij een methode? espresso of filter (val terug op filter)
 function methodFamily(idOrMethod){
   const m=(typeof idOrMethod==='object'&&idOrMethod)?idOrMethod:methodById(idOrMethod);
@@ -905,7 +918,7 @@ async function load(){
     }catch(e){}
   }
   if(s&&s.methods&&s.brews){state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();return;}
-  state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[]};
+  state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[],prepItems:JSON.parse(JSON.stringify(DEFAULT_PREP))};
   save();
 }
 // vul standaard-afbeeldingen aan voor methodes die al opgeslagen waren zonder img
@@ -939,6 +952,8 @@ function mergeMethodImages(){
   state.methods.forEach(m=>{
     if(!m.family){m.family=METHOD_FAMILY_DEFAULTS[m.id]||'filter';changed=true;}
   });
+  // persoonlijke puck-prep-lijst aanmaken als die er nog niet is
+  if(!Array.isArray(state.prepItems)){state.prepItems=JSON.parse(JSON.stringify(DEFAULT_PREP));changed=true;}
   if(changed)save();
 }
 function save(){
@@ -1151,7 +1166,7 @@ function renderStats_DISABLED(){
 
 
 /* ---------------- formulier + calculator ---------------- */
-let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null;
+let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null,formPrep={};
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
 // laat een tekstvak meegroeien met de inhoud (geen klein scroll-vakje meer)
 function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(el.scrollHeight+4,190)+'px';}
@@ -1200,6 +1215,7 @@ function brewAgain(id){
   formTags=Array.isArray(src.tags)?[...src.tags]:[];renderFormTags();
   // doel meenemen: de vorige target, anders de vorige brew zelf als richtlijn
   pendingTarget=src.target||{dose:src.dose,grind:src.grind||'',time:src.time||'',yield:src.yield};
+  formPrep=src.prep?JSON.parse(JSON.stringify(src.prep)):{};renderPrep();
   renderDialInHint();
   toast('nieuwe poging — meet je tijd, pas aan en sla op');
 }
@@ -1257,7 +1273,7 @@ function openForm(methodId){
   document.getElementById('form-title').textContent='new brew';
   ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide'].forEach(i=>setVal(i,''));
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
-  formBean=null;formTags=[];formCustom=[];pendingTarget=null;
+  formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
 function openEdit(b){
@@ -1273,6 +1289,7 @@ function openEdit(b){
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
   formCustom=Array.isArray(b.custom)?JSON.parse(JSON.stringify(b.custom)):[];
   pendingTarget=b.target||null;
+  formPrep=b.prep?JSON.parse(JSON.stringify(b.prep)):{};
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
 function renderCustomFields(){
@@ -1316,6 +1333,36 @@ function applyFamilyToForm(){
   if(yl)yl.textContent=(fam==='filter')?'water (g)':'yield (g)';
   const rh=document.getElementById('f-ratio-hint');
   if(rh)rh.textContent=(fam==='filter')?'rekent mee met dose + water':'rekent mee met dose + yield';
+  // puck-prep alleen bij espresso tonen
+  const pf=document.getElementById('prep-field');
+  if(pf){pf.style.display=(fam==='espresso')?'block':'none';if(fam==='espresso')renderPrep();}
+}
+/* ---------------- puck-prep (espresso) ---------------- */
+function renderPrep(){
+  const el=document.getElementById('prep-list');if(!el)return;
+  const items=state.prepItems||[];
+  el.innerHTML=items.map(it=>{
+    const st=formPrep[it.id]||{};
+    return `<div class="prep-row">
+      <span class="prep-cb ${st.on?'on':''}" onclick="togglePrep('${it.id}')">✓</span>
+      <span class="prep-name">${esc(it.name)}</span>
+      ${it.unit?`<input class="prep-val" value="${esc(st.val||'')}" placeholder="${esc(it.unit)}" oninput="setPrepVal('${it.id}',this.value)">`:''}
+      <button class="prep-x" title="verwijderen" onclick="removePrepItem('${it.id}')">×</button>
+    </div>`;
+  }).join('');
+}
+function togglePrep(id){const st=formPrep[id]||(formPrep[id]={});st.on=!st.on;renderPrep();}
+function setPrepVal(id,v){const st=formPrep[id]||(formPrep[id]={});st.val=v;if(v&&!('on'in st))st.on=true;}
+function addPrepItem(){
+  const name=(prompt('naam van de stap (bv. "distributie-tool")')||'').trim();
+  if(!name)return;
+  if(!Array.isArray(state.prepItems))state.prepItems=[];
+  state.prepItems.push({id:'p_'+uid().slice(0,5),name});
+  save();renderPrep();
+}
+function removePrepItem(id){
+  state.prepItems=(state.prepItems||[]).filter(x=>x.id!==id);
+  delete formPrep[id];save();renderPrep();
 }
 function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
 function renderFormBeans(){
@@ -1365,6 +1412,7 @@ function saveBrew(){
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
     guide:document.getElementById('f-guide').value.trim(),
     target:editingId?(state.brews.find(x=>x.id===editingId)?.target||null):(pendingTarget||null),
+    prep:(function(){const p={};Object.keys(formPrep).forEach(k=>{const s=formPrep[k];if(s&&(s.on||s.val))p[k]={on:!!s.on,val:s.val||''};});return Object.keys(p).length?p:null;})(),
     ts:editingId?(state.brews.find(x=>x.id===editingId)?.ts||Date.now()):Date.now()
   };
   if(editingId){const i=state.brews.findIndex(x=>x.id===editingId);state.brews[i]=b;}
