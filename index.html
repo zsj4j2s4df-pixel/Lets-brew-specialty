@@ -233,7 +233,7 @@
   .search-wrap input{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:18px;padding:12px 16px 12px 42px;font-family:inherit;font-size:19px;color:var(--ink);}
   .search-wrap input:focus{outline:none;border-color:var(--ink);}
   .filter-bar{margin-bottom:10px;}
-  .filter-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;}
+  .filter-chips{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0 4px;}
   .filter-chips::-webkit-scrollbar{display:none;}
   .fc{flex:none;padding:7px 15px;border-radius:15px;background:var(--card);border:2px solid var(--line);filter:url(#wobble);font-family:inherit;font-size:16px;color:var(--ink-soft);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
   .fc-ic{display:inline-flex;align-items:center;height:22px;}
@@ -496,7 +496,9 @@
       <h1 class="title hand">your brews</h1>
       <div class="subtitle">alles wat je hebt gezet</div>
 
-      <div class="search-wrap">
+      <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ nieuwe brew</button>
+
+      <div class="search-wrap" id="brew-search-wrap" style="display:none">
         <svg viewBox="0 0 24 24" class="acic search-ic"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15 Q17.5 17.5 20 20"/><path d="M7.5 9 Q8.5 7.3 10.5 7.2" opacity="0.5"/></svg>
         <input id="brew-search" placeholder="zoek op boon, methode, notitie…" oninput="renderAll()">
       </div>
@@ -505,19 +507,7 @@
         <div class="filter-chips" id="filter-methods"></div>
       </div>
 
-      <div class="sort-row">
-        <span>sorteer:</span>
-        <button class="sortc on" data-s="new" onclick="setSort('new')">nieuwste</button>
-        <button class="sortc" data-s="score" onclick="setSort('score')">hoogste score</button>
-      </div>
-
       <div id="all-list"></div>
-      <div class="share-block sketch soft">
-        <div class="set-t hand">delen met vrienden</div>
-        <div class="set-d" style="margin:2px 0 10px">open een brew en tik op ‘stuur’ om ’m door te sturen, of voeg een brew van een vriend toe.</div>
-        <button class="profile-btn ic-btn" onclick="document.getElementById('brews-import').click()"><svg viewBox="0 0 24 24" class="acic"><path d="M12 13.6 Q12.3 8 12 3.2 M8 10 Q10 12.4 12 14 Q14 12.2 16 9.7 M4 13 Q3.8 16.5 4.3 20 Q12 20.4 19.7 20 Q20.2 16.5 20 13"/><path d="M4.5 19.6 Q11.5 20 19.5 19.6" opacity="0.5"/></svg>voeg brew van vriend toe</button>
-        <input type="file" id="brews-import" accept=".json,application/json" style="display:none" onchange="importBrewsFile(event)">
-      </div>
     </div>
   </div>
   <div id="page-methods" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
@@ -1189,7 +1179,10 @@ function renderFilterChips(){
 }
 function renderAll(){
   renderFilterChips();
-  const q=(document.getElementById('brew-search')?.value||'').toLowerCase().trim();
+  // zoekbalk pas tonen vanaf 6 brews
+  const sw=document.getElementById('brew-search-wrap');
+  if(sw)sw.style.display=(state.brews.length>=6)?'flex':'none';
+  const q=(state.brews.length>=6?(document.getElementById('brew-search')?.value||''):'').toLowerCase().trim();
   let list=state.brews.filter(b=>{
     if(filterMethod!=='all'&&b.method!==filterMethod)return false;
     if(!q)return true;
