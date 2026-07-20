@@ -165,6 +165,9 @@
   .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
   .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
   .gear-chip button{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;}
+  .mm-fam{display:flex;gap:10px;}
+  .fampick{flex:1;padding:12px;border-radius:16px;background:var(--card);border:2px solid var(--line);filter:url(#wobble);font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:var(--ink-soft);cursor:pointer;}
+  .fampick.sel{background:var(--accent);color:#f2ead9;border-color:var(--ink);}
   .dialin-hint{background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;padding:12px 14px;margin-bottom:16px;font-size:17px;color:var(--ink);line-height:1.4;}
   .dialin-hint .di-t{color:var(--ink-soft);font-size:15px;margin-bottom:3px;}
   .dialin-hint .di-tip{margin-top:7px;color:var(--accent);}
@@ -467,6 +470,13 @@
           <input id="mm-new" placeholder="naam, bv. moka pot" style="background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:18px;padding:13px 16px;font-family:inherit;font-size:20px;color:var(--ink);flex:1;">
         </div>
       </div>
+      <div class="field"><label>familie</label>
+        <div class="mm-fam">
+          <button type="button" id="mm-fam-espresso" class="fampick" onclick="pickFamily('espresso')">espresso</button>
+          <button type="button" id="mm-fam-filter" class="fampick sel" onclick="pickFamily('filter')">filter</button>
+        </div>
+        <div class="set-d" style="margin-top:6px;font-size:14px">espresso = kort &amp; sterk (seconden) · filter = langer &amp; milder (minuten). Bepaalt het formulier + de maaltip.</div>
+      </div>
       <button class="profile-btn" onclick="document.getElementById('mm-img-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M5.5 15.5 Q8 12 10 13.6 Q13 9.5 15.5 12 Q17.5 14 18.8 16.5" opacity="0.8"/><circle cx="8.6" cy="9" r="1.5" opacity="0.7"/></svg><span id="mm-img-label">tekening toevoegen (optioneel)</span></button>
       <input type="file" id="mm-img-input" accept="image/*" style="display:none" onchange="pickMethodImg(event)">
       <div id="mm-img-preview" style="text-align:center;margin-bottom:10px"></div>
@@ -753,13 +763,23 @@ function guideFor(methodId){
   return null;
 }
 const DEFAULT_METHODS=[
-  {id:'espresso',name:'espresso',glyph:'☕',img:'m-espresso.png',tint:'--espresso',on:true},
-  {id:'aeropress',name:'aeropress',glyph:'⬗',img:'m-aeropress.png',tint:'--aeropress',on:true},
-  {id:'v60',name:'v60',glyph:'◭',img:'m-v60.png',tint:'--v60',on:true},
-  {id:'chemex',name:'chemex',glyph:'⧖',img:'m-chemex.png',tint:'--chemex',on:true},
-  {id:'perculator',name:'mokka pot',glyph:'🫖',img:'m-mokkapot.png',tint:'--perculator',on:true},
-  {id:'senseo',name:'senseo',glyph:'⬗',img:'m-senseo.png',tint:'--espresso',on:true},
+  {id:'espresso',name:'espresso',glyph:'☕',img:'m-espresso.png',tint:'--espresso',on:true,family:'espresso'},
+  {id:'aeropress',name:'aeropress',glyph:'⬗',img:'m-aeropress.png',tint:'--aeropress',on:true,family:'filter'},
+  {id:'v60',name:'v60',glyph:'◭',img:'m-v60.png',tint:'--v60',on:true,family:'filter'},
+  {id:'chemex',name:'chemex',glyph:'⧖',img:'m-chemex.png',tint:'--chemex',on:true,family:'filter'},
+  {id:'perculator',name:'mokka pot',glyph:'🫖',img:'m-mokkapot.png',tint:'--perculator',on:true,family:'espresso'},
+  {id:'senseo',name:'senseo',glyph:'⬗',img:'m-senseo.png',tint:'--espresso',on:true,family:'espresso'},
 ];
+// bekende familie per standaard-methode (voor migratie van bestaande gebruikers)
+const METHOD_FAMILY_DEFAULTS={espresso:'espresso',perculator:'espresso',senseo:'espresso',aeropress:'filter',v60:'filter',chemex:'filter',coldbrew:'filter'};
+// welke familie hoort bij een methode? espresso of filter (val terug op filter)
+function methodFamily(idOrMethod){
+  const m=(typeof idOrMethod==='object'&&idOrMethod)?idOrMethod:methodById(idOrMethod);
+  if(m&&m.family)return m.family;
+  const id=(m&&m.id)||(typeof idOrMethod==='string'?idOrMethod:null);
+  if(id&&METHOD_FAMILY_DEFAULTS[id])return METHOD_FAMILY_DEFAULTS[id];
+  return 'filter';
+}
 const TINTS=['--espresso','--aeropress','--v60','--chemex','--perculator'];
 // ingebouwde tekeningen om uit te kiezen per methode-soort
 const IMG_LIBRARY={
@@ -907,6 +927,10 @@ function mergeMethodImages(){
     if(se&&!se.on){se.on=true;}
     state.senseoDefaulted=true;changed=true;
   }
+  // familie (espresso/filter) invullen waar die nog ontbreekt
+  state.methods.forEach(m=>{
+    if(!m.family){m.family=METHOD_FAMILY_DEFAULTS[m.id]||'filter';changed=true;}
+  });
   if(changed)save();
 }
 function save(){
@@ -1637,15 +1661,22 @@ async function replaceMethodImg(id,ev){
   }catch(e){toast('kon afbeelding niet laden');}
   ev.target.value='';
 }
+let mmFamily='filter';
+function pickFamily(f){
+  mmFamily=(f==='espresso')?'espresso':'filter';
+  const e=document.getElementById('mm-fam-espresso'),fi=document.getElementById('mm-fam-filter');
+  if(e)e.classList.toggle('sel',mmFamily==='espresso');
+  if(fi)fi.classList.toggle('sel',mmFamily==='filter');
+}
 function addMethod(){
   const name=document.getElementById('mm-new').value.trim();
   if(!name){toast('geef een naam op');return;}
   const id=name.toLowerCase().replace(/[^a-z0-9]/g,'')+'_'+uid().slice(0,3);
   const tint=TINTS[state.methods.length%TINTS.length];
-  const m={id,name:name.toLowerCase(),glyph:'☕',tint,on:true};
+  const m={id,name:name.toLowerCase(),glyph:'☕',tint,on:true,family:mmFamily};
   if(mmNewImg)m.customImg=mmNewImg;
   state.methods.push(m);
-  document.getElementById('mm-new').value='';mmNewImg=null;
+  document.getElementById('mm-new').value='';mmNewImg=null;mmFamily='filter';pickFamily('filter');
   document.getElementById('mm-img-preview').innerHTML='';
   document.getElementById('mm-img-label').textContent='tekening toevoegen (optioneel)';
   save();renderMethods();toast('✓ methode toegevoegd');
