@@ -1556,12 +1556,18 @@ function renderMethods(){
           ${cnt>0?`<a class="bean-link" onclick="showMethodBrews('${m.id}')">${cnt} brew${cnt===1?'':'s'} →</a>`:'nog geen brews'}
           · <a class="bean-link" onclick="openImgPicker('${m.id}')">tekening</a>
         </div>
+        <div style="font-size:14px;color:var(--ink-soft);margin-top:2px">familie: <a class="bean-link" onclick="toggleMethodFamily('${m.id}')">${methodFamily(m)} ⇄</a></div>
         <input type="file" id="mm-edit-img-${m.id}" accept="image/*" style="display:none" onchange="replaceMethodImg('${m.id}',event)">
       </div>
       <div class="toggle ${m.on?'on':''}" onclick="toggleMethod('${m.id}')"><div class="knob"></div></div>
     </div>`;}).join('');
 }
 function toggleMethod(id){const m=state.methods.find(x=>x.id===id);m.on=!m.on;save();renderMethods();toast(m.on?'✓ '+m.name+' aan':'○ '+m.name+' uit');}
+function toggleMethodFamily(id){
+  const m=state.methods.find(x=>x.id===id);if(!m)return;
+  m.family=(methodFamily(m)==='espresso')?'filter':'espresso';
+  save();renderMethods();toast(m.name+' → '+m.family);
+}
 
 let imgPickerMethod=null;
 function openImgPicker(id){
