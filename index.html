@@ -165,6 +165,11 @@
   .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
   .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
   .gear-chip button{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;}
+  .ratio-row{display:flex;align-items:center;gap:8px;margin:2px 4px 16px;flex-wrap:wrap;}
+  .ratio-lbl{color:var(--ink-soft);font-size:17px;}
+  .ratio-input{width:76px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:12px;padding:7px 10px;font-family:inherit;font-size:18px;color:var(--ink);}
+  .ratio-input:focus{outline:none;border-color:var(--ink);}
+  .ratio-hint{color:var(--ink-soft);font-size:14px;}
   .mm-fam{display:flex;gap:10px;}
   .fampick{flex:1;padding:12px;border-radius:16px;background:var(--card);border:2px solid var(--line);filter:url(#wobble);font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:var(--ink-soft);cursor:pointer;}
   .fampick.sel{background:var(--accent);color:#f2ead9;border-color:var(--ink);}
@@ -389,8 +394,11 @@
         <div class="field"><label>dose (g)</label><input id="f-dose" type="number" inputmode="decimal" step="0.1" oninput="calc('dose')"></div>
         <div class="field"><label>yield (g)</label><input id="f-yield" type="number" inputmode="decimal" step="0.1" oninput="calc('yield')"></div>
       </div>
-      <div class="field"><label>ratio (1 : x)</label><input id="f-ratio" type="number" inputmode="decimal" step="0.1" oninput="calc('ratio')"></div>
-      <div class="calc-hint">vul er twee in — de derde rekent zichzelf uit.</div>
+      <div class="ratio-row">
+        <span class="ratio-lbl">ratio 1:</span>
+        <input id="f-ratio" class="ratio-input" type="number" inputmode="decimal" step="0.1" oninput="calc('ratio')">
+        <span class="ratio-hint">rekent mee met dose + yield</span>
+      </div>
 
       <div class="field-row">
         <div class="field"><label>time (mm:ss)</label><input id="f-time" placeholder="2:30" oninput="renderDialInHint()"></div>
