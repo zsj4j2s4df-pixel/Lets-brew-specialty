@@ -175,6 +175,8 @@
   .di-goal .k{color:var(--ink-soft);font-size:14px;}
   .di-goal .v{font-size:26px;line-height:1.05;}
   .di-goal .v small{font-size:15px;color:var(--ink-soft);}
+  .di-goal .v-edit{font-family:'Caveat',cursive;font-weight:700;font-size:26px;line-height:1.05;color:var(--ink);background:transparent;border:none;border-bottom:1.5px dashed var(--line);width:66px;padding:0 0 1px;}
+  .di-goal .v-edit:focus{outline:none;border-bottom-color:var(--ink);}
   .di-goal .di-ai{color:var(--accent);font-size:18px;margin-top:2px;}
   .di-card{padding:14px 18px;margin-bottom:16px;}
   .di-lbl{font-size:22px;color:var(--ink-soft);margin-bottom:6px;}
@@ -527,7 +529,10 @@
           <div class="field"><label>dose in (g)</label><input id="di-dose" type="number" inputmode="decimal" step="0.1"></div>
           <div class="field"><label>yield out (g)</label><input id="di-yield" type="number" inputmode="decimal" step="0.1"></div>
         </div>
-        <div class="field"><label>measured shot time (m:ss)</label><input id="di-time" placeholder="0:28" inputmode="numeric" oninput="formatTime(this);diAdvice()" onblur="normalizeTime(this);diAdvice()"></div>
+        <div class="field-row">
+          <div class="field"><label>shot time (m:ss)</label><input id="di-time" placeholder="0:28" inputmode="numeric" oninput="formatTime(this);diAdvice()" onblur="normalizeTime(this);diAdvice()"></div>
+          <div class="field"><label>grind used</label><input id="di-grind" placeholder="e.g. 7 or -0,5" oninput="diAdvice()"></div>
+        </div>
         <div class="di-advice" id="di-advice"></div>
       </div>
 
@@ -538,8 +543,8 @@
       </div>
 
       <button class="save-btn" onclick="saveDialInBrew(false)">dial-in nailed → save as brew</button>
-      <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">not quite yet → next attempt</button>
-      <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">on "next attempt" your new grind setting becomes the target</div>
+      <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">not good → try again later</button>
+      <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">we save this attempt and give a new AI grind tip — so you can keep improving from here</div>
     </div>
   </div>
 
@@ -1507,6 +1512,7 @@ function openDialIn(methodId){
   formMethod=valid?methodId:(state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0]?.id||'espresso');
   const t=pendingTarget||{};
   setVal('di-dose',t.dose||'');setVal('di-yield',t.yield||'');setVal('di-time','');
+  setVal('di-grind',t.grind||'');   // startpunt: de doel-maalstand, aan te passen
   renderDialIn();go('dialin');
 }
 function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();}
@@ -1522,15 +1528,18 @@ function renderDiGoal(){
   const t=pendingTarget||{};
   const bean=beanById(formBean);
   const aiGrind=(bean&&bean.dialIn&&bean.dialIn.method===formMethod)?bean.dialIn.grind:'';
-  const grind=t.grind||aiGrind||'—';
+  const shownGrind=t.grind||aiGrind||'';
+  const isAI=aiGrind&&shownGrind===aiGrind;
   el.innerHTML=`<div class="di-t"><span><svg class="acic" viewBox="0 0 24 24" style="width:19px;height:19px;vertical-align:-3px"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.4"/></svg> target</span><span>ratio 1:2</span></div>
     <div class="di-grid">
       <div><div class="k">dose in</div><div class="v hand">${t.dose?esc(t.dose)+' <small>g</small>':'18 <small>g</small>'}</div></div>
       <div><div class="k">yield out</div><div class="v hand">${t.yield?esc(t.yield)+' <small>g</small>':'36 <small>g</small>'}</div></div>
       <div><div class="k">shot time</div><div class="v hand">${t.time?esc(t.time):'26–30 <small>s</small>'}</div></div>
-      <div><div class="k">grind</div><div class="v hand">${esc(grind)}</div>${(aiGrind&&aiGrind===grind)?'<div class="di-ai">✦ AI tip</div>':''}</div>
+      <div><div class="k">grind</div><input class="v-edit hand" id="di-target-grind" value="${esc(shownGrind)}" placeholder="—" inputmode="text" onchange="setTargetGrind(this.value)">${isAI?'<div class="di-ai">✦ AI tip</div>':''}</div>
     </div>`;
 }
+// pas de doel-maalstand aan voor een realistischer startpunt
+function setTargetGrind(v){if(!pendingTarget)pendingTarget={};pendingTarget.grind=(v||'').trim();renderDiGoal();}
 function diAdvice(){
   const el=document.getElementById('di-advice');if(!el)return;
   const t=pendingTarget||{};
@@ -1555,6 +1564,7 @@ function diAdvice(){
 async function saveDialInBrew(next){
   const dose=parseFloat(document.getElementById('di-dose').value)||null;
   const yld=parseFloat(document.getElementById('di-yield').value)||null;
+  const usedGrind=(document.getElementById('di-grind').value||'').trim();
   const t=pendingTarget||{};
   const prep={};Object.keys(formPrep).forEach(k=>{const s=formPrep[k];if(s&&(s.on||s.val))prep[k]={on:!!s.on,val:s.val||''};});
   const rec=pendingRecipe||{};
@@ -1562,7 +1572,7 @@ async function saveDialInBrew(next){
     dose,yield:yld,ratio:(dose&&yld)?+(yld/dose).toFixed(1):null,
     time:document.getElementById('di-time').value.trim(),
     temp:(formPrep.temp&&formPrep.temp.val)?(parseFloat(formPrep.temp.val)||null):null,
-    score:0,notes:'',grind:t.grind||'',
+    score:0,notes:'',grind:usedGrind||t.grind||'',
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[],custom:[],guide:(rec.guide||''),target:pendingTarget||null,
     prep:Object.keys(prep).length?prep:null,ts:Date.now()};
@@ -1573,7 +1583,9 @@ async function saveDialInBrew(next){
     const newGrind=(bean&&bean.dialIn&&bean.dialIn.method===b.method)?bean.dialIn.grind:(b.grind||'');
     pendingTarget={dose:dose?String(dose):(t.dose||''),yield:yld?String(yld):(t.yield||''),time:t.time||'',grind:newGrind};
     openDialIn(b.method);
-    toast('next attempt — new target: grind '+(newGrind||'?'));
+    // als de AI net een maaltip gaf, laat die toast staan (met reden); anders eigen bericht
+    const gotAiTip=bean&&bean.dialIn&&bean.dialIn.method===b.method&&aiReady();
+    if(!gotAiTip)toast('attempt saved — adjust the grind and try again');
   }else{toast('✓ dial-in saved');go('home');}
 }
 function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
