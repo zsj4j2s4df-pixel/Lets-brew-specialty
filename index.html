@@ -893,6 +893,15 @@ const DEFAULT_METHODS=[
 const METHOD_FAMILY_DEFAULTS={espresso:'espresso',perculator:'espresso',senseo:'espresso',aeropress:'filter',v60:'filter',chemex:'filter',coldbrew:'filter'};
 // standaard puck-prep-lijst voor espresso (persoonlijk, zelf te beheren). unit -> waarde-veld
 const DEFAULT_PREP=[{id:'wdt',name:'WDT'},{id:'puckscreen',name:'puckscreen'},{id:'preinf',name:'pre-infusion',unit:'s'},{id:'temp',name:'water temp',unit:'°C'}];
+// vaste dial-in-regels die de AI overal meekrijgt bij espresso-maling (voorkomt omgekeerde adviezen)
+const ESPRESSO_RULES=
+  'ESPRESSO DIAL-IN REGELS (niet omkeren):\n'+
+  '- FIJNER malen = meer weerstand = LANGZAMER doorloop = MINDER opbrengst per seconde.\n'+
+  '- GROVER malen = minder weerstand = SNELLER doorloop = MEER opbrengst per seconde.\n'+
+  '- Beoordeel met de doorloopsnelheid = opbrengst(g) ÷ tijd(s), vergeleken met het doel (doelopbrengst ÷ doeltijd) — niet met de tijd alleen.\n'+
+  '- Te weinig opbrengst voor de tijd / choking / te traag → GROVER malen.\n'+
+  '- Te veel of te snelle opbrengst / waterig / te snel → FIJNER malen.\n'+
+  '- Verander één ding tegelijk (de maling); houd dose, temperatuur en puck-prep gelijk.';
 // welke familie hoort bij een methode? espresso of filter (val terug op filter)
 function methodFamily(idOrMethod){
   const m=(typeof idOrMethod==='object'&&idOrMethod)?idOrMethod:methodById(idOrMethod);
@@ -1198,6 +1207,7 @@ async function quickBrew(){
       (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept:\n${beansList}\n`
                      :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
       gearPromptBlock()+
+      (esp?('\n'+ESPRESSO_RULES+'\n'):'')+
       `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
       `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam. drink = melkdranknaam of "espresso" (laat leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord — GEEN uitleg of merknaam). grindNote = korte uitleg over de maling (mag molen noemen). dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
@@ -1403,7 +1413,7 @@ async function updateDialIn(beanId,method){
     const prompt=`Je bent een espresso dial-in expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
       (grinder?` Molen(s) van de gebruiker: ${grinder}. Als je de molen kent, gebruik de juiste getalsrichting (welk getal grover/fijner is).`:'')+
       `\nDOEL: ${tY} g uit in ~${tT} s (ratio ~1:2), doelsnelheid ${(tY/tT).toFixed(2)} g/s.\n`+
-      `NATUURKUNDE (niet omkeren): FIJNER malen = meer weerstand = LANGZAMER = MINDER opbrengst per seconde. GROVER malen = minder weerstand = SNELLER = MEER opbrengst per seconde.\n`+
+      ESPRESSO_RULES+`\n`+
       `Pogingen (oud→nieuw):\n${lines}\n`+
       `Oordeel over de laatste shot: ${richting}.\n`+
       `Geef de beste maalstand voor de VOLGENDE poging, in exact die richting. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = KORTE maalstand (getal/klikken of relatief zoals "+1" of "-0.5", passend bij de schaal die de gebruiker gebruikt; GEEN uitleg). reason = één korte zin met de juiste richting (bv. "te weinig opbrengst → grover"). Nederlands.`;
@@ -2498,7 +2508,7 @@ async function aiRecipe(beanId,methodId){
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
     const espM=methodFamily(m)==='espresso';
     const milk=espM?` Je mag een melkdrank kiezen (espresso, flat white, cappuccino, latte, cortado, macchiato, americano); zet dan de melkstappen in "steps" en de dranknaam in "drink".`:'';
-    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}${milk}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
+    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}${milk}${espM?('\n'+ESPRESSO_RULES+'\n'):''}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
@@ -2725,6 +2735,7 @@ async function askCoach(){
     const ctx=myCoffeeContext();
     const sys="Je bent een ervaren, vriendelijke specialty-barista en koffiecoach. "+
       "Beantwoord de vraag kort en praktisch in het Nederlands, max 5 zinnen, concreet en bruikbaar. "+
+      "Als het over espresso-maling/dial-in gaat, houd je strikt aan deze regels:\n"+ESPRESSO_RULES+"\n"+
       (ctx?("Hieronder staan de gegevens van deze gebruiker. Volg deze volgorde bij je advies:\n"+
         "1) Kijk EERST naar de bonen die de gebruiker IN KAST (in huis) heeft en baseer je advies daar zoveel mogelijk op — dat is wat ze nu echt kunnen zetten.\n"+
         "2) Kijk DAARNA naar hun brew-geschiedenis om te zien wat ze eerder deden, wat goed/slecht scoorde en wat past bij hun smaak.\n"+
