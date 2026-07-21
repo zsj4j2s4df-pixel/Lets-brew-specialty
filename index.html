@@ -1385,11 +1385,28 @@ async function updateDialIn(beanId,method){
   if(!attempts.length||!aiReady())return;   // zonder AI: gewoon opgeslagen, geen berekening
   try{
     const grinder=(state.gear||[]).filter(g=>g.name).map(g=>g.name).join(', ');
-    const lines=attempts.map((a,i)=>`${i+1}) doel: ${fmtShot(a.target)||'—'} | werkelijk: ${a.dose||'?'}g in, maling ${a.grind||'?'}, tijd ${a.time||'?'}, ${a.yield||'?'}g uit${a.score?', score '+a.score+'/10':''}`).join('\n');
-    const prompt=`Je bent een espresso/koffie dial-in expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
-      (grinder?` Molen(s) van de gebruiker: ${grinder} — als je de molen kent, gebruik de juiste richting (welk getal fijner/grover is).`:'')+
-      `\nPogingen (oud→nieuw):\n${lines}\n`+
-      `Bepaal op basis van doel vs. werkelijk (m.n. shot-tijd) de beste maalstand voor de volgende keer. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = KORTE maalstand (alleen getal/klikken of één woord op de schaal van de molen, GEEN uitleg). reason = één korte zin (bv. "shot liep te traag → iets grover"). Nederlands.`;
+    // doel afleiden uit de laatste poging (yield/tijd) en de doorloopsnelheid vergelijken
+    const last=attempts[attempts.length-1];
+    const tgt=last.target||{};
+    const tY=parseFloat(tgt.yield)||36, tT=parseTimeSec(tgt.time)||28;
+    const lines=attempts.map((a,i)=>{
+      const aY=parseFloat(a.yield)||null, aT=parseTimeSec(a.time)||null;
+      const flow=(aY&&aT)?(aY/aT).toFixed(2):'?';
+      return `${i+1}) maling ${a.grind||'?'}: ${a.dose||'?'}g in → ${aY||'?'}g uit in ${a.time||'?'} (doorloop ${flow} g/s)`;
+    }).join('\n');
+    let richting='onbekend — te weinig data';
+    const laY=parseFloat(last.yield)||null, laT=parseTimeSec(last.time)||null;
+    if(laY&&laT){const f=laY/laT, ft=tY/tT;
+      richting = f<ft*0.85 ? 'TE LANGZAAM (te weinig opbrengst voor de tijd / choking) → GROVER malen'
+              : f>ft*1.15 ? 'TE SNEL (te veel/te snel opbrengst, waterig) → FIJNER malen'
+                          : 'op doel — maling ongeveer aanhouden';}
+    const prompt=`Je bent een espresso dial-in expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
+      (grinder?` Molen(s) van de gebruiker: ${grinder}. Als je de molen kent, gebruik de juiste getalsrichting (welk getal grover/fijner is).`:'')+
+      `\nDOEL: ${tY} g uit in ~${tT} s (ratio ~1:2), doelsnelheid ${(tY/tT).toFixed(2)} g/s.\n`+
+      `NATUURKUNDE (niet omkeren): FIJNER malen = meer weerstand = LANGZAMER = MINDER opbrengst per seconde. GROVER malen = minder weerstand = SNELLER = MEER opbrengst per seconde.\n`+
+      `Pogingen (oud→nieuw):\n${lines}\n`+
+      `Oordeel over de laatste shot: ${richting}.\n`+
+      `Geef de beste maalstand voor de VOLGENDE poging, in exact die richting. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = KORTE maalstand (getal/klikken of relatief zoals "+1" of "-0.5", passend bij de schaal die de gebruiker gebruikt; GEEN uitleg). reason = één korte zin met de juiste richting (bv. "te weinig opbrengst → grover"). Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],250);
     const d=extractJSON(txt);
     if(d&&d.grind){
@@ -1543,18 +1560,27 @@ function setTargetGrind(v){if(!pendingTarget)pendingTarget={};pendingTarget.grin
 function diAdvice(){
   const el=document.getElementById('di-advice');if(!el)return;
   const t=pendingTarget||{};
-  const actual=parseTimeSec(document.getElementById('di-time')?.value);
-  const target=parseTimeSec(t.time)||28;
+  const aT=parseTimeSec(document.getElementById('di-time')?.value);
+  const aY=parseFloat(document.getElementById('di-yield')?.value)||null;
+  const tT=parseTimeSec(t.time)||28;
+  const tY=parseFloat(t.yield)||36;
   const grinder=(state.gear||[]).filter(g=>g.category==='espresso'&&g.name).map(g=>g.name)[0];
   const bean=beanById(formBean);
+  const clock='<svg class="acic" viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px"><circle cx="12" cy="12" r="8"/><path d="M12 7.2 L12 12 L15.4 14"/></svg> ';
+  const shot=document.getElementById('di-time')?.value||'';
   let html='';
-  if(actual){
-    const diff=actual-target, tol=3;
+  if(aT&&aY){
+    // vergelijk de doorloopsnelheid (g/s), niet alleen de tijd — zo weet je of hij te snel of te traag liep
+    const f=aY/aT, ft=tY/tT;
     let dir;
-    if(diff>tol)dir='slower than target → grind a bit coarser';
-    else if(diff<-tol)dir='faster than target → grind a bit finer';
-    else dir='right on target ✓';
-    html+='<svg class="acic" viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px"><circle cx="12" cy="12" r="8"/><path d="M12 7.2 L12 12 L15.4 14"/></svg> '+esc(document.getElementById('di-time').value)+' vs target '+esc(t.time||('0:'+String(target).padStart(2,'0')))+' → '+dir+((grinder&&dir!=='right on target ✓')?' on your '+esc(grinder):'');
+    if(f<ft*0.85)dir='slow — only '+aY+'g out in '+shot+' (target '+tY+'g) → grind coarser';
+    else if(f>ft*1.15)dir='fast — '+aY+'g out in '+shot+' (target '+tY+'g) → grind finer';
+    else dir='on target ✓';
+    html+=clock+dir+((grinder&&!/on target/.test(dir))?' on your '+esc(grinder):'');
+  }else if(aT){
+    const diff=aT-tT, tol=3;
+    let dir=diff>tol?'slower than target → grind coarser':diff<-tol?'faster than target → grind finer':'on target so far ✓';
+    html+=clock+esc(shot)+' vs target '+esc(t.time||('0:'+String(tT).padStart(2,'0')))+' → '+dir+' (also enter yield for a better read)';
   }
   if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
     html+=(html?'<br>':'')+'✦ AI tip: try grind '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'');
@@ -1581,7 +1607,8 @@ async function saveDialInBrew(next){
   if(next){
     const bean=beanById(b.beanId);
     const newGrind=(bean&&bean.dialIn&&bean.dialIn.method===b.method)?bean.dialIn.grind:(b.grind||'');
-    pendingTarget={dose:dose?String(dose):(t.dose||''),yield:yld?String(yld):(t.yield||''),time:t.time||'',grind:newGrind};
+    // het DOEL blijft het doel (yield/tijd niet overschrijven met je gemeten waarden); alleen de maalstand wordt bijgesteld
+    pendingTarget={dose:t.dose||(dose?String(dose):''),yield:t.yield||'',time:t.time||'',grind:newGrind};
     openDialIn(b.method);
     // als de AI net een maaltip gaf, laat die toast staan (met reden); anders eigen bericht
     const gotAiTip=bean&&bean.dialIn&&bean.dialIn.method===b.method&&aiReady();
