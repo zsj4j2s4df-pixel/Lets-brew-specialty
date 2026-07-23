@@ -1063,7 +1063,23 @@ function mergeMethodImages(){
   });
   // persoonlijke puck-prep-lijst aanmaken als die er nog niet is
   if(!Array.isArray(state.prepItems)){state.prepItems=JSON.parse(JSON.stringify(DEFAULT_PREP));changed=true;}
+  // eenmalig: oude dial-in-pogingen samenvouwen tot één recept per boon+methode+drank
+  if(!state.dialInCollapsed){
+    const groups={};
+    state.brews.forEach(b=>{if(!isDialInBrew(b))return;const k=(b.beanId||'')+'|'+b.method+'|'+(b.drink||'');(groups[k]=groups[k]||[]).push(b);});
+    const removeIds=new Set();
+    Object.keys(groups).forEach(k=>{const list=groups[k];if(list.length<2)return;list.sort((a,b)=>(b.ts||0)-(a.ts||0));list.slice(1).forEach(x=>removeIds.add(x.id));});
+    if(removeIds.size)state.brews=state.brews.filter(b=>!removeIds.has(b.id));
+    state.dialInCollapsed=true;changed=true;
+  }
   if(changed)save();
+}
+// een dial-in-recept: precies één per boon+methode+drank (pogingen overschrijven, geen kopieën)
+function isDialInBrew(x){
+  if(!x)return false;
+  if(x.dialIn===true)return true;
+  // oudere pogingen (van vóór de dialIn-vlag): espresso-familie, geen score, geen eigen titel
+  return methodFamily(x.method)==='espresso' && !x.score && (!x.title || x.title===(x.drink||''));
 }
 function save(){
   // schrijf naar IndexedDB: veel grotere quota dan localStorage, geschikt voor foto's
@@ -1604,7 +1620,7 @@ async function saveDialInBrew(next){
   const t=pendingTarget||{};
   const prep={};Object.keys(formPrep).forEach(k=>{const s=formPrep[k];if(s&&(s.on||s.val))prep[k]={on:!!s.on,val:s.val||''};});
   const rec=pendingRecipe||{};
-  const b={id:uid(),method:formMethod,title:(rec.title||rec.drink||''),drink:(rec.drink||''),
+  const b={id:uid(),method:formMethod,dialIn:true,title:(rec.title||rec.drink||''),drink:(rec.drink||''),
     dose,yield:yld,ratio:(dose&&yld)?+(yld/dose).toFixed(1):null,
     time:document.getElementById('di-time').value.trim(),
     temp:(formPrep.temp&&formPrep.temp.val)?(parseFloat(formPrep.temp.val)||null):null,
@@ -1612,6 +1628,11 @@ async function saveDialInBrew(next){
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[],custom:[],guide:(rec.guide||''),target:pendingTarget||null,
     prep:Object.keys(prep).length?prep:null,ts:Date.now()};
+  // één dial-in-recept per boon+methode+drank: bestaande pogingen overschrijven i.p.v. kopiëren
+  const same=x=>isDialInBrew(x)&&(x.beanId||'')===(b.beanId||'')&&x.method===b.method&&(x.drink||'')===(b.drink||'');
+  const prior=state.brews.filter(same);
+  if(prior.length)b.id=prior.slice().sort((a,c)=>(a.ts||0)-(c.ts||0))[0].id;   // behoud oudste id (stabiele identiteit)
+  state.brews=state.brews.filter(x=>!same(x));
   state.brews.push(b);save();
   if(b.beanId)try{await updateDialIn(b.beanId,b.method);}catch(e){}
   if(next){
