@@ -197,6 +197,7 @@
   .di-goal .di-ai{color:var(--accent);font-size:18px;margin-top:2px;}
   .di-card{padding:14px 18px;margin-bottom:16px;}
   .di-lbl{font-size:22px;color:var(--ink-soft);margin-bottom:6px;}
+  .brewfor-btn{flex:1;border:2px solid var(--ink);background:var(--accent);color:var(--cream);border-radius:14px;filter:url(#wobble);padding:9px 14px;font-family:'Caveat',cursive;font-weight:700;font-size:20px;cursor:pointer;}
   /* taste wheel */
   #wheel-wrap{margin:2px 0 10px;}
   #taste-wheel{width:188px;display:block;margin:0 auto;}
@@ -733,6 +734,10 @@
         <div class="field"><label>altitude (m)</label><input id="b-altitude" placeholder="e.g. 1900-2100"></div>
       </div>
       <div class="field"><label>roast date</label><input id="b-roastdate" type="date"></div>
+      <div class="field-row" id="b-cost-row">
+        <div class="field"><label>price paid (€)</label><input id="b-price" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 12.50"></div>
+        <div class="field"><label>bag size (g)</label><input id="b-bagsize" type="number" inputmode="numeric" placeholder="e.g. 250"></div>
+      </div>
       <div class="field"><label>roaster tasting notes</label><textarea id="b-roasternotes" placeholder="as on the bag, e.g. jasmine, peach, black tea"></textarea></div>
       <div class="field"><label>website / link to bean</label>
         <input id="b-url" type="url" inputmode="url" placeholder="https://...">
@@ -806,6 +811,24 @@
       <div id="latte-content"></div>
     </div>
   </div>
+  <!-- BREW CREW (coffee CRM) -->
+  <div id="page-crew" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand">brew crew</div><button onclick="go('profile')">done</button></div>
+      <div class="subtitle">everyone you brew for — and exactly how they like it.</div>
+      <div id="crew-list"></div>
+      <div class="settings-card sketch soft">
+        <div class="set-t hand">add someone</div>
+        <div class="field" style="margin-top:8px"><label>name</label><input id="cw-name" placeholder="e.g. Emma"></div>
+        <div class="field"><label>their drink</label><input id="cw-drink" placeholder="e.g. flat white / v60 / senseo"></div>
+        <div class="field"><label>details (milk, sugar, quirks)</label><input id="cw-notes" placeholder="e.g. oat milk, extra hot"></div>
+        <div class="field"><label>birthday (optional)</label><input id="cw-bday" type="date"></div>
+        <button class="save-btn" onclick="addGuest()">＋ add to crew</button>
+      </div>
+    </div>
+  </div>
+
   <div id="page-profile" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
@@ -855,7 +878,16 @@
           <div class="set-d" id="reminder-status" style="margin-top:10px"></div>
           <button class="profile-btn" onclick="testReminder()" style="margin-top:8px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 3.6 Q12.7 3.6 12.9 4.4 Q16.6 5.3 16.9 9.6 Q17.1 13 19 16 Q12 16.6 5 16 Q6.9 13 7.1 9.6 Q7.4 5.3 11.1 4.4 Q11.3 3.6 12 3.6 Z"/><path d="M10 18 Q12 20.2 14 18" opacity="0.7"/></svg> send a test notification now</button>
           <div class="set-d" style="margin-top:10px;font-size:14px">note: on iOS a notification at a fixed time is only delivered reliably when the app is on your home screen. if the app is fully closed, you'll see the suggestion the moment you reopen it.</div>
+          <div class="field" style="margin-top:10px"><label>push server (optional — your Cloudflare worker URL)</label>
+            <input id="push-url" type="url" inputmode="url" placeholder="https://lets-brew-push.….workers.dev" onchange="savePushUrl()"></div>
+          <div class="set-d" style="font-size:14px">with a worker set, the daily suggestion also arrives when the app is fully closed.</div>
         </div>
+      </div>
+
+      <div class="settings-card sketch soft" id="crew-entry" style="display:none">
+        <div class="set-t hand">brew crew</div>
+        <div class="set-d" style="margin:4px 0 10px" id="crew-entry-sub">your coffee CRM — guests, their exact drink and birthdays.</div>
+        <button class="profile-btn" onclick="go('crew')">open brew crew →</button>
       </div>
 
       <div class="settings-card sketch soft" id="feat-card">
@@ -883,6 +915,12 @@
         <button class="profile-btn ic-btn" onclick="document.getElementById('import-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 13 Q12.3 8 12 3.6 M8.4 7.4 Q10.2 5.4 12 3.5 Q13.8 5.5 15.6 7.6 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> restore a back-up</button>
         <input type="file" id="import-input" accept="application/json,.json" style="display:none" onchange="importData(event)">
         <div class="set-d" style="margin-top:8px;font-size:14px">note: “restore a back-up” replaces your current data. “add from a friend” above adds to it instead.</div>
+      </div>
+
+      <div class="settings-card sketch soft" id="shortcut-card" style="display:none">
+        <div class="set-t hand">start from your home screen</div>
+        <div class="set-d" style="margin:4px 0 10px">make an iOS Shortcut (or bookmark) that opens one of these links — the app jumps straight into that brew.</div>
+        <div id="shortcut-list"></div>
       </div>
 
       <div class="settings-card sketch soft" id="adv-card">
@@ -1164,6 +1202,7 @@ function mergeMethodImages(){
     if(!m.family){m.family=METHOD_FAMILY_DEFAULTS[m.id]||'filter';changed=true;}
   });
   if(!state.features){state.features={};changed=true;}
+  if(!Array.isArray(state.crew)){state.crew=[];changed=true;}
   // persoonlijke puck-prep-lijst aanmaken als die er nog niet is
   if(!Array.isArray(state.prepItems)){state.prepItems=JSON.parse(JSON.stringify(DEFAULT_PREP));changed=true;}
   // eenmalig: oude dial-in-pogingen samenvouwen tot één recept per boon+methode+drank
@@ -1218,7 +1257,7 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile'];
+const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile','crew'];
 const navMap={home:'home',form:'home',dialin:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
@@ -1239,6 +1278,7 @@ function go(p,isBack){
   if(p==='brews')renderAll();
   if(p==='methods')renderMethods();
   if(p==='beans')renderBeans();
+  if(p==='crew')renderCrew();
   if(p==='learn-barista')renderLesson('barista-content',LESSONS.barista);
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLesson('latte-content',LESSONS.latte);
@@ -1966,6 +2006,7 @@ function openDetail(id){
       <button class="act" onclick="shareOneBrew('${id}')"><span class="ic">${ICO.send}</span>send</button>
       <button class="act" onclick="shareBrew('${id}')"><span class="ic">${ICO.chat}</span>text</button>
       <button class="act" onclick="printBrew('${id}')"><span class="ic"><svg viewBox="0 0 24 24" class="acic"><path d="M7 9 Q7 5 7.3 4.4 Q12 4.1 16.7 4.4 Q17 8 17 9 M5.5 9.4 Q4.2 9.2 4.4 11 Q4.2 14.5 4.6 16.4 Q6 16.6 8 16.5 M18.5 9.4 Q19.8 9.2 19.6 11 Q19.8 14.5 19.4 16.4 Q18 16.6 16 16.5 M7.4 13.5 Q12 13.1 16.6 13.5 Q16.8 17 16.7 20 Q12 20.4 7.3 20 Q7.2 17 7.4 13.5 Z"/></svg></span>PDF</button>
+      ${featOn('sharecards')?`<button class="act" onclick="shareCard('${id}')"><span class="ic"><svg viewBox="0 0 24 24" class="acic"><path d="M4.5 6.5 Q12 6.1 19.5 6.5 Q19.9 12 19.5 17.5 Q12 17.9 4.5 17.5 Q4.1 12 4.5 6.5 Z"/><path d="M7 10 Q9.5 9.7 12 10 M7 13.5 Q10 13.2 13 13.5" opacity="0.6"/><circle cx="16.5" cy="11.5" r="1.6" opacity="0.7"/></svg></span>card</button>`:''}
     </div>`;
   go('detail');
 }
@@ -2448,6 +2489,7 @@ function beanCardHTML(b){
       ${methodLine}
       ${b.notes?'<br>'+esc(b.notes):''}
       ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">view online</a>':''}
+      ${(featOn('cost')&&b.price&&b.bagsize)?'<br>≈ €'+((b.price/b.bagsize)*18).toFixed(2)+' per cup (18 g) · €'+(+b.price).toFixed(2)+' / '+b.bagsize+' g':''}
       <br>${cnt} brew${cnt===1?'':'s'} linked</div>
     ${freshGaugeHTML(b)}
     <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
@@ -2486,7 +2528,7 @@ let editingBean=null;
 function openBeanForm(){
   editingBean=null;
   document.getElementById('beanform-title').textContent='new bean';
-  ['b-name','b-roaster','b-origin','b-process','b-variety','b-altitude','b-roastdate','b-roasternotes','b-url','b-notes'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  ['b-name','b-roaster','b-origin','b-process','b-variety','b-altitude','b-roastdate','b-roasternotes','b-url','b-notes','b-price','b-bagsize'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
   document.getElementById('scan-status').textContent='';
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null;const lp=document.getElementById('label-preview');if(lp)lp.innerHTML='';
@@ -2500,7 +2542,7 @@ function editBean(id){
   set('b-name',b.name);set('b-roaster',b.roaster);set('b-origin',b.origin);
   set('b-process',b.process);set('b-variety',b.variety);set('b-altitude',b.altitude);
   set('b-roastdate',b.roastdate);set('b-roasternotes',b.roasternotes);
-  set('b-url',b.url);set('b-notes',b.notes);
+  set('b-url',b.url);set('b-notes',b.notes);set('b-price',b.price);set('b-bagsize',b.bagsize);
   document.getElementById('scan-status').textContent='';
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null; // alleen nieuwe foto vervangt de bestaande
@@ -2532,6 +2574,8 @@ function saveBean(){
     roastdate:document.getElementById('b-roastdate').value,
     roasternotes:document.getElementById('b-roasternotes').value.trim(),
     url:document.getElementById('b-url').value.trim(),
+    price:parseFloat(document.getElementById('b-price').value)||null,
+    bagsize:parseFloat(document.getElementById('b-bagsize').value)||null,
     methods:[...beanFormMethods],
     method:beanFormMethods[0]||null,
     notes:document.getElementById('b-notes').value.trim()};
@@ -2969,6 +3013,138 @@ function restoreImages(){
   save();toast('✓ drawings restored');go('home');
 }
 
+/* ---------------- brew crew: jouw koffie-CRM ---------------- */
+function crewDaysToBday(bday){
+  if(!bday)return null;
+  const now=new Date();const d=new Date(bday);if(isNaN(d))return null;
+  const next=new Date(now.getFullYear(),d.getMonth(),d.getDate());
+  if(next<now)next.setFullYear(now.getFullYear()+1);
+  return Math.round((next-now)/86400000);
+}
+function renderCrew(){
+  const el=document.getElementById('crew-list');if(!el)return;
+  const crew=state.crew||[];
+  if(!crew.length){el.innerHTML='<div class="empty-note">nobody yet.<br>add the people you brew for below.</div>';return;}
+  el.innerHTML=crew.map(g=>{
+    const bd=crewDaysToBday(g.bday);
+    const last=g.last?timeAgo(g.last):'never';
+    return `<div class="settings-card sketch soft">
+      <div class="set-t hand">${esc(g.name)}</div>
+      <div class="set-d" style="margin:2px 0 8px"><b style="font-weight:400;color:var(--ink)">${esc(g.drink||'?')}</b>${g.notes?' · '+esc(g.notes):''}
+        <br>last brewed: ${last}${(bd!=null&&bd<=30)?' · 🎂 birthday in '+bd+' day'+(bd===1?'':'s'):''}</div>
+      <div style="display:flex;gap:8px">
+        <button class="brewfor-btn" onclick="brewForGuest('${g.id}')">brew for ${esc(g.name)} →</button>
+        <button class="icon-btn" title="delete" onclick="delGuest('${g.id}')">${ICO.del}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addGuest(){
+  const name=document.getElementById('cw-name').value.trim();
+  if(!name){toast('give them a name');return;}
+  if(!state.crew)state.crew=[];
+  state.crew.push({id:uid(),name,drink:document.getElementById('cw-drink').value.trim(),
+    notes:document.getElementById('cw-notes').value.trim(),bday:document.getElementById('cw-bday').value||'',last:null});
+  ['cw-name','cw-drink','cw-notes','cw-bday'].forEach(i=>setVal(i,''));
+  save();renderCrew();toast('✓ '+name+' joined the crew');
+}
+function delGuest(id){
+  if(!confirm('remove them from the crew?'))return;
+  state.crew=(state.crew||[]).filter(g=>g.id!==id);save();renderCrew();toast('removed');
+}
+const MILK_WORDS=['flat white','cappuccino','latte','cortado','macchiato','americano','espresso','ristretto'];
+function brewForGuest(id){
+  const g=(state.crew||[]).find(x=>x.id===id);if(!g)return;
+  g.last=Date.now();save();
+  const drink=(g.drink||'').toLowerCase();
+  const espLike=MILK_WORDS.some(w=>drink.includes(w));
+  // methode: bij espresso-achtig drankje de espresso-familie, anders match op methodenaam of aanbeveling
+  let mid=null;
+  const byName=state.methods.find(m=>m.on&&drink.includes(m.name.toLowerCase()));
+  if(byName)mid=byName.id;
+  else if(espLike)mid=(state.methods.find(m=>m.on&&methodFamily(m)==='espresso')||{}).id;
+  if(!mid){const r=recommendBrew();mid=r?r.method.id:null;}
+  if(!mid){toast('turn on a method first under methods');return;}
+  if(methodFamily(mid)==='espresso'){
+    const last=state.brews.filter(x=>x.method===mid).sort((a,b)=>b.ts-a.ts)[0];
+    pendingTarget=last?(last.target||{dose:last.dose?String(last.dose):'',yield:last.yield?String(last.yield):'',time:last.time||'',grind:last.grind||''}):null;
+    formPrep=(last&&last.prep)?JSON.parse(JSON.stringify(last.prep)):{};
+    formBean=null;
+    pendingRecipe={guide:'',drink:g.drink||'',title:(g.drink||'coffee')+' for '+g.name};
+    openDialIn(mid);
+  }else{
+    openForm(mid);
+    setTimeout(()=>setVal('f-title',(g.drink||'coffee')+' for '+g.name),0);
+  }
+  toast('☕ brewing for '+g.name+(g.notes?' — '+g.notes:''));
+}
+/* ---------------- shortcuts: start vanaf je beginscherm ---------------- */
+function renderShortcuts(){
+  const card=document.getElementById('shortcut-card');if(!card)return;
+  card.style.display=featOn('shortcuts')?'block':'none';
+  if(!featOn('shortcuts'))return;
+  const base=location.origin+location.pathname;
+  document.getElementById('shortcut-list').innerHTML=
+    state.methods.filter(m=>m.on).map(m=>`<button class="profile-btn ic-btn" onclick="copyShortcut('${m.id}')">${iconHTML(m,22)} copy link: start ${esc(m.name)}</button>`).join('')+
+    `<button class="profile-btn ic-btn" onclick="copyShortcut('surprise')">✦ copy link: surprise me</button>`;
+}
+function copyShortcut(id){
+  const base=location.origin+location.pathname;
+  const url=id==='surprise'?(base+'?quickbrew=1'):(base+'?brew='+encodeURIComponent(id));
+  (navigator.clipboard&&navigator.clipboard.writeText)?
+    navigator.clipboard.writeText(url).then(()=>toast('link copied — paste it in an iOS Shortcut'),()=>prompt('copy this link:',url))
+    :prompt('copy this link:',url);
+}
+/* ---------------- share card: brew als tekenkaart-afbeelding ---------------- */
+async function shareCard(id){
+  const b=state.brews.find(x=>x.id===id);if(!b)return;
+  const m=methodById(b.method);const fam=methodFamily(b.method);
+  try{await document.fonts.load('700 60px Caveat');await document.fonts.load('30px "Patrick Hand"');}catch(e){}
+  const W=900,H=1100,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim()||'#3a302a';
+  const paper='#efe9dd',ink='#3a302a',soft='#7a6c5e',accent='#4a3b30';
+  x.fillStyle=paper;x.fillRect(0,0,W,H);
+  // wiebelige kaderlijn
+  x.strokeStyle=ink;x.lineWidth=5;x.lineCap='round';x.beginPath();
+  const jig=(x0,y0,x1,y1)=>{const n=14;for(let i=0;i<=n;i++){const t=i/n,px=x0+(x1-x0)*t+(Math.random()-.5)*5,py=y0+(y1-y0)*t+(Math.random()-.5)*5;i?x.lineTo(px,py):x.moveTo(px,py);}};
+  jig(46,46,W-46,46);jig(W-46,46,W-46,H-46);jig(W-46,H-46,46,H-46);jig(46,H-46,46,46);x.stroke();
+  x.fillStyle=ink;x.font='700 84px Caveat';x.textAlign='center';
+  x.fillText((b.title&&b.title.trim())?b.title:m.name,W/2,180,W-160);
+  x.fillStyle=soft;x.font='36px "Patrick Hand"';
+  x.fillText([m.name,b.beans].filter(Boolean).join(' · '),W/2,236,W-160);
+  // grote koffieboon-tekening
+  x.save();x.translate(W/2,430);x.rotate(.32);x.strokeStyle=accent;x.lineWidth=6;
+  x.beginPath();x.ellipse(0,0,105,150,0,0,Math.PI*2);x.stroke();
+  x.beginPath();x.moveTo(-52,-120);x.quadraticCurveTo(40,-20,52,124);x.stroke();x.restore();
+  const rows=[['dose in',b.dose?b.dose+' g':'—'],[fam==='espresso'?'yield out':'yield out',b.yield?b.yield+' g':'—'],
+    [fam==='espresso'?'shot time':'time',b.time||'—'],['grind',b.grind||'—'],['temp',b.temp?b.temp+'°C':'—'],
+    ['ratio',b.ratio?'1:'+(+b.ratio).toFixed(1):'—']];
+  x.textAlign='left';
+  rows.forEach((r2,i)=>{
+    const cx0=i%2?W/2+40:120,cy0=680+Math.floor(i/2)*110;
+    x.fillStyle=soft;x.font='30px "Patrick Hand"';x.fillText(r2[0],cx0,cy0);
+    x.fillStyle=ink;x.font='700 58px Caveat';x.fillText(String(r2[1]),cx0,cy0+56);
+  });
+  x.textAlign='center';x.fillStyle=soft;x.font='30px "Patrick Hand"';
+  const tags=(b.tags&&b.tags.length)?b.tags.join(' · '):'';
+  if(tags)x.fillText(tags,W/2,H-120,W-200);
+  x.font='700 40px Caveat';x.fillStyle=accent;
+  x.fillText('lets brew specialty ☕',W/2,H-70);
+  const blob=await new Promise(res=>c.toBlob(res,'image/png'));
+  const file=new File([blob],'brew-card.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'my brew'});return;}catch(e){if(e.name==='AbortError')return;}
+  }
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='brew-card.png';a.click();
+  URL.revokeObjectURL(url);toast('card saved — share it on');
+}
+function savePushUrl(){
+  const v=document.getElementById('push-url').value.trim();
+  localStorage.setItem('scc_push_url',v);
+  toast(v?'✓ push server saved':'push server cleared');
+}
+
 /* ---------------- taste wheel ---------------- */
 const WHEEL_NOTES=['berry','citrus','floral','honey','caramel','choc','nutty','spice'];
 let wheelBuilt=false;
@@ -3047,6 +3223,10 @@ const FEATURES=[
   {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true},
   {id:'smartdefaults', n:'smart defaults', d:'last dose, grind & temp prefilled — never retype', def:true},
   {id:'brewnow', n:'brew now button', d:'one tap on home: your usual, prefilled — confirm & go', def:true},
+  {id:'cost', n:'cost per cup', d:'price & bag size on a bean → what a cup costs you', def:true},
+  {id:'crew', n:'brew crew (coffee CRM)', d:'guests, their exact drink, birthdays — brew for them in one tap', def:true},
+  {id:'sharecards', n:'share cards', d:'any brew as a hand-drawn image card to send to friends', def:true},
+  {id:'shortcuts', n:'home-screen shortcuts', d:'links that start a brew straight from an iOS Shortcut', def:true},
 ];
 function featOn(id){
   const f=FEATURES.find(x=>x.id===id);if(!f)return false;
@@ -3089,6 +3269,14 @@ function renderProfile(){
   renderReminder();
   renderGear();
   renderFeatures();
+  const ce=document.getElementById('crew-entry');
+  if(ce){ce.style.display=featOn('crew')?'block':'none';
+    const n=(state.crew||[]).length;
+    const sub=document.getElementById('crew-entry-sub');
+    if(sub)sub.textContent=n?('your coffee CRM — '+n+' in the crew.'):'your coffee CRM — guests, their exact drink and birthdays.';}
+  renderShortcuts();
+  const pu=document.getElementById('push-url');if(pu)pu.value=localStorage.getItem('scc_push_url')||'';
+  const cr=document.getElementById('b-cost-row');if(cr)cr.style.display=featOn('cost')?'flex':'none';
   applyAIVisibility();
 }
 /* ---------------- mijn uitrusting (gear) ---------------- */
@@ -3210,7 +3398,7 @@ function checkReminderOnOpen(){
 /* echte achtergrond-push via de Cloudflare Worker (optioneel).
    laat PUSH_ENDPOINT leeg -> alleen lokale meldingen (app open / bij openen).
    vul de Worker-URL in -> ook een push op je tijd als de app dicht is. */
-const PUSH_ENDPOINT='';
+function PUSH_ENDPOINT_GET(){return (localStorage.getItem('scc_push_url')||'').trim();}
 function urlBase64ToUint8Array(base64){
   const pad='='.repeat((4-base64.length%4)%4);
   const b=(base64+pad).replace(/-/g,'+').replace(/_/g,'/');
@@ -3220,6 +3408,7 @@ function urlBase64ToUint8Array(base64){
 }
 function currentTz(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';}catch(e){return 'UTC';}}
 async function syncPushSubscription(){
+  const PUSH_ENDPOINT=PUSH_ENDPOINT_GET();
   if(!PUSH_ENDPOINT)return;                       // geen server ingesteld
   if(!('serviceWorker'in navigator)||!('PushManager'in window))return;
   try{
@@ -3239,6 +3428,7 @@ async function syncPushSubscription(){
   }catch(e){/* stil: lokale meldingen blijven werken */}
 }
 async function disablePushSubscription(){
+  const PUSH_ENDPOINT=PUSH_ENDPOINT_GET();
   if(!PUSH_ENDPOINT)return;
   if(!('serviceWorker'in navigator)||!('PushManager'in window))return;
   try{
@@ -3309,6 +3499,7 @@ loadPromise.then(()=>{try{applyFeatures();}catch(e){}try{applyAIVisibility();}ca
 
 // app geopend vanuit een melding? -> pas na het laden/splash een nieuwe brew voorstellen
 let pendingQuickBrew=/[?&]quickbrew=1/.test(location.search);
+let pendingBrewParam=(location.search.match(/[?&]brew=([^&]+)/)||[])[1]||null;
 if('serviceWorker'in navigator){
   navigator.serviceWorker.addEventListener('message',e=>{
     if(e&&e.data&&e.data.type==='quick-brew'){
@@ -3352,6 +3543,7 @@ setTimeout(()=>{
     ph.classList.remove('fading');
     go('home');
     if(pendingQuickBrew){pendingQuickBrew=false;try{quickBrew();}catch(e){}}
+    if(pendingBrewParam){const mid=decodeURIComponent(pendingBrewParam);pendingBrewParam=null;try{beginBrew(mid);}catch(e){}}
   },750);
 },3000);
 </script>
