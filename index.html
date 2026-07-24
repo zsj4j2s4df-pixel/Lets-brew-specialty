@@ -17,12 +17,29 @@
   :root{
     --paper:#efe9dd;--card:#e7ded0;--card-2:#ded2c0;
     --ink:#3a302a;--ink-soft:#7a6c5e;--line:#b8a98f;--accent:#4a3b30;
+    --cream:var(--cream);--desk:#d4ccbe;
     --espresso:#e3d3bf;--aeropress:#dfdcc9;--v60:#e6d9cf;--chemex:#dcd9cc;--perculator:#e4d6cc;
     --radius:26px;
   }
+  /* espresso night — krijtbord-look via dezelfde variabelen */
+  html.night{
+    --paper:#262b28;--card:#2e3431;--card-2:#353c38;
+    --ink:#e9e4d4;--ink-soft:#9aa094;--line:#5a615c;--accent:#d9c9a8;
+    --cream:#1c211e;--desk:#181d1a;
+    --espresso:#333932;--aeropress:#31382f;--v60:#2f3634;--chemex:#2e3532;--perculator:#343831;
+  }
+  html.night img[src$=".png"]{filter:invert(.92) hue-rotate(180deg);mix-blend-mode:screen!important;}
+  html.night .nav{background:rgba(30,36,32,.6);}
+  .phone,body{transition:background .45s;}
+  /* statische koffieboon-achtergrond (feature: bg) */
+  #bg-bean{position:absolute;inset:0;pointer-events:none;z-index:0;display:none;overflow:hidden;}
+  html.f-bg #bg-bean{display:block;}
+  #bg-bean svg{position:absolute;right:-120px;top:22%;width:420px;height:520px;opacity:.055;
+    fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;filter:url(#wobble);}
+  html.night #bg-bean svg{opacity:.09;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
   html,body{height:100%;overflow:hidden;}
-  body{background:#d4ccbe;font-family:'Patrick Hand','Segoe Print',cursive;color:var(--ink);font-size:18px;display:flex;justify-content:center;}
+  body{background:var(--desk);font-family:'Patrick Hand','Segoe Print',cursive;color:var(--ink);font-size:18px;display:flex;justify-content:center;}
   .hand{font-family:'Caveat',cursive;font-weight:700;letter-spacing:.4px;}
 
   .phone{width:100%;max-width:430px;height:100vh;height:100dvh;background:var(--paper);position:relative;display:flex;flex-direction:column;overflow:hidden;}
@@ -66,10 +83,10 @@
 
   .btn-add{width:100%;background:var(--card);border-radius:var(--radius);padding:18px;font-size:21px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
   .btn-add:active{background:var(--card-2);}
-  .btn-reco{width:100%;margin:0 0 16px;background:var(--accent);color:#f2ead9;border:2px solid var(--ink);filter:url(#wobble);border-radius:var(--radius);padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;font-family:inherit;text-align:left;}
+  .btn-reco{width:100%;margin:0 0 16px;background:var(--accent);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:var(--radius);padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;font-family:inherit;text-align:left;}
   .btn-reco:active{filter:url(#wobble) brightness(.9);}
   .btn-reco .reco-ic{flex:none;width:42px;height:42px;display:flex;align-items:center;justify-content:center;}
-  .btn-reco .reco-ic svg{width:36px;height:36px;fill:none;stroke:#f2ead9;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .btn-reco .reco-ic svg{width:36px;height:36px;fill:none;stroke:var(--cream);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
   .btn-reco .reco-txt{display:flex;flex-direction:column;line-height:1.12;min-width:0;}
   .btn-reco .reco-h{font-size:27px;}
   .btn-reco .reco-sub{font-size:15px;opacity:.85;margin-top:1px;}
@@ -96,14 +113,14 @@
   .act{background:none;border:none;color:var(--ink);font-size:16px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-family:inherit;}
   .act .ic{font-size:22px;display:flex;align-items:center;justify-content:center;height:26px;}
   .act .ic .acic{width:24px;height:24px;stroke:var(--ink);}
-  .act.primary{background:var(--accent);color:#f2ead9;width:84px;height:84px;border-radius:50%;justify-content:center;font-size:22px;margin-top:-28px;border:2px solid var(--ink);filter:url(#wobble);}
+  .act.primary{background:var(--accent);color:var(--cream);width:84px;height:84px;border-radius:50%;justify-content:center;font-size:22px;margin-top:-28px;border:2px solid var(--ink);filter:url(#wobble);}
 
   .welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px 50px;text-align:center;}
   .welcome .logo{width:210px;}
   .welcome .logo img{width:100%;mix-blend-mode:multiply;}
   .welcome .logo .fallback{font-size:40px;line-height:1.1;}
   .welcome .tag{color:var(--ink-soft);font-size:21px;margin-top:6px;margin-bottom:auto;}
-  .welcome .btn{width:100%;max-width:300px;background:var(--accent);color:#f2ead9;border:2px solid var(--ink);filter:url(#wobble);border-radius:16px;padding:16px;font-size:26px;cursor:pointer;margin-top:30px;}
+  .welcome .btn{width:100%;max-width:300px;background:var(--accent);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:16px;padding:16px;font-size:26px;cursor:pointer;margin-top:30px;}
   .welcome .signin{margin-top:24px;font-size:21px;color:var(--ink);background:none;border:none;cursor:pointer;font-family:'Caveat',cursive;font-weight:600;}
 
   .placeholder{padding-top:24px;text-align:center;color:var(--ink-soft);}
@@ -140,7 +157,7 @@
   .score-row{display:flex;align-items:center;gap:14px;}
   .score-row input[type=range]{flex:1;accent-color:var(--accent);}
   .score-big{font-size:34px;min-width:64px;text-align:right;}
-  .save-btn{width:100%;background:var(--accent);color:#f2ead9;border:2px solid var(--ink);filter:url(#wobble);border-radius:18px;padding:16px;font-size:26px;font-family:'Caveat',cursive;font-weight:700;cursor:pointer;margin-top:6px;}
+  .save-btn{width:100%;background:var(--accent);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:18px;padding:16px;font-size:26px;font-family:'Caveat',cursive;font-weight:700;cursor:pointer;margin-top:6px;}
   .empty-note{text-align:center;color:var(--ink-soft);font-size:19px;padding:24px 10px;line-height:1.5;}
 
   /* methodes-beheer */
@@ -183,7 +200,7 @@
   .di-advice{color:var(--accent);font-size:18px;line-height:1.4;margin-top:6px;}
   .prep-row{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:20px;}
   .prep-cb{width:26px;height:26px;border:2px solid var(--ink);filter:url(#wobble);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent;cursor:pointer;}
-  .prep-cb.on{background:var(--accent);color:#f2ead9;}
+  .prep-cb.on{background:var(--accent);color:var(--cream);}
   .prep-name{flex:1;min-width:0;}
   .prep-row .prep-val{flex:none;width:66px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:12px;padding:5px 8px;font-family:inherit;font-size:17px;color:var(--ink);text-align:center;}
   .prep-x{background:none;border:none;color:var(--ink-soft);font-size:20px;cursor:pointer;padding:0 2px;}
@@ -194,7 +211,7 @@
   .ratio-hint{color:var(--ink-soft);font-size:14px;}
   .mm-fam{display:flex;gap:10px;}
   .fampick{flex:1;padding:12px;border-radius:16px;background:var(--card);border:2px solid var(--line);filter:url(#wobble);font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:var(--ink-soft);cursor:pointer;}
-  .fampick.sel{background:var(--accent);color:#f2ead9;border-color:var(--ink);}
+  .fampick.sel{background:var(--accent);color:var(--cream);border-color:var(--ink);}
   .dialin-hint{background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;padding:12px 14px;margin-bottom:16px;font-size:17px;color:var(--ink);line-height:1.4;}
   .dialin-hint .di-t{color:var(--ink-soft);font-size:15px;margin-bottom:3px;}
   .dialin-hint .di-tip{margin-top:7px;color:var(--accent);}
@@ -236,7 +253,7 @@
   .share-block .set-t{font-size:22px;}
   .photo-btns .half{width:auto;flex:1;margin-bottom:0;font-size:19px;padding:12px 8px;}
   .scan-status{font-size:16px;color:var(--ink-soft);min-height:22px;margin:0 4px 14px;text-align:center;}
-  .recipe-btn{width:100%;background:var(--accent);color:#f2ead9;border:2px solid var(--ink);filter:url(#wobble);border-radius:16px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:22px;cursor:pointer;margin-top:10px;}
+  .recipe-btn{width:100%;background:var(--accent);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:16px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:22px;cursor:pointer;margin-top:10px;}
   .recipe-card{padding:18px 22px;margin-top:12px;font-size:19px;line-height:1.5;}
   .recipe-card .rk{color:var(--ink-soft);font-size:16px;margin:10px 0 2px;}
   .recipe-card .rstep{margin:4px 0;}
@@ -294,7 +311,7 @@
   .check{display:flex;align-items:flex-start;gap:10px;font-size:18px;line-height:1.4;padding:8px 0;cursor:pointer;border-bottom:1.5px dashed var(--line);}
   .check:last-child{border-bottom:none;}
   .check .box{width:24px;height:24px;flex:none;border:2px solid var(--ink);border-radius:7px;filter:url(#wobble);display:flex;align-items:center;justify-content:center;font-size:16px;margin-top:1px;}
-  .check.done .box{background:var(--accent);color:#f2ead9;}
+  .check.done .box{background:var(--accent);color:var(--cream);}
   .check.done .ctxt{color:var(--ink-soft);text-decoration:line-through;}
   .lesson .lm-wrap{margin-top:8px;}
   .lm-btn{background:none;border:none;color:var(--accent);font-family:'Caveat',cursive;font-weight:700;font-size:19px;cursor:pointer;padding:2px 0;display:inline-flex;align-items:center;gap:6px;}
@@ -304,7 +321,7 @@
   .lm-panel input:focus{outline:none;border-color:var(--ink);}
   .lm-actions{display:flex;gap:8px;margin-top:8px;}
   .lm-go{flex:1;background:var(--card-2);border:2px solid var(--line);filter:url(#wobble);border-radius:13px;padding:9px;font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:var(--ink);cursor:pointer;}
-  .lm-go.primary{background:var(--accent);color:#f2ead9;border-color:var(--ink);}
+  .lm-go.primary{background:var(--accent);color:var(--cream);border-color:var(--ink);}
   .lm-item{position:relative;background:var(--paper);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:11px 14px 12px;margin-top:10px;}
   .lm-item .lm-q{color:var(--accent);font-size:19px;margin-bottom:4px;padding-right:22px;}
   .lm-item .lm-a{font-size:17px;line-height:1.5;color:var(--ink);}
@@ -324,6 +341,11 @@
   #ai-key:focus{outline:none;border-color:var(--ink);}
   .profile-btn{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:10px;}
   .profile-btn:active{background:var(--card-2);}
+  .feat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1.5px dashed var(--line);}
+  .feat-row:last-child{border-bottom:none;}
+  .feat-row .ft{flex:1;min-width:0;}
+  .feat-row .ft .n{font-size:19px;line-height:1.1;}
+  .feat-row .ft .d{color:var(--ink-soft);font-size:14px;line-height:1.3;margin-top:1px;}
   .adv-head{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;color:inherit;}
   .adv-head .g-arr{color:var(--ink-soft);font-size:22px;transition:transform .15s;}
   .settings-card.open .adv-head .g-arr{transform:rotate(90deg);}
@@ -340,7 +362,7 @@
 
   .bean-link{color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--line);}
   .stock-btn{width:100%;margin-top:10px;border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:9px;font-family:'Caveat',cursive;font-weight:700;font-size:20px;cursor:pointer;}
-  .stock-btn.in{background:var(--accent);color:#f2ead9;border-color:var(--ink);}
+  .stock-btn.in{background:var(--accent);color:var(--cream);border-color:var(--ink);}
   .stock-btn.out{background:var(--card);color:var(--ink-soft);}
   /* splash / welkom fade */
   .home-logo{margin:6px 0 2px;}
@@ -381,7 +403,7 @@
   .img-opt.sel{border-color:var(--ink);background:var(--card-2);}
   .img-opt img{height:80px;max-width:100%;mix-blend-mode:multiply;}
   .img-opt .lbl{font-size:16px;color:var(--ink-soft);}
-  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(10px);background:var(--accent);color:#f2ead9;padding:14px 26px;border-radius:18px;border:2px solid var(--ink);filter:url(#wobble);font-family:'Caveat',cursive;font-weight:700;font-size:24px;opacity:0;transition:opacity .25s,transform .25s;z-index:50;pointer-events:none;box-shadow:0 6px 20px rgba(58,48,42,.25);}
+  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(10px);background:var(--accent);color:var(--cream);padding:14px 26px;border-radius:18px;border:2px solid var(--ink);filter:url(#wobble);font-family:'Caveat',cursive;font-weight:700;font-size:24px;opacity:0;transition:opacity .25s,transform .25s;z-index:50;pointer-events:none;box-shadow:0 6px 20px rgba(58,48,42,.25);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   #saved-dot{position:fixed;top:60px;right:16px;background:var(--card);border:1.5px solid var(--line);filter:url(#wobble);border-radius:12px;padding:5px 12px;font-family:'Patrick Hand',cursive;font-size:14px;color:var(--ink-soft);opacity:0;transition:opacity .25s;z-index:60;pointer-events:none;}
   #saved-dot.show{opacity:1;}
@@ -415,6 +437,12 @@
 </svg>
 
 <div class="phone">
+<div id="bg-bean"><svg viewBox="0 0 200 260">
+  <ellipse cx="100" cy="130" rx="72" ry="110" transform="rotate(18 100 130)"/>
+  <path d="M62 42 Q118 96 132 150 Q144 196 128 224"/>
+  <path d="M70 52 Q100 90 116 138 Q128 182 120 214" opacity="0.5"/>
+  <path d="M46 96 Q40 150 58 196" opacity="0.35"/>
+</svg></div>
 
   <!-- WELKOM -->
   <div id="page-welcome" class="screen welcome">
@@ -764,6 +792,14 @@
         </div>
       </div>
 
+      <div class="settings-card sketch soft" id="feat-card">
+        <button class="adv-head" onclick="document.getElementById('feat-card').classList.toggle('open')"><span class="set-t hand">features</span><span class="g-arr">▸</span></button>
+        <div class="adv-body">
+          <div class="set-d" style="margin:6px 0 4px">turn any part of the app on or off — it's your bench, your tools.</div>
+          <div id="feat-list"></div>
+        </div>
+      </div>
+
       <div class="settings-card sketch soft">
         <div class="set-t hand">sharing & friends</div>
         <div class="set-d" style="margin:4px 0 10px">send a single brew or bean with the send icon on the card. or add what a friend sent you — an attached bean comes along automatically.</div>
@@ -1061,6 +1097,7 @@ function mergeMethodImages(){
   state.methods.forEach(m=>{
     if(!m.family){m.family=METHOD_FAMILY_DEFAULTS[m.id]||'filter';changed=true;}
   });
+  if(!state.features){state.features={};changed=true;}
   // persoonlijke puck-prep-lijst aanmaken als die er nog niet is
   if(!Array.isArray(state.prepItems)){state.prepItems=JSON.parse(JSON.stringify(DEFAULT_PREP));changed=true;}
   // eenmalig: oude dial-in-pogingen samenvouwen tot één recept per boon+methode+drank
@@ -2779,6 +2816,37 @@ function restoreImages(){
   save();toast('✓ drawings restored');go('home');
 }
 
+/* ---------------- features: het schakelbord ---------------- */
+// alles wat nieuw bijgebouwd wordt staat hier, met eigen aan/uit-knop in profiel.
+const FEATURES=[
+  {id:'bg',    n:'coffee-bean background', d:'a faint hand-drawn bean behind every screen', def:true},
+  {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false},
+];
+function featOn(id){
+  const f=FEATURES.find(x=>x.id===id);if(!f)return false;
+  const v=state.features&&state.features[id];
+  return v===undefined?f.def:!!v;
+}
+function toggleFeature(id){
+  if(!state.features)state.features={};
+  state.features[id]=!featOn(id);
+  save();applyFeatures();renderFeatures();
+  const f=FEATURES.find(x=>x.id===id);
+  toast((featOn(id)?'✓ ':'○ ')+f.n+(featOn(id)?' on':' off'));
+}
+function applyFeatures(){
+  const h=document.documentElement;
+  h.classList.toggle('night',featOn('night'));
+  h.classList.toggle('f-bg',featOn('bg'));
+}
+function renderFeatures(){
+  const el=document.getElementById('feat-list');if(!el)return;
+  el.innerHTML=FEATURES.map(f=>`<div class="feat-row">
+    <div class="ft"><div class="n">${esc(f.n)}</div><div class="d">${esc(f.d)}</div></div>
+    <div class="toggle ${featOn(f.id)?'on':''}" onclick="toggleFeature('${f.id}')"><div class="knob"></div></div>
+  </div>`).join('');
+}
+
 /* ---------------- AI-instellingen ---------------- */
 function aiEnabled(){return localStorage.getItem('scc_ai_on')==='1';}
 function getKey(){return localStorage.getItem('scc_ai_key')||'';}
@@ -2794,6 +2862,7 @@ function renderProfile(){
   if(ss)ss.textContent='saved now: '+state.brews.length+' brews · '+state.beans.length+' beans · '+state.methods.length+' methods';
   renderReminder();
   renderGear();
+  renderFeatures();
   applyAIVisibility();
 }
 /* ---------------- mijn uitrusting (gear) ---------------- */
@@ -3008,7 +3077,7 @@ const loadPromise=load();
 if(navigator.storage&&navigator.storage.persist){
   navigator.storage.persist().catch(()=>{});
 }
-loadPromise.then(()=>{try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}});
+loadPromise.then(()=>{try{applyFeatures();}catch(e){}try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}});
 
 // app geopend vanuit een melding? -> pas na het laden/splash een nieuwe brew voorstellen
 let pendingQuickBrew=/[?&]quickbrew=1/.test(location.search);
