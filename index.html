@@ -197,6 +197,19 @@
   .di-goal .di-ai{color:var(--accent);font-size:18px;margin-top:2px;}
   .di-card{padding:14px 18px;margin-bottom:16px;}
   .di-lbl{font-size:22px;color:var(--ink-soft);margin-bottom:6px;}
+  /* taste wheel */
+  #wheel-wrap{margin:2px 0 10px;}
+  #taste-wheel{width:188px;display:block;margin:0 auto;}
+  #taste-wheel path{stroke:var(--ink);stroke-width:1.6;fill:var(--card-2);cursor:pointer;filter:url(#wobble-rough);transition:fill .15s;}
+  #taste-wheel path.sel{fill:var(--accent);}
+  #taste-wheel text{font-family:'Patrick Hand',cursive;font-size:9.5px;fill:var(--ink);pointer-events:none;}
+  #taste-wheel path.sel+text{fill:var(--cream);}
+  /* versheidsmeter */
+  .fgauge{width:100%;max-width:240px;display:block;margin:10px auto 0;}
+  .fgauge .zone{stroke-width:9;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
+  .fgauge .needle{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;filter:url(#wobble-rough);}
+  .fgauge text{font-family:'Patrick Hand',cursive;font-size:10px;fill:var(--ink-soft);}
+  .fgauge .fd{font-family:'Caveat',cursive;font-weight:700;font-size:19px;fill:var(--ink);}
   /* E61 shot clock */
   .e61-box{display:flex;justify-content:center;margin:2px 0 4px;}
   .e61-box svg{width:214px;height:172px;overflow:visible;}
@@ -487,6 +500,7 @@
         <span class="reco-ic"><svg viewBox="0 0 32 32"><path d="M7 12 L7 22 Q7 26 12 26 L19 26 Q24 26 24 22 L24 12 Z M24 14 Q29 14 29 18 Q29 22 24 22 M6 30 L26 30"/><path d="M11 6 Q10 8 11.5 9.5 M16 5 Q15 7 16.5 8.5 M21 6 Q20 8 21.5 9.5" opacity="0.8"/></svg></span>
         <span class="reco-txt"><span class="reco-h hand">surprise me</span><span class="reco-sub">a surprise brew with a bean from your shelf</span></span>
       </button>
+      <button class="btn-add sketch soft" id="brew-now-btn" onclick="brewNow()" style="display:none;margin-bottom:16px">☕ brew now — your usual, prefilled</button>
       <div class="methods sketch soft">
         <div class="lbl"><span>brew methods</span><a class="hand" onclick="go('methods')">manage</a></div>
         <div class="methods-scroll" id="methods-scroll"></div>
@@ -544,6 +558,7 @@
         <span class="score-big hand" id="score-big">8.0</span></div></div>
 
       <div class="field"><label>taste notes</label>
+        <div id="wheel-wrap" style="display:none"><svg id="taste-wheel" viewBox="0 0 200 200"></svg></div>
         <div class="tags" id="form-tags"></div>
         <div class="tag-new-row"><input id="f-tagnew" placeholder="add your own taste"><button class="tag-add-btn" onclick="addTag()">＋</button></div>
         <textarea id="f-notes" placeholder="free note (optional)" style="margin-top:10px"></textarea></div>
@@ -1260,6 +1275,8 @@ function renderHome(){
   const recent=[...(pool.length?pool:state.brews)].sort((a,b)=>b.ts-a.ts).slice(0,3);
   document.getElementById('recent-list').innerHTML =
     recent.length?recent.map(brewCard).join(''):'<div class="empty-note">no brews yet.<br>tap ＋ new brew to get started.</div>';
+  const bn=document.getElementById('brew-now-btn');
+  if(bn)bn.style.display=(featOn('brewnow')&&state.brews.length)?'block':'none';
   const ms=document.getElementById('methods-scroll');
   ms.innerHTML=state.methods.filter(m=>m.on).map(m=>
     `<button class="method" onclick="showMethodBrews('${m.id}')"><div class="ic">${iconHTML(m,46)}</div><div class="nm">${esc(m.name)}</div></button>`
@@ -1536,6 +1553,11 @@ function openForm(methodId){
   ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s'].forEach(i=>setVal(i,''));
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
+  if(featOn('smartdefaults')){
+    const last=state.brews.filter(x=>x.method===formMethod).sort((a,b)=>b.ts-a.ts)[0];
+    if(last){setVal('f-dose',last.dose||'');setVal('f-yield',last.yield||'');setVal('f-ratio',last.ratio||'');
+      setVal('f-temp',last.temp||'');setVal('f-grind',last.grind||'');}
+  }
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
 function openEdit(b){
@@ -1644,6 +1666,10 @@ function openDialIn(methodId){
   const t=pendingTarget||{};
   setVal('di-dose',t.dose||'');setVal('di-yield',t.yield||'');setVal('di-time','');
   setVal('di-grind',t.grind||'');   // startpunt: de doel-maalstand, aan te passen
+  if(featOn('smartdefaults')&&!pendingTarget){
+    const last=state.brews.filter(x=>x.method===formMethod).sort((a,b)=>b.ts-a.ts)[0];
+    if(last){setVal('di-dose',last.dose||'');setVal('di-yield',last.yield||'');if(last.grind)setVal('di-grind',last.grind);}
+  }
   e61Reset();renderDialIn();go('dialin');
 }
 function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();}
@@ -2423,6 +2449,7 @@ function beanCardHTML(b){
       ${b.notes?'<br>'+esc(b.notes):''}
       ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">view online</a>':''}
       <br>${cnt} brew${cnt===1?'':'s'} linked</div>
+    ${freshGaugeHTML(b)}
     <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
       ${inStock?'✓ in stock':'○ empty — no longer in stock'}</button>
     <div style="margin-top:10px"><button class="lp sel" onclick="brewBean('${b.id}')">brew this bean →</button></div>
@@ -2942,6 +2969,73 @@ function restoreImages(){
   save();toast('✓ drawings restored');go('home');
 }
 
+/* ---------------- taste wheel ---------------- */
+const WHEEL_NOTES=['berry','citrus','floral','honey','caramel','choc','nutty','spice'];
+let wheelBuilt=false;
+function buildTasteWheel(){
+  const svg=document.getElementById('taste-wheel');if(!svg||wheelBuilt)return;wheelBuilt=true;
+  const cx=100,cy=100,r1=40,r2=94;let out='';
+  WHEEL_NOTES.forEach((n,i)=>{
+    const a0=(i/8)*Math.PI*2-Math.PI/2,a1=((i+1)/8)*Math.PI*2-Math.PI/2,am=(a0+a1)/2;
+    const P=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+    const[x0,y0]=P(r2,a0),[x1,y1]=P(r2,a1),[x2,y2]=P(r1,a1),[x3,y3]=P(r1,a0);
+    out+=`<path data-n="${n}" onclick="wheelTap('${n}')" d="M${x0} ${y0} A${r2} ${r2} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r1} ${r1} 0 0 0 ${x3} ${y3} Z"/>`;
+    const[tx,ty]=P((r1+r2)/2,am);
+    out+=`<text x="${tx}" y="${ty+3}" text-anchor="middle">${n}</text>`;
+  });
+  out+=`<circle cx="${cx}" cy="${cy}" r="${r1-6}" fill="none" stroke="var(--line)" stroke-width="1.5" filter="url(#wobble-rough)"/>`;
+  svg.innerHTML=out;
+}
+function renderTasteWheel(){
+  const wrap=document.getElementById('wheel-wrap');if(!wrap)return;
+  wrap.style.display=featOn('wheel')?'block':'none';
+  if(!featOn('wheel'))return;
+  buildTasteWheel();
+  document.querySelectorAll('#taste-wheel path[data-n]').forEach(p=>p.classList.toggle('sel',formTags.includes(p.dataset.n)));
+}
+function wheelTap(n){
+  if(formTags.includes(n))formTags=formTags.filter(x=>x!==n);else formTags.push(n);
+  renderFormTags();
+}
+/* ---------------- versheidsmeter per boon ---------------- */
+function freshGaugeHTML(b){
+  if(!featOn('freshgauge'))return '';
+  const fr=beanFreshness(b);if(!fr)return '';
+  const days=Math.min(fr.days,42);
+  const cx=150,cy=104,R=78;
+  const P=fr2=>[cx+R*Math.cos(Math.PI+fr2*Math.PI),cy+R*Math.sin(Math.PI+fr2*Math.PI)];
+  const arc=(d0,d1,col)=>{const[x0,y0]=P(d0/42),[x1,y1]=P(d1/42);
+    return `<path class="zone" stroke="${col}" d="M${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1}"/>`;};
+  const[nx,ny]=P(days/42);
+  return `<svg class="fgauge" viewBox="0 0 300 118">
+    ${arc(0,3,'#a5673a')}${arc(3,21,'#5c7a4f')}${arc(21,42,'var(--line)')}
+    <text x="${P(1.5/42)[0]}" y="${P(1.5/42)[1]-12}" text-anchor="middle">rest</text>
+    <text x="${P(12/42)[0]}" y="${P(12/42)[1]-12}" text-anchor="middle">peak</text>
+    <text x="${P(31/42)[0]}" y="${P(31/42)[1]-12}" text-anchor="middle">fading</text>
+    <line class="needle" x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="var(--ink)"/>
+    <text class="fd" x="${cx}" y="${cy-22}" text-anchor="middle">day ${fr.days}</text>
+  </svg>`;
+}
+/* ---------------- brew now: jouw vaste bak, voor-ingevuld ---------------- */
+function brewNow(){
+  const r=recommendBrew();
+  if(!r){toast('turn on a method first under methods');return;}
+  const mid=r.method.id;
+  if(methodFamily(mid)==='espresso'){
+    formBean=r.bean?r.bean.id:null;pendingRecipe=null;
+    const last=state.brews.filter(x=>x.method===mid).sort((a,b)=>b.ts-a.ts)[0];
+    pendingTarget=last?(last.target||{dose:last.dose?String(last.dose):'',yield:last.yield?String(last.yield):'',time:last.time||'',grind:last.grind||''}):null;
+    formPrep=(last&&last.prep)?JSON.parse(JSON.stringify(last.prep)):{};
+    openDialIn(mid);
+    if(r.bean)setTimeout(()=>pickDiBean(r.bean.id),0);
+  }else{
+    openForm(mid);
+    if(r.bean)setTimeout(()=>pickBean(r.bean.id),0);
+  }
+  toast('☕ your usual: '+r.method.name+(r.bean?' · '+r.bean.name:'')+' — check & go');
+}
+
 /* ---------------- features: het schakelbord ---------------- */
 // alles wat nieuw bijgebouwd wordt staat hier, met eigen aan/uit-knop in profiel.
 const FEATURES=[
@@ -2949,6 +3043,10 @@ const FEATURES=[
   {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false},
   {id:'shotclock', n:'E61 shot clock', d:'pull the lever on the dial-in screen — time fills in, stays editable', def:true},
   {id:'journey', n:'dial-in journey', d:'your attempts drawn as a line walking into the target band', def:true},
+  {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true},
+  {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true},
+  {id:'smartdefaults', n:'smart defaults', d:'last dose, grind & temp prefilled — never retype', def:true},
+  {id:'brewnow', n:'brew now button', d:'one tap on home: your usual, prefilled — confirm & go', def:true},
 ];
 function featOn(id){
   const f=FEATURES.find(x=>x.id===id);if(!f)return false;
@@ -3199,6 +3297,8 @@ let toastT;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600);}
 
+const _renderFormTags=renderFormTags;
+renderFormTags=function(){_renderFormTags();try{renderTasteWheel();}catch(e){}};
 const loadPromise=load();
 // vraag de browser om de opslag permanent te maken (beschermt tegen
 // automatisch opruimen van lokale data door iOS/Safari bij weinig gebruik)
