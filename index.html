@@ -197,6 +197,28 @@
   .di-goal .di-ai{color:var(--accent);font-size:18px;margin-top:2px;}
   .di-card{padding:14px 18px;margin-bottom:16px;}
   .di-lbl{font-size:22px;color:var(--ink-soft);margin-bottom:6px;}
+  /* E61 shot clock */
+  .e61-box{display:flex;justify-content:center;margin:2px 0 4px;}
+  .e61-box svg{width:214px;height:172px;overflow:visible;}
+  .e61-box path,.e61-box circle{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  #e61-lever{transition:transform .5s cubic-bezier(.4,1.6,.5,1);transform-origin:158px 58px;}
+  .e61-run #e61-lever{transform:rotate(-100deg);}
+  .e61-drips path{opacity:0;stroke:var(--accent);stroke-width:2.4;stroke-dasharray:3 6;}
+  .e61-run .e61-drips path{opacity:.85;animation:e61drip .45s linear infinite;}
+  @keyframes e61drip{to{stroke-dashoffset:-9;}}
+  .e61-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 4px;}
+  .e61-time{font-size:52px;line-height:1;font-variant-numeric:tabular-nums;}
+  .e61-tgt{color:var(--ink-soft);font-size:15px;}
+  .e61-btn{border:2px solid var(--ink);background:var(--accent);color:var(--cream);border-radius:15px;filter:url(#wobble);padding:10px 16px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;cursor:pointer;}
+  /* dial-in journey grafiek */
+  #di-journey{width:100%;height:auto;}
+  #di-journey .axis{stroke:var(--ink-soft);stroke-width:1.5;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
+  #di-journey .band{fill:#5c7a4f;opacity:.16;}
+  #di-journey .ln{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
+  #di-journey .dot{fill:var(--paper);stroke:var(--ink);stroke-width:2;}
+  #di-journey .dot.hit{fill:var(--accent);}
+  #di-journey text{font-family:'Patrick Hand',cursive;font-size:11px;fill:var(--ink-soft);}
+  #di-journey text.val{font-family:'Caveat',cursive;font-weight:700;font-size:14px;fill:var(--ink);}
   .di-advice{color:var(--accent);font-size:18px;line-height:1.4;margin-top:6px;}
   .prep-row{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:20px;}
   .prep-cb{width:26px;height:26px;border:2px solid var(--ink);filter:url(#wobble);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent;cursor:pointer;}
@@ -551,6 +573,29 @@
 
       <div class="di-goal sketch" id="di-goal"></div>
 
+      <div class="di-card sketch soft" id="di-clock-card">
+        <div class="di-lbl hand">shot clock</div>
+        <div class="e61-box" id="e61" onclick="e61Toggle()">
+          <svg viewBox="0 0 240 190">
+            <path d="M70 18 Q120 12 170 18 L166 34 Q120 40 74 34 Z"/>
+            <path d="M96 34 L94 52 M144 34 L146 52"/>
+            <path d="M84 52 Q80 96 92 112 Q120 120 148 112 Q160 96 156 52 Q120 46 84 52 Z"/>
+            <circle cx="118" cy="82" r="10" opacity="0.5"/>
+            <path d="M92 118 Q120 126 148 118 L144 136 Q120 142 96 136 Z"/>
+            <path d="M148 124 Q186 128 204 140 Q210 144 205 150" stroke-width="3"/>
+            <path d="M110 142 L106 154 M130 142 L134 154"/>
+            <g class="e61-drips"><path d="M106 158 L106 178"/><path d="M134 158 L134 178"/></g>
+            <g id="e61-lever"><path d="M158 58 L196 118" stroke-width="3"/><circle cx="199" cy="123" r="7"/></g>
+            <path d="M60 186 Q120 192 180 186" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="e61-row">
+          <div><span class="e61-time hand" id="e61-time">0:00</span><div class="e61-tgt" id="e61-tgt"></div></div>
+          <button type="button" class="e61-btn" id="e61-btn" onclick="event.stopPropagation();e61Toggle()">pull the lever</button>
+        </div>
+        <div class="set-d" style="margin-top:8px;font-size:14px">lever up = shot running · lever down = stop, the time is filled in below — you can always correct any value by hand</div>
+      </div>
+
       <div class="di-card sketch soft">
         <div class="di-lbl hand">your shot</div>
         <div class="field-row">
@@ -568,6 +613,12 @@
         <div class="di-lbl hand">puck-prep &amp; machine</div>
         <div id="di-prep-list"></div>
         <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
+      </div>
+
+      <div class="di-card sketch soft" id="di-journey-card">
+        <div class="di-lbl hand">dial-in journey</div>
+        <svg id="di-journey" viewBox="0 0 360 185"></svg>
+        <div class="set-d" id="di-journey-note" style="font-size:14px"></div>
       </div>
 
       <button class="save-btn" onclick="saveDialInBrew(false)">dial-in nailed → save as brew</button>
@@ -1593,9 +1644,78 @@ function openDialIn(methodId){
   const t=pendingTarget||{};
   setVal('di-dose',t.dose||'');setVal('di-yield',t.yield||'');setVal('di-time','');
   setVal('di-grind',t.grind||'');   // startpunt: de doel-maalstand, aan te passen
-  renderDialIn();go('dialin');
+  e61Reset();renderDialIn();go('dialin');
 }
-function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();}
+function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();}
+/* --- E61 shot clock: stopwatch, geen simulator — jouw waarden blijven leidend --- */
+let e61Run=false,e61T0=0,e61Raf=null;
+function e61Fmt(sec){const m=Math.floor(sec/60),ss=Math.floor(sec%60);return m+':'+String(ss).padStart(2,'0');}
+function renderDiClock(){
+  const card=document.getElementById('di-clock-card');if(!card)return;
+  card.style.display=featOn('shotclock')?'block':'none';
+  const t=pendingTarget||{};
+  const tgt=document.getElementById('e61-tgt');
+  if(tgt)tgt.textContent='target '+(t.time||'0:28');
+}
+function e61Reset(){
+  e61Run=false;cancelAnimationFrame(e61Raf);
+  const e=document.getElementById('e61');if(e)e.classList.remove('e61-run');
+  const b=document.getElementById('e61-btn');if(b)b.textContent='pull the lever';
+  const tm=document.getElementById('e61-time');if(tm)tm.textContent='0:00';
+}
+function e61Tick(){
+  const s=(performance.now()-e61T0)/1000;
+  const tm=document.getElementById('e61-time');if(tm)tm.textContent=e61Fmt(s);
+  if(e61Run)e61Raf=requestAnimationFrame(e61Tick);
+}
+function e61Toggle(){
+  if(!featOn('shotclock'))return;
+  const e=document.getElementById('e61'),b=document.getElementById('e61-btn');
+  if(!e61Run){
+    e61Run=true;e61T0=performance.now();
+    e.classList.add('e61-run');b.textContent='stop';
+    e61Tick();
+  }else{
+    e61Run=false;cancelAnimationFrame(e61Raf);
+    e.classList.remove('e61-run');b.textContent='pull the lever';
+    const s=Math.round((performance.now()-e61T0)/1000);
+    const inp=document.getElementById('di-time');
+    if(inp){inp.value=e61Fmt(s);normalizeTime(inp);diAdvice();}
+    toast('⏱ '+e61Fmt(s)+' filled in — correct it if your machine says otherwise');
+  }
+}
+/* --- dial-in journey: elke poging getekend, de lijn wandelt de doelzone in --- */
+function renderDiJourney(){
+  const card=document.getElementById('di-journey-card');if(!card)return;
+  card.style.display=featOn('journey')?'block':'none';
+  if(!featOn('journey'))return;
+  const key=(formBean||'')+'|'+formMethod;
+  const log=((state.dialLog||{})[key]||[]).slice(-6);
+  const svg=document.getElementById('di-journey'),note=document.getElementById('di-journey-note');
+  if(log.length<1){svg.innerHTML='';note.textContent='your attempts will be drawn here — every lever pull adds a dot.';return;}
+  note.textContent=log.length===1?'first attempt on paper — pull another to draw the line.':'';
+  const t=pendingTarget||{};
+  const tT=parseTimeSec(t.time)||28, lo=Math.max(1,tT-2), hi=tT+2;
+  const times=log.map(a=>parseTimeSec(a.t)||0);
+  const ymin=Math.min(lo-4,...times)-2, ymax=Math.max(hi+4,...times)+2;
+  const W=360,H=185,L=40,R=14,T=14,B=36;
+  const X=i=>log.length===1?(L+(W-L-R)/2):(L+(W-L-R)*(i/(log.length-1)));
+  const Y=v=>T+(H-T-B)*(1-(v-ymin)/(ymax-ymin));
+  let out='';
+  out+=`<rect class="band" x="${L-6}" y="${Y(hi)}" width="${W-L-R+12}" height="${Y(lo)-Y(hi)}" rx="6"/>`;
+  out+=`<text x="${L-8}" y="${Y(tT)+4}" text-anchor="end">${lo}–${hi}s</text>`;
+  out+=`<path class="axis" d="M${L} ${T} L${L} ${H-B} L${W-R} ${H-B}"/>`;
+  if(log.length>1)out+=`<polyline class="ln" points="${log.map((a,i)=>X(i)+','+Y(parseTimeSec(a.t)||0)).join(' ')}"/>`;
+  log.forEach((a,i)=>{
+    const tv=parseTimeSec(a.t)||0,hit=tv>=lo&&tv<=hi;
+    out+=`<circle class="dot${hit?' hit':''}" cx="${X(i)}" cy="${Y(tv)}" r="6.5"/>`;
+    out+=`<text class="val" x="${X(i)}" y="${Y(tv)-12}" text-anchor="middle">${tv}s</text>`;
+    out+=`<text x="${X(i)}" y="${H-B+16}" text-anchor="middle">${esc(a.g||'?')}</text>`;
+  });
+  out+=`<text x="${W-R}" y="${H-B+30}" text-anchor="end">grind per attempt →</text>`;
+  svg.innerHTML=out;
+}
+
 function renderDiBeans(){
   const el=document.getElementById('di-beans');if(!el)return;
   let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickDiBean(null)">none</button>';
@@ -1670,7 +1790,13 @@ async function saveDialInBrew(next){
   const prior=state.brews.filter(same);
   if(prior.length)b.id=prior.slice().sort((a,c)=>(a.ts||0)-(c.ts||0))[0].id;   // behoud oudste id (stabiele identiteit)
   state.brews=state.brews.filter(x=>!same(x));
-  state.brews.push(b);save();
+  state.brews.push(b);
+  // journey-log: elke poging apart bewaren (het brew-record blijft er één)
+  if(!state.dialLog)state.dialLog={};
+  const lk=(b.beanId||'')+'|'+b.method;
+  (state.dialLog[lk]=state.dialLog[lk]||[]).push({ts:b.ts,g:b.grind||'',t:b.time||'',y:b.yield||null,d:b.dose||null});
+  if(state.dialLog[lk].length>12)state.dialLog[lk]=state.dialLog[lk].slice(-12);
+  save();
   if(b.beanId)try{await updateDialIn(b.beanId,b.method);}catch(e){}
   if(next){
     const bean=beanById(b.beanId);
@@ -2821,6 +2947,8 @@ function restoreImages(){
 const FEATURES=[
   {id:'bg',    n:'coffee-bean background', d:'a faint hand-drawn bean behind every screen', def:true},
   {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false},
+  {id:'shotclock', n:'E61 shot clock', d:'pull the lever on the dial-in screen — time fills in, stays editable', def:true},
+  {id:'journey', n:'dial-in journey', d:'your attempts drawn as a line walking into the target band', def:true},
 ];
 function featOn(id){
   const f=FEATURES.find(x=>x.id===id);if(!f)return false;
