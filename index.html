@@ -775,6 +775,35 @@
         <div class="lc-arr">›</div>
       </div>
 
+      <div class="learn-card sketch" id="water-card" style="background:var(--chemex)" onclick="document.getElementById('water-body').classList.toggle('hidden')">
+        <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12 3 Q17.5 10 17.5 15 Q17.5 20 12 20 Q6.5 20 6.5 15 Q6.5 10 12 3 Z"/><path d="M9 15 Q9.2 17.4 11 18.2" opacity="0.5"/></svg></div>
+        <div class="lc-body"><div class="lc-t hand">water helper</div>
+          <div class="lc-d">ppm-doelen & simpele recepten per methode</div></div>
+        <div class="lc-arr">›</div>
+      </div>
+      <div id="water-body" class="hidden">
+        <div class="lesson sketch soft"><h3>filter (V60 / chemex / aeropress)</h3>
+          <p>Doel: ~75–100 ppm totaal. Recept per liter gefilterd/flessenwater: 1 afgestreken mespunt (±0,1 g) magnesiumsulfaat (epsomzout) + 1 mespunt natriumbicarbonaat (baksoda). Zacht, zoet en helder — laat fruitzuren zingen.</p></div>
+        <div class="lesson sketch soft"><h3>espresso</h3>
+          <p>Doel: ~90–150 ppm met wat meer buffer (bicarbonaat) tegen scherpe zuren en tegen ketelsteen. Gebruik gefilterd water of een verhouding 1:1 kraan/gefilterd als je water gemiddeld hard is.</p></div>
+        <div class="lesson sketch soft"><h3>waarom het uitmaakt</h3>
+          <p>Koffie is ~98% water. Te zacht smaakt vlak en hol; te hard maskeert nuance en verkalkt je machine. Eén vaste water-basis maakt je dial-in eerlijk: dan proef je de maling, niet het water.</p></div>
+      </div>
+
+      <div class="learn-card sketch" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
+        <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4 9 Q4 15 7 16.6 Q9.5 18 12 16.6 M12 16.6 Q14.5 18 17 16.6 Q20 15 20 9 M4 9 Q8 8 12 9 M12 9 Q16 8 20 9"/><path d="M7 12.5 Q9.5 13.4 12 12.5 M12 12.5 Q14.5 13.4 17 12.5" opacity="0.5"/></svg></div>
+        <div class="lc-body"><div class="lc-t hand">cupping session</div>
+          <div class="lc-d">blind-taste two beans, score & reveal</div></div>
+        <div class="lc-arr">›</div>
+      </div>
+
+      <div class="learn-card sketch" id="gallery-card" style="background:var(--aeropress)" onclick="go('gallery')">
+        <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.5 5.5 Q12 5.1 19.5 5.5 Q19.9 12 19.5 18.5 Q12 18.9 4.5 18.5 Q4.1 12 4.5 5.5 Z"/><path d="M8 14 Q10 10.5 12 12.5 Q14.5 9 16.5 13" opacity="0.8"/><circle cx="9" cy="9" r="1.4" opacity="0.6"/></svg></div>
+        <div class="lc-body"><div class="lc-t hand">latte-art gallery</div>
+          <div class="lc-d">photo timeline of your pours — with AI feedback</div></div>
+        <div class="lc-arr">›</div>
+      </div>
+
       <div class="ask-box sketch soft ai-only hidden">
         <div class="lc-t hand" style="font-size:24px">ask the coffee coach</div>
         <div class="lc-d" style="margin:4px 0 10px">ask a question about brewing, taste or technique — the coach knows your bean shelf and recent brews and gives tailored advice.</div>
@@ -811,6 +840,28 @@
       <div id="latte-content"></div>
     </div>
   </div>
+  <!-- CUPPING -->
+  <div id="page-cupping" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand">cupping</div><button onclick="go('learn')">done</button></div>
+      <div class="subtitle">blind-taste two beans — score first, reveal after.</div>
+      <div id="cupping-body"></div>
+    </div>
+  </div>
+
+  <!-- LATTE ART GALLERY -->
+  <div id="page-gallery" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand">latte-art gallery</div><button onclick="go('learn')">done</button></div>
+      <div class="subtitle">every pour on paper — watch the rosetta improve.</div>
+      <button class="scan-btn" onclick="document.getElementById('latte-input').click()">＋ add a pour photo</button>
+      <input type="file" id="latte-input" accept="image/*" style="display:none" onchange="addLatteShot(event)">
+      <div id="gallery-list"></div>
+    </div>
+  </div>
+
   <!-- BREW CREW (coffee CRM) -->
   <div id="page-crew" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
@@ -881,6 +932,19 @@
           <div class="field" style="margin-top:10px"><label>push server (optional — your Cloudflare worker URL)</label>
             <input id="push-url" type="url" inputmode="url" placeholder="https://lets-brew-push.….workers.dev" onchange="savePushUrl()"></div>
           <div class="set-d" style="font-size:14px">with a worker set, the daily suggestion also arrives when the app is fully closed.</div>
+        </div>
+      </div>
+
+      <div class="settings-card sketch soft" id="logbook-card" style="display:none">
+        <button class="adv-head" onclick="document.getElementById('logbook-card').classList.toggle('open')"><span class="set-t hand">café & roaster logbook</span><span class="g-arr">▸</span></button>
+        <div class="adv-body">
+          <div class="set-d" style="margin:6px 0 8px">where you drank or bought every bean.</div>
+          <div id="place-list"></div>
+          <div class="field-row" style="margin-top:8px">
+            <input id="pl-name" placeholder="place, e.g. Friedhats FUKU" style="flex:2;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
+            <input id="pl-note" placeholder="note" style="flex:1.4;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
+            <button class="tag-add-btn" onclick="addPlace()">＋</button>
+          </div>
         </div>
       </div>
 
@@ -1203,6 +1267,8 @@ function mergeMethodImages(){
   });
   if(!state.features){state.features={};changed=true;}
   if(!Array.isArray(state.crew)){state.crew=[];changed=true;}
+  if(!Array.isArray(state.places)){state.places=[];changed=true;}
+  if(!Array.isArray(state.latteShots)){state.latteShots=[];changed=true;}
   // persoonlijke puck-prep-lijst aanmaken als die er nog niet is
   if(!Array.isArray(state.prepItems)){state.prepItems=JSON.parse(JSON.stringify(DEFAULT_PREP));changed=true;}
   // eenmalig: oude dial-in-pogingen samenvouwen tot één recept per boon+methode+drank
@@ -1257,7 +1323,7 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile','crew'];
+const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile','crew','cupping','gallery'];
 const navMap={home:'home',form:'home',dialin:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
@@ -1279,6 +1345,14 @@ function go(p,isBack){
   if(p==='methods')renderMethods();
   if(p==='beans')renderBeans();
   if(p==='crew')renderCrew();
+  if(p==='cupping')renderCupping();
+  if(p==='gallery')renderGallery();
+  if(p==='learn'){
+    const w=document.getElementById('water-card');if(w)w.style.display=featOn('water')?'flex':'none';
+    const wb=document.getElementById('water-body');if(wb&&!featOn('water'))wb.classList.add('hidden');
+    const cc=document.getElementById('cupping-card');if(cc)cc.style.display=featOn('cupping')?'flex':'none';
+    const gc=document.getElementById('gallery-card');if(gc)gc.style.display=featOn('latteart')?'flex':'none';
+  }
   if(p==='learn-barista')renderLesson('barista-content',LESSONS.barista);
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLesson('latte-content',LESSONS.latte);
@@ -3013,6 +3087,115 @@ function restoreImages(){
   save();toast('✓ drawings restored');go('home');
 }
 
+/* ---------------- cupping session ---------------- */
+let cup={a:null,b:null,flip:false,stage:0,scores:{}};
+function renderCupping(){
+  const el=document.getElementById('cupping-body');if(!el)return;
+  const beans=state.beans.filter(b=>b.inStock!==false);
+  if(cup.stage===0){
+    if(beans.length<2){el.innerHTML='<div class="empty-note">you need two beans in stock to cup.</div>';return;}
+    el.innerHTML='<div class="k" style="margin-bottom:6px">pick two beans</div><div class="link-pick">'+
+      beans.map(b2=>`<button class="lp ${(cup.a===b2.id||cup.b===b2.id)?'sel':''}" onclick="cupPick('${b2.id}')">${esc(b2.name)}</button>`).join('')+'</div>'+
+      ((cup.a&&cup.b)?'<button class="save-btn" style="margin-top:14px" onclick="cupStart()">start blind tasting →</button>':'');
+    return;
+  }
+  if(cup.stage===1){
+    el.innerHTML=['A','B'].map(L=>`<div class="settings-card sketch soft">
+      <div class="set-t hand">cup ${L}</div>
+      <div class="set-d">brew both the same way. taste blind, then score.</div>
+      <div class="score-row" style="margin-top:8px"><input type="range" min="0" max="10" step="0.1" value="${cup.scores[L]||7}" oninput="cup.scores['${L}']=+this.value;document.getElementById('cup-sc-${L}').textContent=(+this.value).toFixed(1)">
+      <span class="score-big hand" id="cup-sc-${L}">${(+(cup.scores[L]||7)).toFixed(1)}</span></div>
+    </div>`).join('')+'<button class="save-btn" onclick="cupReveal()">reveal ↺</button>';
+    return;
+  }
+  const first=cup.flip?cup.b:cup.a, second=cup.flip?cup.a:cup.b;
+  const A=beanById(first),B=beanById(second);
+  const sa=cup.scores.A||0,sb=cup.scores.B||0;
+  el.innerHTML=`<div class="settings-card sketch" style="background:var(--v60)">
+      <div class="set-t hand">the reveal</div>
+      <div class="set-d" style="margin-top:6px;font-size:17px">
+        cup A was <b style="font-weight:400;color:var(--ink)">${esc(A?A.name:'?')}</b> — ${sa.toFixed(1)}/10<br>
+        cup B was <b style="font-weight:400;color:var(--ink)">${esc(B?B.name:'?')}</b> — ${sb.toFixed(1)}/10<br><br>
+        ${sa===sb?'a tie — both earned their spot.':('your palate picks <b style="font-weight:400;color:var(--ink)">'+esc((sa>sb?A:B)?.name||'?')+'</b> ✓')}
+      </div></div>
+    <button class="profile-btn" onclick="cupSaveNotes()">save result as a note on both beans</button>
+    <button class="profile-btn" onclick="cup={a:null,b:null,flip:false,stage:0,scores:{}};renderCupping()">new session</button>`;
+}
+function cupPick(id){
+  if(cup.a===id){cup.a=null;}else if(cup.b===id){cup.b=null;}
+  else if(!cup.a)cup.a=id;else cup.b=id;
+  renderCupping();
+}
+function cupStart(){cup.flip=Math.random()<0.5;cup.stage=1;cup.scores={};renderCupping();}
+function cupReveal(){cup.stage=2;renderCupping();}
+function cupSaveNotes(){
+  const first=cup.flip?cup.b:cup.a, second=cup.flip?cup.a:cup.b;
+  const A=beanById(first),B=beanById(second);
+  const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const add=(bn,sc,other)=>{if(!bn)return;bn.notes=((bn.notes||'')+`\ncupping ${d}: ${sc.toFixed(1)}/10 vs ${other}`).trim();};
+  add(A,cup.scores.A||0,B?B.name:'?');add(B,cup.scores.B||0,A?A.name:'?');
+  save();toast('✓ saved on both beans');
+}
+/* ---------------- latte-art gallery + AI coach ---------------- */
+async function addLatteShot(ev){
+  const file=ev.target.files&&ev.target.files[0];if(!file)return;
+  try{
+    const img=await fileToDataURL(file,520,false);
+    if(!Array.isArray(state.latteShots))state.latteShots=[];
+    state.latteShots.unshift({id:uid(),ts:Date.now(),img,fb:''});
+    save();renderGallery();toast('✓ pour added');
+  }catch(e){toast("couldn't load image");}
+  ev.target.value='';
+}
+function renderGallery(){
+  const el=document.getElementById('gallery-list');if(!el)return;
+  const shots=state.latteShots||[];
+  if(!shots.length){el.innerHTML='<div class="empty-note">no pours yet.<br>photograph your next flat white and watch yourself improve.</div>';return;}
+  el.innerHTML=shots.map(sh=>`<div class="settings-card sketch soft">
+    <img src="${sh.img}" style="width:100%;border-radius:14px;border:2px solid var(--line)">
+    <div class="set-d" style="margin-top:6px">${timeAgo(sh.ts)}</div>
+    ${sh.fb?'<div class="set-d" style="margin-top:6px;color:var(--ink)">✦ '+esc(sh.fb).replace(/\n/g,'<br>')+'</div>':''}
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" style="margin-top:0;flex:1" onclick="latteCoach('${sh.id}')">✦ coach my pour</button>
+      <button class="icon-btn" title="delete" onclick="delLatteShot('${sh.id}')">${ICO.del}</button>
+    </div>
+  </div>`).join('');
+}
+function delLatteShot(id){
+  if(!confirm('delete this pour?'))return;
+  state.latteShots=(state.latteShots||[]).filter(x=>x.id!==id);save();renderGallery();
+}
+async function latteCoach(id){
+  const sh=(state.latteShots||[]).find(x=>x.id===id);if(!sh)return;
+  if(!aiReady()){toast('turn on AI in profile first');return;}
+  toast('✦ the coach is looking…');
+  try{
+    const b64=sh.img.split(',')[1];
+    const media=(sh.img.match(/^data:([^;]+)/)||[])[1]||'image/jpeg';
+    const prompt='Dit is een foto van latte art van een thuisbarista. Geef vriendelijke, concrete feedback in het Nederlands (max 4 zinnen): wat gaat goed, en één duidelijk verbeterpunt over melktextuur, giethoogte of trekbeweging.';
+    const txt=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:media,data:b64}},{type:"text",text:prompt}]}],400);
+    sh.fb=(txt||'').trim();save();renderGallery();
+  }catch(e){toast("couldn't reach the coach");}
+}
+/* ---------------- café & roaster logbook ---------------- */
+function renderPlaces(){
+  const el=document.getElementById('place-list');if(!el)return;
+  const ps=state.places||[];
+  el.innerHTML=ps.length?ps.map(p2=>`<div class="feat-row"><div class="ft"><div class="n">${esc(p2.name)}</div>
+    <div class="d">${esc(p2.note||'')}${p2.note?' · ':''}${new Date(p2.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div>
+    <button class="icon-btn" title="delete" onclick="delPlace('${p2.id}')">${ICO.del}</button></div>`).join('')
+    :'<div class="set-d">nothing logged yet.</div>';
+}
+function addPlace(){
+  const name=document.getElementById('pl-name').value.trim();
+  if(!name){toast('enter a place');return;}
+  if(!Array.isArray(state.places))state.places=[];
+  state.places.unshift({id:uid(),name,note:document.getElementById('pl-note').value.trim(),ts:Date.now()});
+  setVal('pl-name','');setVal('pl-note','');
+  save();renderPlaces();toast('✓ logged');
+}
+function delPlace(id){state.places=(state.places||[]).filter(p2=>p2.id!==id);save();renderPlaces();}
+
 /* ---------------- brew crew: jouw koffie-CRM ---------------- */
 function crewDaysToBday(bday){
   if(!bday)return null;
@@ -3227,6 +3410,10 @@ const FEATURES=[
   {id:'crew', n:'brew crew (coffee CRM)', d:'guests, their exact drink, birthdays — brew for them in one tap', def:true},
   {id:'sharecards', n:'share cards', d:'any brew as a hand-drawn image card to send to friends', def:true},
   {id:'shortcuts', n:'home-screen shortcuts', d:'links that start a brew straight from an iOS Shortcut', def:true},
+  {id:'water', n:'water helper', d:'ppm targets & simple mineral recipes on the learn page', def:true},
+  {id:'cupping', n:'cupping session', d:'blind-taste two beans, score & reveal', def:true},
+  {id:'latteart', n:'latte-art gallery & coach', d:'photo timeline of your pours, with AI feedback', def:true},
+  {id:'logbook', n:'café & roaster logbook', d:'where you drank or bought every bean', def:true},
 ];
 function featOn(id){
   const f=FEATURES.find(x=>x.id===id);if(!f)return false;
@@ -3275,6 +3462,8 @@ function renderProfile(){
     const sub=document.getElementById('crew-entry-sub');
     if(sub)sub.textContent=n?('your coffee CRM — '+n+' in the crew.'):'your coffee CRM — guests, their exact drink and birthdays.';}
   renderShortcuts();
+  const lb=document.getElementById('logbook-card');
+  if(lb){lb.style.display=featOn('logbook')?'block':'none';renderPlaces();}
   const pu=document.getElementById('push-url');if(pu)pu.value=localStorage.getItem('scc_push_url')||'';
   const cr=document.getElementById('b-cost-row');if(cr)cr.style.display=featOn('cost')?'flex':'none';
   applyAIVisibility();
