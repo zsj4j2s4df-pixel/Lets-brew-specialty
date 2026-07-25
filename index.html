@@ -377,6 +377,12 @@
   #ai-key:focus{outline:none;border-color:var(--ink);}
   .profile-btn{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:10px;}
   .profile-btn:active{background:var(--card-2);}
+  .sect{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:26px 2px 8px;border-bottom:2px solid var(--line);filter:url(#wobble);padding-bottom:5px;}
+  .sect .hand{font-size:27px;line-height:1;flex:none;}
+  .sect .sd{color:var(--ink-soft);font-size:15px;}
+  .feat-group{font-family:'Caveat',cursive;font-weight:700;font-size:20px;color:var(--ink-soft);
+    margin:14px 0 2px;padding-bottom:3px;border-bottom:1.5px dashed var(--line);}
+  .feat-group:first-child{margin-top:4px;}
   .feat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1.5px dashed var(--line);}
   .feat-row:last-child{border-bottom:none;}
   .feat-row .ft{flex:1;min-width:0;}
@@ -895,20 +901,8 @@
       <h1 class="title hand">profile</h1>
       <div class="subtitle">settings & back-up</div>
 
-      <div class="settings-card sketch soft">
-        <div class="set-row">
-          <div class="set-body"><div class="set-t hand">AI features</div>
-            <div class="set-d">label scanning, brew recipes & coffee coach</div></div>
-          <div class="toggle" id="ai-toggle" onclick="toggleAI()"><div class="knob"></div></div>
-        </div>
-        <div id="ai-key-wrap" class="hidden">
-          <div class="set-d" style="margin:6px 0 8px">paste your own API key here. it stays on this device only.</div>
-          <input id="ai-key" type="password" placeholder="sk-ant-..." onchange="saveKey()">
-          <div class="set-d" id="ai-key-status" style="margin-top:6px"></div>
-        </div>
-        <div class="set-d" id="ai-off-note" style="margin-top:8px">AI is off. turn it on and enter a key to use label scanning and recipes. without a key the rest of the app works fine.</div>
-      </div>
 
+      <div class="sect"><span class="hand">your coffee</span><span class="sd">your gear, your people, your week</span></div>
       <div class="settings-card sketch soft">
         <div class="set-t hand">my gear</div>
         <div class="set-d" style="margin:4px 0 10px">add your grinder, machine and tools — then the AI makes the brew suggestion more specific (grind setting for your grinder, technique for your tools).</div>
@@ -922,6 +916,61 @@
           <input id="gear-name" placeholder="e.g. Eureka Libra 65" onkeydown="if(event.key==='Enter')addGear()">
           <button class="tag-add-btn" onclick="addGear()">＋</button>
         </div>
+      
+        <div id="pair-card" style="display:none;border-top:1.5px dashed var(--line);margin-top:14px;padding-top:12px">
+        <div class="set-t hand" style="font-size:19px;margin-top:4px">pairing</div>
+        <div class="set-d" style="margin:4px 0 8px" id="pair-status"></div>
+        <button class="profile-btn" id="pair-btn" onclick="pairScale()">pair a smart scale (Bluetooth)</button>
+        <div class="set-d" style="font-size:14px">tip: add your machine & grinder under "my gear" above — La Marzocco, Mahlkönig and friends have no open app-API yet, but their profiles make every AI tip sharper. live weight lands in the shot clock when a scale is paired.</div>
+      </div>
+      </div>
+      <div class="settings-card sketch soft" id="crew-entry" style="display:none">
+        <div class="set-t hand">brew crew</div>
+        <div class="set-d" style="margin:4px 0 10px" id="crew-entry-sub">your coffee CRM — guests, their exact drink and birthdays.</div>
+        <button class="profile-btn" onclick="go('crew')">open brew crew →</button>
+      </div>
+
+      <div class="settings-card sketch soft" id="logbook-card" style="display:none">
+        <button class="adv-head" onclick="document.getElementById('logbook-card').classList.toggle('open')"><span class="set-t hand">café & roaster logbook</span><span class="g-arr">▸</span></button>
+        <div class="adv-body">
+          <div class="set-d" style="margin:6px 0 8px">where you drank or bought every bean.</div>
+          <div id="place-list"></div>
+          <div class="field-row" style="margin-top:8px">
+            <input id="pl-name" placeholder="place, e.g. Friedhats FUKU" style="flex:2;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
+            <input id="pl-note" placeholder="note" style="flex:1.4;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
+            <button class="tag-add-btn" onclick="addPlace()">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card sketch soft" id="week-card" style="display:none">
+        <div class="set-t hand">your week</div>
+        <div id="bl-card">
+        <div class="set-t hand">weekly brewsletter</div>
+        <div class="set-d" style="margin:4px 0 10px">a hand-drawn recap card of your week in coffee — share it or keep it.</div>
+        <button class="profile-btn" onclick="brewsletter()">draw my week ☕</button>
+      </div>
+        <div id="tm-card" style="border-top:1.5px dashed var(--line);margin-top:12px;padding-top:10px">
+        <div class="set-t hand">taste memory</div>
+        <div class="set-d" style="margin:4px 0 10px">what your scores say about your palate.</div>
+        <div id="tm-body" class="set-d" style="color:var(--ink)"></div>
+        <button class="profile-btn" style="margin-top:8px" onclick="tasteMemory()">read my palate</button>
+      </div>
+      </div>
+
+      <div class="sect"><span class="hand">make it smart</span><span class="sd">AI, reminders and what you switch on</span></div>
+      <div class="settings-card sketch soft">
+        <div class="set-row">
+          <div class="set-body"><div class="set-t hand">AI features</div>
+            <div class="set-d">label scanning, brew recipes & coffee coach</div></div>
+          <div class="toggle" id="ai-toggle" onclick="toggleAI()"><div class="knob"></div></div>
+        </div>
+        <div id="ai-key-wrap" class="hidden">
+          <div class="set-d" style="margin:6px 0 8px">paste your own API key here. it stays on this device only.</div>
+          <input id="ai-key" type="password" placeholder="sk-ant-..." onchange="saveKey()">
+          <div class="set-d" id="ai-key-status" style="margin-top:6px"></div>
+        </div>
+        <div class="set-d" id="ai-off-note" style="margin-top:8px">AI is off. turn it on and enter a key to use label scanning and recipes. without a key the rest of the app works fine.</div>
       </div>
 
       <div class="settings-card sketch soft">
@@ -944,45 +993,6 @@
         </div>
       </div>
 
-      <div class="settings-card sketch soft" id="bl-card" style="display:none">
-        <div class="set-t hand">weekly brewsletter</div>
-        <div class="set-d" style="margin:4px 0 10px">a hand-drawn recap card of your week in coffee — share it or keep it.</div>
-        <button class="profile-btn" onclick="brewsletter()">draw my week ☕</button>
-      </div>
-
-      <div class="settings-card sketch soft" id="tm-card" style="display:none">
-        <div class="set-t hand">taste memory</div>
-        <div class="set-d" style="margin:4px 0 10px">what your scores say about your palate.</div>
-        <div id="tm-body" class="set-d" style="color:var(--ink)"></div>
-        <button class="profile-btn" style="margin-top:8px" onclick="tasteMemory()">read my palate</button>
-      </div>
-
-      <div class="settings-card sketch soft" id="pair-card" style="display:none">
-        <div class="set-t hand">pairing & machines</div>
-        <div class="set-d" style="margin:4px 0 8px" id="pair-status"></div>
-        <button class="profile-btn" id="pair-btn" onclick="pairScale()">pair a smart scale (Bluetooth)</button>
-        <div class="set-d" style="font-size:14px">tip: add your machine & grinder under "my gear" above — La Marzocco, Mahlkönig and friends have no open app-API yet, but their profiles make every AI tip sharper. live weight lands in the shot clock when a scale is paired.</div>
-      </div>
-
-      <div class="settings-card sketch soft" id="logbook-card" style="display:none">
-        <button class="adv-head" onclick="document.getElementById('logbook-card').classList.toggle('open')"><span class="set-t hand">café & roaster logbook</span><span class="g-arr">▸</span></button>
-        <div class="adv-body">
-          <div class="set-d" style="margin:6px 0 8px">where you drank or bought every bean.</div>
-          <div id="place-list"></div>
-          <div class="field-row" style="margin-top:8px">
-            <input id="pl-name" placeholder="place, e.g. Friedhats FUKU" style="flex:2;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
-            <input id="pl-note" placeholder="note" style="flex:1.4;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
-            <button class="tag-add-btn" onclick="addPlace()">＋</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="settings-card sketch soft" id="crew-entry" style="display:none">
-        <div class="set-t hand">brew crew</div>
-        <div class="set-d" style="margin:4px 0 10px" id="crew-entry-sub">your coffee CRM — guests, their exact drink and birthdays.</div>
-        <button class="profile-btn" onclick="go('crew')">open brew crew →</button>
-      </div>
-
       <div class="settings-card sketch soft" id="feat-card">
         <button class="adv-head" onclick="document.getElementById('feat-card').classList.toggle('open')"><span class="set-t hand">features</span><span class="g-arr">▸</span></button>
         <div class="adv-body">
@@ -991,6 +1001,14 @@
         </div>
       </div>
 
+      <div class="settings-card sketch soft" id="shortcut-card" style="display:none">
+        <div class="set-t hand">start from your home screen</div>
+        <div class="set-d" style="margin:4px 0 10px">make an iOS Shortcut (or bookmark) that opens one of these links — the app jumps straight into that brew.</div>
+        <div id="shortcut-list"></div>
+      </div>
+
+
+      <div class="sect"><span class="hand">keep &amp; share</span><span class="sd">your safety net</span></div>
       <div class="settings-card sketch soft">
         <div class="set-t hand">sharing & friends</div>
         <div class="set-d" style="margin:4px 0 10px">send a single brew or bean with the send icon on the card. or add what a friend sent you — an attached bean comes along automatically.</div>
@@ -1008,12 +1026,6 @@
         <button class="profile-btn ic-btn" onclick="document.getElementById('import-input').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M12 13 Q12.3 8 12 3.6 M8.4 7.4 Q10.2 5.4 12 3.5 Q13.8 5.5 15.6 7.6 M5 17 Q12 17.5 19 17 M5.5 20 Q12 20.4 18.5 20"/></svg> restore a back-up</button>
         <input type="file" id="import-input" accept="application/json,.json" style="display:none" onchange="importData(event)">
         <div class="set-d" style="margin-top:8px;font-size:14px">note: “restore a back-up” replaces your current data. “add from a friend” above adds to it instead.</div>
-      </div>
-
-      <div class="settings-card sketch soft" id="shortcut-card" style="display:none">
-        <div class="set-t hand">start from your home screen</div>
-        <div class="set-d" style="margin:4px 0 10px">make an iOS Shortcut (or bookmark) that opens one of these links — the app jumps straight into that brew.</div>
-        <div id="shortcut-list"></div>
       </div>
 
       <div class="settings-card sketch soft" id="adv-card">
@@ -1763,7 +1775,7 @@ function applyFamilyToForm(){
   const yl=document.getElementById('f-yield-label');
   if(yl)yl.textContent=(fam==='filter')?'water (g)':'yield (g)';
   const rh=document.getElementById('f-ratio-hint');
-  if(rh)rh.textContent=(fam==='filter')?'rekent mee met dose + water':'rekent mee met dose + yield';
+  if(rh)rh.textContent=(fam==='filter')?'auto-calculates from dose + water':'auto-calculates from dose + yield';
   // puck-prep alleen bij espresso tonen
   const pf=document.getElementById('prep-field');
   if(pf){pf.style.display=(fam==='espresso')?'block':'none';if(fam==='espresso')renderPrep();}
@@ -2121,7 +2133,7 @@ function openDetail(id){
 function customGuideHTML(guide){
   return `<div class="guide-card sketch soft open">
     <button class="guide-toggle" onclick="this.parentElement.classList.toggle('open')">
-      <span class="hand">hoe zet je dit?</span><span class="g-arr">▸</span></button>
+      <span class="hand">how to brew this?</span><span class="g-arr">▸</span></button>
     <div class="guide-body"><div class="rstep" style="white-space:pre-wrap">${esc(guide)}</div></div></div>`;
 }
 function guideHTML(methodId){
@@ -2129,7 +2141,7 @@ function guideHTML(methodId){
   const steps=g.steps.map((st,i)=>`<div class="rstep">${i+1}. ${esc(st)}</div>`).join('');
   return `<div class="guide-card sketch soft">
     <button class="guide-toggle" onclick="this.parentElement.classList.toggle('open')">
-      <span class="hand">hoe zet je dit?</span><span class="g-arr">▸</span></button>
+      <span class="hand">how to brew this?</span><span class="g-arr">▸</span></button>
     <div class="guide-body">
       <div class="rk">recept</div><div class="rstep">${esc(g.recept)}</div>
       <div class="rk">maling</div><div class="rstep">${esc(g.grind)}</div>
@@ -3591,27 +3603,27 @@ function brewNow(){
 /* ---------------- features: het schakelbord ---------------- */
 // alles wat nieuw bijgebouwd wordt staat hier, met eigen aan/uit-knop in profiel.
 const FEATURES=[
-  {id:'bg',    n:'coffee-bean background', d:'a faint hand-drawn bean behind every screen', def:true},
-  {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false},
-  {id:'shotclock', n:'E61 shot clock', d:'pull the lever on the dial-in screen — time fills in, stays editable', def:true},
-  {id:'journey', n:'dial-in journey', d:'your attempts drawn as a line walking into the target band', def:true},
-  {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true},
-  {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true},
-  {id:'smartdefaults', n:'smart defaults', d:'last dose, grind & temp prefilled — never retype', def:true},
-  {id:'brewnow', n:'brew now button', d:'one tap on home: your usual, prefilled — confirm & go', def:true},
-  {id:'cost', n:'cost per cup', d:'price & bag size on a bean → what a cup costs you', def:true},
-  {id:'crew', n:'brew crew (coffee CRM)', d:'guests, their exact drink, birthdays — brew for them in one tap', def:true},
-  {id:'sharecards', n:'share cards', d:'any brew as a hand-drawn image card to send to friends', def:true},
-  {id:'shortcuts', n:'home-screen shortcuts', d:'links that start a brew straight from an iOS Shortcut', def:true},
-  {id:'water', n:'water helper', d:'ppm targets & simple mineral recipes on the learn page', def:true},
-  {id:'cupping', n:'cupping session', d:'blind-taste two beans, score & reveal', def:true},
-  {id:'latteart', n:'latte-art gallery & coach', d:'photo timeline of your pours, with AI feedback', def:true},
-  {id:'logbook', n:'café & roaster logbook', d:'where you drank or bought every bean', def:true},
-  {id:'brewsletter', n:'weekly brewsletter', d:'a hand-drawn recap card of your week, shareable', def:true},
-  {id:'tastememory', n:'taste memory', d:'what your scores say about your palate', def:true},
-  {id:'voice', n:'voice logging', d:'say "18 in, 36 out, 27 seconds" — hands stay on the machine', def:false},
-  {id:'weather', n:'weather-aware suggestions', d:'iced on hot days, cozy moka when it rains (uses location)', def:false},
-  {id:'pairing', n:'scale & machine pairing', d:'live weight via Bluetooth where the browser allows it', def:false},
+  {id:'bg',    n:'coffee-bean background', d:'a faint hand-drawn bean behind every screen', def:true, cat:'app'},
+  {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false, cat:'app'},
+  {id:'shotclock', n:'E61 shot clock', d:'pull the lever on the dial-in screen — time fills in, stays editable', def:true, cat:'app'},
+  {id:'journey', n:'dial-in journey', d:'your attempts drawn as a line walking into the target band', def:true, cat:'app'},
+  {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true, cat:'app'},
+  {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true, cat:'app'},
+  {id:'smartdefaults', n:'smart defaults', d:'last dose, grind & temp prefilled — never retype', def:true, cat:'app'},
+  {id:'brewnow', n:'brew now button', d:'one tap on home: your usual, prefilled — confirm & go', def:true, cat:'app'},
+  {id:'cost', n:'cost per cup', d:'price & bag size on a bean → what a cup costs you', def:true, cat:'app'},
+  {id:'crew', n:'brew crew (coffee CRM)', d:'guests, their exact drink, birthdays — brew for them in one tap', def:true, cat:'people'},
+  {id:'sharecards', n:'share cards', d:'any brew as a hand-drawn image card to send to friends', def:true, cat:'app'},
+  {id:'shortcuts', n:'home-screen shortcuts', d:'links that start a brew straight from an iOS Shortcut', def:true, cat:'smart'},
+  {id:'water', n:'water helper', d:'ppm targets & simple mineral recipes on the learn page', def:true, cat:'people'},
+  {id:'cupping', n:'cupping session', d:'blind-taste two beans, score & reveal', def:true, cat:'people'},
+  {id:'latteart', n:'latte-art gallery & coach', d:'photo timeline of your pours, with AI feedback', def:true, cat:'people'},
+  {id:'logbook', n:'café & roaster logbook', d:'where you drank or bought every bean', def:true, cat:'people'},
+  {id:'brewsletter', n:'weekly brewsletter', d:'a hand-drawn recap card of your week, shareable', def:true, cat:'smart'},
+  {id:'tastememory', n:'taste memory', d:'what your scores say about your palate', def:true, cat:'smart'},
+  {id:'voice', n:'voice logging', d:'say "18 in, 36 out, 27 seconds" — hands stay on the machine', def:false, cat:'smart'},
+  {id:'weather', n:'weather-aware suggestions', d:'iced on hot days, cozy moka when it rains (uses location)', def:false, cat:'smart'},
+  {id:'pairing', n:'scale & machine pairing', d:'live weight via Bluetooth where the browser allows it', def:false, cat:'smart'},
 ];
 function featOn(id){
   const f=FEATURES.find(x=>x.id===id);if(!f)return false;
@@ -3621,7 +3633,8 @@ function featOn(id){
 function toggleFeature(id){
   if(!state.features)state.features={};
   state.features[id]=!featOn(id);
-  save();applyFeatures();renderFeatures();
+  save();applyFeatures();
+  if(currentPage==='profile')renderProfile();else renderFeatures();
   const f=FEATURES.find(x=>x.id===id);
   toast((featOn(id)?'✓ ':'○ ')+f.n+(featOn(id)?' on':' off'));
 }
@@ -3632,10 +3645,15 @@ function applyFeatures(){
 }
 function renderFeatures(){
   const el=document.getElementById('feat-list');if(!el)return;
-  el.innerHTML=FEATURES.map(f=>`<div class="feat-row">
-    <div class="ft"><div class="n">${esc(f.n)}</div><div class="d">${esc(f.d)}</div></div>
-    <div class="toggle ${featOn(f.id)?'on':''}" onclick="toggleFeature('${f.id}')"><div class="knob"></div></div>
-  </div>`).join('');
+  const GROUPS=[['app','in the app'],['people','people & learning'],['smart','smart & connected']];
+  el.innerHTML=GROUPS.map(([c,label])=>{
+    const rows=FEATURES.filter(f=>(f.cat||'app')===c);
+    if(!rows.length)return '';
+    return `<div class="feat-group">${esc(label)}</div>`+rows.map(f=>`<div class="feat-row">
+      <div class="ft"><div class="n">${esc(f.n)}</div><div class="d">${esc(f.d)}</div></div>
+      <div class="toggle ${featOn(f.id)?'on':''}" onclick="toggleFeature('${f.id}')"><div class="knob"></div></div>
+    </div>`).join('');
+  }).join('');
 }
 
 /* ---------------- AI-instellingen ---------------- */
@@ -3664,6 +3682,8 @@ function renderProfile(){
   if(lb){lb.style.display=featOn('logbook')?'block':'none';renderPlaces();}
   const bl=document.getElementById('bl-card');if(bl)bl.style.display=featOn('brewsletter')?'block':'none';
   const tm=document.getElementById('tm-card');if(tm)tm.style.display=featOn('tastememory')?'block':'none';
+  const wk=document.getElementById('week-card');
+  if(wk)wk.style.display=(featOn('brewsletter')||featOn('tastememory'))?'block':'none';
   renderPairing();
   const pu=document.getElementById('push-url');if(pu)pu.value=localStorage.getItem('scc_push_url')||'';
   const cr=document.getElementById('b-cost-row');if(cr)cr.style.display=featOn('cost')?'flex':'none';
@@ -3683,7 +3703,7 @@ function delGear(id){state.gear=(state.gear||[]).filter(g=>g.id!==id);save();ren
 function renderGear(){
   const el=document.getElementById('gear-list');if(!el)return;
   const g=state.gear||[];
-  if(!g.length){el.innerHTML='<div class="set-d" style="margin-bottom:4px">nog niets toegevoegd.</div>';return;}
+  if(!g.length){el.innerHTML='<div class="set-d" style="margin-bottom:4px">nothing added yet.</div>';return;}
   let html='';
   GEAR_CATS.forEach(([cat,label])=>{
     const items=g.filter(x=>x.category===cat);
