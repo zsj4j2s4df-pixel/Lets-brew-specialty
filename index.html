@@ -17,7 +17,7 @@
   :root{
     --paper:#efe9dd;--card:#e7ded0;--card-2:#ded2c0;
     --ink:#3a302a;--ink-soft:#7a6c5e;--line:#b8a98f;--accent:#4a3b30;
-    --cream:var(--cream);--desk:#d4ccbe;
+    --cream:#f2ead9;--desk:#d4ccbe;--accent-soft:#7d6650;
     --espresso:#e3d3bf;--aeropress:#dfdcc9;--v60:#e6d9cf;--chemex:#dcd9cc;--perculator:#e4d6cc;
     --radius:26px;
   }
@@ -25,7 +25,7 @@
   html.night{
     --paper:#262b28;--card:#2e3431;--card-2:#353c38;
     --ink:#e9e4d4;--ink-soft:#9aa094;--line:#5a615c;--accent:#d9c9a8;
-    --cream:#1c211e;--desk:#181d1a;
+    --cream:#1c211e;--desk:#181d1a;--accent-soft:#c2b191;
     --espresso:#333932;--aeropress:#31382f;--v60:#2f3634;--chemex:#2e3532;--perculator:#343831;
   }
   html.night img[src$=".png"]{filter:invert(.92) hue-rotate(180deg);mix-blend-mode:screen!important;}
@@ -33,7 +33,7 @@
   .phone,body{transition:background .45s;}
   /* statische koffieboon-achtergrond (feature: bg) */
   #bg-bean{position:absolute;inset:0;pointer-events:none;z-index:0;display:none;overflow:hidden;}
-  html.f-bg #bg-bean{display:block;}
+  #bg-bean.on{display:block;}
   #bg-bean svg{position:absolute;right:-120px;top:22%;width:420px;height:520px;opacity:.055;
     fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;filter:url(#wobble);}
   html.night #bg-bean svg{opacity:.09;}
@@ -83,7 +83,7 @@
 
   .btn-add{width:100%;background:var(--card);border-radius:var(--radius);padding:18px;font-size:21px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
   .btn-add:active{background:var(--card-2);}
-  .btn-reco{width:100%;margin:0 0 16px;background:var(--accent);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:var(--radius);padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;font-family:inherit;text-align:left;}
+  .btn-reco{width:100%;margin:0 0 16px;background:var(--accent-soft);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:var(--radius);padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;font-family:inherit;text-align:left;}
   .btn-reco:active{filter:url(#wobble) brightness(.9);}
   .btn-reco .reco-ic{flex:none;width:42px;height:42px;display:flex;align-items:center;justify-content:center;}
   .btn-reco .reco-ic svg{width:36px;height:36px;fill:none;stroke:var(--cream);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
@@ -507,7 +507,7 @@
         <span class="reco-ic"><svg viewBox="0 0 32 32"><path d="M7 12 L7 22 Q7 26 12 26 L19 26 Q24 26 24 22 L24 12 Z M24 14 Q29 14 29 18 Q29 22 24 22 M6 30 L26 30"/><path d="M11 6 Q10 8 11.5 9.5 M16 5 Q15 7 16.5 8.5 M21 6 Q20 8 21.5 9.5" opacity="0.8"/></svg></span>
         <span class="reco-txt"><span class="reco-h hand">surprise me</span><span class="reco-sub">a surprise brew with a bean from your shelf</span></span>
       </button>
-      <button class="btn-add sketch soft" id="brew-now-btn" onclick="brewNow()" style="display:none;margin-bottom:16px">☕ brew now — your usual, prefilled</button>
+      <button class="btn-add sketch soft" id="brew-now-btn" onclick="brewNow()" style="display:none;margin-bottom:16px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M5 10 Q5 16 8 18 Q12 20 16 18 Q19 16 19 10 Q12 8.6 5 10 Z M19 11 Q22 11 22 13.5 Q22 16 19 16 M3.5 21.5 L20.5 21.5"/><path d="M9 6.2 Q8.3 7.6 9.4 8.6 M12.4 5.4 Q11.6 6.9 12.7 7.9 M15.6 6.2 Q14.9 7.6 16 8.6" opacity="0.7"/></svg>brew now — your usual, prefilled</button>
       <div class="methods sketch soft">
         <div class="lbl"><span>brew methods</span><a class="hand" onclick="go('methods')">manage</a></div>
         <div class="methods-scroll" id="methods-scroll"></div>
@@ -1329,6 +1329,9 @@ const navMap={home:'home',form:'home',dialin:'home',detail:'home',brews:'brews',
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
+  // de getekende boon hoort bij de app, niet bij het beginscherm
+  const bgb=document.getElementById('bg-bean');
+  if(bgb)bgb.classList.toggle('on',p!=='welcome');
   // geschiedenis bijhouden (niet voor splash/naam, en niet bij terug-navigatie)
   if(!isBack && currentPage && currentPage!==p && currentPage!=='welcome'){
     navHistory.push(currentPage);
@@ -3479,7 +3482,6 @@ function brewNow(){
 /* ---------------- features: het schakelbord ---------------- */
 // alles wat nieuw bijgebouwd wordt staat hier, met eigen aan/uit-knop in profiel.
 const FEATURES=[
-  {id:'bg',    n:'coffee-bean background', d:'a faint hand-drawn bean behind every screen', def:true, cat:'app'},
   {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false, cat:'app'},
   {id:'shotclock', n:'E61 shot clock', d:'pull the lever on the dial-in screen — time fills in, stays editable', def:true, cat:'app'},
   {id:'journey', n:'dial-in journey', d:'your attempts drawn as a line walking into the target band', def:true, cat:'app'},
@@ -3515,7 +3517,6 @@ function toggleFeature(id){
 function applyFeatures(){
   const h=document.documentElement;
   h.classList.toggle('night',featOn('night'));
-  h.classList.toggle('f-bg',featOn('bg'));
 }
 function renderFeatures(){
   const el=document.getElementById('feat-list');if(!el)return;
