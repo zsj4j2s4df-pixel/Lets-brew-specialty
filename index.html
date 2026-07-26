@@ -218,7 +218,7 @@
   html.night #e61-crema{fill:#8a744f;}
   /* stroke/fill op de svg zelf: <use>-kopieen erven het (selectors bereiken de shadow-tree niet) */
   .e61-box svg{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
-  .e61-od{opacity:.5;}                       /* de tweede pennestreek */
+  .e61-b{opacity:.62;stroke-width:1.35;}     /* de tweede, afwijkende pennestreek */
   .e61-stream path{stroke:var(--accent-soft);stroke-width:2.4;opacity:0;stroke-dasharray:13 3;}
   .e61-run .e61-stream path{opacity:.92;animation:e61flow .55s linear infinite;}
   @keyframes e61flow{to{stroke-dashoffset:-16;}}
@@ -604,31 +604,39 @@
         <div class="di-lbl hand">shot clock</div>
         <div class="e61-box" id="e61" onclick="e61Toggle()">
           <svg viewBox="0 0 240 236">
-            <defs>
-              <clipPath id="e61-cupclip">
-                <path d="M99 181 Q120 177 141 181 Q139 202 130 210 Q120 214 110 210 Q101 202 99 181 Z"/>
-              </clipPath>
-              <g id="e61-machine">
-                <path d="M70 18 Q120 12 170 18 L166 34 Q120 40 74 34 Z"/>
-                <path d="M96 34 L94 52 M144 34 L146 52"/>
-                <path d="M84 52 Q80 96 92 112 Q120 120 148 112 Q160 96 156 52 Q120 46 84 52 Z"/>
-                <circle cx="118" cy="82" r="10" opacity="0.55"/>
-                <path d="M92 118 Q120 126 148 118 L144 136 Q120 142 96 136 Z"/>
-                <path d="M148 124 Q186 128 204 140 Q210 144 205 150" stroke-width="2.6"/>
-                <path d="M110 142 L106 154 M130 142 L134 154"/>
-              </g>
-              <g id="e61-cupart">
-                <path d="M97 179 Q120 175 143 179 Q141 202 131 211 Q120 215 109 211 Q99 202 97 179 Z"/>
-                <path d="M143 185 Q158 183 159 192 Q160 202 145 203"/>
-                <path d="M84 219 Q120 226 156 219" opacity="0.75"/>
-                <path d="M60 231 Q120 236 180 231" opacity="0.4"/>
-              </g>
-            </defs>
+            <defs><clipPath id="e61-cupclip">
+              <path d="M99 181 Q120 177 141 181 Q139 202 130 210 Q120 214 110 210 Q101 202 99 181 Z"/>
+            </clipPath></defs>
 
-            <use href="#e61-machine"/>
-            <use href="#e61-machine" class="e61-od" transform="translate(1.4,-1) rotate(.45 120 90)"/>
+            <!-- groepkop: elke contour twee keer, met eigen afwijking en doorschietende hoeken -->
+            <path d="M67.5 19.5 Q120 10.8 172 17.5 Q168.5 26 166 35 Q120 41.5 73 33.8 Q70 26 67.8 19"/>
+            <path class="e61-b" d="M70 17.4 Q118.5 13.2 169.5 19.4 Q167 27 164.8 33.6 Q121.5 39.4 75 34.8 Q71.8 25 69.4 18"/>
+            <path d="M96.5 32.6 Q95.2 43 93.8 53.8"/>
+            <path class="e61-b" d="M98 34 Q96.6 43.5 95.4 52.4"/>
+            <path d="M144 33.2 Q145.4 43 146.8 53.4"/>
+            <path class="e61-b" d="M142.6 34.6 Q144 43.6 145.2 52.2"/>
 
-            <g id="e61-lever"><path d="M158 58 L196 118" stroke-width="2.6"/><circle cx="199" cy="123" r="7"/></g>
+            <path d="M83 50.6 Q79.4 96 92.6 113.4 Q120 121.8 148.6 112.6 Q160.6 95 156.6 51.2 Q120 44.8 83.4 51.6"/>
+            <path class="e61-b" d="M85.2 53.6 Q81.6 94 91 111 Q120 118.4 147 111 Q158.4 96.6 154.8 53 Q121 47.4 84 52.8"/>
+
+            <path d="M128.2 80.4 Q129.2 90.6 118.4 92.4 Q108.4 92.6 107.6 82.4 Q107.4 72.4 117.6 71.4 Q127 71.8 128.4 80 Q128.8 83.2 127.4 85.8" opacity="0.6"/>
+
+            <path d="M90.5 116.6 Q120 127.2 149.6 117.2 Q147 127 144.6 137.2 Q120 143.6 95.4 136.6 Q93 127 90.8 117.4"/>
+            <path class="e61-b" d="M93 119.4 Q120 124.8 147 118.8 Q145 128 143 135.4 Q120 141 97 135.2 Q95 128 93.4 119.8"/>
+
+            <path d="M147 122.8 Q187 127.4 205.2 140 Q211.6 144.6 205.4 151.6" stroke-width="2.2"/>
+            <path class="e61-b" d="M149 125.8 Q185 130.6 202.6 141.6 Q208 145.6 203.8 149.8"/>
+
+            <path d="M110.6 140.8 Q108 148 105.4 155.4"/>
+            <path class="e61-b" d="M112 142.2 Q109.6 148.6 107 154.2"/>
+            <path d="M129.4 140.8 Q132 148 134.6 155.4"/>
+            <path class="e61-b" d="M128 142.2 Q130.4 148.6 133 154.2"/>
+
+            <g id="e61-lever">
+              <path d="M157 56.8 Q177 87 197.4 119.4" stroke-width="2.2"/>
+              <path class="e61-b" d="M159.6 59.2 Q178.6 88.6 195 117"/>
+              <path d="M205.6 121.4 Q206.6 128.6 199.4 129.8 Q192.4 129 191.8 122.4 Q192.4 115.8 199 115.4 Q204.8 116 205.8 121"/>
+            </g>
 
             <g class="e61-stream">
               <path d="M106 155 Q109 168 116 183"/>
@@ -638,8 +646,15 @@
             <rect id="e61-fill" x="96" y="214" width="48" height="0" clip-path="url(#e61-cupclip)"/>
             <rect id="e61-crema" x="96" y="214" width="48" height="0" clip-path="url(#e61-cupclip)"/>
 
-            <use href="#e61-cupart"/>
-            <use href="#e61-cupart" class="e61-od" transform="translate(-1.2,.9) rotate(-.4 120 196)"/>
+            <!-- kopje -->
+            <path d="M95.4 178 Q120 173.4 144.6 178.2 Q142 202 131.6 212 Q120 216.6 108.4 211.6 Q98 202 95.8 178.6"/>
+            <path class="e61-b" d="M98 180.6 Q120 177 142.6 180.4 Q140 201 130 209.8 Q120 213.4 109.4 209.4 Q99.4 201 97.8 180"/>
+            <path d="M142.4 184 Q159 182 160.6 192 Q161.6 203 143.8 204.6"/>
+            <path class="e61-b" d="M144 186.4 Q157.4 185 158.4 192.6 Q159 200.4 145.4 202"/>
+
+            <path d="M81.8 218 Q120 227.2 158.4 218" opacity="0.8"/>
+            <path class="e61-b" d="M85.4 220.6 Q120 228 154 220.4" opacity="0.8"/>
+            <path d="M58 230.4 Q120 236.6 182 230.8" opacity="0.38"/>
           </svg>
         </div>
         <div class="e61-row">
