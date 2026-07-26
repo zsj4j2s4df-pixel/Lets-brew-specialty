@@ -388,6 +388,54 @@
   .shelf-do svg{width:22px;height:22px;flex:none;}
   .shelf-do span:first-of-type{flex:1;}
   .shelf-do .ll-arr{color:var(--ink-soft);font-size:20px;}
+  /* ---- latte art ---- */
+  :root{--la-coffee:#7d6650;--la-milk:#f6f0e2;}
+  html.night{--la-coffee:#6b5947;--la-milk:#e6e0cf;}
+  .la-intro{font-size:18px;line-height:1.45;color:var(--ink-soft);margin:2px 2px 4px;}
+  .la-draw{display:flex;justify-content:center;}
+  .la-draw svg{width:100%;max-width:280px;height:auto;fill:none;stroke:var(--ink);
+    stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .la-swirl{stroke:var(--la-coffee);}
+  .la-jet{stroke:var(--ink-soft);stroke-dasharray:5 3;}
+  .la-milkline{stroke:var(--la-coffee);stroke-width:2.4;stroke-dasharray:11 4;}
+  .la-mark{stroke:var(--ink-soft);stroke-width:1.3;opacity:0.5;}
+  .la-lab{font-family:'Caveat',cursive;font-weight:700;font-size:15px;fill:var(--ink-soft);stroke:none;}
+
+  .la-steam,.la-pour{padding:14px 16px 16px;background:var(--card);border:2px solid var(--ink);
+    filter:url(#wobble);border-radius:24px;margin-bottom:4px;}
+  .la-steps{margin-top:8px;}
+  .la-step{display:flex;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);}
+  .la-step:last-child{border-bottom:none;}
+  .la-step .ls-n{font-size:26px;color:var(--accent-soft);flex:none;min-width:22px;line-height:1.1;}
+  .la-step b{font-size:21px;font-weight:700;display:block;}
+  .la-step div div{font-size:16px;line-height:1.4;color:var(--ink-soft);margin-top:1px;}
+
+  .la-lvl{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 10px;margin:22px 2px 8px;
+    border-bottom:2px solid var(--line);filter:url(#wobble);padding-bottom:4px;}
+  .la-lvl .hand{font-size:25px;}
+  .la-lvl .lv-d{flex:1;color:var(--ink-soft);font-size:15px;}
+  .la-lvl .lv-dots{color:var(--accent-soft);font-size:13px;letter-spacing:2px;}
+
+  .la-pat{display:flex;gap:14px;align-items:flex-start;padding:13px 15px;background:var(--card);
+    border:2px solid var(--line);filter:url(#wobble);border-radius:22px;margin-bottom:10px;}
+  .la-pat .lp-draw{flex:none;width:88px;}
+  .la-pat .lp-draw svg{width:100%;height:auto;filter:url(#wobble-rough);}
+  .la-cup{fill:var(--la-coffee);stroke:var(--ink);stroke-width:2.4;}
+  .la-milk{fill:var(--la-milk);stroke:none;}
+  .la-line{fill:none;stroke:var(--la-coffee);stroke-width:1.5;opacity:0.35;}
+  .la-pat .lp-body{flex:1;min-width:0;}
+  .la-pat .lp-t{font-size:24px;line-height:1.1;}
+  .la-pat .lp-en{font-size:15px;color:var(--accent-soft);font-style:italic;
+    font-family:'Patrick Hand',cursive;font-weight:400;letter-spacing:0;}
+  .la-pat .lp-d{font-size:16px;line-height:1.4;color:var(--ink-soft);margin-top:3px;}
+  .la-pat .lp-tip{font-size:15px;line-height:1.35;color:var(--ink);margin-top:6px;
+    padding-left:10px;border-left:2px solid var(--accent-soft);}
+
+  .la-fix{margin-bottom:9px;padding:12px 16px 13px;background:var(--card);
+    border:2px solid var(--line);filter:url(#wobble);border-radius:20px;}
+  .la-fix .lf-p{font-size:21px;}
+  .la-fix .lf-c{font-size:15.5px;color:var(--ink-soft);margin-top:2px;}
+  .la-fix .lf-f{font-size:16px;margin-top:4px;}
   /* ---- cupping ---- */
   .cup-ex-t{display:flex;align-items:center;gap:9px;width:100%;margin:2px 0 0;padding:12px 15px;
     background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;
@@ -445,6 +493,7 @@
   .cup-sec{padding:5px 0;}
   .cup-sec .cs-lab{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;}
   .cup-sec .cs-lab .hand{font-size:20px;}
+  .cup-sec .cs-en{font-size:14px;color:var(--accent-soft);font-style:italic;}
   .cup-sec .cs-hint{font-size:13.5px;color:var(--ink-soft);}
   .cup-sec .cs-in{display:flex;align-items:center;gap:10px;}
   .cup-sec input[type=range]{flex:1;accent-color:var(--accent-soft);}
@@ -956,8 +1005,8 @@
 
       <div class="learn-card sketch" style="background:var(--aeropress)" onclick="go('learn-latte')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M6.8 5.7 Q11.5 5.3 16.2 5.9 M16.1 5.6 Q16.7 12.6 16.1 19.3 M16.3 19 Q11.6 19.8 7.3 19.1 M7.5 19.4 Q6.5 12.6 6.9 5.4 M7.1 7.3 Q4.8 8.4 4.4 11 Q4.2 13.2 6.1 13.7 M16.1 6.8 Q17.7 5.8 18.9 7.1 Q19.8 8.5 18.3 9.4"/><path d="M9.3 8.9 Q11.5 8.5 14 9.1" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">latte art & milk</div>
-          <div class="lc-d">practise steaming and pour patterns</div></div>
+        <div class="lc-body"><div class="lc-t hand">latte art & melk</div>
+          <div class="lc-d">opschuimen, gieten en de vormen op niveau</div></div>
         <div class="lc-arr">›</div>
       </div>
 
@@ -980,15 +1029,15 @@
 
       <div class="learn-card sketch do" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">cupping session</div>
-          <div class="lc-d">the SCA protocol, timed — taste blind and score</div></div>
+        <div class="lc-body"><div class="lc-t hand">cuppen</div>
+          <div class="lc-d">het SCA-protocol, met klok — blind proeven en scoren</div></div>
         <div class="lc-arr hand">start</div>
       </div>
 
       <div class="learn-card sketch do" id="gallery-card" style="background:var(--aeropress)" onclick="go('gallery')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M7.7 14.2 Q10 10.4 12.1 12.6 Q14.5 8.9 16.8 13.2" opacity="0.8"/><path d="M10.3 8.7 Q10.7 10.4 9 10.5 Q7.5 10.4 7.7 8.9 Q8 7.5 9.6 7.7 Q10.3 7.9 10.6 8.4" opacity="0.6"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">latte-art gallery</div>
-          <div class="lc-d">photo timeline of your pours — with AI feedback</div></div>
+        <div class="lc-body"><div class="lc-t hand">de gieterij</div>
+          <div class="lc-d">foto's van je gieten, op volgorde — met AI-feedback</div></div>
         <div class="lc-arr hand">open</div>
       </div>
 
@@ -1024,7 +1073,7 @@
   <div id="page-learn-latte" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">latte art & milk</div><div style="width:24px"></div></div>
+      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">latte art & melk</div><div style="width:24px"></div></div>
       <div id="latte-content"></div>
     </div>
   </div>
@@ -1032,8 +1081,8 @@
   <div id="page-cupping" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">cupping</div><button onclick="go('learn')">done</button></div>
-      <div class="subtitle">brew them all the same way, taste blind, score first — reveal after.</div>
+      <div class="form-head"><div class="h hand">cuppen</div><button onclick="go('learn')">klaar</button></div>
+      <div class="subtitle">zet ze allemaal hetzelfde, proef blind, scoor eerst — onthul daarna.</div>
       <div id="cupping-body"></div>
     </div>
   </div>
@@ -1042,9 +1091,9 @@
   <div id="page-gallery" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">latte-art gallery</div><button onclick="go('learn')">done</button></div>
-      <div class="subtitle">every pour on paper — watch the rosetta improve.</div>
-      <button class="scan-btn" onclick="document.getElementById('latte-input').click()">＋ add a pour photo</button>
+      <div class="form-head"><div class="h hand">de gieterij</div><button onclick="go('learn')">klaar</button></div>
+      <div class="subtitle">elke giet vastgelegd — zie je rozet beter worden.</div>
+      <button class="scan-btn" onclick="document.getElementById('latte-input').click()">＋ voeg een foto toe</button>
       <input type="file" id="latte-input" accept="image/*" style="display:none" onchange="addLatteShot(event)">
       <div id="gallery-list"></div>
     </div>
@@ -1534,7 +1583,7 @@ function go(p,isBack){
   }
   if(p==='learn-barista')renderLesson('barista-content',LESSONS.barista);
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
-  if(p==='learn-latte')renderLesson('latte-content',LESSONS.latte);
+  if(p==='learn-latte')renderLatte();
   if(p==='profile')renderProfile();
   if(p==='form')requestAnimationFrame(()=>autoGrow(document.getElementById('f-guide')));
   applyAIVisibility();
@@ -2783,7 +2832,7 @@ function renderBeans(){
   html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap ＋ add or check your empty bags.</div>';
   // cupping hoort bij je bonen, niet alleen achterin learn
   if(featOn('cupping')&&inBeans.length>=2){
-    html+=`<button class="shelf-do" onclick="go('cupping')"><svg viewBox="0 0 24 24" class="acic"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg><span>taste two of these blind — cupping session</span><span class="ll-arr">›</span></button>`;
+    html+=`<button class="shelf-do" onclick="go('cupping')"><svg viewBox="0 0 24 24" class="acic"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg><span>proef er twee blind — cuppingsessie</span><span class="ll-arr">›</span></button>`;
   }
   if(outBeans.length){
     html+=`<button class="extra-kast" onclick="toggleExtraKast()"><svg viewBox="0 0 24 24" class="acic"><path d="M6.4 8.7 Q6.1 6.8 7.8 6.6 Q12 6.2 16.2 6.6 Q17.9 6.8 17.6 8.6 M17.5 8.2 Q17.1 13.7 16.6 19.3 M16.8 19 Q12 19.7 7.2 19.1 M7.4 19.4 Q6.9 13.7 6.5 8.1"/><path d="M7.8 6.8 Q7.1 5.3 7.5 4.2 Q12 3.9 16.5 4.3 Q16.9 5.4 16.2 6.9" opacity="0.85"/><path d="M8.5 11.9 Q12 11.5 15.6 12.1" opacity="0.4"/></svg> empty bags · ${outBeans.length} bean${outBeans.length===1?'':'s'} finished ${extraKastOpen?'▾':'▸'}</button>`;
@@ -3124,17 +3173,8 @@ const LESSONS={
     {type:'p',h:'cupping & smaak',t:'Bij cupping wordt blind geproefd op aroma, zuren, zoetheid, body en nasmaak. Thuis kun je hetzelfde doen: laat je koffie afkoelen — bij specialty komen dan juist méér smaken naar boven.'},
     {type:'tip',t:'Zuur en dun? Maal fijner of zet warmer. Bitter en droog? Maal grover of zet koeler. Eén stap tegelijk.'},
   ],
-  latte:[
-    {type:'p',h:'melk opschuimen',t:'Begin met koude melk. Zet de stoompijp net onder het oppervlak voor een korte "tsss" om lucht in te brengen (stretchen), zak dan iets dieper om te rollen en de microfoam glad te draaien tot ~60–65°C.'},
-    {type:'p',h:'textuur',t:'Goede microfoam is glanzend als natte verf, geen grote bellen. Tik de kan op tafel en swirl tot de melk egaal glanst voordat je giet.'},
-    {type:'p',h:'gieten',t:'Giet eerst van hoog om de crema te mengen, zak dan dicht op het oppervlak om wit naar boven te brengen. Een hartje: giet stil, duw door het midden. Rozet: wiebel zachtjes heen en weer en trek door.'},
-    {type:'p',h:'welke melk',t:'Volle melk schuimt het makkelijkst en stabielst door vet en eiwit. Halfvol kan ook. Plantaardig: barista-versies van haver of soja schuimen het best dankzij toegevoegde stabilisatoren.'},
-    {type:'check',h:'latte art oefenroutine',items:[
-      'koude verse melk','stretchen (korte lucht)','rollen tot glad','swirl tot glanzend','hoog beginnen','dicht afmaken','door het midden trekken']},
-    {type:'link',feat:'latteart',h:'',t:'',label:'leg je giet vast in de latte-art gallery',action:'learnToGallery'},
-  ],
 };
-const LESSON_MAP={'barista-content':'barista','academy-content':'academy','latte-content':'latte'};
+const LESSON_MAP={'barista-content':'barista','academy-content':'academy'};
 function lessonBlock(elId,bi){return (LESSONS[LESSON_MAP[elId]]||[])[bi];}
 function learnMoreKey(elId,bi){return 'scc_learn_more_'+elId+'_'+bi;}
 function renderLearnMore(elId,bi){
@@ -3454,6 +3494,228 @@ async function pairScale(){
   }catch(e){if(e.name!=='NotFoundError')toast('pairing failed — try again');}
 }
 
+/* ---------------- latte art ---------------- */
+/* Melk: volle melk schuimt het best door de verhouding vet/eiwit (±3,5% / 3,4%);
+   eiwitten vangen de luchtbellen en houden het schuim overeind. Luchtfase 2-5 s,
+   daarna rollen; stoppen tussen 55 en 65 °C. Gieten in drie hoogtes.
+   De patronen staan op moeilijkheid, van hartje tot feniks. */
+
+const LA_CUP='<path class="la-cup" d="M50 7 C75 7 93 25 93 50 C93 75 75 93 50 93 C25 93 7 75 7 50 C7 25 25 7 50 7"/>';
+
+/* rozetblad-paren, van groot naar klein — links en rechts gespiegeld */
+const LA_LEAVES=[
+  'M48 82 C33 80 21 72 15 61 C27 68 40 72 48 73',
+  'M48 70 C34 68 23 61 18 51 C29 57 41 61 48 62',
+  'M48 58 C36 56 26 50 21 42 C31 47 42 50 48 51',
+  'M48 47 C38 45 30 40 26 34 C34 38 43 41 48 42',
+  'M48 37 C40 35 34 31 31 26 C37 29 44 32 48 33',
+];
+function laRosettaBody(){
+  const left=LA_LEAVES.map(d=>`<path class="la-milk" d="${d}"/>`).join('');
+  const right=LA_LEAVES.map(d=>`<path class="la-milk" d="${d}" transform="translate(100,0) scale(-1,1)"/>`).join('');
+  return left+right+
+    '<path class="la-milk" d="M46 18 C48 42 48 68 46 91 C49 92 52 92 54 91 C56 68 56 42 54 18"/>'+
+    '<path class="la-milk" d="M50 10 C58 10 63 15 62 21 C61 27 55 31 50 35 C45 31 39 27 38 21 C37 15 42 10 50 10"/>';
+}
+const LA_PATTERNS=[
+  {lvl:0,n:'de plas',en:'monk’s head',
+   d:'Nog geen vorm — alleen leren wanneer je zakt. Giet hoog tot de kop halfvol is, zak dan tot de tuit het oppervlak bijna raakt en laat één ronde witte vlek opkomen.',
+   tip:'Komt er geen wit boven? Je zit te hoog of je giet te snel.',
+   svg:'<path class="la-milk" d="M50 31 C67 31 77 42 77 54 C77 67 64 75 50 75 C36 75 23 67 23 54 C23 42 33 31 50 31"/>'},
+  {lvl:0,n:'hartje',en:'heart',
+   d:'Dezelfde plas, maar je maakt hem af. Als het wit staat, til je de kan iets op en trek je in één beweging door het midden naar je toe — dwars door de vlek heen tot over de rand.',
+   tip:'De klassieke fout is stoppen vóór je doortrekt. Er mag geen pauze in zitten.',
+   svg:'<path class="la-milk" d="M50 25 C68 25 80 37 79 51 C78 65 63 76 50 89 C37 76 22 65 21 51 C20 37 32 25 50 25"/>'+
+       '<path class="la-line" d="M30 44 C38 38 62 38 70 44 M33 55 C40 50 60 50 67 55"/>'},
+  {lvl:1,n:'tulp',en:'tulip',
+   d:'Drie hartjes op een rij. Giet een vlek, stop, schuif iets naar achter en duw een tweede vlek ín de eerste, dan een derde. Trek er aan het eind in één keer doorheen.',
+   tip:'Elke stop moet écht een stop zijn. Blijf je doorgieten, dan lopen de lagen in elkaar.',
+   svg:'<path class="la-milk" d="M50 56 C70 56 82 64 80 72 C77 81 62 88 50 94 C38 88 23 81 20 72 C18 64 30 56 50 56"/>'+
+       '<path class="la-milk" d="M50 38 C66 38 76 45 74 52 C71 60 60 65 50 69 C40 65 29 60 26 52 C24 45 34 38 50 38"/>'+
+       '<path class="la-milk" d="M50 20 C62 20 70 26 68 32 C66 39 57 43 50 47 C43 43 34 39 32 32 C30 26 38 20 50 20"/>'},
+  {lvl:1,n:'rozet',en:'rosetta',
+   d:'De varen. Zak dicht op het oppervlak en wiebel met je pols heen en weer terwijl je langzaam naar je toe komt. De blaadjes worden vanzelf kleiner. Til op en trek door.',
+   tip:'Wiebel klein en snel, en beweeg tegelijk naar achteren — de meeste mensen wiebelen te groot en te traag.',
+   svg:laRosettaBody()},
+  {lvl:2,n:'gevleugelde tulp',en:'wing tulip',
+   d:'Een tulp waarvan elke laag ook wiebelt. Duw een laag, wiebel hem breed uit, stop, en zet de volgende erin. Zo krijgt elke laag vleugels.',
+   tip:'Werkt alleen met echt strakke microfoam — losse melk zakt tussen de lagen weg.',
+   svg:'<path class="la-milk" d="M50 60 C72 60 86 66 84 74 C80 83 62 90 50 96 C38 90 20 83 16 74 C14 66 28 60 50 60"/>'+
+       '<path class="la-milk" d="M22 66 C14 64 9 59 6 53 C14 57 22 60 28 62 M78 66 C86 64 91 59 94 53 C86 57 78 60 72 62"/>'+
+       '<path class="la-milk" d="M50 38 C68 38 79 44 77 51 C74 59 60 65 50 69 C40 65 26 59 23 51 C21 44 32 38 50 38"/>'+
+       '<path class="la-milk" d="M27 44 C19 42 14 38 11 33 C19 36 26 39 32 41 M73 44 C81 42 86 38 89 33 C81 36 74 39 68 41"/>'+
+       '<path class="la-milk" d="M50 18 C62 18 70 23 68 29 C66 36 57 41 50 45 C43 41 34 36 32 29 C30 23 38 18 50 18"/>'},
+  {lvl:2,n:'omgekeerde rozet',en:'reverse rosetta',
+   d:'Dezelfde varen, maar je giet van je af in plaats van naar je toe. Je pols moet het spiegelbeeld doen en je ziet minder van wat je maakt.',
+   tip:'Begin dicht bij je eigen rand en wiebel weg. Doortrekken doe je terug naar je toe.',
+   svg:'<g transform="rotate(180 50 50)">'+laRosettaBody()+'</g>'},
+  {lvl:3,n:'zwaan',en:'swan',
+   d:'Een rozet als lichaam, dan een dunne hoge sliert als hals, en een klein duwtje voor de kop. De hals giet je hoog en heel langzaam.',
+   tip:'De hals is een haarlijn: bijna dichtknijpen en zonder haperen doorgieten.',
+   svg:'<path class="la-milk" d="M40 86 C28 82 19 74 15 63 C26 70 35 74 42 76"/>'+
+       '<path class="la-milk" d="M43 74 C32 70 24 63 20 53 C30 59 38 62 45 64"/>'+
+       '<path class="la-milk" d="M46 62 C36 58 28 52 25 44 C34 50 42 53 48 54"/>'+
+       '<path class="la-milk" d="M49 51 C41 47 35 42 32 36 C39 41 46 44 50 45"/>'+
+       '<path class="la-milk" d="M38 90 C44 66 52 47 60 33 C63 35 66 37 67 40 C58 55 50 72 47 91"/>'+
+       '<path class="la-milk" d="M64 38 C70 28 74 20 72 15 C70 11 65 12 63 17 C60 24 58 30 57 36 C59 38 62 39 64 38"/>'+
+       '<path class="la-milk" d="M72 11 C77 10 80 14 78 18 C75 22 69 21 68 16 C67 12 69 11 72 11"/>'+
+       '<path class="la-milk" d="M79 15 C83 14 86 16 87 18 C84 19 81 18 79 17"/>'},
+  {lvl:3,n:'feniks',en:'phoenix',
+   d:'De zwaan met gespreide vleugels en een staart. Twee rozetten links en rechts van het lichaam, dan pas de hals. Meerdere kanten op wiebelen in één kop.',
+   tip:'Dit is de lastigste vrije giet die er is. Reken op honderden koppen — en zet je espresso extra strak, want je hebt alle crema nodig.',
+   svg:'<path class="la-milk" d="M46 90 C36 88 27 82 22 74 C31 79 40 82 46 83"/>'+
+       '<path class="la-milk" d="M47 79 C37 77 29 71 25 64 C34 69 42 71 47 72"/>'+
+       '<path class="la-milk" d="M54 90 C64 88 73 82 78 74 C69 79 60 82 54 83"/>'+
+       '<path class="la-milk" d="M53 79 C63 77 71 71 75 64 C66 69 58 71 53 72"/>'+
+       '<path class="la-milk" d="M48 60 C38 58 29 52 24 45 C34 50 43 53 48 54"/>'+
+       '<path class="la-milk" d="M52 60 C62 58 71 52 76 45 C66 50 57 53 52 54"/>'+
+       '<path class="la-milk" d="M47 92 C48 70 50 52 53 40 C56 43 58 45 59 48 C55 62 51 76 51 93"/>'+
+       '<path class="la-milk" d="M55 38 C49 28 40 21 31 17 C26 15 21 17 22 22 C23 26 28 27 33 29 C42 33 49 39 54 45"/>'+
+       '<path class="la-milk" d="M23 15 C28 14 31 17 30 21 C28 25 23 25 20 22 C18 19 20 16 23 15"/>'},
+];
+const LA_LEVELS=[
+  {n:'beginner',d:'eerst de hoogte leren voelen'},
+  {n:'gevorderd',d:'stoppen, stapelen en wiebelen'},
+  {n:'ervaren',d:'meerdere bewegingen in één kop'},
+  {n:'advanced',d:'jaren, geen weken'},
+];
+const LA_FIX=[
+  {p:'grote bellen in het schuim',c:'te lang lucht getrokken, of de tuit zat te diep tijdens het rollen',f:'kort lucht (2–5 s), daarna de pijp net onder het oppervlak houden zodat de melk blijft draaien'},
+  {p:'de melk zakt weg, geen wit',c:'te hoog gegoten, of te snel',f:'zak tot de tuit het oppervlak bijna raakt en giet rustiger'},
+  {p:'wit komt te vroeg boven',c:'te laag begonnen — het schuim ligt op de crema in plaats van erdoorheen',f:'begin hoog tot de kop halfvol is, zak dan pas'},
+  {p:'het hartje wordt een rondje',c:'gestopt met wiebelen vóór het doortrekken',f:'trek zonder pauze door: de beweging naar voren volgt direct op de wiebel'},
+  {p:'schuim en melk scheiden in de kan',c:'te lang gewacht tussen opschuimen en gieten',f:'giet binnen ±20 seconden; anders opnieuw swirlen tot het weer glanst'},
+  {p:'niets te zien op de espresso',c:'te weinig of te lichte crema',f:'verse bonen en een strakke shot — zonder crema is er geen doek om op te tekenen'},
+];
+
+function renderLatte(){
+  const el=document.getElementById('latte-content');if(!el)return;
+  let h=`
+  <div class="la-intro">Latte art is voor tachtig procent melk en voor twintig procent hand.
+    Krijg je de microfoam goed, dan tekent hij bijna vanzelf. Zit er lucht in, dan helpt geen enkele beweging.</div>
+
+  <div class="sect"><span class="hand">de melk</span><span class="sd">waar het mee staat of valt</span></div>
+  <div class="lesson sketch soft">
+    <p>Volle melk schuimt het best: ongeveer 3,5% vet en 3,4% eiwit. De eiwitten vangen de
+      luchtbellen en houden ze overeind, het vet maakt het glanzend en romig. Halfvol werkt
+      ook, maar zakt sneller in.</p>
+    <p>Plantaardig is lastiger — minder eiwit, minder vet, en per merk anders. Neem een
+      barista-versie: daar zitten extra eiwitten en plantaardige olie in die precies dat
+      samenspel nabootsen. Haver schuimt traag en heeft langer nodig; amandel is het
+      moeilijkst.</p>
+    <p>Start koud, met een schone kan. Schenk zoveel in dat de tuit-onderkant net onder staat
+      — te vol en je kunt niet meer draaien.</p>
+  </div>
+
+  <div class="sect"><span class="hand">opschuimen</span><span class="sd">lucht erin, dan glad draaien</span></div>
+  <div class="la-steam sketch">
+    ${laPitcherSVG()}
+    <div class="la-steps">
+      <div class="la-step"><span class="ls-n hand">1</span><div><b class="hand">lucht — 2 tot 5 seconden</b>
+        <div>Tuit nét onder het oppervlak. Je hoort een rustige «tsss». Elke tel lucht is
+        ongeveer een centimeter schuim; voor een flat white heb je er weinig nodig.</div></div></div>
+      <div class="la-step"><span class="ls-n hand">2</span><div><b class="hand">rollen</b>
+        <div>Zak een centimeter dieper en zet de kan schuin, zodat de melk gaat draaien.
+        De draaikolk slaat de grote bellen kapot tot microfoam.</div></div></div>
+      <div class="la-step"><span class="ls-n hand">3</span><div><b class="hand">stop bij 55–65 °C</b>
+        <div>De kan wordt te heet om vast te houden: dat is je thermometer. Warmer dan 65 °C
+        en de melk verliest zijn zoetheid en zakt in.</div></div></div>
+      <div class="la-step"><span class="ls-n hand">4</span><div><b class="hand">tik en swirl</b>
+        <div>Tik de kan op tafel, draai tot de melk glanst als natte verf. Geen zichtbare
+        bellen meer. Nu heb je ongeveer twintig seconden voordat schuim en melk scheiden.</div></div></div>
+    </div>
+  </div>
+
+  <div class="sect"><span class="hand">gieten</span><span class="sd">drie hoogtes, één beweging</span></div>
+  <div class="la-pour sketch">
+    ${laPourSVG()}
+    <div class="la-steps">
+      <div class="la-step"><span class="ls-n hand">1</span><div><b class="hand">hoog — inmengen</b>
+        <div>Ongeveer een handbreedte boven de kop, in het diepste punt van de espresso.
+        Zo zakt de melk eronder en meng je crema en melk. Blijf hoog tot de kop halfvol is.</div></div></div>
+      <div class="la-step"><span class="ls-n hand">2</span><div><b class="hand">laag — tekenen</b>
+        <div>Zak tot de tuit het oppervlak bijna raakt. Nu blijft het schuim bovenop liggen
+        en verschijnt het wit. Hier gebeurt het patroon.</div></div></div>
+      <div class="la-step"><span class="ls-n hand">3</span><div><b class="hand">optillen — doortrekken</b>
+        <div>Til de kan iets op zodat de straal dun wordt, en trek in één vloeiende beweging
+        door je vorm heen naar je toe. Niet stoppen, niet aarzelen.</div></div></div>
+    </div>
+  </div>
+
+  <div class="sect"><span class="hand">de vormen</span><span class="sd">van makkelijk naar levenswerk</span></div>`;
+
+  LA_LEVELS.forEach((lv,i)=>{
+    h+=`<div class="la-lvl"><span class="hand">${lv.n}</span><span class="lv-d">${lv.d}</span>
+      <span class="lv-dots">${'●'.repeat(i+1)}${'○'.repeat(3-i)}</span></div>`;
+    LA_PATTERNS.filter(p=>p.lvl===i).forEach(p=>{
+      h+=`<div class="la-pat sketch">
+        <div class="lp-draw"><svg viewBox="0 0 100 100" role="img" aria-label="${esc(p.n)}">${LA_CUP}${p.svg}</svg></div>
+        <div class="lp-body">
+          <div class="lp-t hand">${esc(p.n)} <span class="lp-en">${esc(p.en)}</span></div>
+          <div class="lp-d">${esc(p.d)}</div>
+          <div class="lp-tip">${esc(p.tip)}</div>
+        </div></div>`;
+    });
+  });
+
+  h+=`<div class="sect"><span class="hand">als het misgaat</span><span class="sd">wat je ziet, en wat je eraan doet</span></div>`;
+  LA_FIX.forEach(f=>{
+    h+=`<div class="la-fix sketch soft">
+      <div class="lf-p hand">${esc(f.p)}</div>
+      <div class="lf-c">komt door: ${esc(f.c)}</div>
+      <div class="lf-f">→ ${esc(f.f)}</div></div>`;
+  });
+
+  if(featOn('latteart')){
+    h+=`<button class="lesson-link sketch" onclick="learnToGallery()">
+      <svg viewBox="0 0 24 24" class="acic"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M7.7 14.2 Q10 10.4 12.1 12.6 Q14.5 8.9 16.8 13.2" opacity="0.8"/><path d="M10.3 8.7 Q10.7 10.4 9 10.5 Q7.5 10.4 7.7 8.9 Q8 7.5 9.6 7.7 Q10.3 7.9 10.6 8.4" opacity="0.6"/></svg>
+      <span>leg je giet vast in de gieterij</span><span class="ll-arr">›</span></button>`;
+  }
+  el.innerHTML=h;
+}
+
+/* kan met stoompijp: de luchtfase en de draaikolk */
+function laPitcherSVG(){
+  return `<div class="la-draw"><svg viewBox="0 0 200 150" role="img" aria-label="Melkkan met stoompijp in de melk">
+    <path d="M50 40 C92 31 152 33 150 42"/>
+    <path d="M150 41 C112 50 86 49 50 41" opacity="0.75"/>
+    <path d="M52 43 C58 80 66 110 78 126"/>
+    <path d="M148 43 C142 80 134 110 124 126"/>
+    <path d="M76 125 C94 133 112 133 127 124"/>
+    <path d="M144 37 C157 33 169 38 174 45 C165 48 154 49 148 47"/>
+    <path d="M51 50 C33 52 26 68 38 78 C46 84 54 80 56 73"/>
+    <path d="M186 5 C171 23 155 44 141 60"/>
+    <path d="M138 56 C145 62 152 61 155 55"/>
+    <path d="M140 63 C135 68 131 72 128 75"/>
+    <g class="la-swirl">
+      <path d="M60 64 C88 56 130 56 148 65 C126 74 84 74 58 65"/>
+      <path d="M74 69 C92 76 116 76 134 68" opacity="0.5"/>
+      <path d="M86 60 C96 55 112 55 122 59" opacity="0.4"/>
+    </g>
+    <path class="la-jet" d="M120 78 C118 84 122 88 120 94 M132 80 C130 85 134 89 132 95"/>
+  </svg></div>`;
+}
+/* kop met de drie giethoogtes */
+function laPourSVG(){
+  return `<div class="la-draw"><svg viewBox="0 0 200 150" role="img" aria-label="De drie giethoogtes boven de kop">
+    <path d="M30 88 C54 78 102 80 108 90"/>
+    <path d="M108 89 C86 97 54 97 30 89" opacity="0.7"/>
+    <path d="M31 90 C34 114 46 130 68 133 C92 135 105 124 108 104 C109 97 109 93 108 89"/>
+    <path d="M108 98 C126 94 135 105 129 116 C123 123 112 122 106 117"/>
+    <path d="M38 143 C68 150 104 149 122 142" opacity="0.45"/>
+    <path class="la-milkline" d="M68 14 C70 34 67 60 68 86"/>
+    <path d="M56 10 C60 5 80 5 84 10" opacity="0.5"/>
+    <g class="la-mark">
+      <path d="M78 20 C90 21 100 21 110 20"/>
+      <path d="M78 52 C90 53 100 53 110 52"/>
+      <path d="M78 80 C90 80 100 79 110 78"/>
+    </g>
+    <text x="115" y="24" class="la-lab">hoog</text>
+    <text x="115" y="56" class="la-lab">laag</text>
+    <text x="115" y="82" class="la-lab">doortrekken</text>
+  </svg></div>`;
+}
+
 /* ---------------- cupping session ---------------- */
 /* Mechanica volgt SCA-102 (sample preparation & cupping mechanics):
    8,25 g per 150 ml, medium-grof gemalen, water van 93 °C, vier minuten
@@ -3462,22 +3724,22 @@ async function pairScale(){
    De acht scoresecties volgen de CVA affective assessment (SCA-104, 2024),
    die sinds november 2024 de 100-puntsvorm uit 2004 vervangt. */
 const CUP_SECTIONS=[
-  {k:'fragrance', n:'fragrance',  d:'the dry grounds, before any water'},
-  {k:'aroma',     n:'aroma',      d:'the wet smell, right at the crust break'},
-  {k:'flavour',   n:'flavour',    d:'what you taste when you slurp'},
-  {k:'aftertaste',n:'aftertaste', d:'what stays behind, and how long'},
-  {k:'acidity',   n:'acidity',    d:'the brightness — its quality, not its amount'},
-  {k:'sweetness', n:'sweetness',  d:'ripeness, the fullness of the sugar'},
-  {k:'mouthfeel', n:'mouthfeel',  d:'weight and texture on your tongue'},
-  {k:'overall',   n:'overall',    d:'your own impression, as a whole'},
+  {k:'fragrance', n:'geur',          e:'fragrance', d:'de droge maling, vóór het water'},
+  {k:'aroma',     n:'aroma',         e:'aroma',     d:'de natte geur, precies bij het breken'},
+  {k:'flavour',   n:'smaak',         e:'flavour',   d:'wat je proeft als je slurpt'},
+  {k:'aftertaste',n:'nasmaak',       e:'aftertaste',d:'wat achterblijft, en hoe lang'},
+  {k:'acidity',   n:'zuur',          e:'acidity',   d:'de helderheid — de kwaliteit, niet de hoeveelheid'},
+  {k:'sweetness', n:'zoet',          e:'sweetness', d:'rijpheid, de volheid van de suiker'},
+  {k:'mouthfeel', n:'mondgevoel',    e:'mouthfeel', d:'gewicht en textuur op je tong'},
+  {k:'overall',   n:'totaalindruk',  e:'overall',   d:'je eigen indruk, als geheel'},
 ];
 const CUP_STEPS=[
-  {t:null,n:'smell the dry grounds',  d:'nose in the bowl before any water. this is fragrance — score it now, it never comes back.'},
-  {t:0,   n:'pour all bowls at once', d:'93°C, straight onto the grounds, up to the rim. start the clock.'},
-  {t:240, n:'break the crust',        d:'nose right above the bowl, stir three times through the crust, breathe in. this is aroma.'},
-  {t:270, n:'skim the foam',          d:'two spoons, drawn across the surface from opposite sides. lift off the foam and floating grounds.'},
-  {t:480, n:'first slurp · ~71°C',    d:'slurp hard so it sprays across your whole palate. flavour, acidity and mouthfeel read best here.'},
-  {t:720, n:'taste again, cooler',    d:'sweetness and any defect come forward as it cools. aftertaste and overall belong to this pass.'},
+  {t:null,n:'ruik de droge maling',   d:'neus in de kom vóór het water. dit is fragrance — scoor het nu, het komt niet meer terug.'},
+  {t:0,   n:'giet alle kommen tegelijk vol', d:'93 °C, recht op de maling, tot de rand. start de klok.'},
+  {t:240, n:'breek de korst',         d:'neus vlak boven de kom, drie keer roeren, diep inademen. dit is aroma.'},
+  {t:270, n:'schuim af',              d:'twee lepels, van weerszijden over het oppervlak. schuim en drijvende maling eraf.'},
+  {t:480, n:'eerste slurp · ~71 °C',  d:'slurp hard, zodat het verneveld over je hele tong slaat. smaak, zuur en mondgevoel lezen hier het best.'},
+  {t:720, n:'proef opnieuw, lauwer',  d:'zoet en eventuele fouten komen pas nu boven. nasmaak en totaalindruk horen bij deze ronde.'},
 ];
 const CUP_LABELS=['A','B','C','D'];
 let cup={picks:[],order:[],stage:0,scores:{},notes:{},size:200,t0:0,timer:null,el:0,open:false};
@@ -3524,7 +3786,7 @@ function cupBowlSVG(){
 function cupExplainHTML(){
   return `<button class="cup-ex-t" onclick="cup.open=!cup.open;renderCupping()">
       <svg viewBox="0 0 24 24" class="acic"><path d="M11.5 3.4 Q17.2 3.2 17.8 8.4 Q18.2 11.6 15.7 13.8 Q15 14.4 14.9 16.3 M15 16 Q12 16.6 9.1 16.1 M9.3 16.3 Q9 14.2 8.3 13.6 Q5.8 11.4 6.2 8.2 Q6.8 3.3 12.5 3.6"/><path d="M9.7 18.4 Q12 18.9 14.3 18.4 M10.3 20.5 Q12 21 13.8 20.5" opacity="0.7"/></svg>
-      <span>how cupping works</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
+      <span>hoe cuppen werkt</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
     <div class="cup-ex ${cup.open?'':'hidden'}">
       <div class="lesson sketch soft"><h3>waarom cuppen</h3>
         <p>Bij cupping zet je koffie zonder techniek. Geen filter, geen druk, geen giettechniek — alleen maling, water en tijd, voor elke kom exact hetzelfde. Daardoor is het enige verschil dat je proeft de boon zelf. Dat is precies waarom de hele keten het zo doet: de boer, de brander en de inkoper vergelijken langs dezelfde lat.</p>
@@ -3552,23 +3814,23 @@ function renderCupping(){
   if(cup.stage===0){
     let h=cupExplainHTML();
     if(beans.length<2){
-      h+='<div class="empty-note">you need two beans in stock to cup.<br>add another bag and come back.</div>';
+      h+='<div class="empty-note">je hebt twee bonen in huis nodig om te cuppen.<br>voeg nog een zak toe en kom terug.</div>';
       el.innerHTML=h;return;
     }
-    h+=`<div class="k" style="margin:18px 2px 6px">pick two to four beans</div><div class="link-pick">`+
+    h+=`<div class="k" style="margin:18px 2px 6px">kies twee tot vier bonen</div><div class="link-pick">`+
       beans.map(b=>`<button class="lp ${cup.picks.includes(b.id)?'sel':''}" onclick="cupPick('${b.id}')">${esc(b.name)}</button>`).join('')+'</div>';
     h+=`<div class="cup-recipe sketch">
-        <div class="cr-h hand">your recipe</div>
-        <div class="cr-row"><span>bowl size</span><span class="cr-in"><input type="number" min="100" max="400" step="10" value="${cup.size}" oninput="cupSize(this.value)"> ml</span></div>
-        <div class="cr-row"><span>coffee per bowl</span><b>${cupDose()} g</b></div>
-        <div class="cr-row"><span>water</span><b>${cup.size} ml · 93°C</b></div>
-        <div class="cr-row"><span>grind</span><b>medium-coarse</b></div>
-        <div class="cr-row"><span>bowls to fill</span><b>${cup.picks.length||'—'}</b></div>
-        <div class="cr-note">8.25 g per 150 ml — the SCA ratio, scaled to your bowl. same grind, same water, same time for every bowl.</div>
+        <div class="cr-h hand">jouw recept</div>
+        <div class="cr-row"><span>komformaat</span><span class="cr-in"><input type="number" min="100" max="400" step="10" value="${cup.size}" oninput="cupSize(this.value)"> ml</span></div>
+        <div class="cr-row"><span>koffie per kom</span><b>${String(cupDose()).replace('.',',')} g</b></div>
+        <div class="cr-row"><span>water</span><b>${cup.size} ml · 93 °C</b></div>
+        <div class="cr-row"><span>maling</span><b>medium-grof</b></div>
+        <div class="cr-row"><span>kommen te vullen</span><b>${cup.picks.length||'—'}</b></div>
+        <div class="cr-note">8,25 g per 150 ml — de SCA-verhouding, omgerekend naar jouw kom. dezelfde maling, hetzelfde water en dezelfde tijd voor elke kom.</div>
       </div>`;
     h+=cup.picks.length>=2
-      ? '<button class="save-btn" style="margin-top:14px" onclick="cupStart()">start the session →</button>'
-      : '<div class="cup-hint">pick at least two.</div>';
+      ? '<button class="save-btn" style="margin-top:14px" onclick="cupStart()">start de sessie →</button>'
+      : '<div class="cup-hint">kies er minstens twee.</div>';
     el.innerHTML=h;return;
   }
 
@@ -3579,7 +3841,7 @@ function renderCupping(){
         ${cupBowlSVG()}
         <div class="cc-row">
           <div class="cc-t hand" id="cup-t">${cupFmt(t)}</div>
-          <button class="save-btn cc-btn" onclick="cupToggleClock()">${cup.timer?'pause':(t?'resume':'pour & start')}</button>
+          <button class="save-btn cc-btn" onclick="cupToggleClock()">${cup.timer?'pauze':(t?'verder':'giet &amp; start')}</button>
         </div>
       </div><div class="cup-proto">`;
     CUP_STEPS.forEach((s,i)=>{
@@ -3587,33 +3849,33 @@ function renderCupping(){
       const next=CUP_STEPS[i+1];
       const now=started&&(!next||next.t===null||t<next.t);
       h+=`<div class="cup-step ${now?'now':''} ${started&&!now?'past':''}">
-        <div class="cs-t hand">${s.t===null?'before':cupFmt(s.t)}</div>
+        <div class="cs-t hand">${s.t===null?'vooraf':cupFmt(s.t)}</div>
         <div class="cs-b"><div class="cs-n hand">${s.n}</div><div class="cs-d">${s.d}</div></div></div>`;
     });
-    h+=`</div><button class="save-btn" onclick="cupToScore()">score the bowls →</button>
-        <button class="profile-btn" onclick="cupReset();renderCupping()">start over</button>`;
+    h+=`</div><button class="save-btn" onclick="cupToScore()">scoor de kommen →</button>
+        <button class="profile-btn" onclick="cupReset();renderCupping()">opnieuw beginnen</button>`;
     el.innerHTML=h;cupPaint();return;
   }
 
   /* --- 2. scoren, blind --- */
   if(cup.stage===2){
-    let h='<div class="cup-hint" style="text-align:left;margin:0 0 12px">score every bowl before you reveal. 5 is neutral — neither good nor bad.</div>';
+    let h='<div class="cup-hint" style="text-align:left;margin:0 0 12px">scoor elke kom vóór je onthult. 5 is neutraal — niet lekker, niet vies.</div>';
     cup.order.forEach((id,i)=>{
       const L=CUP_LABELS[i], sc=cup.scores[L]||{};
       const tot=CUP_SECTIONS.reduce((a,s)=>a+(sc[s.k]||5),0);
       h+=`<div class="cup-card sketch">
-        <div class="cc-h"><span class="cc-l hand">bowl ${L}</span><span class="cc-tot hand" id="cup-tot-${L}">${tot}<span class="cc-of">/72</span></span></div>`;
+        <div class="cc-h"><span class="cc-l hand">kom ${L}</span><span class="cc-tot hand" id="cup-tot-${L}">${tot}<span class="cc-of">/72</span></span></div>`;
       CUP_SECTIONS.forEach(s=>{
         const v=sc[s.k]||5;
         h+=`<div class="cup-sec">
-          <div class="cs-lab"><span class="hand">${s.n}</span><span class="cs-hint">${s.d}</span></div>
+          <div class="cs-lab"><span class="hand">${s.n}</span><span class="cs-en">${s.e}</span><span class="cs-hint">${s.d}</span></div>
           <div class="cs-in"><input type="range" min="1" max="9" step="1" value="${v}" oninput="cupScore('${L}','${s.k}',this.value)">
             <span class="cs-v hand" id="cup-v-${L}-${s.k}">${v}</span></div></div>`;
       });
       h+=`<textarea class="cup-note" placeholder="wat proef je? schrijf het op zoals het bij je opkomt…" oninput="cup.notes['${L}']=this.value">${esc(cup.notes[L]||'')}</textarea>
         </div>`;
     });
-    h+='<button class="save-btn" onclick="cupReveal()">reveal which is which →</button>';
+    h+='<button class="save-btn" onclick="cupReveal()">onthul wat wat was →</button>';
     el.innerHTML=h;return;
   }
 
@@ -3625,7 +3887,7 @@ function renderCupping(){
   }).sort((a,b)=>b.tot-a.tot);
   const top=rows[0], tie=rows.length>1&&rows[1].tot===top.tot;
   let h=`<div class="settings-card sketch" style="background:var(--v60)">
-      <div class="set-t hand">the reveal</div>
+      <div class="set-t hand">de onthulling</div>
       <div class="cup-rev">`;
   rows.forEach(r=>{
     h+=`<div class="cr-line"><span class="cr-l hand">${r.L}</span>
@@ -3634,11 +3896,11 @@ function renderCupping(){
     if(cup.notes[r.L])h+=`<div class="cr-note-b">${esc(cup.notes[r.L])}</div>`;
   });
   h+=`</div><div class="set-d" style="margin-top:8px">${tie
-      ? 'a tie — your palate could not separate them.'
-      : 'your palate picks <b style="font-weight:400;color:var(--ink)">'+esc(top.b?top.b.name:'?')+'</b>'}</div></div>`;
+      ? 'gelijkspel — je tong kon ze niet uit elkaar houden.'
+      : 'je tong kiest <b style="font-weight:400;color:var(--ink)">'+esc(top.b?top.b.name:'?')+'</b>'}</div></div>`;
   /* per sectie waar het verschil zat */
   if(rows.length>1){
-    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">where they differed</span></div>';
+    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">waar ze verschilden</span></div>';
     const byLabel=cup.order.map((id,i)=>({L:CUP_LABELS[i],b:beanById(id),sc:cup.scores[CUP_LABELS[i]]||{}}));
     CUP_SECTIONS.forEach(s=>{
       const vals=byLabel.map(r=>(r.sc[s.k]||5));
@@ -3646,12 +3908,12 @@ function renderCupping(){
       const win=byLabel[vals.indexOf(hi)];
       h+=`<div class="cup-diff ${hi-lo>=2?'big':''}"><span class="hand">${s.n}</span>
         <span class="cd-v">${byLabel.map((r,i)=>r.L+' '+vals[i]).join(' · ')}</span>
-        <span class="cd-w">${hi===lo?'level':esc((win.b&&win.b.name)||'?')}</span></div>`;
+        <span class="cd-w">${hi===lo?'gelijk':esc((win.b&&win.b.name)||'?')}</span></div>`;
     });
     h+='</div>';
   }
-  h+=`<button class="profile-btn" onclick="cupSaveNotes()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.8 4.2 Q11 3.8 16.6 4.4 Q18.3 6.2 19.8 8.1 M19.6 7.7 Q20.1 13.5 19.7 19.7 M19.9 19.3 Q12 20.1 4.4 19.5 M4.7 19.8 Q4 12 4.9 4 M7.9 4.4 Q7.8 7 7.9 8.7 Q11.8 9.2 15.5 8.6 Q15.7 6.6 15.6 4.5"/><path d="M7.9 19.5 Q7.8 15 8.1 12.8 Q12 12.4 16.1 12.9 M16 12.6 Q16.3 16.1 16.2 19.5" opacity="0.7"/></svg> save the result on every bean</button>
-    <button class="profile-btn" onclick="cupReset();renderCupping()">new session</button>`;
+  h+=`<button class="profile-btn" onclick="cupSaveNotes()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.8 4.2 Q11 3.8 16.6 4.4 Q18.3 6.2 19.8 8.1 M19.6 7.7 Q20.1 13.5 19.7 19.7 M19.9 19.3 Q12 20.1 4.4 19.5 M4.7 19.8 Q4 12 4.9 4 M7.9 4.4 Q7.8 7 7.9 8.7 Q11.8 9.2 15.5 8.6 Q15.7 6.6 15.6 4.5"/><path d="M7.9 19.5 Q7.8 15 8.1 12.8 Q12 12.4 16.1 12.9 M16 12.6 Q16.3 16.1 16.2 19.5" opacity="0.7"/></svg> bewaar het resultaat bij elke boon</button>
+    <button class="profile-btn" onclick="cupReset();renderCupping()">nieuwe sessie</button>`;
   el.innerHTML=h;
 }
 
@@ -3659,7 +3921,7 @@ function cupPick(id){
   const i=cup.picks.indexOf(id);
   if(i>=0)cup.picks.splice(i,1);
   else if(cup.picks.length<4)cup.picks.push(id);
-  else toast('four bowls is the most your palate can hold');
+  else toast('vier kommen is het meeste dat je tong aankan');
   renderCupping();
 }
 function cupSize(v){const n=parseInt(v,10);if(n>=100&&n<=400){cup.size=n;const d=document.querySelector('.cup-recipe');if(d)renderCupping();}}
@@ -3712,7 +3974,7 @@ function cupSaveNotes(){
     if(!r.b)return;
     r.b.notes=((r.b.notes||'')+`\ncupping ${d}: ${r.tot}/72 (blind ${r.L}) — ${field}${r.n?'\n  '+r.n:''}`).trim();
   });
-  save();toast('✓ saved on every bean');
+  save();toast('✓ bewaard bij elke boon');
 }
 /* ---------------- latte-art gallery + AI coach ---------------- */
 async function addLatteShot(ev){
@@ -3721,32 +3983,32 @@ async function addLatteShot(ev){
     const img=await fileToDataURL(file,520,false);
     if(!Array.isArray(state.latteShots))state.latteShots=[];
     state.latteShots.unshift({id:uid(),ts:Date.now(),img,fb:''});
-    save();renderGallery();toast('✓ pour added');
-  }catch(e){toast("couldn't load image");}
+    save();renderGallery();toast('✓ giet toegevoegd');
+  }catch(e){toast('kon de foto niet laden');}
   ev.target.value='';
 }
 function renderGallery(){
   const el=document.getElementById('gallery-list');if(!el)return;
   const shots=state.latteShots||[];
-  if(!shots.length){el.innerHTML='<div class="empty-note">no pours yet.<br>photograph your next flat white and watch yourself improve.</div>';return;}
+  if(!shots.length){el.innerHTML='<div class="empty-note">nog geen gieten.<br>fotografeer je volgende flat white en zie jezelf vooruitgaan.</div>';return;}
   el.innerHTML=shots.map(sh=>`<div class="settings-card sketch soft">
     <img src="${sh.img}" style="width:100%;border-radius:14px;border:2px solid var(--line)">
     <div class="set-d" style="margin-top:6px">${timeAgo(sh.ts)}</div>
     ${sh.fb?'<div class="set-d" style="margin-top:6px;color:var(--ink)">✦ '+esc(sh.fb).replace(/\n/g,'<br>')+'</div>':''}
     <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" style="margin-top:0;flex:1" onclick="latteCoach('${sh.id}')">✦ coach my pour</button>
+      <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" style="margin-top:0;flex:1" onclick="latteCoach('${sh.id}')">✦ laat de coach kijken</button>
       <button class="icon-btn" title="delete" onclick="delLatteShot('${sh.id}')">${ICO.del}</button>
     </div>
   </div>`).join('');
 }
 function delLatteShot(id){
-  if(!confirm('delete this pour?'))return;
+  if(!confirm('deze giet verwijderen?'))return;
   state.latteShots=(state.latteShots||[]).filter(x=>x.id!==id);save();renderGallery();
 }
 async function latteCoach(id){
   const sh=(state.latteShots||[]).find(x=>x.id===id);if(!sh)return;
   if(!aiReady()){toast('turn on AI in profile first');return;}
-  toast('✦ the coach is looking…');
+  toast('✦ de coach kijkt mee…');
   try{
     const b64=sh.img.split(',')[1];
     const media=(sh.img.match(/^data:([^;]+)/)||[])[1]||'image/jpeg';
@@ -3905,7 +4167,7 @@ const FEATURES=[
   {id:'shortcuts', n:'home-screen shortcuts', d:'links that start a brew straight from an iOS Shortcut', def:true, cat:'smart'},
   {id:'water', n:'water helper', d:'ppm targets & simple mineral recipes on the learn page', def:true, cat:'people'},
   {id:'cupping', n:'cupping session', d:'blind-taste two beans, score & reveal', def:true, cat:'people'},
-  {id:'latteart', n:'latte-art gallery & coach', d:'photo timeline of your pours, with AI feedback', def:true, cat:'people'},
+  {id:'latteart', n:'de gieterij & coach', d:"foto's van je gieten, met AI-feedback", def:true, cat:'people'},
   {id:'brewsletter', n:'weekly brewsletter', d:'a hand-drawn recap card of your week, shareable', def:true, cat:'smart'},
   {id:'tastememory', n:'taste memory', d:'what your scores say about your palate', def:true, cat:'smart'},
   {id:'voice', n:'voice logging', d:'say "18 in, 36 out, 27 seconds" — hands stay on the machine', def:false, cat:'smart'},
