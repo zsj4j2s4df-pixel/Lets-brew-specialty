@@ -31,10 +31,42 @@ variables. Style through tokens so night mode keeps working for free.
 - **Two SVG filters, already defined in the file**: `#wobble` on card/button
   borders, `#wobble-rough` on icons. Every bordered surface gets one — that
   wobble *is* the style.
-- **Icons are always inline SVG**: `fill:none`, `stroke:currentColor`-ish via the
-  `.acic` class, `stroke-width:1.6–2`, rounded caps, loose two-stroke sketch
-  shapes. **Never use emoji as an icon** — the user rejects it every time.
+- **Icons are always inline SVG**: `fill:none`, stroke via the `.acic` class,
+  `stroke-width:1.6–2`, rounded caps, loose sketch shapes.
+  **Never use emoji as an icon** — the user rejects it every time.
 - Cards: `border-radius:26px`, 2px border. Buttons: 14–18px radius.
+
+### Bigger drawings: overdraw them
+
+The reference the user gave (a pencil Chemex) is **not a single clean line**: every
+contour is gone over two or three times with a small offset, ellipses don't close
+neatly, and lines overshoot slightly at the joints. Line weight is thin, there is
+no fill and no shading — pure ink on cream.
+
+Reproduce that by drawing the same line work twice instead of hand-authoring
+doubles. Put the paths in `<defs>` and render them with `<use>`:
+
+```html
+<defs><g id="thing"> …paths… </g></defs>
+<use href="#thing"/>
+<use href="#thing" class="e61-od" transform="translate(1.4,-1) rotate(.45 120 90)"/>
+```
+```css
+.e61-od{opacity:.5;}
+/* stroke/fill MUST sit on the <svg> (or the <use>), because CSS selectors do not
+   reach into the shadow tree of <use> — but stroke and fill are inheritable. */
+.e61-box svg{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;
+             stroke-linejoin:round;filter:url(#wobble-rough);}
+```
+
+Keep animated parts (a lever, a liquid fill) **outside** the duplicated group.
+
+### Liquid
+
+Coffee is `var(--accent-soft)` with a lighter crema band (`#c8a577`, night `#8a744f`).
+A pouring stream is a thin stroked path with `stroke-dasharray:13 3` and an animated
+`stroke-dashoffset` — mostly solid, so it reads as flowing, not as dots. A cup fills
+via a `<rect>` clipped to the cup interior whose `y`/`height` you animate.
 
 ## Language rule (strict)
 
