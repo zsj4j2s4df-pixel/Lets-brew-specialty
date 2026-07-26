@@ -381,6 +381,13 @@
   #ai-key:focus{outline:none;border-color:var(--ink);}
   .profile-btn{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:10px;}
   .profile-btn:active{background:var(--card-2);}
+  .learn-card.do .lc-arr{font-size:20px;color:var(--ink);border-bottom:2px solid var(--line);line-height:1.05;}
+  .shelf-do{display:flex;align-items:center;gap:10px;width:100%;margin:14px 0 4px;padding:13px 16px;
+    background:var(--card-2);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;
+    font-family:'Patrick Hand',cursive;font-size:17px;color:var(--ink);text-align:left;cursor:pointer;}
+  .shelf-do svg{width:22px;height:22px;flex:none;}
+  .shelf-do span:first-of-type{flex:1;}
+  .shelf-do .ll-arr{color:var(--ink-soft);font-size:20px;}
   .sect{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:26px 2px 8px;border-bottom:2px solid var(--line);filter:url(#wobble);padding-bottom:5px;}
   .sect .hand{font-size:27px;line-height:1;flex:none;}
   .sect .sd{color:var(--ink-soft);font-size:15px;}
@@ -854,6 +861,8 @@
       <h1 class="title hand">learn</h1>
       <div class="subtitle">sharpen your skills, cup by cup</div>
 
+      <div class="sect" style="margin-top:14px"><span class="hand">read up</span><span class="sd">the theory, whenever you want it</span></div>
+
       <div class="learn-card sketch" style="background:var(--espresso)" onclick="go('learn-barista')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M6.7 4.2 Q12 3.9 17.3 4.3 M17.1 4.6 Q16.4 8.1 15.7 11.3 M15.9 11 Q12 11.6 8.1 11.2 M8.3 11.4 Q7.5 8 6.8 4.3 M8.8 11 Q8.6 15.6 8.9 19.9 M8.6 19.5 Q12 20.2 15.4 19.6 M15.2 19.9 Q15.4 15.4 15.1 11"/><path d="M16.6 4.8 Q19.7 4.3 20.8 6.6 Q21.2 8.2 19.6 8.8" opacity="0.8"/><path d="M10.3 13.4 Q12 13.1 13.8 13.6" opacity="0.5"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">barista skills</div>
@@ -890,18 +899,20 @@
           <p>Koffie is ~98% water. Te zacht smaakt vlak en hol; te hard maskeert nuance en verkalkt je machine. Eén vaste water-basis maakt je dial-in eerlijk: dan proef je de maling, niet het water.</p></div>
       </div>
 
-      <div class="learn-card sketch" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
+      <div class="sect" id="learn-do-sect"><span class="hand">try it yourself</span><span class="sd">with your own coffee, right now</span></div>
+
+      <div class="learn-card sketch do" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">cupping session</div>
           <div class="lc-d">blind-taste two beans, score & reveal</div></div>
-        <div class="lc-arr">›</div>
+        <div class="lc-arr hand">start</div>
       </div>
 
-      <div class="learn-card sketch" id="gallery-card" style="background:var(--aeropress)" onclick="go('gallery')">
+      <div class="learn-card sketch do" id="gallery-card" style="background:var(--aeropress)" onclick="go('gallery')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M7.7 14.2 Q10 10.4 12.1 12.6 Q14.5 8.9 16.8 13.2" opacity="0.8"/><path d="M10.3 8.7 Q10.7 10.4 9 10.5 Q7.5 10.4 7.7 8.9 Q8 7.5 9.6 7.7 Q10.3 7.9 10.6 8.4" opacity="0.6"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">latte-art gallery</div>
           <div class="lc-d">photo timeline of your pours — with AI feedback</div></div>
-        <div class="lc-arr">›</div>
+        <div class="lc-arr hand">open</div>
       </div>
 
       <div class="ask-box sketch soft ai-only hidden">
@@ -1441,6 +1452,8 @@ function go(p,isBack){
     const wb=document.getElementById('water-body');if(wb&&!featOn('water'))wb.classList.add('hidden');
     const cc=document.getElementById('cupping-card');if(cc)cc.style.display=featOn('cupping')?'flex':'none';
     const gc=document.getElementById('gallery-card');if(gc)gc.style.display=featOn('latteart')?'flex':'none';
+    const ds=document.getElementById('learn-do-sect');
+    if(ds)ds.style.display=(featOn('cupping')||featOn('latteart'))?'flex':'none';
   }
   if(p==='learn-barista')renderLesson('barista-content',LESSONS.barista);
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
@@ -2691,6 +2704,10 @@ function renderBeans(){
   if(!state.beans.length){el.innerHTML='<div class="empty-note">no beans yet.<br>tap ＋ add to add your first bean.</div>';return;}
   let html='';
   html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap ＋ add or check your empty bags.</div>';
+  // cupping hoort bij je bonen, niet alleen achterin learn
+  if(featOn('cupping')&&inBeans.length>=2){
+    html+=`<button class="shelf-do" onclick="go('cupping')"><svg viewBox="0 0 24 24" class="acic"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg><span>taste two of these blind — cupping session</span><span class="ll-arr">›</span></button>`;
+  }
   if(outBeans.length){
     html+=`<button class="extra-kast" onclick="toggleExtraKast()"><svg viewBox="0 0 24 24" class="acic"><path d="M6.4 8.7 Q6.1 6.8 7.8 6.6 Q12 6.2 16.2 6.6 Q17.9 6.8 17.6 8.6 M17.5 8.2 Q17.1 13.7 16.6 19.3 M16.8 19 Q12 19.7 7.2 19.1 M7.4 19.4 Q6.9 13.7 6.5 8.1"/><path d="M7.8 6.8 Q7.1 5.3 7.5 4.2 Q12 3.9 16.5 4.3 Q16.9 5.4 16.2 6.9" opacity="0.85"/><path d="M8.5 11.9 Q12 11.5 15.6 12.1" opacity="0.4"/></svg> empty bags · ${outBeans.length} bean${outBeans.length===1?'':'s'} finished ${extraKastOpen?'▾':'▸'}</button>`;
     if(extraKastOpen){
@@ -3037,6 +3054,7 @@ const LESSONS={
     {type:'p',h:'welke melk',t:'Volle melk schuimt het makkelijkst en stabielst door vet en eiwit. Halfvol kan ook. Plantaardig: barista-versies van haver of soja schuimen het best dankzij toegevoegde stabilisatoren.'},
     {type:'check',h:'latte art oefenroutine',items:[
       'koude verse melk','stretchen (korte lucht)','rollen tot glad','swirl tot glanzend','hoog beginnen','dicht afmaken','door het midden trekken']},
+    {type:'link',feat:'latteart',h:'',t:'',label:'leg je giet vast in de latte-art gallery',action:'learnToGallery'},
   ],
 };
 const LESSON_MAP={'barista-content':'barista','academy-content':'academy','latte-content':'latte'};
@@ -3066,7 +3084,10 @@ function renderLesson(elId,blocks){
         </div></div>`;
     }
     if(b.type==='tip')return `<div class="lesson sketch soft" style="background:var(--v60)"><div class="tipbox">💡 ${esc(b.t)}</div></div>`;
-    if(b.type==='link')return `<button class="lesson-link sketch" onclick="${esc(b.action)}()"><svg viewBox="0 0 24 24" class="acic"><path d="M18.4 9.4 Q21.4 14.4 17.2 18.5 Q12.5 21.3 7.5 18.6 Q3.3 15.3 4.6 10.1 Q6.6 4.9 12.1 3.8 Q16.5 3.9 19 8.3"/><path d="M15 9.3 Q17.2 12.4 14.6 15.2 Q11.5 17 8.8 14.8 Q6.9 12.1 9 9.5 Q11.5 7.2 14.5 8.6"/><path d="M12.9 11.2 Q13.7 12.6 12.2 13.3 Q10.8 13.1 10.9 11.6 Q11.4 10.8 12.6 11.1"/></svg><span>${esc(b.label)}</span><span class="ll-arr">›</span></button>`;
+    if(b.type==='link'){
+      if(b.feat&&!featOn(b.feat))return '';
+      return `<button class="lesson-link sketch" onclick="${esc(b.action)}()"><svg viewBox="0 0 24 24" class="acic"><path d="M18.4 9.4 Q21.4 14.4 17.2 18.5 Q12.5 21.3 7.5 18.6 Q3.3 15.3 4.6 10.1 Q6.6 4.9 12.1 3.8 Q16.5 3.9 19 8.3"/><path d="M15 9.3 Q17.2 12.4 14.6 15.2 Q11.5 17 8.8 14.8 Q6.9 12.1 9 9.5 Q11.5 7.2 14.5 8.6"/><path d="M12.9 11.2 Q13.7 12.6 12.2 13.3 Q10.8 13.1 10.9 11.6 Q11.4 10.8 12.6 11.1"/></svg><span>${esc(b.label)}</span><span class="ll-arr">›</span></button>`;
+    }
     if(b.type==='check'){
       const key=elId+'_'+bi;
       const done=JSON.parse(localStorage.getItem('scc_check_'+key)||'[]');
@@ -3077,6 +3098,7 @@ function renderLesson(elId,blocks){
     return '';
   }).join('');
 }
+function learnToGallery(){go('gallery');}
 function learnToDialIn(){
   const esp=state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0];
   if(esp)beginBrew(esp.id); else toast('turn on an espresso method first under methods');
