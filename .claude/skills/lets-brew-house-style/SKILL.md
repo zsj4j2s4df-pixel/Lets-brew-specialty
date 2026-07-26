@@ -76,6 +76,40 @@ user has asked twice to loosen it up, never to tighten it:
 Scale check: on a 240-unit canvas, a machine outline of ~56 paths looks right;
 ~11 paths looks like clip-art.
 
+### Small icons: same rules, scaled — but no second pass
+
+The 24×24 and 32×32 inline icons follow the same grammar (one stroke per edge,
+no `Z`, open circles), with the overshoot scaled to the canvas: **0.5–1 unit on
+a 24-unit viewBox**, the same proportion as 5–10 on 240. Do *not* double the
+strokes at this size — two lines 2 units apart on a 24-unit canvas merge into
+mush at 20 px.
+
+Replace every `<circle>`, `<rect>` and `<ellipse>` with an open path. A lens, a
+magnifier ring or a nav avatar is a loop that runs past its own start:
+
+```html
+<!-- was: <circle cx="10.5" cy="10.5" r="6"/> -->
+<path d="M14.4 8.1 Q17 11.6 14.2 14.6 Q11.1 16.9 7.6 14.9 Q4.8 12.3 6.5 8.5
+         Q9 5.3 12.6 6.3 Q14.2 7 15 8.7"/>
+```
+
+Restyle the whole set in one asserted Python pass keyed on the exact old path
+string — the icons repeat (the AI spark appears 6×, the photo frame 5×), so one
+replacement per *icon* covers every copy and keeps them identical.
+
+### Raster drawings you must not redraw
+
+The method PNGs and the splash frames are the user's own drawings — never
+regenerate them. To pull them into the same visual register, put
+`filter:url(#wobble-rough)` on the `<img>`: the displacement map roughens a
+bitmap edge exactly as it does a stroke. On a sequence of frames, give each one
+a slightly different `rotate()` (±0.3–0.6 deg) so it lands like a hand placed
+it rather than a mechanical cross-fade.
+
+**Emoji keep creeping back in.** After any icon pass, sweep for characters above
+U+2190 and check each hit: toasts and share text may keep theirs, anything
+sitting on a button must become an SVG.
+
 Keep animated parts (a lever, a liquid fill) in their own group, outside the
 doubled line work.
 
