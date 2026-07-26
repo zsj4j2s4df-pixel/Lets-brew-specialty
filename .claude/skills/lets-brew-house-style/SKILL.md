@@ -43,23 +43,32 @@ contour is gone over two or three times with a small offset, ellipses don't clos
 neatly, and lines overshoot slightly at the joints. Line weight is thin, there is
 no fill and no shading — pure ink on cream.
 
-Reproduce that by drawing the same line work twice instead of hand-authoring
-doubles. Put the paths in `<defs>` and render them with `<use>`:
+**Do not duplicate with `<use>` and a transform.** That was tried and rejected: a
+uniform offset gives two perfectly parallel contours, which reads as a photocopy,
+not as a pen going over the line twice. The variation has to differ per stroke.
+
+Write every contour **twice by hand**, each with its own deviation:
 
 ```html
-<defs><g id="thing"> …paths… </g></defs>
-<use href="#thing"/>
-<use href="#thing" class="e61-od" transform="translate(1.4,-1) rotate(.45 120 90)"/>
+<!-- first pass -->
+<path d="M67.5 19.5 Q120 10.8 172 17.5 Q168.5 26 166 35 Q120 41.5 73 33.8 Q70 26 67.8 19"/>
+<!-- second pass: other control points, slightly thinner and lighter -->
+<path class="e61-b" d="M70 17.4 Q118.5 13.2 169.5 19.4 Q167 27 164.8 33.6 Q121.5 39.4 75 34.8 Q71.8 25 69.4 18"/>
 ```
 ```css
-.e61-od{opacity:.5;}
-/* stroke/fill MUST sit on the <svg> (or the <use>), because CSS selectors do not
-   reach into the shadow tree of <use> — but stroke and fill are inheritable. */
+.e61-b{opacity:.62;stroke-width:1.35;}
 .e61-box svg{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;
              stroke-linejoin:round;filter:url(#wobble-rough);}
 ```
 
-Keep animated parts (a lever, a liquid fill) **outside** the duplicated group.
+Three details that carry the whole effect:
+- **Overshoot the joints** — end each path a few units past where it started, so
+  corners show a small tail instead of closing cleanly. Never use `Z`.
+- **Bow the straight lines** — a "straight" edge is a `Q` with 1–2 units of sag.
+- **Leave circles open** — draw them as a loop that runs past its own start point.
+
+Keep animated parts (a lever, a liquid fill) in their own group, outside the
+doubled line work.
 
 ### Liquid
 
