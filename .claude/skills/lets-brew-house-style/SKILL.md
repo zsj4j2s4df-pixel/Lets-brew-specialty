@@ -61,11 +61,20 @@ Write every contour **twice by hand**, each with its own deviation:
              stroke-linejoin:round;filter:url(#wobble-rough);}
 ```
 
-Three details that carry the whole effect:
-- **Overshoot the joints** — end each path a few units past where it started, so
-  corners show a small tail instead of closing cleanly. Never use `Z`.
-- **Bow the straight lines** — a "straight" edge is a `Q` with 1–2 units of sag.
-- **Leave circles open** — draw them as a loop that runs past its own start point.
+Four details that carry the whole effect. Err on the side of **too sloppy** — the
+user has asked twice to loosen it up, never to tighten it:
+
+- **One stroke per edge, not one path per shape.** A rectangle is four separate
+  paths, not a closed contour. Never use `Z`.
+- **Overshoot generously** — run each edge 5–10 units past the corner so the
+  strokes visibly *cross* and leave tails. Small 1–2 unit overshoots read as neat.
+- **Let the two passes diverge 2–4 units**, and differently along their length:
+  wider apart at one end, nearly touching at the other.
+- **Bow the straight lines** and **leave circles open** — draw a circle as a loop
+  that runs past its own start, then a second smaller loop inside it.
+
+Scale check: on a 240-unit canvas, a machine outline of ~56 paths looks right;
+~11 paths looks like clip-art.
 
 Keep animated parts (a lever, a liquid fill) in their own group, outside the
 doubled line work.
