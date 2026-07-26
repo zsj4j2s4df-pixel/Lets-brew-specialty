@@ -388,6 +388,83 @@
   .shelf-do svg{width:22px;height:22px;flex:none;}
   .shelf-do span:first-of-type{flex:1;}
   .shelf-do .ll-arr{color:var(--ink-soft);font-size:20px;}
+  /* ---- cupping ---- */
+  .cup-ex-t{display:flex;align-items:center;gap:9px;width:100%;margin:2px 0 0;padding:12px 15px;
+    background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;
+    font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:var(--ink);text-align:left;cursor:pointer;}
+  .cup-ex-t svg{width:22px;height:22px;flex:none;}
+  .cup-ex-t span:first-of-type{flex:1;}
+  .cup-ex-t .ll-arr{color:var(--ink-soft);font-size:17px;}
+  .cup-ex{margin-top:10px;}
+  .cup-ex .lesson{margin-bottom:10px;}
+  .cup-hint{color:var(--ink-soft);font-size:16px;margin-top:12px;text-align:center;}
+
+  .cup-recipe{margin-top:16px;padding:14px 16px 12px;background:var(--card-2);border:2px solid var(--ink);
+    filter:url(#wobble);border-radius:20px;}
+  .cup-recipe .cr-h{font-size:24px;margin-bottom:6px;}
+  .cup-recipe .cr-row{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:5px 0;border-bottom:1px dashed var(--line);font-size:17px;color:var(--ink-soft);}
+  .cup-recipe .cr-row:last-of-type{border-bottom:none;}
+  .cup-recipe .cr-row b{color:var(--ink);font-weight:400;font-family:'Caveat',cursive;font-weight:700;font-size:21px;}
+  .cup-recipe .cr-in input{width:66px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);
+    border-radius:11px;padding:3px 7px;font-family:'Caveat',cursive;font-weight:700;font-size:20px;
+    color:var(--ink);text-align:center;}
+  .cup-recipe .cr-note{margin-top:9px;font-size:14px;line-height:1.35;color:var(--ink-soft);}
+
+  .cup-clock{padding:10px 14px 14px;background:var(--card);border:2px solid var(--ink);
+    filter:url(#wobble);border-radius:22px;margin-top:4px;}
+  .cup-draw{display:flex;justify-content:center;}
+  .cup-draw svg{width:100%;max-width:270px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .cup-draw #cup-crust{stroke:var(--accent-soft);}
+  .cup-draw #cup-liquid{stroke:var(--accent-soft);}
+  .cup-draw #cup-spoon{transform-origin:180px 40px;transition:transform .5s ease;}
+  .cup-steam{stroke:var(--ink-soft);opacity:.5;animation:cupsteam 3.4s ease-in-out infinite;}
+  @keyframes cupsteam{0%,100%{opacity:.22;transform:translateY(2px)}50%{opacity:.6;transform:translateY(-3px)}}
+  .cup-clock .cc-row{display:flex;align-items:center;gap:12px;margin-top:4px;}
+  .cup-clock .cc-t{font-size:44px;line-height:1;flex:none;min-width:96px;}
+  .cup-clock .cc-btn{margin:0;flex:1;}
+
+  .cup-proto{margin:14px 0 4px;}
+  .cup-step{display:flex;gap:12px;padding:9px 12px;border-left:3px solid var(--line);opacity:.5;}
+  .cup-step.past{opacity:.42;}
+  .cup-step.now{opacity:1;border-left-color:var(--accent-soft);background:var(--card);
+    filter:url(#wobble);border-radius:0 16px 16px 0;}
+  .cup-step .cs-t{font-size:20px;color:var(--ink-soft);flex:none;min-width:58px;}
+  .cup-step.now .cs-t{color:var(--ink);}
+  .cup-step .cs-n{font-size:21px;}
+  .cup-step .cs-d{font-size:15px;line-height:1.35;color:var(--ink-soft);margin-top:1px;}
+
+  .cup-card{margin:0 0 14px;padding:12px 15px 14px;background:var(--card);border:2px solid var(--ink);
+    filter:url(#wobble);border-radius:22px;}
+  .cup-card .cc-h{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:2px solid var(--line);padding-bottom:5px;margin-bottom:8px;}
+  .cup-card .cc-l{font-size:26px;}
+  .cup-card .cc-tot{font-size:24px;}
+  .cc-of{font-size:15px;color:var(--ink-soft);}
+  .cup-sec{padding:5px 0;}
+  .cup-sec .cs-lab{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;}
+  .cup-sec .cs-lab .hand{font-size:20px;}
+  .cup-sec .cs-hint{font-size:13.5px;color:var(--ink-soft);}
+  .cup-sec .cs-in{display:flex;align-items:center;gap:10px;}
+  .cup-sec input[type=range]{flex:1;accent-color:var(--accent-soft);}
+  .cup-sec .cs-v{font-size:22px;min-width:20px;text-align:right;}
+  .cup-note{width:100%;margin-top:8px;min-height:56px;background:var(--paper);border:2px solid var(--line);
+    filter:url(#wobble);border-radius:14px;padding:9px 12px;font-family:'Patrick Hand',cursive;
+    font-size:16px;color:var(--ink);resize:vertical;}
+
+  .cup-rev{margin-top:8px;}
+  .cup-rev .cr-line{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .cup-rev .cr-l{font-size:24px;flex:none;min-width:24px;}
+  .cup-rev .cr-n{flex:1;font-size:17px;color:var(--ink);}
+  .cup-rev .cr-s{font-size:22px;}
+  .cup-rev .cr-note-b{font-size:15.5px;line-height:1.35;color:var(--ink-soft);
+    padding:0 0 7px 34px;border-bottom:1px dashed var(--line);margin-top:-1px;}
+  .cup-diff{display:flex;align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:15px;}
+  .cup-diff .hand{font-size:19px;flex:1;}
+  .cup-diff .cd-v{color:var(--ink-soft);font-size:16px;letter-spacing:.5px;}
+  .cup-diff .cd-w{color:var(--ink-soft);min-width:88px;text-align:right;}
+  .cup-diff.big .cd-w{color:var(--ink);}
   .sect{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:26px 2px 8px;border-bottom:2px solid var(--line);filter:url(#wobble);padding-bottom:5px;}
   .sect .hand{font-size:27px;line-height:1;flex:none;}
   .sect .sd{color:var(--ink-soft);font-size:15px;}
@@ -904,7 +981,7 @@
       <div class="learn-card sketch do" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">cupping session</div>
-          <div class="lc-d">blind-taste two beans, score & reveal</div></div>
+          <div class="lc-d">the SCA protocol, timed — taste blind and score</div></div>
         <div class="lc-arr hand">start</div>
       </div>
 
@@ -956,7 +1033,7 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">cupping</div><button onclick="go('learn')">done</button></div>
-      <div class="subtitle">blind-taste two beans — score first, reveal after.</div>
+      <div class="subtitle">brew them all the same way, taste blind, score first — reveal after.</div>
       <div id="cupping-body"></div>
     </div>
   </div>
@@ -3378,53 +3455,264 @@ async function pairScale(){
 }
 
 /* ---------------- cupping session ---------------- */
-let cup={a:null,b:null,flip:false,stage:0,scores:{}};
+/* Mechanica volgt SCA-102 (sample preparation & cupping mechanics):
+   8,25 g per 150 ml, medium-grof gemalen, water van 93 °C, vier minuten
+   staan, korst breken met drie roerbewegingen, afschuimen, slurpen vanaf
+   ~71 °C en nog eens terwijl het afkoelt.
+   De acht scoresecties volgen de CVA affective assessment (SCA-104, 2024),
+   die sinds november 2024 de 100-puntsvorm uit 2004 vervangt. */
+const CUP_SECTIONS=[
+  {k:'fragrance', n:'fragrance',  d:'the dry grounds, before any water'},
+  {k:'aroma',     n:'aroma',      d:'the wet smell, right at the crust break'},
+  {k:'flavour',   n:'flavour',    d:'what you taste when you slurp'},
+  {k:'aftertaste',n:'aftertaste', d:'what stays behind, and how long'},
+  {k:'acidity',   n:'acidity',    d:'the brightness — its quality, not its amount'},
+  {k:'sweetness', n:'sweetness',  d:'ripeness, the fullness of the sugar'},
+  {k:'mouthfeel', n:'mouthfeel',  d:'weight and texture on your tongue'},
+  {k:'overall',   n:'overall',    d:'your own impression, as a whole'},
+];
+const CUP_STEPS=[
+  {t:null,n:'smell the dry grounds',  d:'nose in the bowl before any water. this is fragrance — score it now, it never comes back.'},
+  {t:0,   n:'pour all bowls at once', d:'93°C, straight onto the grounds, up to the rim. start the clock.'},
+  {t:240, n:'break the crust',        d:'nose right above the bowl, stir three times through the crust, breathe in. this is aroma.'},
+  {t:270, n:'skim the foam',          d:'two spoons, drawn across the surface from opposite sides. lift off the foam and floating grounds.'},
+  {t:480, n:'first slurp · ~71°C',    d:'slurp hard so it sprays across your whole palate. flavour, acidity and mouthfeel read best here.'},
+  {t:720, n:'taste again, cooler',    d:'sweetness and any defect come forward as it cools. aftertaste and overall belong to this pass.'},
+];
+const CUP_LABELS=['A','B','C','D'];
+let cup={picks:[],order:[],stage:0,scores:{},notes:{},size:200,t0:0,timer:null,el:0,open:false};
+
+function cupReset(){
+  cupStopClock();
+  cup={picks:[],order:[],stage:0,scores:{},notes:{},size:cup.size||200,t0:0,timer:null,el:0,open:false};
+}
+function cupDose(){return Math.round(cup.size*8.25/150*10)/10;}
+function cupFmt(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+
+/* --- de tekening: kom met korst, lepel en stoom --- */
+function cupBowlSVG(){
+  return `<div class="cup-draw"><svg viewBox="0 0 240 150">
+    <g class="cup-steam">
+      <path d="M92 34 C86 26 96 21 90 11"/>
+      <path d="M120 30 C114 21 124 16 118 6"/>
+      <path d="M148 34 C142 26 152 21 146 11"/>
+    </g>
+    <g id="cup-crust">
+      <path d="M63 59 C82 49 158 49 179 58 C161 69 78 69 61 58"/>
+      <path d="M70 56 C92 51 150 51 172 57" opacity="0.5"/>
+      <path d="M86 62 C90 59 94 62 98 59 M112 63 Q118 60 124 63 M140 62 C144 59 148 62 152 59" opacity="0.45"/>
+    </g>
+    <g id="cup-liquid" style="display:none">
+      <path d="M64 62 C84 55 156 55 177 61 C156 70 82 70 63 61"/>
+      <path d="M80 64 C100 68 140 68 160 63" opacity="0.4"/>
+    </g>
+    <g class="cup-rim">
+      <path d="M60 54 C78 44 162 44 180 54 C188 62 176 74 120 78 C64 79 52 70 57 59 C59 55 64 52 71 49"/>
+      <path d="M66 51 C88 42 156 43 178 52 C186 61 170 73 118 77 C66 77 50 68 56 57" opacity="0.6"/>
+      <path d="M55 63 C60 92 74 112 96 120 M185 63 C180 92 166 112 144 120 M93 118 C112 125 131 125 148 117"/>
+      <path d="M72 128 C110 135 153 134 174 126" opacity="0.5"/>
+      <path d="M78 131 C112 137 150 136 168 130" opacity="0.3"/>
+    </g>
+    <g id="cup-spoon">
+      <path d="M199 20 C188 33 173 48 159 61"/>
+      <path d="M159 58 C167 55 172 62 166 69 C158 73 149 69 152 62 C154 58 156 57 160 59"/>
+    </g>
+  </svg></div>`;
+}
+
+/* --- uitleg: wat cupping is en waarom het zo gaat --- */
+function cupExplainHTML(){
+  return `<button class="cup-ex-t" onclick="cup.open=!cup.open;renderCupping()">
+      <svg viewBox="0 0 24 24" class="acic"><path d="M11.5 3.4 Q17.2 3.2 17.8 8.4 Q18.2 11.6 15.7 13.8 Q15 14.4 14.9 16.3 M15 16 Q12 16.6 9.1 16.1 M9.3 16.3 Q9 14.2 8.3 13.6 Q5.8 11.4 6.2 8.2 Q6.8 3.3 12.5 3.6"/><path d="M9.7 18.4 Q12 18.9 14.3 18.4 M10.3 20.5 Q12 21 13.8 20.5" opacity="0.7"/></svg>
+      <span>how cupping works</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
+    <div class="cup-ex ${cup.open?'':'hidden'}">
+      <div class="lesson sketch soft"><h3>waarom cuppen</h3>
+        <p>Bij cupping zet je koffie zonder techniek. Geen filter, geen druk, geen giettechniek — alleen maling, water en tijd, voor elke kom exact hetzelfde. Daardoor is het enige verschil dat je proeft de boon zelf. Dat is precies waarom de hele keten het zo doet: de boer, de brander en de inkoper vergelijken langs dezelfde lat.</p>
+        <p>Thuis is de winst dubbel. Je leert je bonen kennen, én je leert je eigen tong kennen. Blind proeven haalt het etiket weg: geen prijs, geen herkomst, geen verwachting. Wat overblijft is wat je werkelijk lekker vindt.</p></div>
+      <div class="lesson sketch"><h3>het recept (SCA-102)</h3>
+        <p>De verhouding is <b>8,25 g per 150 ml</b> — ongeveer 1:18. Maal <b>medium-grof</b>, iets grover dan filter, en voor alle kommen op precies dezelfde stand. Water van <b>93 °C</b>, vers en zacht. Weeg alles, ook het water: de hele oefening staat of valt met gelijke omstandigheden.</p>
+        <p>Professioneel zet men vijf kommen per koffie, om te zien of de partij overal hetzelfde smaakt. Thuis is één kom per boon genoeg; twee als je wilt controleren of je eigen werk consistent is.</p></div>
+      <div class="lesson sketch soft"><h3>het verloop</h3>
+        <p><b>Voor het water</b> ruik je de droge maling. Dat is <i>fragrance</i>, en die is daarna weg.</p>
+        <p><b>0:00</b> giet je alle kommen tegelijk vol en start je de klok. De koffie drijft boven en vormt een korst.</p>
+        <p><b>4:00</b> breek je de korst: neus vlak boven de kom, drie keer roeren, diep inademen. Die stoot geur is <i>aroma</i>, het mooiste moment van de sessie.</p>
+        <p><b>Daarna</b> schuim je af met twee lepels, van weerszijden over het oppervlak.</p>
+        <p><b>Vanaf ±8 minuten</b>, rond 71 °C, slurp je. Hard, zodat de koffie verneveld over je hele tong slaat. Proef opnieuw terwijl het afkoelt: zuur en zoet laten zich op verschillende temperaturen zien, en fouten komen pas lauw boven.</p></div>
+      <div class="lesson sketch"><h3>de score</h3>
+        <p>De SCA verving in november 2024 het oude 100-puntsformulier uit 2004 door de <b>Coffee Value Assessment</b>. Die splitst beschrijven (wát je proeft) van waarderen (hoe goed je het vindt). Dit scherm volgt het waarderende deel: acht secties, elk van 1 tot 9, waarbij 5 neutraal is — niet lekker, niet vies.</p>
+        <p>De officiële omrekening naar honderd punten doet de SCA met een eigen rekenhulp; <b>80 punten of meer</b> heet specialty, 85+ excellent, 90+ outstanding. Het cijfer dat je hier ziet is je eigen voorkeursscore, geen SCA-keuring. Voor thuis is dat ook het enige dat telt: welke boon wil jij morgen weer.</p></div>
+    </div>`;
+}
+
 function renderCupping(){
   const el=document.getElementById('cupping-body');if(!el)return;
   const beans=state.beans.filter(b=>b.inStock!==false);
+
+  /* --- 0. opzet --- */
   if(cup.stage===0){
-    if(beans.length<2){el.innerHTML='<div class="empty-note">you need two beans in stock to cup.</div>';return;}
-    el.innerHTML='<div class="k" style="margin-bottom:6px">pick two beans</div><div class="link-pick">'+
-      beans.map(b2=>`<button class="lp ${(cup.a===b2.id||cup.b===b2.id)?'sel':''}" onclick="cupPick('${b2.id}')">${esc(b2.name)}</button>`).join('')+'</div>'+
-      ((cup.a&&cup.b)?'<button class="save-btn" style="margin-top:14px" onclick="cupStart()">start blind tasting →</button>':'');
-    return;
+    let h=cupExplainHTML();
+    if(beans.length<2){
+      h+='<div class="empty-note">you need two beans in stock to cup.<br>add another bag and come back.</div>';
+      el.innerHTML=h;return;
+    }
+    h+=`<div class="k" style="margin:18px 2px 6px">pick two to four beans</div><div class="link-pick">`+
+      beans.map(b=>`<button class="lp ${cup.picks.includes(b.id)?'sel':''}" onclick="cupPick('${b.id}')">${esc(b.name)}</button>`).join('')+'</div>';
+    h+=`<div class="cup-recipe sketch">
+        <div class="cr-h hand">your recipe</div>
+        <div class="cr-row"><span>bowl size</span><span class="cr-in"><input type="number" min="100" max="400" step="10" value="${cup.size}" oninput="cupSize(this.value)"> ml</span></div>
+        <div class="cr-row"><span>coffee per bowl</span><b>${cupDose()} g</b></div>
+        <div class="cr-row"><span>water</span><b>${cup.size} ml · 93°C</b></div>
+        <div class="cr-row"><span>grind</span><b>medium-coarse</b></div>
+        <div class="cr-row"><span>bowls to fill</span><b>${cup.picks.length||'—'}</b></div>
+        <div class="cr-note">8.25 g per 150 ml — the SCA ratio, scaled to your bowl. same grind, same water, same time for every bowl.</div>
+      </div>`;
+    h+=cup.picks.length>=2
+      ? '<button class="save-btn" style="margin-top:14px" onclick="cupStart()">start the session →</button>'
+      : '<div class="cup-hint">pick at least two.</div>';
+    el.innerHTML=h;return;
   }
+
+  /* --- 1. het verloop, met klok --- */
   if(cup.stage===1){
-    el.innerHTML=['A','B'].map(L=>`<div class="settings-card sketch soft">
-      <div class="set-t hand">cup ${L}</div>
-      <div class="set-d">brew both the same way. taste blind, then score.</div>
-      <div class="score-row" style="margin-top:8px"><input type="range" min="0" max="10" step="0.1" value="${cup.scores[L]||7}" oninput="cup.scores['${L}']=+this.value;document.getElementById('cup-sc-${L}').textContent=(+this.value).toFixed(1)">
-      <span class="score-big hand" id="cup-sc-${L}">${(+(cup.scores[L]||7)).toFixed(1)}</span></div>
-    </div>`).join('')+'<button class="save-btn" onclick="cupReveal()">reveal ↺</button>';
-    return;
+    const t=cup.el;
+    let h=`<div class="cup-clock sketch">
+        ${cupBowlSVG()}
+        <div class="cc-row">
+          <div class="cc-t hand" id="cup-t">${cupFmt(t)}</div>
+          <button class="save-btn cc-btn" onclick="cupToggleClock()">${cup.timer?'pause':(t?'resume':'pour & start')}</button>
+        </div>
+      </div><div class="cup-proto">`;
+    CUP_STEPS.forEach((s,i)=>{
+      const started=s.t===null?true:(cup.timer||t>0)&&t>=s.t;
+      const next=CUP_STEPS[i+1];
+      const now=started&&(!next||next.t===null||t<next.t);
+      h+=`<div class="cup-step ${now?'now':''} ${started&&!now?'past':''}">
+        <div class="cs-t hand">${s.t===null?'before':cupFmt(s.t)}</div>
+        <div class="cs-b"><div class="cs-n hand">${s.n}</div><div class="cs-d">${s.d}</div></div></div>`;
+    });
+    h+=`</div><button class="save-btn" onclick="cupToScore()">score the bowls →</button>
+        <button class="profile-btn" onclick="cupReset();renderCupping()">start over</button>`;
+    el.innerHTML=h;cupPaint();return;
   }
-  const first=cup.flip?cup.b:cup.a, second=cup.flip?cup.a:cup.b;
-  const A=beanById(first),B=beanById(second);
-  const sa=cup.scores.A||0,sb=cup.scores.B||0;
-  el.innerHTML=`<div class="settings-card sketch" style="background:var(--v60)">
+
+  /* --- 2. scoren, blind --- */
+  if(cup.stage===2){
+    let h='<div class="cup-hint" style="text-align:left;margin:0 0 12px">score every bowl before you reveal. 5 is neutral — neither good nor bad.</div>';
+    cup.order.forEach((id,i)=>{
+      const L=CUP_LABELS[i], sc=cup.scores[L]||{};
+      const tot=CUP_SECTIONS.reduce((a,s)=>a+(sc[s.k]||5),0);
+      h+=`<div class="cup-card sketch">
+        <div class="cc-h"><span class="cc-l hand">bowl ${L}</span><span class="cc-tot hand" id="cup-tot-${L}">${tot}<span class="cc-of">/72</span></span></div>`;
+      CUP_SECTIONS.forEach(s=>{
+        const v=sc[s.k]||5;
+        h+=`<div class="cup-sec">
+          <div class="cs-lab"><span class="hand">${s.n}</span><span class="cs-hint">${s.d}</span></div>
+          <div class="cs-in"><input type="range" min="1" max="9" step="1" value="${v}" oninput="cupScore('${L}','${s.k}',this.value)">
+            <span class="cs-v hand" id="cup-v-${L}-${s.k}">${v}</span></div></div>`;
+      });
+      h+=`<textarea class="cup-note" placeholder="wat proef je? schrijf het op zoals het bij je opkomt…" oninput="cup.notes['${L}']=this.value">${esc(cup.notes[L]||'')}</textarea>
+        </div>`;
+    });
+    h+='<button class="save-btn" onclick="cupReveal()">reveal which is which →</button>';
+    el.innerHTML=h;return;
+  }
+
+  /* --- 3. onthulling --- */
+  const rows=cup.order.map((id,i)=>{
+    const L=CUP_LABELS[i], b=beanById(id), sc=cup.scores[L]||{};
+    const tot=CUP_SECTIONS.reduce((a,s)=>a+(sc[s.k]||5),0);
+    return {L,b,sc,tot,ten:Math.round(tot/72*100)/10};
+  }).sort((a,b)=>b.tot-a.tot);
+  const top=rows[0], tie=rows.length>1&&rows[1].tot===top.tot;
+  let h=`<div class="settings-card sketch" style="background:var(--v60)">
       <div class="set-t hand">the reveal</div>
-      <div class="set-d" style="margin-top:6px;font-size:17px">
-        cup A was <b style="font-weight:400;color:var(--ink)">${esc(A?A.name:'?')}</b> — ${sa.toFixed(1)}/10<br>
-        cup B was <b style="font-weight:400;color:var(--ink)">${esc(B?B.name:'?')}</b> — ${sb.toFixed(1)}/10<br><br>
-        ${sa===sb?'a tie — both earned their spot.':('your palate picks <b style="font-weight:400;color:var(--ink)">'+esc((sa>sb?A:B)?.name||'?')+'</b> ✓')}
-      </div></div>
-    <button class="profile-btn" onclick="cupSaveNotes()">save result as a note on both beans</button>
-    <button class="profile-btn" onclick="cup={a:null,b:null,flip:false,stage:0,scores:{}};renderCupping()">new session</button>`;
+      <div class="cup-rev">`;
+  rows.forEach(r=>{
+    h+=`<div class="cr-line"><span class="cr-l hand">${r.L}</span>
+      <span class="cr-n">${esc(r.b?r.b.name:'?')}</span>
+      <span class="cr-s hand">${r.tot}<span class="cc-of">/72</span></span></div>`;
+    if(cup.notes[r.L])h+=`<div class="cr-note-b">${esc(cup.notes[r.L])}</div>`;
+  });
+  h+=`</div><div class="set-d" style="margin-top:8px">${tie
+      ? 'a tie — your palate could not separate them.'
+      : 'your palate picks <b style="font-weight:400;color:var(--ink)">'+esc(top.b?top.b.name:'?')+'</b>'}</div></div>`;
+  /* per sectie waar het verschil zat */
+  if(rows.length>1){
+    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">where they differed</span></div>';
+    const byLabel=cup.order.map((id,i)=>({L:CUP_LABELS[i],b:beanById(id),sc:cup.scores[CUP_LABELS[i]]||{}}));
+    CUP_SECTIONS.forEach(s=>{
+      const vals=byLabel.map(r=>(r.sc[s.k]||5));
+      const hi=Math.max(...vals), lo=Math.min(...vals);
+      const win=byLabel[vals.indexOf(hi)];
+      h+=`<div class="cup-diff ${hi-lo>=2?'big':''}"><span class="hand">${s.n}</span>
+        <span class="cd-v">${byLabel.map((r,i)=>r.L+' '+vals[i]).join(' · ')}</span>
+        <span class="cd-w">${hi===lo?'level':esc((win.b&&win.b.name)||'?')}</span></div>`;
+    });
+    h+='</div>';
+  }
+  h+=`<button class="profile-btn" onclick="cupSaveNotes()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.8 4.2 Q11 3.8 16.6 4.4 Q18.3 6.2 19.8 8.1 M19.6 7.7 Q20.1 13.5 19.7 19.7 M19.9 19.3 Q12 20.1 4.4 19.5 M4.7 19.8 Q4 12 4.9 4 M7.9 4.4 Q7.8 7 7.9 8.7 Q11.8 9.2 15.5 8.6 Q15.7 6.6 15.6 4.5"/><path d="M7.9 19.5 Q7.8 15 8.1 12.8 Q12 12.4 16.1 12.9 M16 12.6 Q16.3 16.1 16.2 19.5" opacity="0.7"/></svg> save the result on every bean</button>
+    <button class="profile-btn" onclick="cupReset();renderCupping()">new session</button>`;
+  el.innerHTML=h;
 }
+
 function cupPick(id){
-  if(cup.a===id){cup.a=null;}else if(cup.b===id){cup.b=null;}
-  else if(!cup.a)cup.a=id;else cup.b=id;
+  const i=cup.picks.indexOf(id);
+  if(i>=0)cup.picks.splice(i,1);
+  else if(cup.picks.length<4)cup.picks.push(id);
+  else toast('four bowls is the most your palate can hold');
   renderCupping();
 }
-function cupStart(){cup.flip=Math.random()<0.5;cup.stage=1;cup.scores={};renderCupping();}
-function cupReveal(){cup.stage=2;renderCupping();}
+function cupSize(v){const n=parseInt(v,10);if(n>=100&&n<=400){cup.size=n;const d=document.querySelector('.cup-recipe');if(d)renderCupping();}}
+function cupStart(){
+  cup.order=cup.picks.slice().sort(()=>Math.random()-0.5);   // blind: volgorde door elkaar
+  cup.scores={};cup.notes={};cup.el=0;cup.stage=1;renderCupping();
+}
+function cupToggleClock(){cup.timer?cupStopClock():cupStartClock();renderCupping();}
+function cupStartClock(){
+  cup.t0=Date.now()-cup.el*1000;
+  cup.timer=setInterval(()=>{
+    cup.el=(Date.now()-cup.t0)/1000;
+    const t=document.getElementById('cup-t');if(t)t.textContent=cupFmt(cup.el);
+    cupPaint();
+    const cur=CUP_STEPS.filter(s=>s.t!==null&&Math.abs(cup.el-s.t)<0.5)[0];
+    if(cur&&cur.t>0)toast(cur.n);
+  },250);
+}
+function cupStopClock(){if(cup.timer){clearInterval(cup.timer);cup.timer=null;}}
+/* korst tot 4:00, daarna vloeistof; de lepel duikt in bij het breken */
+function cupPaint(){
+  const cr=document.getElementById('cup-crust'), lq=document.getElementById('cup-liquid'), sp=document.getElementById('cup-spoon');
+  if(!cr||!lq)return;
+  const broken=cup.el>=240;
+  cr.style.display=broken?'none':'';
+  lq.style.display=broken?'':'none';
+  if(sp)sp.style.transform=(cup.el>=240&&cup.el<270)?'rotate(-14deg)':'';
+  document.querySelectorAll('.cup-step').forEach((n,i)=>{
+    const s=CUP_STEPS[i],next=CUP_STEPS[i+1];
+    const started=s.t===null?true:cup.el>=s.t;
+    const now=started&&(!next||next.t===null||cup.el<next.t);
+    n.classList.toggle('now',now);n.classList.toggle('past',started&&!now);
+  });
+}
+function cupToScore(){cupStopClock();cup.stage=2;renderCupping();}
+function cupScore(L,k,v){
+  if(!cup.scores[L])cup.scores[L]={};
+  cup.scores[L][k]=+v;
+  const el=document.getElementById('cup-v-'+L+'-'+k);if(el)el.textContent=v;
+  const tot=CUP_SECTIONS.reduce((a,s)=>a+(cup.scores[L][s.k]||5),0);
+  const t=document.getElementById('cup-tot-'+L);if(t)t.innerHTML=tot+'<span class="cc-of">/72</span>';
+}
+function cupReveal(){cupStopClock();cup.stage=3;renderCupping();}
 function cupSaveNotes(){
-  const first=cup.flip?cup.b:cup.a, second=cup.flip?cup.a:cup.b;
-  const A=beanById(first),B=beanById(second);
   const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-  const add=(bn,sc,other)=>{if(!bn)return;bn.notes=((bn.notes||'')+`\ncupping ${d}: ${sc.toFixed(1)}/10 vs ${other}`).trim();};
-  add(A,cup.scores.A||0,B?B.name:'?');add(B,cup.scores.B||0,A?A.name:'?');
-  save();toast('✓ saved on both beans');
+  const rows=cup.order.map((id,i)=>({b:beanById(id),L:CUP_LABELS[i],
+    tot:CUP_SECTIONS.reduce((a,s)=>a+((cup.scores[CUP_LABELS[i]]||{})[s.k]||5),0),n:cup.notes[CUP_LABELS[i]]||''}));
+  const field=rows.map(r=>(r.b?r.b.name:'?')+' '+r.tot).join(' · ');
+  rows.forEach(r=>{
+    if(!r.b)return;
+    r.b.notes=((r.b.notes||'')+`\ncupping ${d}: ${r.tot}/72 (blind ${r.L}) — ${field}${r.n?'\n  '+r.n:''}`).trim();
+  });
+  save();toast('✓ saved on every bean');
 }
 /* ---------------- latte-art gallery + AI coach ---------------- */
 async function addLatteShot(ev){
