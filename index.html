@@ -1518,6 +1518,7 @@ function mergeMethodImages(){
     if(!m.family){m.family=METHOD_FAMILY_DEFAULTS[m.id]||'filter';changed=true;}
   });
   if(!state.features){state.features={};changed=true;}
+  normaliseerData(state);
   if(!Array.isArray(state.latteShots)){state.latteShots=[];changed=true;}
   // persoonlijke puck-prep-lijst aanmaken als die er nog niet is
   if(!Array.isArray(state.prepItems)){state.prepItems=JSON.parse(JSON.stringify(DEFAULT_PREP));changed=true;}
@@ -1533,6 +1534,28 @@ function mergeMethodImages(){
   if(changed)save();
 }
 // een dial-in-recept: precies één per boon+methode+drank (pogingen overschrijven, geen kopieën)
+/* Lijstvelden uit een back-up of een bestand van een vriend kunnen van alles zijn.
+   Een tekenreeks komt door een `x && x.length`-controle heen en klapt daarna om op
+   .map(). Alles wat binnenkomt gaat daarom eerst hierlangs. */
+function asArr(v){return Array.isArray(v)?v:(v==null||v==='')?[]:[v];}
+function normaliseerData(st){
+  if(!st||typeof st!=='object')return st;
+  ['brews','beans','methods','gear','prepItems','latteShots'].forEach(k=>{
+    if(k in st && !Array.isArray(st[k]))st[k]=[];
+  });
+  (st.brews||[]).forEach(b=>{
+    if(!b||typeof b!=='object')return;
+    b.tags=asArr(b.tags).filter(t=>t!=null).map(t=>(''+t));
+    b.custom=asArr(b.custom).filter(c=>c&&typeof c==='object');
+    if(b.prep&&typeof b.prep!=='object')b.prep={};
+  });
+  (st.beans||[]).forEach(b=>{
+    if(!b||typeof b!=='object')return;
+    b.methods=asArr(b.methods).filter(m=>typeof m==='string');
+    if(b.dialIn&&typeof b.dialIn!=='object')b.dialIn=null;
+  });
+  return st;
+}
 function isDialInBrew(x){
   if(!x)return false;
   if(x.dialIn===true)return true;
@@ -2350,8 +2373,8 @@ function openDetail(id){
     ${advice?'<div class="notes-card sketch soft"><div class="k">grind tip'+(fam==='espresso'?'':' — gear-aware')+'</div><div class="v">next time: grind '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
     ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'prep')+'</div>'+prepHtml+'</div>':''}
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
-      ${(b.tags&&b.tags.length)?'<div class="note-tags">'+b.tags.map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
-      ${(b.custom&&b.custom.length)?'<div style="margin-top:10px">'+b.custom.map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
+      ${asArr(b.tags).length?'<div class="note-tags">'+asArr(b.tags).map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
+      ${asArr(b.custom).length?'<div style="margin-top:10px">'+asArr(b.custom).map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
     ${tasteWheelStatic(b.tags,'taste')}
     ${freshGaugeHTML(bean,b.ts,'the bean on brew day')}
     ${b.guide?customGuideHTML(b.guide):guideHTML(b.method)}
@@ -2538,7 +2561,7 @@ function importFriend(ev){
   const r=new FileReader();
   r.onload=()=>{
     try{
-      const d=JSON.parse(r.result);
+      const d=normaliseerData(JSON.parse(r.result));
       let addedBrews=0,addedBeans=0,skippedBeans=0;
       const idMap={};                         // oud boon-id -> nieuw boon-id
       const addBean=(nb)=>{
@@ -2604,7 +2627,7 @@ function brewSheetHTML(b){
   let guideTxt='';
   if(b.guide){guideTxt=b.guide;}
   else{const g=guideFor(b.method);if(g){guideTxt='recept: '+g.recept+'\nmaling: '+g.grind+'\n'+g.steps.map((s,i)=>(i+1)+'. '+s).join('\n');}}
-  const tags=(b.tags&&b.tags.length)?('taste: '+b.tags.join(', ')):'';
+  const tags=asArr(b.tags).length?('taste: '+asArr(b.tags).join(', ')):'';
   return `<div class="p-brew">
     <div class="p-bt"><span class="p-ic">${iconHTML(m,34)}</span>${pesc(titel)}</div>
     <div class="p-meta">${metaBits||''}</div>
@@ -3574,9 +3597,6 @@ function laMv(m){
 function laMoves(list){return (list||[]).map(laMv).join('');}
 
 const LA_CUP='<path class="la-cup" d="M50 6 C75 6 94 25 94 50 C94 75 75 94 50 94 C25 94 6 75 6 50 C6 25 25 6 50 6"/>';
-/* de beweeglijn krijgt een lichte rug, anders verdwijnt hij in de koffie */
-function laM(d){return '<path class="la-mo-bg" d="'+d+'"/><path class="la-mo" d="'+d+'"/>';}
-function laH(d){return '<path class="la-mo-bg" d="'+d+'"/><path class="la-mo-h" d="'+d+'"/>';}
 
 /* rozet: zeven bladparen, groot bij je toe en kleiner naar de punt */
 const LA_LEAF=[
@@ -4221,7 +4241,7 @@ async function shareCard(id){
     x.fillStyle=ink;x.font='700 58px Caveat';x.fillText(String(r2[1]),cx0,cy0+56);
   });
   x.textAlign='center';x.fillStyle=soft;x.font='30px "Patrick Hand"';
-  const tags=(b.tags&&b.tags.length)?b.tags.join(' · '):'';
+  const tags=asArr(b.tags).length?asArr(b.tags).join(' · '):'';
   if(tags)x.fillText(tags,W/2,H-120,W-200);
   x.font='700 40px Caveat';x.fillStyle=accent;
   x.fillText('lets brew specialty ☕',W/2,H-70);
@@ -4270,7 +4290,7 @@ function wheelTap(n){
 /* smaakwiel als plaatje: dezelfde acht noten, alleen tonen wat gekozen is */
 function tasteWheelStatic(tags,label){
   if(!featOn('wheel'))return '';
-  const on=(tags||[]).map(t=>(''+t).toLowerCase());
+  const on=asArr(tags).map(t=>(''+t).toLowerCase());
   if(!on.some(t=>WHEEL_NOTES.includes(t)))return '';
   const cx=100,cy=100,r1=40,r2=94;let out='';
   WHEEL_NOTES.forEach((nt,i)=>{
@@ -4598,7 +4618,9 @@ function importData(ev){
       if(!d.methods||!d.brews)throw new Error('ongeldig');
       if(!d.beans)d.beans=[];
       if(!confirm('this replaces your current data. continue?')){ev.target.value='';return;}
-      state=d;save();toast('✓ data imported');go('home');
+      state=normaliseerData(d);
+      mergeMethodImages();          // dezelfde opschoning als bij het opstarten
+      save();toast('✓ data imported');renderAll();go('home');
     }catch(e){toast('couldn\'t read the file');}
     ev.target.value='';
   };
