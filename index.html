@@ -210,6 +210,13 @@
   .fgauge .needle{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;filter:url(#wobble-rough);}
   .fgauge text{font-family:'Patrick Hand',cursive;font-size:10px;fill:var(--ink-soft);}
   .fgauge .fd{font-family:'Caveat',cursive;font-weight:700;font-size:19px;fill:var(--ink);}
+  .fg-lab{text-align:center;font-size:15px;color:var(--ink-soft);margin-top:-2px;}
+  .fg-hint{font-size:15.5px;line-height:1.4;color:var(--ink-soft);margin:8px 2px 0;}
+  .wheel-ro{width:172px;display:block;margin:8px auto 2px;}
+  .wheel-ro path{stroke:var(--ink);stroke-width:1.6;fill:var(--card-2);filter:url(#wobble-rough);}
+  .wheel-ro path.sel{fill:var(--accent-soft);}
+  .wheel-ro text{font-family:'Patrick Hand',cursive;font-size:9.5px;fill:var(--ink);}
+  .wheel-ro path.sel+text{fill:var(--cream);}
   /* E61 shot clock */
   .e61-box{display:flex;justify-content:center;margin:2px 0 4px;}
   .e61-box svg{width:214px;height:210px;overflow:visible;}
@@ -562,23 +569,20 @@
   .home-logo{margin:6px 0 2px;}
   .home-logo img{height:54px;mix-blend-mode:multiply;}
   /* splash slideshow: 4 frames, elk 0,75s zichtbaar, vervangend, gecentreerd */
-  .splash-stage{position:relative;width:88%;max-width:360px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;}
-  .splash-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:100%;max-height:100%;mix-blend-mode:multiply;opacity:0;
-    filter:url(#wobble-rough);}
-  /* elk beeld landt iets anders, alsof het opnieuw met de hand gezet is */
-  #sf1{transform:translate(-50%,-50%) rotate(-.6deg);}
-  #sf2{transform:translate(-50.4%,-49.7%) rotate(.5deg);}
-  #sf3{transform:translate(-49.7%,-50.3%) rotate(-.3deg);}
-  #sf4{transform:translate(-50%,-50%) rotate(.35deg);}
-  /* totale cyclus 3s; elk frame zichtbaar in zijn eigen kwart (0,75s) */
-  #sf1{animation:f1 3s linear forwards;}
-  #sf2{animation:f2 3s linear forwards;}
-  #sf3{animation:f3 3s linear forwards;}
-  #sf4{animation:f4 3s linear forwards;}
-  @keyframes f1{0%{opacity:1}24.9%{opacity:1}25%{opacity:0}100%{opacity:0}}
-  @keyframes f2{0%{opacity:0}24.9%{opacity:0}25%{opacity:1}49.9%{opacity:1}50%{opacity:0}100%{opacity:0}}
-  @keyframes f3{0%{opacity:0}49.9%{opacity:0}50%{opacity:1}74.9%{opacity:1}75%{opacity:0}100%{opacity:0}}
-  @keyframes f4{0%{opacity:0}74.9%{opacity:0}75%{opacity:1}100%{opacity:1}}
+  .splash-stage{position:relative;width:96%;max-width:430px;display:flex;
+    align-items:center;justify-content:center;}
+  #splash-art{width:100%;height:auto;fill:none;stroke:var(--ink);stroke-width:5;
+    stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  #splash-art .sp-word{font-family:'Patrick Hand',cursive;font-size:84px;
+    fill:var(--ink);stroke:none;}
+  #splash-art #sp-fill,#splash-art #sp-stream,#splash-art .sp-liq{stroke:var(--accent-soft);}
+  /* de vier beelden zijn nu groepen die op hun eigen moment aangaan */
+  #sp-server{animation:spA 3s linear forwards;}
+  #sp-pour,#sp-stream{animation:spB 3s linear forwards;}
+  #sp-fill{animation:spC 3s linear forwards;}
+  @keyframes spA{0%,24.9%{opacity:0}25%,49.9%{opacity:1}50%,100%{opacity:0}}
+  @keyframes spB{0%,49.9%{opacity:0}50%,100%{opacity:1}}
+  @keyframes spC{0%,74.9%{opacity:0}75%,100%{opacity:1}}
   .phone.fading #page-welcome{opacity:0;transition:opacity .75s ease;}
   #page-welcome{transition:opacity .6s ease;}
 
@@ -654,10 +658,62 @@
   <!-- WELKOM -->
   <div id="page-welcome" class="screen welcome">
     <div class="splash-stage">
-      <img src="splash-1.png" class="splash-frame" id="sf1" alt="">
-      <img src="splash-2.png" class="splash-frame" id="sf2" alt="">
-      <img src="splash-3.png" class="splash-frame" id="sf3" alt="">
-      <img src="splash-4.png" class="splash-frame" id="sf4" alt="">
+    <svg id="splash-art" viewBox="0 0 900 660" role="img" aria-label="Lets Brew Specialty">
+      <defs>
+        <g id="sp-jug">
+          <path d="M330 60 C372 28 560 28 601 60"/>
+          <path d="M601 59 C560 90 372 90 330 60" opacity="0.75"/>
+          <path d="M341 53 C382 27 549 27 592 51" opacity="0.5"/>
+          <path d="M336 52 C315 45 298 54 294 67 C307 74 324 73 337 67"/>
+          <path d="M330 64 C317 130 311 212 320 259"/>
+          <path d="M601 64 C612 130 617 212 607 259"/>
+          <path d="M319 256 C350 298 578 298 608 255"/>
+          <path d="M332 267 C363 302 566 302 597 265" opacity="0.45"/>
+          <path d="M604 80 C662 87 692 152 669 212 C655 248 619 256 605 241"/>
+          <path d="M601 94 C651 103 675 154 657 203 C645 236 617 242 604 231" opacity="0.5"/>
+          <path d="M614 100 C619 104 619 111 614 115" opacity="0.55"/>
+          <path d="M609 218 C614 222 614 229 609 233" opacity="0.55"/>
+        </g>
+      </defs>
+
+      <g id="sp-cup">
+        <path d="M72 415 C104 386 276 386 309 415"/>
+        <path d="M309 414 C276 444 104 444 72 415" opacity="0.75"/>
+        <path d="M82 409 C114 384 266 384 300 408" opacity="0.5"/>
+        <path d="M73 418 C77 482 84 542 94 573"/>
+        <path d="M307 418 C303 482 296 542 286 573"/>
+        <path d="M93 570 C120 596 261 596 287 570"/>
+        <path d="M104 579 C131 600 250 600 277 579" opacity="0.45"/>
+        <path d="M71 441 C28 443 5 482 24 515 C39 538 69 538 84 520"/>
+        <path d="M79 454 C43 458 25 486 40 511 C51 528 73 530 86 516" opacity="0.5"/>
+        <path d="M27 597 C60 630 317 630 350 597"/>
+        <path d="M350 595 C317 564 60 564 27 595" opacity="0.75"/>
+        <path d="M41 602 C76 628 305 628 339 602" opacity="0.4"/>
+      </g>
+
+      <g id="sp-fill">
+        <path d="M84 421 C116 400 265 400 297 421 C265 442 116 442 84 421"/>
+        <path d="M120 428 C152 437 230 437 263 427" opacity="0.45"/>
+      </g>
+
+      <g id="sp-server"><use href="#sp-jug"/>
+        <path class="sp-liq" d="M341 214 C382 244 556 244 597 214"/>
+        <path class="sp-liq" d="M356 224 C394 246 545 246 583 223" opacity="0.4"/></g>
+
+      <g id="sp-pour"><use href="#sp-jug" transform="translate(-70 292) rotate(-42 294 67)"/>
+        <path class="sp-liq" d="M258 331 C340 319 452 319 524 331"/>
+        <path class="sp-liq" d="M274 341 C348 332 444 332 506 341" opacity="0.45"/></g>
+
+      <g id="sp-stream">
+        <path d="M227 352 C233 392 227 408 223 432"/>
+        <path d="M239 354 C245 392 239 410 235 434" opacity="0.6"/>
+      </g>
+
+      <text class="sp-word" x="566" y="452">Lets</text>
+      <text class="sp-word" x="566" y="536">Brew</text>
+      <text class="sp-word" x="566" y="620">Specialty</text>
+    </svg>
+
     </div>
   </div>
 
@@ -1346,7 +1402,11 @@ const ESPRESSO_RULES=
   '- Beoordeel met de doorloopsnelheid = opbrengst(g) ÷ tijd(s), vergeleken met het doel (doelopbrengst ÷ doeltijd) — niet met de tijd alleen.\n'+
   '- Te weinig opbrengst voor de tijd / choking / te traag → GROVER malen.\n'+
   '- Te veel of te snelle opbrengst / waterig / te snel → FIJNER malen.\n'+
-  '- Verander één ding tegelijk (de maling); houd dose, temperatuur en puck-prep gelijk.';
+  '- Verander één ding tegelijk (de maling); houd dose, temperatuur en puck-prep gelijk.\n'+
+  '- Versheid telt mee. Vers gebrande bonen (0-6 dagen) zitten vol CO2; dat gas remt het water, de shot loopt trager en schuimt -> iets GROVER en laat ze eerst rusten.\n'+
+  '- Tussen ongeveer 7 en 21 dagen is de boon stabiel; dan hoef je niet voor versheid te corrigeren.\n'+
+  '- Vanaf ongeveer 25 dagen is het CO2 grotendeels weg en is de boon brozer; de puck geeft minder weerstand en de shot loopt sneller -> iets FIJNER.\n'+
+  '- Corrigeer nooit voor versheid tegen de gemeten doorloopsnelheid in: wat je werkelijk meet gaat voor.';
 // welke familie hoort bij een methode? espresso of filter (val terug op filter)
 function methodFamily(idOrMethod){
   const m=(typeof idOrMethod==='object'&&idOrMethod)?idOrMethod:methodById(idOrMethod);
@@ -2168,6 +2228,11 @@ function diAdvice(){
     let dir=diff>tol?'slower than target → grind coarser':diff<-tol?'faster than target → grind finer':'on target so far ✓';
     html+=clock+esc(shot)+' vs target '+esc(t.time||('0:'+String(tT).padStart(2,'0')))+' → '+dir+' (also enter yield for a better read)';
   }
+  const fr=beanFreshness(bean),hint=fr?freshGrindHint(fr.days):null;
+  if(hint&&hint.dir!=='stable'){
+    html+=(html?'<br>':'')+'day '+fr.days+' — '+esc(hint.s)+': '+
+      (hint.dir==='coarser'?'expect it to run slow, lean coarser':'expect it to run fast, lean finer');
+  }
   if(bean&&bean.dialIn&&bean.dialIn.method===formMethod&&bean.dialIn.grind){
     html+=(html?'<br>':'')+'✦ AI tip: try grind '+esc(bean.dialIn.grind)+(bean.dialIn.reason?' — '+esc(bean.dialIn.reason):'');
   }
@@ -2336,6 +2401,8 @@ function openDetail(id){
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
       ${(b.tags&&b.tags.length)?'<div class="note-tags">'+b.tags.map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${(b.custom&&b.custom.length)?'<div style="margin-top:10px">'+b.custom.map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
+    ${tasteWheelStatic(b.tags,'taste')}
+    ${freshGaugeHTML(bean,b.ts,'the bean on brew day')}
     ${b.guide?customGuideHTML(b.guide):guideHTML(b.method)}
     <div class="detail-actions sketch soft">
       <button class="act" onclick="delBrew('${id}')"><span class="ic">${ICO.del}</span>delete</button>
@@ -2770,10 +2837,10 @@ let extraKastOpen=false;
 function toggleBeanCard(id){ if(expandedBeans.has(id))expandedBeans.delete(id); else expandedBeans.add(id); renderBeans(); }
 function toggleExtraKast(){ extraKastOpen=!extraKastOpen; renderBeans(); }
 // subtiele versheid op basis van roastdate (YYYY-MM-DD)
-function beanFreshness(b){
-  if(!b.roastdate)return null;
+function beanFreshness(b,atTs){
+  if(!b||!b.roastdate)return null;
   const d=new Date(b.roastdate+'T00:00:00');if(isNaN(d.getTime()))return null;
-  const days=Math.floor((Date.now()-d.getTime())/86400000);
+  const days=Math.floor(((atTs||Date.now())-d.getTime())/86400000);
   if(days<0)return null;
   let label;
   if(days===0)label='roasted today — let it rest';
@@ -2782,6 +2849,24 @@ function beanFreshness(b){
   else if(days<=35)label=days+' days — past peak';
   else label=days+' days — over the hill';
   return {days,label};
+}
+/* Wat versheid met je maling doet.
+   Vers gebrande bonen zitten vol CO2. Dat gas komt in de puck vrij en houdt het
+   water tegen: de shot loopt traag en schuimt. Na een week of drie is dat gas weg
+   en zijn de bonen brozer, dus de puck geeft nauwelijks weerstand meer en loopt de
+   shot juist door. Vandaar: jong = grover, oud = fijner. */
+function freshGrindHint(days){
+  if(days==null)return null;
+  if(days<=2)  return {dir:'coarser', s:'too fresh',
+    t:'still full of CO₂. The gas holds the water back, so expect a slow, foamy shot. Go a notch coarser — or give the bag a few more days.'};
+  if(days<=6)  return {dir:'coarser', s:'still degassing',
+    t:'still letting go of gas. If it runs slower than yesterday, go half a step coarser; tomorrow it will be a little quicker again.'};
+  if(days<=21) return {dir:'stable', s:'in the window',
+    t:'the settled stretch. Yesterday\'s grind should still hold today.'};
+  if(days<=32) return {dir:'finer', s:'past peak',
+    t:'most of the CO₂ has gone, so the puck offers less resistance and the shot runs faster. A notch finer.'};
+  return {dir:'finer', s:'old',
+    t:'little gas left, brittle beans, plenty of fines. Grinding finer catches some of it, but there is not much left to save.'};
 }
 // start een brew met deze boon (respecteert espresso -> dial-in, filter -> formulier)
 function brewBean(beanId){
@@ -2829,6 +2914,8 @@ function beanCardHTML(b){
       ${(featOn('cost')&&b.price&&b.bagsize)?'<br>≈ €'+((b.price/b.bagsize)*18).toFixed(2)+' per cup (18 g) · €'+(+b.price).toFixed(2)+' / '+b.bagsize+' g':''}
       <br>${cnt} brew${cnt===1?'':'s'} linked</div>
     ${freshGaugeHTML(b)}
+    ${tasteWheelStatic([].concat(...state.brews.filter(x=>x.beanId===b.id).map(x=>x.tags||[])),
+      'what you tasted in this bean')}
     <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
       ${inStock?'✓ in stock':'○ empty — no longer in stock'}</button>
     <div style="margin-top:10px"><button class="lp sel" onclick="brewBean('${b.id}')">brew this bean →</button></div>
@@ -4142,7 +4229,7 @@ function renderShortcuts(){
   const base=location.origin+location.pathname;
   document.getElementById('shortcut-list').innerHTML=
     state.methods.filter(m=>m.on).map(m=>`<button class="profile-btn ic-btn" onclick="copyShortcut('${m.id}')">${iconHTML(m,22)} copy link: start ${esc(m.name)}</button>`).join('')+
-    `<button class="profile-btn ic-btn" onclick="copyShortcut('surprise')">✦ copy link: surprise me</button>`;
+    `<button class="profile-btn ic-btn" onclick="copyShortcut('surprise')"><svg viewBox="0 0 24 24" class="acic"><path d="M4.7 9.7 Q4.6 16.2 8 18.3 Q12 20.6 16.2 18.1 Q19.4 16.1 19.3 9.6 M4.3 10.2 Q12 8.3 19.7 10.1 M19.1 10.9 Q22.4 10.7 22.3 13.5 Q22.2 16.4 18.8 16.1 M3 21.4 Q12 22.1 21.1 21.3"/><path d="M8.9 5.9 Q8.1 7.6 9.5 8.8 M12.4 5.1 Q11.4 6.9 12.8 8.1 M15.7 5.9 Q14.8 7.6 16.2 8.8" opacity="0.7"/></svg> copy link: surprise me</button>`;
 }
 function copyShortcut(id){
   const base=location.origin+location.pathname;
@@ -4229,10 +4316,28 @@ function wheelTap(n){
   if(formTags.includes(n))formTags=formTags.filter(x=>x!==n);else formTags.push(n);
   renderFormTags();
 }
+/* smaakwiel als plaatje: dezelfde acht noten, alleen tonen wat gekozen is */
+function tasteWheelStatic(tags,label){
+  if(!featOn('wheel'))return '';
+  const on=(tags||[]).map(t=>(''+t).toLowerCase());
+  if(!on.some(t=>WHEEL_NOTES.includes(t)))return '';
+  const cx=100,cy=100,r1=40,r2=94;let out='';
+  WHEEL_NOTES.forEach((nt,i)=>{
+    const a0=(i/8)*Math.PI*2-Math.PI/2,a1=((i+1)/8)*Math.PI*2-Math.PI/2,am=(a0+a1)/2;
+    const P=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+    const[x0,y0]=P(r2,a0),[x1,y1]=P(r2,a1),[x2,y2]=P(r1,a1),[x3,y3]=P(r1,a0);
+    out+=`<path class="${on.includes(nt)?'sel':''}" d="M${x0} ${y0} A${r2} ${r2} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r1} ${r1} 0 0 0 ${x3} ${y3} Z"/>`;
+    const[tx,ty]=P((r1+r2)/2,am);
+    out+=`<text x="${tx}" y="${ty+3}" text-anchor="middle">${nt}</text>`;
+  });
+  return `<div class="notes-card sketch soft"><div class="k">${esc(label||'taste')}</div>
+    <svg class="wheel-ro" viewBox="0 0 200 200">${out}</svg></div>`;
+}
 /* ---------------- versheidsmeter per boon ---------------- */
-function freshGaugeHTML(b){
+function freshGaugeHTML(b,atTs,label){
   if(!featOn('freshgauge'))return '';
-  const fr=beanFreshness(b);if(!fr)return '';
+  const fr=beanFreshness(b,atTs);if(!fr)return '';
+  const hint=freshGrindHint(fr.days);
   const days=Math.min(fr.days,42);
   const cx=150,cy=104,R=78;
   const P=fr2=>[cx+R*Math.cos(Math.PI+fr2*Math.PI),cy+R*Math.sin(Math.PI+fr2*Math.PI)];
@@ -4241,13 +4346,14 @@ function freshGaugeHTML(b){
   const[nx,ny]=P(days/42);
   return `<svg class="fgauge" viewBox="0 0 300 118">
     ${arc(0,3,'#a5673a')}${arc(3,21,'#5c7a4f')}${arc(21,42,'var(--line)')}
-    <text x="${P(1.5/42)[0]}" y="${P(1.5/42)[1]-12}" text-anchor="middle">rest</text>
+    <text x="${P(0.6/42)[0]-7}" y="${P(0.6/42)[1]-9}" text-anchor="end">rest</text>
     <text x="${P(12/42)[0]}" y="${P(12/42)[1]-12}" text-anchor="middle">peak</text>
     <text x="${P(31/42)[0]}" y="${P(31/42)[1]-12}" text-anchor="middle">fading</text>
     <line class="needle" x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}"/>
     <circle cx="${cx}" cy="${cy}" r="4" fill="var(--ink)"/>
     <text class="fd" x="${cx}" y="${cy-22}" text-anchor="middle">day ${fr.days}</text>
-  </svg>`;
+  </svg>${label?'<div class="fg-lab">'+esc(label)+'</div>':''}
+  ${hint?'<div class="fg-hint">'+esc(hint.s)+' — '+esc(hint.t)+'</div>':''}`;
 }
 /* ---------------- brew now: jouw vaste bak, voor-ingevuld ---------------- */
 function brewNow(){
