@@ -602,6 +602,26 @@
   .stay-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 0;font-family:'Patrick Hand',cursive;font-size:18px;color:var(--ink-soft);cursor:pointer;}
   .stay-row input{width:20px;height:20px;accent-color:var(--accent);}
   .lock-error{color:#a5453a;font-family:'Patrick Hand',cursive;font-size:17px;min-height:22px;margin-bottom:4px;}
+  .whatsnew{position:absolute;left:0;right:0;bottom:82px;z-index:70;padding:0 14px;
+    transform:translateY(calc(100% + 90px));transition:transform .55s cubic-bezier(.22,1,.36,1);
+    pointer-events:none;}
+  .whatsnew.on{transform:translateY(0);pointer-events:auto;}
+  .wn-card{background:var(--card);border:2px solid var(--ink);filter:url(#wobble);
+    border-radius:22px;padding:12px 16px 13px;box-shadow:0 10px 30px rgba(58,48,42,.13);}
+  html.night .wn-card{box-shadow:0 10px 30px rgba(0,0,0,.35);}
+  .wn-h{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    border-bottom:2px solid var(--line);filter:url(#wobble);padding-bottom:4px;margin-bottom:6px;}
+  .wn-h .hand{font-size:23px;}
+  .wn-x{background:none;border:none;padding:2px;cursor:pointer;line-height:0;}
+  .wn-x svg{width:19px;height:19px;stroke:var(--ink-soft);}
+  .wn-i{display:flex;gap:8px;align-items:baseline;padding:2.5px 0;}
+  .wn-i svg{width:12px;height:12px;flex:none;stroke:var(--accent-soft);
+    stroke-width:2.4;fill:none;align-self:center;}
+  .wn-i b{font-family:'Caveat',cursive;font-weight:700;font-size:19px;}
+  .wn-i span{font-size:15px;line-height:1.3;color:var(--ink-soft);}
+  .wn-ok{width:100%;margin-top:9px;background:var(--accent-soft);color:var(--cream);
+    border:2px solid var(--ink);filter:url(#wobble);border-radius:14px;padding:7px;
+    font-size:20px;cursor:pointer;}
   .hidden{display:none !important;}
   .img-picker-overlay{position:fixed;inset:0;background:rgba(58,48,42,.45);display:flex;align-items:flex-end;justify-content:center;z-index:60;}
   .img-picker-sheet{width:100%;max-width:430px;background:var(--paper);border-radius:26px 26px 0 0;border:2px solid var(--ink);padding:20px 20px 28px;max-height:80vh;overflow-y:auto;}
@@ -1250,6 +1270,18 @@
     </div>
   </div>
 
+  <div id="whatsnew" class="whatsnew" role="dialog" aria-label="Wat is er nieuw" aria-hidden="true">
+    <div class="wn-card sketch">
+      <div class="wn-h">
+        <span class="hand">wat is er nieuw</span>
+        <button class="wn-x" onclick="sluitNieuws()" aria-label="sluiten">
+          <svg viewBox="0 0 24 24" class="acic"><path d="M6.4 6 Q12 11.6 17.8 17.4 M17.6 6.2 Q12 11.8 6.2 17.6"/></svg>
+        </button>
+      </div>
+      <div id="wn-list"></div>
+      <button class="wn-ok hand" onclick="sluitNieuws()">aan de slag</button>
+    </div>
+  </div>
   <div id="nav" class="nav hidden">
     <button data-p="home" class="on" onclick="go('home')">
       <span class="ic"><svg viewBox="0 0 32 32" class="navic"><path d="M4.2 16.7 Q10 11 16.2 5.3 Q22 10.8 27.8 16.5 M7.6 13.3 Q7.3 20 7.8 26.6 M7.4 26.1 Q16 26.9 24.6 26.2 M24.2 26.6 Q24.7 20 24.3 13.4 M12.7 26.7 Q12.4 22.6 12.9 18.6 Q16 18.2 19.3 18.6 M19.1 18.4 Q19.5 22.6 19.2 26.7"/></svg></span>home</button>
@@ -1468,6 +1500,7 @@ function idbSet(key,val){
     tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error||new Error('idb-set'));
   }));
 }
+let hadOpgeslagenData=false;   // draaide deze telefoon de app al eerder?
 async function load(){
   let s=null;
   try{s=await idbGet(IDB_KEY);}catch(e){s=null;}
@@ -1482,7 +1515,7 @@ async function load(){
       }
     }catch(e){}
   }
-  if(s&&s.methods&&s.brews){state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();return;}
+  if(s&&s.methods&&s.brews){hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();return;}
   state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[],prepItems:JSON.parse(JSON.stringify(DEFAULT_PREP))};
   save();
 }
@@ -4627,6 +4660,40 @@ function importData(ev){
   r.readAsText(file);
 }
 
+/* ---------------- wat is er nieuw ---------------- */
+const APP_VERSION='2026.07';
+const NIEUWS=[
+  ['cuppen','blind proeven met de klok erbij'],
+  ['latte art','opschuimen, gieten en acht vormen'],
+  ['versheid','stuurt nu je maaladvies bij dial-in'],
+  ['smaakwiel','terug op boon en brew'],
+  ['tekeningen','alles opnieuw overgetrokken'],
+];
+function toonNieuws(){
+  const el=document.getElementById('wn-list');if(!el)return;
+  const bolletje='<svg viewBox="0 0 16 16"><path d="M12.6 5.2 C14 8.6 11.4 12.6 7.6 12 C3.6 11 3 6 6 3.6 C8.6 1.8 12 3.4 12.8 6.4"/></svg>';
+  el.innerHTML=NIEUWS.map(([k,t])=>
+    `<div class="wn-i">${bolletje}<span><b>${esc(k)}</b> — ${esc(t)}</span></div>`).join('');
+  const p=document.getElementById('whatsnew');
+  p.classList.add('on');p.setAttribute('aria-hidden','false');
+}
+function sluitNieuws(){
+  const p=document.getElementById('whatsnew');if(!p)return;
+  p.classList.remove('on');p.setAttribute('aria-hidden','true');
+  try{localStorage.setItem('scc_seen_version',APP_VERSION);}catch(e){}
+}
+/* Alleen tonen aan wie de vorige versie al draaide. Een verse installatie
+   krijgt niets te zien — die heeft immers niets gemist. */
+function nieuwsMisschien(){
+  let seen=null;
+  try{seen=localStorage.getItem('scc_seen_version');}catch(e){}
+  if(seen===APP_VERSION)return;
+  if(!seen && !hadOpgeslagenData){
+    try{localStorage.setItem('scc_seen_version',APP_VERSION);}catch(e){}
+    return;
+  }
+  setTimeout(toonNieuws,900);
+}
 /* ---------------- util ---------------- */
 function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 let toastT;
@@ -4690,6 +4757,7 @@ setTimeout(()=>{
     go('home');
     if(pendingQuickBrew){pendingQuickBrew=false;try{quickBrew();}catch(e){}}
     if(pendingBrewParam){const mid=decodeURIComponent(pendingBrewParam);pendingBrewParam=null;try{beginBrew(mid);}catch(e){}}
+    try{nieuwsMisschien();}catch(e){}
   },750);
 },3000);
 </script>
