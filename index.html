@@ -1089,7 +1089,7 @@
 
       <div class="learn-card sketch do" id="gallery-card" style="background:var(--aeropress)" onclick="go('gallery')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M7.7 14.2 Q10 10.4 12.1 12.6 Q14.5 8.9 16.8 13.2" opacity="0.8"/><path d="M10.3 8.7 Q10.7 10.4 9 10.5 Q7.5 10.4 7.7 8.9 Q8 7.5 9.6 7.7 Q10.3 7.9 10.6 8.4" opacity="0.6"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">de gieterij</div>
+        <div class="lc-body"><div class="lc-t hand">pouring shapes</div>
           <div class="lc-d">foto's van je gieten, op volgorde — met AI-feedback</div></div>
         <div class="lc-arr hand">open</div>
       </div>
@@ -1144,7 +1144,7 @@
   <div id="page-gallery" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">de gieterij</div><button onclick="go('learn')">klaar</button></div>
+      <div class="form-head"><div class="h hand">pouring shapes</div><button onclick="go('learn')">klaar</button></div>
       <div class="subtitle">elke giet vastgelegd — zie je rozet beter worden.</div>
       <button class="scan-btn" onclick="document.getElementById('latte-input').click()">＋ voeg een foto toe</button>
       <input type="file" id="latte-input" accept="image/*" style="display:none" onchange="addLatteShot(event)">
@@ -1401,6 +1401,18 @@ const ESPRESSO_RULES=
   '- Tussen ongeveer 7 en 21 dagen is de boon stabiel; dan hoef je niet voor versheid te corrigeren.\n'+
   '- Vanaf ongeveer 25 dagen is het CO2 grotendeels weg en is de boon brozer; de puck geeft minder weerstand en de shot loopt sneller -> iets FIJNER.\n'+
   '- Corrigeer nooit voor versheid tegen de gemeten doorloopsnelheid in: wat je werkelijk meet gaat voor.';
+// vaste filterregels die de AI overal meekrijgt (spiegelbeeld van ESPRESSO_RULES)
+const FILTER_RULES=
+  'FILTER-REGELS (niet omkeren):\n'+
+  '- FIJNER malen = meer weerstand = TRAGER doorlopen = MEER extractie (minder zuur, meer body; te ver = bitter en droog).\n'+
+  '- GROVER malen = minder weerstand = SNELLER doorlopen = MINDER extractie (zuur, dun, zoutig).\n'+
+  '- De RATIO bepaalt de STERKTE, de MALING bepaalt de EXTRACTIE. Slap maar niet bitter -> minder water of meer koffie. Zuur of bitter -> aan de maling draaien, niet aan de ratio.\n'+
+  '- Beoordeel met de totale tijd en met de doorlooptijd (vanaf de laatste giet tot het bed droogvalt), niet met de tijd alleen.\n'+
+  '- Te snel doorgelopen en zuur/dun -> FIJNER. Te traag of verstopt en bitter/droog -> GROVER, en minder roeren of van lager gieten.\n'+
+  '- Een krater of een droge rand in het bed is een GIETfout, geen maalfout: corrigeer eerst het gieten.\n'+
+  '- Bloom hoort ongeveer 2 tot 3 keer de dose te zijn en 30 tot 45 seconden te duren. Hoe verser de boon, hoe meer CO2, hoe ruimer en langer de bloom.\n'+
+  '- Temperatuur is de fijnafstelling: koeler = minder extractie, warmer = meer.\n'+
+  '- Verander één ding tegelijk.';
 // welke familie hoort bij een methode? espresso of filter (val terug op filter)
 function methodFamily(idOrMethod){
   const m=(typeof idOrMethod==='object'&&idOrMethod)?idOrMethod:methodById(idOrMethod);
@@ -1408,6 +1420,101 @@ function methodFamily(idOrMethod){
   const id=(m&&m.id)||(typeof idOrMethod==='string'?idOrMethod:null);
   if(id&&METHOD_FAMILY_DEFAULTS[id])return METHOD_FAMILY_DEFAULTS[id];
   return 'filter';
+}
+/* ---------------- filterrecepten met een stappenschema ----------------
+   Elke stap: t = seconden vanaf start, p = deel van het totale water (0-1),
+   k = soort stap, d = wat je doet (inhoud, dus Nederlands).
+   Het water schaalt mee met je eigen dose: water = dose * ratio.        */
+const FILTER_RECIPES=[
+  {id:'hoffmann', naam:'Hoffmann V60', voor:['v60'], dose:15, ratio:16.7, temp:95, maling:'medium-fijn',
+   over:'Twee gietbeurten en twee keer swirlen. Weinig stappen, maar je pols bepaalt het resultaat.',
+   stappen:[
+     {t:0,   p:0.12, k:'bloom', d:'giet 2× je dose in cirkels tot alles nat is'},
+     {t:10,  p:0,    k:'swirl', d:'swirl de dripper rustig rond — het bed moet vlak liggen'},
+     {t:45,  p:0.60, k:'giet',  d:'giet in rustige cirkels tot 60 % van je water'},
+     {t:75,  p:1.00, k:'giet',  d:'vul in cirkels aan tot je eindgewicht'},
+     {t:105, p:0,    k:'swirl', d:'nog één zachte swirl om het bed vlak te leggen'},
+     {t:120, p:0,    k:'doorloop', d:'laten zakken — droog rond 3:00 tot 3:30'}]},
+
+  {id:'kasuya', naam:'Kasuya 4:6', voor:['v60'], dose:20, ratio:15, temp:92, maling:'grof',
+   over:'Vijf kleine gietbeurten. De eerste 40 % stuurt zuur tegenover zoet, de laatste 60 % de sterkte. Werkt ook zonder zwanenhals.',
+   hendels:true,
+   stappen:[
+     {t:0,   p:0.20, k:'bloom', d:'eerste giet — recht in het midden'},
+     {t:45,  p:0.40, k:'giet',  d:'tweede giet — hiermee is de smaakbalans klaar'},
+     {t:90,  p:0.60, k:'giet',  d:'derde giet — vanaf hier bouw je de sterkte'},
+     {t:130, p:0.80, k:'giet',  d:'vierde giet'},
+     {t:170, p:1.00, k:'giet',  d:'vijfde giet'},
+     {t:200, p:0,    k:'doorloop', d:'laten zakken — droog rond 3:30'}]},
+
+  {id:'rao', naam:'Rao spin', voor:['v60'], dose:20, ratio:16, temp:96, maling:'medium',
+   over:'Eén doorlopende giet en een swirl aan het eind. Vlak bed, weinig kans om te knoeien.',
+   stappen:[
+     {t:0,   p:0.15, k:'bloom', d:'giet 3× je dose op, alles moet nat zijn'},
+     {t:10,  p:0,    k:'swirl', d:'swirl tot het bed vlak ligt'},
+     {t:45,  p:1.00, k:'giet',  d:'giet in één rustige doorlopende stroom tot je eindgewicht'},
+     {t:100, p:0,    k:'swirl', d:'één zachte swirl — de rand spoelt terug het bed in'},
+     {t:110, p:0,    k:'doorloop', d:'laten zakken — droog rond 3:00'}]},
+
+  {id:'chemex', naam:'Chemex klassiek', voor:['chemex'], dose:30, ratio:16.7, temp:95, maling:'medium-grof',
+   over:'Het dikke filter houdt oliën tegen: heel schoon in de kop, maar het duurt langer.',
+   stappen:[
+     {t:0,   p:0.12, k:'bloom', d:'giet ~2× je dose op en laat het gas eruit'},
+     {t:45,  p:0.50, k:'giet',  d:'giet in cirkels tot de helft — blijf van de filterrand af'},
+     {t:105, p:0.80, k:'giet',  d:'vul aan zodra het niveau zakt'},
+     {t:165, p:1.00, k:'giet',  d:'laatste giet tot je eindgewicht'},
+     {t:210, p:0,    k:'doorloop', d:'laten zakken — droog rond 4:00 tot 4:30'}]},
+
+  {id:'kalita', naam:'Kalita pulse', voor:['kalita','v60'], dose:20, ratio:16, temp:93, maling:'medium',
+   over:'Vlakke bodem, ondiep bed. Kleine gietjes om het niveau gelijk te houden.',
+   stappen:[
+     {t:0,   p:0.16, k:'bloom', d:'giet 2,5× je dose op'},
+     {t:45,  p:0.40, k:'giet',  d:'klein gietje in het midden'},
+     {t:75,  p:0.60, k:'giet',  d:'weer een klein gietje'},
+     {t:105, p:0.80, k:'giet',  d:'en nog een'},
+     {t:135, p:1.00, k:'giet',  d:'laatste gietje tot je eindgewicht'},
+     {t:170, p:0,    k:'doorloop', d:'laten zakken — droog rond 3:30'}]},
+
+  {id:'switch', naam:'Switch hybride', voor:['switch','v60'], dose:15, ratio:16.7, temp:94, maling:'medium',
+   over:'Eerst open percoleren voor helderheid, daarna dicht laten staan voor zoetheid en body.',
+   stappen:[
+     {t:0,   p:0.20, k:'bloom', d:'klep dicht — giet 3× je dose op en laat bloeien'},
+     {t:45,  p:0.60, k:'giet',  d:'klep open — giet in cirkels bij'},
+     {t:80,  p:1.00, k:'giet',  d:'vul aan tot je eindgewicht'},
+     {t:100, p:0,    k:'wacht', d:'klep dicht — laat het staan en afkoelen'},
+     {t:150, p:0,    k:'doorloop', d:'klep open — laten leeglopen'}]},
+
+  {id:'aeropress', naam:'AeroPress standaard', voor:['aeropress'], dose:16, ratio:15, temp:88, maling:'medium-fijn',
+   over:'Immersie met een duwtje. Kort en vergevingsgezind.',
+   stappen:[
+     {t:0,   p:0.22, k:'bloom', d:'giet op tot alles nat is en roer 10 seconden'},
+     {t:30,  p:1.00, k:'giet',  d:'vul aan tot je eindgewicht en zet de deksel erop'},
+     {t:60,  p:0,    k:'wacht', d:'laten staan'},
+     {t:75,  p:0,    k:'pers',  d:'rustig indrukken in 30 tot 45 seconden — stop bij het sissen'}]},
+];
+// welke recepten passen bij deze methode? (val terug op alles wat filter is)
+function recipesFor(methodId){
+  const m=methodById(methodId); const naam=((m&&m.name)||'').toLowerCase();
+  const hit=FILTER_RECIPES.filter(r=>r.voor.some(v=>v===methodId||naam.includes(v)));
+  if(hit.length)return hit;
+  return FILTER_RECIPES.filter(r=>r.id==='rao'||r.id==='hoffmann');
+}
+function recipeById(id){return FILTER_RECIPES.find(r=>r.id===id)||null;}
+// gewichten uitrekenen voor jouw dose; hendels verschuiven de 4:6-verdeling
+function recipeSteps(r,dose,hendels){
+  if(!r)return [];
+  const water=Math.round((dose||r.dose)*r.ratio);
+  let st=r.stappen.map(x=>Object.assign({},x));
+  if(r.hendels&&hendels){
+    // eerste 40 %: zoeter = een kleiner eerste gietje, zuurder = een groter
+    const zoet=Math.max(0,Math.min(1,hendels.zoet==null?0.5:hendels.zoet));
+    const eerste=0.40*(0.35+zoet*0.30);        // tussen 14 % en 26 % van het totaal
+    st[0].p=eerste; st[1].p=0.40;
+    // laatste 60 %: meer gietjes = steviger
+    const sterk=Math.max(0,Math.min(1,hendels.sterk==null?0.5:hendels.sterk));
+    if(sterk<0.5){ st=st.filter(x=>x!==st[3]); st[2].p=0.70; st[3].p=1.00; }
+  }
+  return st.map(x=>Object.assign({},x,{g:x.p?Math.round(water*x.p):0, water}));
 }
 const TINTS=['--espresso','--aeropress','--v60','--chemex','--perculator'];
 // ingebouwde tekeningen om uit te kiezen per methode-soort
@@ -2886,6 +2993,21 @@ function freshGrindHint(days){
   return {dir:'finer', s:'old',
     t:'little gas left, brittle beans, plenty of fines. Grinding finer catches some of it, but there is not much left to save.'};
 }
+/* Wat versheid met je bloom doet.
+   Bij espresso corrigeer je vers gas met de maling, want daar meet je de
+   doorloopsnelheid. Bij filter zit de knop eerder bij de bloom: daar laat je
+   het gas juist bewust ontsnappen voordat de extractie begint. */
+function freshBloomHint(days){
+  if(days==null)return null;
+  if(days<=4) return {mult:3, sec:45, s:'very fresh',
+    t:'full of CO\u2082 — the bed will dome and crackle. Give it a bigger bloom and wait longer, or the gas keeps pushing your water away.'};
+  if(days<=21)return {mult:2.5, sec:40, s:'in the window',
+    t:'the settled stretch. A normal bloom is all it needs.'};
+  if(days<=32)return {mult:2, sec:30, s:'past peak',
+    t:'less gas left, so the bloom falls flat sooner. Shorten it and grind a touch finer to keep the sweetness.'};
+  return {mult:2, sec:30, s:'old',
+    t:'barely any gas. A long bloom only cools the bed now — keep it short and grind finer.'};
+}
 // start een brew met deze boon (respecteert espresso -> dial-in, filter -> formulier)
 function brewBean(beanId){
   const b=beanById(beanId);if(!b)return;
@@ -3897,7 +4019,7 @@ function renderLatte(){
   if(featOn('latteart')){
     h+=`<button class="lesson-link sketch" onclick="learnToGallery()">
       <svg viewBox="0 0 24 24" class="acic"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M7.7 14.2 Q10 10.4 12.1 12.6 Q14.5 8.9 16.8 13.2" opacity="0.8"/><path d="M10.3 8.7 Q10.7 10.4 9 10.5 Q7.5 10.4 7.7 8.9 Q8 7.5 9.6 7.7 Q10.3 7.9 10.6 8.4" opacity="0.6"/></svg>
-      <span>leg je giet vast in de gieterij</span><span class="ll-arr">›</span></button>`;
+      <span>leg je giet vast bij pouring shapes</span><span class="ll-arr">›</span></button>`;
   }
   el.innerHTML=h;
 }
@@ -4414,6 +4536,9 @@ const FEATURES=[
   {id:'night', n:'espresso night mode',    d:'the whole app becomes a chalkboard', def:false, cat:'app'},
   {id:'shotclock', n:'E61 shot clock', d:'pull the lever on the dial-in screen — time fills in, stays editable', def:true, cat:'app'},
   {id:'journey', n:'dial-in journey', d:'your attempts drawn as a line walking into the target band', def:true, cat:'app'},
+  {id:'pourcoach', n:'pour coach', d:'filter recipes that run with a clock while you pour', def:true, cat:'app'},
+  {id:'drawdown', n:'drawdown & bed', d:'log how long it drained and what the bed looked like', def:true, cat:'app'},
+  {id:'filtercompass', n:'filter compass', d:'what you tasted, plotted — with one next change', def:true, cat:'app'},
   {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true, cat:'app'},
   {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true, cat:'app'},
   {id:'smartdefaults', n:'smart defaults', d:'last dose, grind & temp prefilled — never retype', def:true, cat:'app'},
@@ -4423,7 +4548,7 @@ const FEATURES=[
   {id:'shortcuts', n:'home-screen shortcuts', d:'links that start a brew straight from an iOS Shortcut', def:true, cat:'smart'},
   {id:'water', n:'water helper', d:'ppm targets & simple mineral recipes on the learn page', def:true, cat:'people'},
   {id:'cupping', n:'cupping session', d:'blind-taste two beans, score & reveal', def:true, cat:'people'},
-  {id:'latteart', n:'de gieterij & coach', d:"foto's van je gieten, met AI-feedback", def:true, cat:'people'},
+  {id:'latteart', n:'pouring shapes & coach', d:'photos of your pours, in order — with AI feedback', def:true, cat:'people'},
   {id:'brewsletter', n:'weekly brewsletter', d:'a hand-drawn recap card of your week, shareable', def:true, cat:'smart'},
   {id:'tastememory', n:'taste memory', d:'what your scores say about your palate', def:true, cat:'smart'},
   {id:'voice', n:'voice logging', d:'say "18 in, 36 out, 27 seconds" — hands stay on the machine', def:false, cat:'smart'},
