@@ -2520,7 +2520,8 @@ function openPour(methodId){
   const mid=valid?methodId:(state.methods.filter(m=>m.on&&methodFamily(m)==='filter')[0]?.id||'v60');
   const lijst=recipesFor(mid);
   pourStop(true);
-  pc={mid,rid:(lijst[0]||{}).id||null,bean:null,steps:[],hendels:{zoet:0.5,sterk:0.5},
+  const bewaard=(state.lastRecipe||{})[mid];
+  pc={mid,rid:(lijst.find(r=>r.id===bewaard)||lijst[0]||{}).id||null,bean:null,steps:[],hendels:{zoet:0.5,sterk:0.5},
       run:false,t0:0,el:0,timer:null,idx:0,shift:0,marks:[],total:null,draw:null,live:-1};
   editingId=null;formMethod=mid;
   const r=recipeById(pc.rid);
@@ -2576,6 +2577,8 @@ function pourRecipes(){
 function pourPickRecipe(id){
   if(pc.run){toast('the clock is running \u2014 stop it first');return;}
   pc.rid=id;const r=recipeById(id);
+  if(!state.lastRecipe)state.lastRecipe={};
+  state.lastRecipe[pc.mid]=id;save();
   if(r){setVal('pc-temp',r.temp);}
   pourBuild();
 }
@@ -5383,13 +5386,14 @@ function importData(ev){
 }
 
 /* ---------------- wat is er nieuw ---------------- */
-const APP_VERSION='2026.07';
+const APP_VERSION='2026.08';
 const NIEUWS=[
-  ['cuppen','blind proeven met de klok erbij'],
-  ['latte art','opschuimen, gieten en acht vormen'],
-  ['versheid','stuurt nu je maaladvies bij dial-in'],
-  ['smaakwiel','terug op boon en brew'],
-  ['tekeningen','alles opnieuw overgetrokken'],
+  ['pour coach','filterrecepten lopen mee met de klok'],
+  ['zeven recepten','Hoffmann, 4:6, Rao en meer, op jouw dose'],
+  ['filterkompas','wat je proefde \u2192 \u00e9\u00e9n vervolgstap'],
+  ['doorlooptijd','plus hoe het bed erbij lag'],
+  ['waterkaart','reken je eigen recept uit'],
+  ['filter skills','een eigen leerspoor bij learn'],
 ];
 function toonNieuws(){
   const el=document.getElementById('wn-list');if(!el)return;
