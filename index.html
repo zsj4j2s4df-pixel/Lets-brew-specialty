@@ -145,6 +145,17 @@
   .field textarea{min-height:80px;resize:vertical;}
   .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--ink);}
   .field-row{display:flex;gap:12px;}
+  /* drie elementen op één regel binnen de kaart: de invoer krimpt, de knoppen niet */
+  .voice-row{gap:8px;align-items:stretch;}
+  .voice-row #voice-text{flex:1;min-width:0;background:var(--paper);border:2px solid var(--line);
+    filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;
+    font-size:16px;color:var(--ink);}
+  .voice-row .vr-btn{flex:none;width:50px;padding:0;display:flex;align-items:center;
+    justify-content:center;}
+  /* BLAUW: aan het luisteren = donkerder bruin, daarna terug naar de rustkleur */
+  .voice-row #voice-mic{transition:background .18s ease,border-color .18s ease;}
+  .voice-row #voice-mic[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--ink);}
+  .voice-row #voice-mic[aria-pressed="true"] .acic{stroke:var(--cream);}
   .field-row .field{flex:1;}
   .method-pick{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;}
   .method-pick::-webkit-scrollbar{display:none;}
@@ -878,10 +889,10 @@
         </div>
         <div class="set-d" style="margin-top:8px;font-size:14px">lever up = shot running · lever down = stop, the time is filled in below — you can always correct any value by hand</div>
         <div id="voice-row" style="display:none;margin-top:8px">
-          <div class="field-row">
-            <input id="voice-text" placeholder='say or type: "18 in, 36 out, 27 seconds"' style="flex:1;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);">
-            <button class="tag-add-btn" id="voice-mic" onclick="voiceListen()" title="dictate"><svg viewBox="0 0 24 24" class="acic" style="width:19px;height:19px"><path d="M12.1 2.6 Q14.9 2.4 14.8 5.6 Q15 8.4 14.8 11.2 Q14.7 14 11.9 13.9 Q9.2 13.8 9.2 11.1 Q9 8.3 9.2 5.5 Q9.3 2.7 12.3 2.8"/><path d="M6.3 10.4 Q6 15.2 10.4 16.6 Q13.9 17.4 16.6 15 Q18.1 13.3 17.8 10.3 M12 16.6 Q12.3 18.8 11.9 21.2 M8.7 21.3 Q12 21.8 15.4 21.2" opacity="0.85"/></svg></button>
-            <button class="tag-add-btn" onclick="voiceParse()" title="fill in">→</button>
+          <div class="field-row voice-row">
+            <input id="voice-text" placeholder='zeg of typ: 18 in, 36 uit, 27 seconden'>
+            <button class="tag-add-btn vr-btn" id="voice-mic" onclick="voiceListen()" title="inspreken" aria-label="inspreken" aria-pressed="false"><svg viewBox="0 0 24 24" class="acic" style="width:19px;height:19px"><path d="M12.1 2.6 Q14.9 2.4 14.8 5.6 Q15 8.4 14.8 11.2 Q14.7 14 11.9 13.9 Q9.2 13.8 9.2 11.1 Q9 8.3 9.2 5.5 Q9.3 2.7 12.3 2.8"/><path d="M6.3 10.4 Q6 15.2 10.4 16.6 Q13.9 17.4 16.6 15 Q18.1 13.3 17.8 10.3 M12 16.6 Q12.3 18.8 11.9 21.2 M8.7 21.3 Q12 21.8 15.4 21.2" opacity="0.85"/></svg></button>
+            <button class="tag-add-btn vr-btn" onclick="voiceParse()" title="invullen" aria-label="invullen">→</button>
           </div>
           <div class="set-d" id="e61-live" style="font-size:14px"></div>
         </div>
@@ -3509,24 +3520,43 @@ async function tasteMemory(){
 }
 /* ---------------- voice logging ---------------- */
 function voiceParse(){
-  const t=(document.getElementById('voice-text').value||'');
-  const nums=(t.match(/\d+[.,]?\d*/g)||[]).map(v=>parseFloat(v.replace(',','.')));
-  if(nums.length<2){toast('say it like: "18 in, 36 out, 27 seconds"');return;}
-  const [dose,yld,sec]=nums;
+  const t=(document.getElementById('voice-text').value||'').toLowerCase();
+  const getal=m=>m?parseFloat(m[1].replace(',','.')):null;
+  // eerst op woorden, zodat de volgorde niet uitmaakt
+  let dose=getal(t.match(/(\d+[.,]?\d*)\s*(?:gram\s*)?(?:erin|in)\b/));
+  let yld =getal(t.match(/(\d+[.,]?\d*)\s*(?:gram\s*)?(?:eruit|uit)\b/));
+  let sec =getal(t.match(/(\d+[.,]?\d*)\s*(?:seconden|seconde|sec|s)\b/));
+  // wat niet benoemd is, in de gewone volgorde uit de overgebleven getallen halen
+  const rest=(t.match(/\d+[.,]?\d*/g)||[]).map(v=>parseFloat(v.replace(',','.')))
+    .filter(v=>v!==dose&&v!==yld&&v!==sec);
+  if(dose==null)dose=rest.shift()??null;
+  if(yld==null) yld =rest.shift()??null;
+  if(sec==null) sec =rest.shift()??null;
+  if(dose==null&&yld==null&&sec==null){toast('zeg het zo: 18 in, 36 uit, 27 seconden');return;}
   if(dose)setVal('di-dose',dose);
   if(yld)setVal('di-yield',yld);
   if(sec){const inp=document.getElementById('di-time');if(inp){inp.value=String(Math.round(sec));normalizeTime(inp);}}
-  diAdvice();toast('✓ filled in — check the numbers');
+  diAdvice();toast('✓ ingevuld — kijk de getallen even na');
+}
+let luisteraar=null;
+function micStand(aan){
+  const b=document.getElementById('voice-mic');
+  if(b)b.setAttribute('aria-pressed',aan?'true':'false');
 }
 function voiceListen(){
+  // tweede keer indrukken zet hem weer uit
+  if(luisteraar){try{luisteraar.stop();}catch(e){}luisteraar=null;micStand(false);return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('no speech engine here — use the keyboard mic 🎙 in the text field');document.getElementById('voice-text').focus();return;}
+  if(!SR){toast('geen spraakherkenning hier — gebruik de microfoon op je toetsenbord');
+    document.getElementById('voice-text').focus();return;}
   try{
-    const r=new SR();r.lang='en-US';r.interimResults=false;
+    const r=new SR();r.lang='nl-NL';r.interimResults=false;
     r.onresult=e=>{document.getElementById('voice-text').value=e.results[0][0].transcript;voiceParse();};
-    r.onerror=()=>toast('didn\'t catch that — try again');
-    r.start();toast('listening…');
-  }catch(e){toast('mic not available');}
+    r.onerror=()=>toast('niet verstaan — probeer het nog eens');
+    // hoe het ook eindigt, de knop gaat altijd terug naar zijn rustkleur
+    r.onend=()=>{luisteraar=null;micStand(false);};
+    r.start();luisteraar=r;micStand(true);toast('ik luister…');
+  }catch(e){luisteraar=null;micStand(false);toast('microfoon niet beschikbaar');}
 }
 /* ---------------- weer-bewuste suggestie ---------------- */
 async function refreshWeather(){
