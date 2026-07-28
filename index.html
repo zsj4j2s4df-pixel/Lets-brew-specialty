@@ -633,6 +633,16 @@
   .wn-ok{width:100%;margin-top:9px;background:var(--accent-soft);color:var(--cream);
     border:2px solid var(--ink);filter:url(#wobble);border-radius:14px;padding:7px;
     font-size:20px;cursor:pointer;}
+  /* waterkaart */
+  .wt-presets{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;}
+  .wt-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .wt-row label{flex:1;color:var(--ink-soft);font-size:17px;}
+  .wt-row input{width:94px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);
+    border-radius:12px;padding:8px 10px;font-family:inherit;font-size:17px;color:var(--ink);}
+  .wt-out{margin-top:10px;border-top:2px solid var(--line);filter:url(#wobble);padding-top:10px;}
+  .wt-out .wo-l{display:flex;justify-content:space-between;gap:10px;padding:3px 0;}
+  .wt-out .wo-l b{font-family:'Caveat',cursive;font-weight:700;font-size:22px;}
+  .wt-note{color:var(--ink-soft);font-size:15px;line-height:1.35;margin-top:7px;}
   /* filterkompas */
   .cup-pick{display:flex;flex-wrap:wrap;gap:8px;}
   .cup-opt{padding:8px 13px;border-radius:15px;background:var(--card);border:2px solid var(--line);
@@ -824,11 +834,12 @@
         <div class="cup-pick" id="f-cup"></div>
         <div class="fx-note">one tap — the compass turns it into a single next step</div></div>
 
-      <div class="field" id="filter-gear" style="display:none"><label>brewer &amp; paper</label>
+      <div class="field" id="filter-gear" style="display:none"><label>brewer, paper &amp; water</label>
         <div class="field-row">
           <div class="field"><input id="f-brewer" placeholder="brewer, e.g. Hario V60 02"></div>
           <div class="field"><input id="f-paper" placeholder="paper, e.g. Cafec Abaca"></div>
         </div>
+        <input id="f-water" placeholder="water, e.g. 70/40 recipe or filtered tap" style="margin-top:8px">
         <div class="link-pick" id="f-gearchips"></div>
       </div>
 
@@ -1189,12 +1200,23 @@
         <div class="lc-arr">›</div>
       </div>
       <div id="water-body" class="hidden">
-        <div class="lesson sketch soft"><h3>filter (V60 / chemex / aeropress)</h3>
-          <p>Doel: ~75–100 ppm totaal. Recept per liter gefilterd/flessenwater: 1 afgestreken mespunt (±0,1 g) magnesiumsulfaat (epsomzout) + 1 mespunt natriumbicarbonaat (baksoda). Zacht, zoet en helder — laat fruitzuren zingen.</p></div>
-        <div class="lesson sketch soft"><h3>espresso</h3>
-          <p>Doel: ~90–150 ppm met wat meer buffer (bicarbonaat) tegen scherpe zuren en tegen ketelsteen. Gebruik gefilterd water of een verhouding 1:1 kraan/gefilterd als je water gemiddeld hard is.</p></div>
+        <div class="lesson sketch soft"><h3>wat je aan het instellen bent</h3>
+          <p>Hardheid is het magnesium en calcium in je water. Die twee trekken de smaak uit de koffie: magnesium pakt vooral de aroma's, calcium meer body en zuren. Alkaliniteit (bicarbonaat) is iets anders — dat dempt zuren. Te veel ervan haalt precies het frisse weg waar je een lichte branding om koopt.</p>
+          <p>Begin met demiwater of heel zacht flessenwater, want dan weet je zeker wat erin zit. De SCA mikt op ongeveer 51–68 mg/l calciumhardheid.</p></div>
+
+        <div class="lesson sketch soft"><h3>jouw recept</h3>
+          <div class="wt-presets" id="wt-presets"></div>
+          <div class="wt-row"><label>hardheid (ppm)</label>
+            <input id="wt-gh" type="number" inputmode="numeric" value="70" oninput="waterCalc()"></div>
+          <div class="wt-row"><label>alkaliniteit (ppm)</label>
+            <input id="wt-kh" type="number" inputmode="numeric" value="40" oninput="waterCalc()"></div>
+          <div class="wt-row"><label>hoeveel water</label>
+            <input id="wt-l" type="number" inputmode="decimal" step="0.5" value="1" oninput="waterCalc()"></div>
+          <div class="wt-out" id="wt-out"></div>
+        </div>
+
         <div class="lesson sketch soft"><h3>waarom het uitmaakt</h3>
-          <p>Koffie is ~98% water. Te zacht smaakt vlak en hol; te hard maskeert nuance en verkalkt je machine. Eén vaste water-basis maakt je dial-in eerlijk: dan proef je de maling, niet het water.</p></div>
+          <p>Koffie is ~98% water, en bij filter staat er geen crema of melk overheen. Te zacht smaakt vlak en hol; te hard maskeert nuance en verkalkt je machine. Eén vaste waterbasis maakt je afstellen eerlijk: dan proef je de maling en niet het water.</p></div>
       </div>
 
       <div class="sect" id="learn-do-sect"><span class="hand">try it yourself</span><span class="sd">with your own coffee, right now</span></div>
@@ -1895,6 +1917,7 @@ function go(p,isBack){
   if(p==='gallery')renderGallery();
   if(p==='learn'){
     const w=document.getElementById('water-card');if(w)w.style.display=featOn('water')?'flex':'none';
+    if(featOn('water')){waterPresets();waterCalc();}
     const wb=document.getElementById('water-body');if(wb&&!featOn('water'))wb.classList.add('hidden');
     const cc=document.getElementById('cupping-card');if(cc)cc.style.display=featOn('cupping')?'flex':'none';
     const gc=document.getElementById('gallery-card');if(gc)gc.style.display=featOn('latteart')?'flex':'none';
@@ -2217,7 +2240,7 @@ async function updateDialIn(beanId,method){
 function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
-  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper'].forEach(i=>setVal(i,''));
+  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper','f-water'].forEach(i=>setVal(i,''));
   formBed=null;formCup=null;
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
@@ -2226,7 +2249,7 @@ function openForm(methodId){
     if(last){setVal('f-dose',last.dose||'');setVal('f-yield',last.yield||'');setVal('f-ratio',last.ratio||'');
       setVal('f-temp',last.temp||'');setVal('f-grind',last.grind||'');
       // brewer en papier veranderen zelden: die mogen blijven staan
-      setVal('f-brewer',last.brewer||'');setVal('f-paper',last.paper||'');}
+      setVal('f-brewer',last.brewer||'');setVal('f-paper',last.paper||'');setVal('f-water',last.water||'');}
   }
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
@@ -2239,7 +2262,7 @@ function openEdit(b){
   setVal('f-time',b.time);setVal('f-temp',b.temp);setVal('f-notes',b.notes);
   setVal('f-grind',b.grind||'');
   setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
-  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');
+  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');setVal('f-water',b.water||'');
   formBed=b.bed||null;formCup=b.cup||null;
   setVal('f-score',b.score||8);setVal('f-guide',b.guide||'');
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
@@ -2304,6 +2327,43 @@ function applyFamilyToForm(){
   const ft=document.getElementById('filter-taste');
   if(ft)ft.style.display=(fam==='filter'&&featOn('filtercompass'))?'block':'none';
   if(fam==='filter'){renderBedPick();renderGearChips();renderCupPick();}
+}
+/* ---------------- de waterkaart ----------------
+   Twee zouten, twee knoppen. 1 g epsomzout in een liter geeft ~406 ppm hardheid
+   (als CaCO3), 1 g baksoda ~596 ppm alkaliniteit. Daar reken je gewoon mee
+   terug naar het doel dat je intikt.                                      */
+const WATER_PER_G_GH=406, WATER_PER_G_KH=596;
+const WATER_PRESETS=[
+  {id:'filter', n:'filter', gh:70, kh:40, t:'helder en zoet, laat fruitzuren staan'},
+  {id:'espresso', n:'espresso', gh:110, kh:60, t:'iets meer buffer tegen scherpe zuren en ketelsteen'},
+  {id:'sca', n:'SCA-midden', gh:68, kh:40, t:'het midden van de SCA-band'},
+  {id:'zacht', n:'heel zacht', gh:45, kh:20, t:'maximale helderheid, kan dun worden'},
+];
+function waterPresets(){
+  const el=document.getElementById('wt-presets');if(!el)return;
+  el.innerHTML=WATER_PRESETS.map(p=>
+    `<button type="button" class="lp" onclick="waterPreset('${p.id}')">${esc(p.n)}</button>`).join('');
+}
+function waterPreset(id){
+  const p=WATER_PRESETS.find(x=>x.id===id);if(!p)return;
+  setVal('wt-gh',p.gh);setVal('wt-kh',p.kh);waterCalc();
+}
+function waterCalc(){
+  const el=document.getElementById('wt-out');if(!el)return;
+  const gh=parseFloat(document.getElementById('wt-gh').value)||0;
+  const kh=parseFloat(document.getElementById('wt-kh').value)||0;
+  const l=parseFloat(document.getElementById('wt-l').value)||1;
+  const eps=(gh/WATER_PER_G_GH)*l, bic=(kh/WATER_PER_G_KH)*l;
+  const g=v=>v<0.1?(Math.round(v*1000)+' mg'):(v.toFixed(2).replace('.',',')+' g');
+  let waarschuwing='';
+  if(kh>gh)waarschuwing='Meer alkaliniteit dan hardheid dempt je zuren sterker dan dat je aroma lostrekt — bij lichte brandingen wil je dat meestal niet.';
+  else if(gh>150)waarschuwing='Boven de 150 ppm gaat hardheid maskeren en kalkt je apparaat sneller aan.';
+  else if(gh<40)waarschuwing='Onder de 40 ppm valt de body weg: helder, maar vaak ook dun.';
+  el.innerHTML=`<div class="wo-l"><span>epsomzout (magnesiumsulfaat)</span><b>${g(eps)}</b></div>
+    <div class="wo-l"><span>baksoda (natriumbicarbonaat)</span><b>${g(bic)}</b></div>
+    <div class="wo-l"><span>op</span><b>${(l+'').replace('.',',')} liter demiwater</b></div>
+    <div class="wt-note">Los ze apart op, roer tot alles weg is, en gebruik dezelfde basis voor elke brew.
+      ${waarschuwing?('<br>'+esc(waarschuwing)):''}</div>`;
 }
 /* ---------------- het filterkompas ----------------
    Twee assen, geen refractometer nodig. Links-rechts is de extractie (die stel
@@ -2894,6 +2954,7 @@ function saveBrew(){
     tds:editingId?(state.brews.find(x=>x.id===editingId)?.tds??null):null,
     brewer:document.getElementById('f-brewer').value.trim(),
     paper:document.getElementById('f-paper').value.trim(),
+    water:document.getElementById('f-water').value.trim(),
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[...formTags],
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
@@ -2972,7 +3033,7 @@ function openDetail(id){
     ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">target (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
     ${advice?'<div class="notes-card sketch soft"><div class="k">grind tip'+(fam==='espresso'?'':' — gear-aware')+'</div><div class="v">next time: grind '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
     ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'prep')+'</div>'+prepHtml+'</div>':''}
-    ${(b.brewer||b.paper)?'<div class="notes-card sketch soft"><div class="k">brewer &amp; paper</div><div class="v">'+[b.brewer,b.paper].filter(Boolean).map(esc).join(' · ')+'</div></div>':''}
+    ${(b.brewer||b.paper||b.water)?'<div class="notes-card sketch soft"><div class="k">brewer, paper &amp; water</div><div class="v">'+[b.brewer,b.paper,b.water].filter(Boolean).map(esc).join(' · ')+'</div></div>':''}
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
       ${asArr(b.tags).length?'<div class="note-tags">'+asArr(b.tags).map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${asArr(b.custom).length?'<div style="margin-top:10px">'+asArr(b.custom).map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
