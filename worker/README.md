@@ -15,56 +15,92 @@ berekend, dus er staan geen persoonlijke gegevens in de push.
   verifieert tegen de publieke sleutel, elke wektijd van 00:00 tot 23:59 wordt
   precies één keer per dag geraakt, en de drie endpoints doen wat ze moeten
 - de KV-namespace `lets-brew-push-SUBS`, aangemaakt en al ingevuld in
-  `wrangler.jsonc`
+  `wrangler.jsonc` (id `610b6d1efd644301b7eb93b466a82620`)
+- `vapid.html`, waarmee je in je eigen browser een sleutelpaar maakt
 - de app: onder **profiel → dagelijkse brew-suggestie** staat een veld
   *push server* waar straks de Worker-URL in gaat
 
-## Wat jij nog doet
+## Uitrollen via het dashboard
 
-Je hebt [Node](https://nodejs.org) nodig. Alle commando's in deze `worker/`-map.
+Geen terminal, geen Node — alles in de browser. Reken op een kwartier.
 
-**1. VAPID-sleutelpaar**
+**1. Sleutelpaar maken**
 
-Heb je het paar uit onze eerdere sessie nog liggen? Gebruik dat. Zo niet:
+Open `vapid.html` (dubbelklik het bestand) en druk op *maak een sleutelpaar*. De
+sleutels worden met de WebCrypto van je eigen browser gemaakt en gaan nergens
+heen. Laat het tabblad open staan tot je bij stap 4 bent — ververs je de pagina,
+dan krijg je een ander paar.
 
-```sh
-node generate-vapid.mjs
-```
+> **De privésleutel gaat alleen naar Cloudflare, als type *Secret*.** Niet in
+> `wrangler.jsonc`, niet in een bestand dat je commit, niet door een chat.
 
-Dit print `VAPID_PUBLIC_KEY` en `VAPID_PRIVATE_JWK`. Zet de publieke sleutel in
-`wrangler.jsonc`. **De privésleutel gaat nergens in een bestand dat je commit** —
-die zet je in stap 3 als secret.
+**2. De Worker aanmaken**
 
-**2. Je e-mailadres invullen**
+Dashboard → **Workers & Pages** → **Create application** → **Create Worker**.
+Noem hem `lets-brew-push` en druk op **Deploy**; je krijgt dan de standaard
+hallo-wereld-worker. Klik daarna op **Edit code**.
 
-In `wrangler.jsonc` staat `VAPID_SUBJECT`. Zet daar je eigen `mailto:`-adres in;
-push-diensten willen een contactadres voor als er iets misgaat.
+**3. De code erin**
 
-**3. Inloggen, secret zetten, uitrollen**
+Open `src/index.js` uit deze map, neem de hele inhoud over en plak die in de
+editor over de hallo-wereld heen. Het is één bestand zonder imports, dus er valt
+niets te bundelen. **Deploy**.
+
+**4. Variabelen en secret**
+
+**Settings** → **Variables and Secrets** → **Add**, drie keer:
+
+| type | naam | waarde |
+|---|---|---|
+| Text | `VAPID_PUBLIC_KEY` | het bovenste vak uit `vapid.html` |
+| Text | `VAPID_SUBJECT` | `mailto:` plus je eigen e-mailadres |
+| Secret | `VAPID_PRIVATE_JWK` | het onderste vak uit `vapid.html` |
+
+Het contactadres is geen formaliteit: push-diensten gebruiken het als er iets
+misgaat met jouw meldingen. Druk op **Deploy**.
+
+**5. De KV-namespace koppelen**
+
+**Settings** → **Bindings** → **Add** → **KV namespace**. Variabelenaam `SUBS`,
+namespace `lets-brew-push-SUBS`. Die bestaat al, je hoeft hem alleen te kiezen.
+**Deploy**.
+
+**6. De cron aanzetten**
+
+**Settings** → **Triggers** → **Cron Triggers** → **Add**. Zet er `*/5 * * * *`
+in: elke vijf minuten kijken wie er aan de beurt is. Cloudflare heeft tot een
+minuut of vijftien nodig om dat rond te zetten.
+
+**7. De app erop wijzen**
+
+Je Worker draait nu op `https://lets-brew-push.<jouw-subdomein>.workers.dev`.
+Open de app → **profiel → dagelijkse brew-suggestie** → plak die URL in het veld
+*push server*, zet de melding aan en kies je tijd. De app abonneert zich dan
+vanzelf.
+
+## Controleren of het staat
+
+Open `https://lets-brew-push.<jouw-subdomein>.workers.dev/vapidPublicKey` in je
+browser. Daar hoort je publieke sleutel uit te komen — komt er een lege `key`
+terug, dan is stap 4 niet doorgekomen.
+
+Onder **Settings → Trigger Events → View events** zie je of de cron loopt. Of de
+melding echt aankomt merk je de volgende ochtend op je gekozen tijd.
+
+## In plaats daarvan met de CLI
+
+Kan ook, als je Node hebt. Sleutelpaar met `node generate-vapid.mjs`, publieke
+sleutel en `VAPID_SUBJECT` in `wrangler.jsonc`, dan:
 
 ```sh
 npx wrangler login
-npx wrangler secret put VAPID_PRIVATE_JWK    # plak de hele JSON-regel
+npx wrangler secret put VAPID_PRIVATE_JWK
 npx wrangler deploy
 ```
 
-Je krijgt een URL terug, ongeveer `https://lets-brew-push.<jouw-subdomein>.workers.dev`.
-
-**4. De app erop wijzen**
-
-Open de app → **profiel → dagelijkse brew-suggestie** → plak die URL in het veld
-*push server*. Zet de melding aan en kies je tijd. De app abonneert zich dan
-vanzelf bij de Worker.
-
-## Controleren of het werkt
-
-```sh
-curl https://lets-brew-push.<jouw-subdomein>.workers.dev/vapidPublicKey
-```
-
-Dat hoort je publieke sleutel terug te geven. Komt die eruit, dan staat de
-Worker. Met `npx wrangler tail` zie je live wat de cron doet; of de melding
-echt aankomt merk je de volgende ochtend op je gekozen tijd.
+De KV-binding en de cron staan al in `wrangler.jsonc`, dus die regelt `deploy`
+zelf. Doe het één van beide: deploy je later alsnog met Wrangler over een
+dashboard-worker heen, dan wint wat er in `wrangler.jsonc` staat.
 
 ## Endpoints
 

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>VAPID-sleutels — Lets Brew Specialty</title>
+<style>
+  :root{--paper:#efe9dd;--card:#e7ded0;--ink:#3a302a;--ink-soft:#7a6c5e;
+        --line:#b8a98f;--accent-soft:#7d6650;--cream:#f2ead9;}
+  *{box-sizing:border-box;}
+  body{margin:0;padding:22px 16px 40px;background:var(--paper);color:var(--ink);
+       font-family:'Patrick Hand','Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.45;}
+  main{max-width:640px;margin:0 auto;}
+  h1{font-family:'Caveat',cursive,system-ui;font-size:34px;margin:0 0 4px;}
+  .sub{color:var(--ink-soft);margin:0 0 22px;}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:24px;
+        padding:16px 18px;margin-bottom:16px;}
+  h2{font-family:'Caveat',cursive,system-ui;font-size:25px;margin:0 0 8px;}
+  button{font-family:inherit;font-size:19px;cursor:pointer;border:2px solid var(--ink);
+         border-radius:15px;padding:9px 16px;background:var(--accent-soft);color:var(--cream);}
+  button.soft{background:transparent;color:var(--ink);font-size:16px;padding:6px 12px;}
+  button[disabled]{opacity:.45;cursor:default;}
+  .out{display:none;}
+  .out.on{display:block;}
+  label{display:block;font-family:'Caveat',cursive,system-ui;font-size:22px;margin:14px 0 4px;}
+  textarea{width:100%;min-height:74px;background:var(--paper);color:var(--ink);
+           border:2px solid var(--line);border-radius:14px;padding:10px 12px;
+           font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;
+           line-height:1.4;resize:vertical;word-break:break-all;}
+  .warn{border-color:#8a4b3a;}
+  .note{color:var(--ink-soft);font-size:15px;margin:6px 0 0;}
+  ol{padding-left:22px;}
+  li{margin-bottom:7px;}
+  code{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:1px 5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;}
+  .err{color:#8a4b3a;}
+</style>
+</head>
+<body>
+<main>
+  <h1>VAPID-sleutels</h1>
+  <p class="sub">voor de push-worker van Lets Brew Specialty</p>
+
+  <div class="card">
+    <h2>1. sleutelpaar maken</h2>
+    <p>Dit gebeurt volledig in je eigen browser, met de ingebouwde WebCrypto. Er gaat
+      niets naar een server — ook niet naar Cloudflare of naar mij.</p>
+    <button id="gen">maak een sleutelpaar</button>
+    <p class="note" id="msg"></p>
+  </div>
+
+  <div class="card out" id="out">
+    <h2>2. overnemen in Cloudflare</h2>
+
+    <label for="pub">VAPID_PUBLIC_KEY — gewone variabele</label>
+    <textarea id="pub" readonly rows="2"></textarea>
+    <button class="soft" data-copy="pub">kopieer</button>
+
+    <label for="priv">VAPID_PRIVATE_JWK — <b>secret</b></label>
+    <textarea id="priv" readonly rows="4" class="warn"></textarea>
+    <button class="soft" data-copy="priv">kopieer</button>
+    <p class="note">Deze regel is de privésleutel. Zet 'm in Cloudflare als type
+      <b>Secret</b>, en verder nergens: niet in <code>wrangler.jsonc</code>, niet in
+      een bestand dat je commit, niet in een chat. Raak je 'm kwijt, dan maak je hier
+      gewoon een nieuw paar — je hoeft dan alleen de meldingen in de app één keer
+      opnieuw aan te zetten.</p>
+
+    <h2 style="margin-top:20px">3. waar het heen gaat</h2>
+    <ol>
+      <li>Cloudflare-dashboard → <b>Workers &amp; Pages</b> → je worker
+        <code>lets-brew-push</code> → <b>Settings</b> → <b>Variables and Secrets</b>.</li>
+      <li><b>Add</b> → type <b>Text</b>, naam <code>VAPID_PUBLIC_KEY</code>, waarde uit het
+        eerste vak.</li>
+      <li><b>Add</b> → type <b>Text</b>, naam <code>VAPID_SUBJECT</code>, waarde
+        <code>mailto:</code> plus je eigen e-mailadres.</li>
+      <li><b>Add</b> → type <b>Secret</b>, naam <code>VAPID_PRIVATE_JWK</code>, waarde uit
+        het tweede vak.</li>
+      <li><b>Deploy</b>.</li>
+    </ol>
+    <p class="note">Sluit deze pagina daarna. Ververs je 'm, dan krijg je een ander paar
+      en klopt de sleutel in Cloudflare niet meer.</p>
+  </div>
+</main>
+
+<script>
+function b64url(buf){
+  const b = new Uint8Array(buf); let s = '';
+  for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+document.getElementById('gen').addEventListener('click', async () => {
+  const msg = document.getElementById('msg');
+  if (!(window.crypto && crypto.subtle)) {
+    msg.className = 'note err';
+    msg.textContent = 'Deze browser geeft geen WebCrypto vrij. Open de pagina via https of file://, niet via http.';
+    return;
+  }
+  msg.className = 'note'; msg.textContent = 'bezig…';
+  try {
+    const pair = await crypto.subtle.generateKey(
+      { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    // publiek in 'raw' (65 bytes, begint met 0x04) — precies wat push-diensten
+    // als applicationServerKey verwachten
+    const pub = b64url(await crypto.subtle.exportKey('raw', pair.publicKey));
+    const jwk = await crypto.subtle.exportKey('jwk', pair.privateKey);
+    // alleen wat de worker nodig heeft om te ondertekenen
+    const priv = JSON.stringify({ kty:'EC', crv:'P-256', d:jwk.d, x:jwk.x, y:jwk.y, ext:true });
+    document.getElementById('pub').value = pub;
+    document.getElementById('priv').value = priv;
+    document.getElementById('out').classList.add('on');
+    msg.textContent = 'klaar — hieronder staan ze';
+    document.getElementById('out').scrollIntoView({ behavior:'smooth', block:'start' });
+    document.getElementById('gen').disabled = true;
+  } catch (e) {
+    msg.className = 'note err';
+    msg.textContent = 'het lukte niet: ' + e.message;
+  }
+});
+document.querySelectorAll('[data-copy]').forEach(b => {
+  b.addEventListener('click', async () => {
+    const el = document.getElementById(b.dataset.copy);
+    el.select(); el.setSelectionRange(0, 99999);
+    try { await navigator.clipboard.writeText(el.value); }
+    catch (e) { document.execCommand('copy'); }
+    const t = b.textContent; b.textContent = 'gekopieerd ✓';
+    setTimeout(() => { b.textContent = t; }, 1400);
+  });
+});
+</script>
+</body>
+</html>

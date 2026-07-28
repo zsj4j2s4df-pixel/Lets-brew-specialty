@@ -1,6 +1,9 @@
 {
   // Cloudflare Worker voor de dagelijkse brew-push van Lets Brew Specialty.
-  // Vul de KV-namespace-id en de VAPID-publieke sleutel in (zie README.md).
+  //
+  // Dit bestand heb je alleen nodig als je met Wrangler uitrolt. Ga je via het
+  // dashboard (zie README.md), dan zet je de variabelen, de KV-binding en de
+  // cron daar en blijft dit bestand ongebruikt.
   "name": "lets-brew-push",
   "main": "src/index.js",
   "compatibility_date": "2025-01-01",
@@ -18,7 +21,7 @@
 
   "vars": {
     // publieke VAPID-sleutel (base64url) — dezelfde die de app als
-    // applicationServerKey gebruikt. Genereer met: node generate-vapid.mjs
+    // applicationServerKey gebruikt. Genereer met vapid.html of generate-vapid.mjs
     "VAPID_PUBLIC_KEY": "PLAK_HIER_JE_VAPID_PUBLIEKE_SLEUTEL",
     // contact voor de push-service (mailto: of https:)
     "VAPID_SUBJECT": "mailto:jij@voorbeeld.nl"
