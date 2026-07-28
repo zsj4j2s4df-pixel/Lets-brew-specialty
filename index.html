@@ -633,6 +633,15 @@
   .wn-ok{width:100%;margin-top:9px;background:var(--accent-soft);color:var(--cream);
     border:2px solid var(--ink);filter:url(#wobble);border-radius:14px;padding:7px;
     font-size:20px;cursor:pointer;}
+  /* tekening in een les */
+  .ls-draw{display:flex;justify-content:center;margin:8px 0 2px;}
+  .ls-draw svg{width:100%;max-width:300px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .ls-draw svg text{stroke:none;fill:var(--ink-soft);font-family:'Patrick Hand',cursive;font-size:12.5px;}
+  .ls-draw svg .hi{stroke:var(--accent-soft);}
+  .ls-draw svg .dash{stroke-dasharray:6 5;opacity:.7;}
+  .ls-draw svg .b{opacity:.58;stroke-width:1.3;}
+  .ls-cap{text-align:center;color:var(--ink-soft);font-size:15px;margin-top:2px;}
   /* waterkaart */
   .wt-presets{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;}
   .wt-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
@@ -1179,6 +1188,13 @@
         <div class="lc-arr">›</div>
       </div>
 
+      <div class="learn-card sketch" id="filter-card" style="background:var(--chemex)" onclick="go('learn-filter')">
+        <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.2 5.6 Q12 4.9 19.9 5.7"/><path d="M4.6 5.8 Q8.4 13.4 11.4 19.6"/><path d="M19.6 5.8 Q15.9 13.4 12.9 19.6"/><path d="M11.4 19.6 Q12.2 20.4 12.9 19.5"/><path d="M7 10.2 Q12 9.4 17.1 10.3" opacity="0.7"/><path d="M10.2 12.6 Q10.6 15.4 11.6 17.9" opacity="0.45"/><path d="M14 12.6 Q13.5 15.4 12.6 17.9" opacity="0.45"/></svg></div>
+        <div class="lc-body"><div class="lc-t hand">filter skills</div>
+          <div class="lc-d">percolatie, bloom, doorlooptijd & gieten</div></div>
+        <div class="lc-arr">&rsaquo;</div>
+      </div>
+
       <div class="learn-card sketch" style="background:var(--v60)" onclick="go('learn-academy')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12.1 5.4 Q8.4 3.4 4.2 4.5 M4.5 4.2 Q3.8 11.5 4.3 18.7 M4.2 18.2 Q8.6 17.3 12.2 19.7 M11.9 19.4 Q15.4 17.3 19.8 18.5 M19.5 18.8 Q20.2 11.5 19.7 4.3 M19.9 4.7 Q15.5 3.4 11.8 5.7 M12.1 5.1 Q12.3 12.6 11.9 19.9"/><path d="M6.4 8.1 Q9 7.4 10.7 8.3 M6.4 11.1 Q9 10.4 10.7 11.3 M13.4 8.3 Q15.6 7.4 17.7 8.1 M13.4 11.3 Q15.6 10.4 17.7 11.1" opacity="0.5"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">coffee academy</div>
@@ -1251,6 +1267,15 @@
     <div class="screen">
       <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">barista skills</div><div style="width:24px"></div></div>
       <div id="barista-content"></div>
+    </div>
+  </div>
+
+  <!-- FILTER SKILLS -->
+  <div id="page-learn-filter" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
+    <div class="screen">
+      <div class="detail-top"><button onclick="go('learn')">&lsaquo;</button><div class="h hand">filter skills</div><div style="width:24px"></div></div>
+      <div id="filter-content"></div>
     </div>
   </div>
 
@@ -1888,8 +1913,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','pour','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',pour:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
+const pages=['welcome','home','form','dialin','pour','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
+const navMap={home:'home',form:'home',dialin:'home',pour:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -1925,6 +1950,7 @@ function go(p,isBack){
     if(ds)ds.style.display=(featOn('cupping')||featOn('latteart'))?'flex':'none';
   }
   if(p==='learn-barista')renderLesson('barista-content',LESSONS.barista);
+  if(p==='learn-filter')renderLesson('filter-content',LESSONS.filter);
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLatte();
   if(p==='profile')renderProfile();
@@ -3897,6 +3923,28 @@ function useRecipe(beanId){
 
 /* ---------------- learn content ---------------- */
 const LESSONS={
+  filter:[
+    {type:'draw',h:'percolatie of immersie',svg:'<svg viewBox="0 0 300 158"><path d="M18 34 Q60 28 104 34"/><path class="b" d="M21 37 Q60 31 101 37"/><path d="M20 36 Q40 84 54 116"/><path class="b" d="M23 38 Q42 85 56 118"/><path d="M102 36 Q82 84 68 116"/><path class="b" d="M99 38 Q80 85 66 118"/><path d="M54 116 Q61 120 68 116"/><path class="hi" d="M31 54 Q61 49 91 54"/><path class="hi dash" d="M48 60 Q50 88 56 114"/><path class="hi dash" d="M76 60 Q74 88 68 114"/><path class="hi" d="M59 122 Q62 130 60 138"/><path class="hi" d="M55 132 L60 140 L65 131"/><text x="14" y="154">percolatie</text><path d="M198 34 Q240 28 284 34"/><path class="b" d="M201 37 Q240 31 281 37"/><path d="M200 36 Q220 84 234 116"/><path class="b" d="M203 38 Q222 85 236 118"/><path d="M282 36 Q262 84 248 116"/><path class="b" d="M279 38 Q260 85 246 118"/><path d="M234 116 Q241 120 248 116"/><path class="hi" d="M210 50 Q241 45 272 50"/><path class="hi b" d="M220 76 Q241 72 262 76"/><path class="hi b" d="M228 94 Q241 91 254 94"/><path d="M232 122 Q241 118 250 122"/><path class="hi" d="M240 126 Q248 130 240 136"/><text x="214" y="154">immersie</text></svg>',
+     c:'de twee families waar elk filterrecept tussenin zit',
+     t:'Bij percolatie (V60, Chemex, Kalita) stroomt het water door het bed heen: elke druppel maakt \u00e9\u00e9n reis en de contacttijd bepaal je met je maling. Bij immersie (AeroPress, French press, cold brew) staat alles even lang onder water, wat een stuk vergevingsgezinder is. De Hario Switch doet allebei: eerst open percoleren voor helderheid, daarna dicht voor zoetheid en body.'},
+    {type:'p',h:'de vier knoppen',t:'Je stuurt een filterkop met vier dingen: maling, ratio, temperatuur en gietschema. De maling is verreweg de sterkste \u2014 begin daar, en verander \u00e9\u00e9n ding tegelijk. Anders weet je achteraf niet wat het deed.'},
+    {type:'p',h:'ratio en maling doen niet hetzelfde',t:'De ratio bepaalt hoe sterk je kop is; de maling bepaalt hoe ver je extraheert. Slap maar niet bitter? Dat is de ratio: minder water of meer koffie, richting 1:15. Zuur of juist bitter? Dat is de maling. Het standaardvertrekpunt is 1:16, met 1:15 voor steviger en 1:17 voor helderder.'},
+    {type:'draw',h:'waarom je bloomt',svg:'<svg viewBox="0 0 300 160"><path d="M18 40 Q56 34 94 40"/><path class="b" d="M21 43 Q56 37 91 43"/><path d="M20 42 Q36 84 46 112"/><path d="M92 42 Q76 84 66 112"/><path class="hi" d="M28 36 Q38 6 56 4 Q74 5 84 36"/><path class="hi b" d="M32 34 Q42 12 56 10 Q70 11 80 34"/><path class="hi" d="M46 14 Q52 20 48 26"/><text x="16" y="134">vers: bolt op</text><text x="16" y="149">3× dose, 45 s</text><path class="dash" d="M112 66 Q136 62 160 66"/><path d="M153 60 L162 66 L153 72"/><path d="M182 40 Q220 34 258 40"/><path class="b" d="M185 43 Q220 37 255 43"/><path d="M184 42 Q200 84 210 112"/><path d="M256 42 Q240 84 230 112"/><path class="hi" d="M194 34 Q220 26 246 34"/><text x="180" y="134">oud: blijft vlak</text><text x="180" y="149">2× dose, 30 s</text></svg>',
+     c:'hetzelfde gas, een ander advies dan bij espresso',
+     t:'Vers gebrande bonen zitten vol CO\u2082. Dat gas duwt het water weg, dus laat je het eerst ontsnappen: ongeveer 2 tot 3 keer je dose aan water, 30 tot 45 seconden. Hoe verser de boon, hoe ruimer en langer. Na een week of vier is er nauwelijks gas over en koelt een lange bloom je bed alleen maar af.'},
+    {type:'p',h:'gieten: hoogte, cirkels en de rand',t:'Giet van laag en rustig; van hoog slaat de straal het bed open en spoelt fijn stof naar beneden. Blijf van de filterrand af \u2014 water dat langs het papier loopt heeft geen koffie gezien. Swirlen mag, maar roer niet met een lepel \u00ed\u00f1 het bed: dat drijft fijn stof de poriën van het papier in en verstopt je filter.'},
+    {type:'draw',h:'het bed lezen',svg:'<svg viewBox="0 0 300 150"><path d="M12 26 Q46 21 80 26"/><path d="M14 28 Q30 66 40 92"/><path d="M78 28 Q62 66 52 92"/><path d="M40 92 Q46 95 52 92"/><path class="hi" d="M24 56 Q46 52 68 56"/><text x="16" y="116">vlak</text><text x="8" y="132">zoals het hoort</text><path d="M112 26 Q146 21 180 26"/><path d="M114 28 Q130 66 140 92"/><path d="M178 28 Q162 66 152 92"/><path d="M140 92 Q146 95 152 92"/><path class="hi" d="M124 52 Q135 68 146 69 Q157 68 168 52"/><text x="116" y="116">krater</text><text x="106" y="132">te hard gegoten</text><path d="M212 26 Q246 21 280 26"/><path d="M214 28 Q230 66 240 92"/><path d="M278 28 Q262 66 252 92"/><path d="M240 92 Q246 95 252 92"/><path class="hi" d="M224 46 Q235 64 246 64 Q257 64 268 46"/><path class="hi b" d="M226 42 Q228 52 231 58"/><path class="hi b" d="M266 42 Q264 52 261 58"/><text x="216" y="116">muurtje</text><text x="216" y="132">droge rand</text></svg>',
+     c:'kijk even in je dripper als het water weg is',
+     t:'Een vlak bed betekent dat het water overal even hard heeft gewerkt. Een krater betekent dat je te hard of te hoog hebt gegoten. Een droge rand die blijft staan betekent dat een deel van je koffie nooit heeft meegedaan. Allebei gietfouten, geen maalfouten \u2014 corrigeer dus eerst je gieten voordat je aan je molen draait.'},
+    {type:'p',h:'de doorlooptijd',t:'Bij espresso lees je de shot af aan de tijd; bij filter is de doorlooptijd het equivalent: vanaf je laatste giet tot het bed droogvalt. Loopt het steeds trager, dan zit je filter verstopt door fijn stof \u2014 grover malen, minder roeren, lager gieten. Loopt het opeens snel, dan is je maling te grof of je bed opengeslagen.'},
+    {type:'p',h:'papier en brewer tellen mee',t:'Hetzelfde recept op ander papier verschuift je doorlooptijd makkelijk een halve minuut: de Japanse Hario loopt sneller dan de tabbed versie, Sibarist sneller dan allebei, Cafec Abaca zit ertussenin met wat meer zoetheid. Een conische brewer houdt een dieper bed dan een vlakke, en die twee vragen niet dezelfde maling. Noteer het, anders schrijf je het verschil toe aan je molen.'},
+    {type:'p',h:'water',t:'Een kop filter is bijna helemaal water en er staat geen crema of melk overheen, dus je proeft het. Magnesium trekt vooral aroma\u2019s los, calcium meer body en zuren, en bicarbonaat dempt zuren \u2014 te veel daarvan haalt precies het frisse weg waar je een lichte branding om koopt. Zet je waterbasis \u00e9\u00e9n keer vast en vergeet hem daarna.'},
+    {type:'tip',t:'Proef je kop nog een keer als hij handwarm is. Bij specialty komen er dan juist m\u00e9\u00e9r smaken naar boven \u2014 en een kop die koud nog lekker is, was goed gezet.'},
+    {type:'check',h:'filter check-routine',items:[
+      'boon vers (3 dagen tot 4 weken)','water op \u00e9\u00e9n vaste basis','filter gespoeld','dose gewogen','bed vlak geschud',
+      'bloom 2\u20133\u00d7 dose, 30\u201345 s','laag en binnen de rand gegoten','doorlooptijd gekeken','bed bekeken','geproefd \u00e9n genoteerd']},
+    {type:'link',h:'meteen zetten?',t:'',label:'open de pour coach',action:'learnToPour',feat:'pourcoach'},
+  ],
   barista:[
     {type:'p',h:'dose & verdeling',t:'Weeg altijd je dose op 0,1 g nauwkeurig. Verdeel het maalsel gelijkmatig (WDT met een naaldje) zodat water overal even snel doorloopt — ongelijke verdeling = kanaalvorming en een scheve extractie.'},
     {type:'p',h:'tampen',t:'Tamp recht en consistent, niet keihard. Belangrijker dan de kracht is dat je elke keer hetzelfde doet en dat het oppervlak waterpas is.'},
@@ -3928,7 +3976,7 @@ const LESSONS={
     {type:'tip',t:'Zuur en dun? Maal fijner of zet warmer. Bitter en droog? Maal grover of zet koeler. Eén stap tegelijk.'},
   ],
 };
-const LESSON_MAP={'barista-content':'barista','academy-content':'academy'};
+const LESSON_MAP={'barista-content':'barista','filter-content':'filter','academy-content':'academy'};
 function lessonBlock(elId,bi){return (LESSONS[LESSON_MAP[elId]]||[])[bi];}
 function learnMoreKey(elId,bi){return 'scc_learn_more_'+elId+'_'+bi;}
 function renderLearnMore(elId,bi){
@@ -3954,6 +4002,9 @@ function renderLesson(elId,blocks){
           </div>
         </div></div>`;
     }
+    if(b.type==='draw')return `<div class="lesson sketch soft"><h3>${esc(b.h)}</h3>
+      <div class="ls-draw">${b.svg}</div><div class="ls-cap">${esc(b.c||'')}</div>
+      ${b.t?('<p style="margin-top:8px">'+esc(b.t)+'</p>'):''}</div>`;
     if(b.type==='tip')return `<div class="lesson sketch soft" style="background:var(--v60)"><div class="tipbox">💡 ${esc(b.t)}</div></div>`;
     if(b.type==='link'){
       if(b.feat&&!featOn(b.feat))return '';
@@ -3970,6 +4021,10 @@ function renderLesson(elId,blocks){
   }).join('');
 }
 function learnToGallery(){go('gallery');}
+function learnToPour(){
+  const f=state.methods.filter(m=>m.on&&methodFamily(m)==='filter')[0];
+  if(f)beginBrew(f.id); else toast('turn on a filter method first under methods');
+}
 function learnToDialIn(){
   const esp=state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0];
   if(esp)beginBrew(esp.id); else toast('turn on an espresso method first under methods');
