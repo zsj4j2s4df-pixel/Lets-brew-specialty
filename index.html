@@ -633,6 +633,29 @@
   .wn-ok{width:100%;margin-top:9px;background:var(--accent-soft);color:var(--cream);
     border:2px solid var(--ink);filter:url(#wobble);border-radius:14px;padding:7px;
     font-size:20px;cursor:pointer;}
+  /* pour coach */
+  .pc-over{color:var(--ink-soft);font-size:16px;line-height:1.35;margin:2px 2px 0;}
+  .pc-lever{margin-top:11px;}
+  .pc-lever .pl-t{display:flex;justify-content:space-between;font-size:15px;color:var(--ink-soft);}
+  .pc-lever input[type=range]{width:100%;margin:2px 0 0;accent-color:var(--accent-soft);}
+  .pc-bloom{margin-top:10px;font-size:16px;line-height:1.35;color:var(--ink-soft);}
+  .pc-bloom b{font-family:'Caveat',cursive;font-weight:700;font-size:20px;color:var(--ink);}
+  .pc-clockrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .pc-time{font-size:42px;line-height:1;}
+  .pc-of{color:var(--ink-soft);font-size:15px;margin-top:-2px;}
+  .pc-step{display:flex;gap:11px;align-items:flex-start;padding:9px 10px;border-radius:16px;
+    border:2px solid transparent;margin-bottom:5px;}
+  .pc-step .ps-t{font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink-soft);
+    flex:none;width:52px;font-variant-numeric:tabular-nums;}
+  .pc-step .ps-b{flex:1;min-width:0;}
+  .pc-step .ps-k{font-family:'Caveat',cursive;font-weight:700;font-size:21px;}
+  .pc-step .ps-d{font-size:16px;line-height:1.3;color:var(--ink-soft);}
+  .pc-step .ps-g{font-family:'Caveat',cursive;font-weight:700;font-size:23px;flex:none;}
+  .pc-step.nu{background:var(--card-2);border-color:var(--ink);filter:url(#wobble);cursor:pointer;}
+  .pc-step.nu .ps-t,.pc-step.nu .ps-d{color:var(--ink);}
+  .pc-step.klaar{opacity:.45;}
+  .pc-step.klaar .ps-k{text-decoration:line-through;}
+  .pc-step.straks{opacity:.72;}
   .hidden{display:none !important;}
   .img-picker-overlay{position:fixed;inset:0;background:rgba(58,48,42,.45);display:flex;align-items:flex-end;justify-content:center;z-index:60;}
   .img-picker-sheet{width:100%;max-width:430px;background:var(--paper);border-radius:26px 26px 0 0;border:2px solid var(--ink);padding:20px 20px 28px;max-height:80vh;overflow-y:auto;}
@@ -926,6 +949,50 @@
       <button class="save-btn" onclick="saveDialInBrew(false)">dial-in nailed → save as brew</button>
       <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">not good → try again later</button>
       <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">we save this attempt and give a new AI grind tip — so you can keep improving from here</div>
+    </div>
+  </div>
+
+  <!-- POUR COACH (filter) -->
+  <div id="page-pour" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand">pour coach</div><button onclick="pourCancel()">cancel</button></div>
+      <div class="subtitle" id="pc-sub"></div>
+
+      <div class="field"><label>beans</label><div class="link-pick" id="pc-beans"></div></div>
+
+      <div class="di-card sketch soft">
+        <div class="di-lbl hand">recipe</div>
+        <div class="link-pick" id="pc-recipes"></div>
+        <div class="pc-over" id="pc-over"></div>
+        <div id="pc-levers"></div>
+      </div>
+
+      <div class="di-card sketch soft">
+        <div class="di-lbl hand">your brew</div>
+        <div class="field-row">
+          <div class="field"><label>dose (g)</label><input id="pc-dose" type="number" inputmode="decimal" step="0.1" oninput="pourRecalc()"></div>
+          <div class="field"><label>water (g)</label><input id="pc-water" type="number" inputmode="decimal" step="1" oninput="pourWaterEdit()"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>temp (&deg;C)</label><input id="pc-temp" type="number" inputmode="decimal"></div>
+          <div class="field"><label>grind</label><input id="pc-grind" placeholder="e.g. 22 clicks"></div>
+        </div>
+        <div class="pc-bloom" id="pc-bloom"></div>
+      </div>
+
+      <div class="di-card sketch soft">
+        <div class="di-lbl hand">the pour</div>
+        <div class="pc-clockrow">
+          <div><span class="pc-time hand" id="pc-time">0:00</span><div class="pc-of" id="pc-of"></div></div>
+          <button type="button" class="e61-btn" id="pc-btn" onclick="pourToggle()">start</button>
+        </div>
+        <div id="pc-steps"></div>
+        <div class="set-d" style="margin-top:8px;font-size:14px">tap a step the moment you actually do it &mdash; everything after it shifts with you</div>
+      </div>
+
+      <button class="save-btn" onclick="pourFinish()">done &rarr; fill in the brew</button>
+      <button class="profile-btn" onclick="pourSkip()" style="margin-top:2px">skip the coach, just log it</button>
     </div>
   </div>
 
@@ -1747,8 +1814,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
+const pages=['welcome','home','form','dialin','pour','detail','brews','methods','beans','beanform','learn','learn-barista','learn-academy','learn-latte','profile','cupping','gallery'];
+const navMap={home:'home',form:'home',dialin:'home',pour:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -1772,6 +1839,7 @@ function go(p,isBack){
   if(p==='methods')renderMethods();
   if(p==='beans')renderBeans();
   if(p==='cupping')renderCupping();
+  if(p==='pour')renderPour();
   if(p==='gallery')renderGallery();
   if(p==='learn'){
     const w=document.getElementById('water-card');if(w)w.style.display=featOn('water')?'flex':'none';
@@ -2170,6 +2238,194 @@ function applyFamilyToForm(){
   const bf=document.getElementById('bloom-field');
   if(bf)bf.style.display=(fam==='filter')?'flex':'none';
 }
+/* ---------------- pour coach (filter) ----------------
+   Een recept is een tijdlijn. De klok loopt, de stap die aan de beurt is licht
+   op, en tik je hem later aan dan gepland dan schuift al het volgende mee -- zo
+   val je niet uit het recept als je een keer te laat bent.                */
+let pc={mid:null,rid:null,bean:null,steps:[],hendels:{zoet:0.5,sterk:0.5},
+        run:false,t0:0,el:0,timer:null,idx:0,shift:0,marks:[],total:null,draw:null,live:-1};
+function pourFmt(sec){const m=Math.floor(sec/60),ss=Math.floor(sec%60);return m+':'+String(ss).padStart(2,'0');}
+function openPour(methodId){
+  const valid=methodId&&state.methods.find(m=>m.id===methodId&&methodFamily(m)==='filter');
+  const mid=valid?methodId:(state.methods.filter(m=>m.on&&methodFamily(m)==='filter')[0]?.id||'v60');
+  const lijst=recipesFor(mid);
+  pourStop(true);
+  pc={mid,rid:(lijst[0]||{}).id||null,bean:null,steps:[],hendels:{zoet:0.5,sterk:0.5},
+      run:false,t0:0,el:0,timer:null,idx:0,shift:0,marks:[],total:null,draw:null,live:-1};
+  editingId=null;formMethod=mid;
+  const r=recipeById(pc.rid);
+  setVal('pc-dose',r?r.dose:15);setVal('pc-temp',r?r.temp:94);setVal('pc-grind','');
+  if(featOn('smartdefaults')){
+    const last=state.brews.filter(x=>x.method===mid).sort((a,b)=>b.ts-a.ts)[0];
+    if(last){if(last.dose)setVal('pc-dose',last.dose);if(last.temp)setVal('pc-temp',last.temp);
+      if(last.grind)setVal('pc-grind',last.grind);}
+  }
+  pourBuild();go('pour');
+}
+// het schema opnieuw uitrekenen voor de huidige dose en hendelstand
+function pourBuild(){
+  const r=recipeById(pc.rid);
+  const dose=parseFloat(document.getElementById('pc-dose').value)||(r?r.dose:15);
+  pc.steps=recipeSteps(r,dose,pc.hendels);
+  const w=pc.steps.length?pc.steps[pc.steps.length-1].water:'';
+  setVal('pc-water',w);
+  renderPour();
+}
+function pourRecalc(){if(pc.run)return;pourBuild();}
+// water met de hand bijstellen = de ratio verschuiven, dose blijft leidend
+function pourWaterEdit(){
+  if(pc.run)return;
+  const w=parseFloat(document.getElementById('pc-water').value);
+  const dose=parseFloat(document.getElementById('pc-dose').value);
+  if(!(w>0&&dose>0))return;
+  pc.steps=pc.steps.map(x=>Object.assign({},x,{g:x.p?Math.round(w*x.p):0,water:w}));
+  pourSteps();
+}
+function renderPour(){
+  const m=methodById(pc.mid);
+  const sub=document.getElementById('pc-sub');
+  if(sub)sub.textContent=(m?m.name:'filter')+' \u2014 a recipe that runs while you pour';
+  pourBeans();pourRecipes();pourLevers();pourBloom();pourSteps();
+  const t=document.getElementById('pc-time');if(t)t.textContent=pourFmt(pc.el);
+}
+function pourBeans(){
+  const el=document.getElementById('pc-beans');if(!el)return;
+  let h='<button class="lp '+(!pc.bean?'sel':'')+'" onclick="pourPickBean(null)">none</button>';
+  h+=state.beans.filter(b=>b.inStock!==false).map(b=>
+    '<button class="lp '+(b.id===pc.bean?'sel':'')+'" onclick="pourPickBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
+  el.innerHTML=h;
+}
+function pourPickBean(id){pc.bean=id;formBean=id;pourBeans();pourBloom();}
+function pourRecipes(){
+  const el=document.getElementById('pc-recipes');if(!el)return;
+  el.innerHTML=recipesFor(pc.mid).map(r=>
+    '<button class="lp '+(r.id===pc.rid?'sel':'')+'" onclick="pourPickRecipe(\''+r.id+'\')">'+esc(r.naam)+'</button>').join('');
+  const o=document.getElementById('pc-over');const r=recipeById(pc.rid);
+  if(o)o.textContent=r?(r.over+'  \u00b7  '+r.maling+', '+r.temp+'\u00b0C'):'';
+}
+function pourPickRecipe(id){
+  if(pc.run){toast('the clock is running \u2014 stop it first');return;}
+  pc.rid=id;const r=recipeById(id);
+  if(r){setVal('pc-temp',r.temp);}
+  pourBuild();
+}
+// de twee hendels van de 4:6 (alleen bij recepten die ze hebben)
+function pourLevers(){
+  const el=document.getElementById('pc-levers');if(!el)return;
+  const r=recipeById(pc.rid);
+  if(!r||!r.hendels){el.innerHTML='';return;}
+  el.innerHTML=`<div class="pc-lever">
+      <div class="pl-t"><span>sharper</span><span>first 40 % \u2192 taste</span><span>sweeter</span></div>
+      <input type="range" min="0" max="1" step="0.05" value="${pc.hendels.zoet}" oninput="pourLever('zoet',this.value)">
+    </div>
+    <div class="pc-lever">
+      <div class="pl-t"><span>lighter</span><span>last 60 % \u2192 strength</span><span>stronger</span></div>
+      <input type="range" min="0" max="1" step="0.05" value="${pc.hendels.sterk}" oninput="pourLever('sterk',this.value)">
+    </div>`;
+}
+function pourLever(k,v){
+  if(pc.run)return;
+  pc.hendels[k]=parseFloat(v);
+  const r=recipeById(pc.rid);
+  const dose=parseFloat(document.getElementById('pc-dose').value)||(r?r.dose:15);
+  pc.steps=recipeSteps(r,dose,pc.hendels);
+  pourSteps();
+}
+// versheid -> bloom (de filterkant van de versheidsmeter)
+function pourBloom(){
+  const el=document.getElementById('pc-bloom');if(!el)return;
+  const bean=beanById(pc.bean);
+  const f=bean?beanFreshness(bean):null;
+  const h=f?freshBloomHint(f.days):null;
+  if(!h){el.innerHTML='';return;}
+  const dose=parseFloat(document.getElementById('pc-dose').value)||0;
+  const g=dose?Math.round(dose*h.mult):null;
+  el.innerHTML='<b>'+esc(h.s)+'</b> \u2014 '+esc(h.t)+(g?(' <b>'+g+' g bloom, '+h.sec+' s</b>'):'');
+}
+function pourSteps(){
+  const el=document.getElementById('pc-steps');if(!el)return;
+  el.innerHTML=pc.steps.map((st,i)=>{
+    const at=st.t+pc.shift;
+    const klaar=i<pc.idx;
+    const nu=(i===pc.idx)&&pc.run&&pc.el>=at;
+    const cls=klaar?'klaar':(nu?'nu':'straks');
+    const tijd=klaar&&pc.marks[i]!=null?pourFmt(pc.marks[i]):pourFmt(Math.max(0,at));
+    const g=st.g?('<div class="ps-g">'+st.g+' g</div>'):'';
+    const tik=nu?(' onclick="pourTick('+i+')"'):'';
+    return '<div class="pc-step '+cls+'"'+tik+'><div class="ps-t">'+tijd+'</div>'+
+      '<div class="ps-b"><div class="ps-k">'+esc(st.k)+'</div><div class="ps-d">'+esc(st.d)+'</div></div>'+g+'</div>';
+  }).join('');
+  const of=document.getElementById('pc-of');
+  if(of){
+    if(pc.total!=null)of.textContent='total '+pourFmt(pc.total)+(pc.draw!=null?(' \u00b7 drawdown '+pourFmt(pc.draw)):'');
+    else if(pc.idx<pc.steps.length)of.textContent='next: '+pc.steps[pc.idx].k+' at '+pourFmt(Math.max(0,pc.steps[pc.idx].t+pc.shift));
+    else of.textContent='';
+  }
+}
+function pourToggle(){pc.run?pourStop():pourStart();}
+function pourStart(){
+  if(!pc.steps.length)pourBuild();
+  pc.run=true;pc.t0=performance.now();pc.el=0;pc.idx=0;pc.shift=0;pc.marks=[];pc.total=null;pc.draw=null;pc.live=-1;
+  document.getElementById('pc-btn').textContent='stop';
+  pc.timer=setInterval(pourTickClock,200);
+  pourSteps();toast('\u23f1 clock running \u2014 tap each step as you do it');
+}
+function pourTickClock(){
+  pc.el=(performance.now()-pc.t0)/1000;
+  const t=document.getElementById('pc-time');if(t)t.textContent=pourFmt(pc.el);
+  // alleen opnieuw tekenen als er echt iets verandert, anders flikkert het tikken weg
+  const actief=(pc.idx<pc.steps.length&&pc.el>=pc.steps[pc.idx].t+pc.shift)?pc.idx:-1;
+  if(actief!==pc.live){pc.live=actief;pourSteps();}
+}
+function pourStop(stil){
+  if(pc.timer){clearInterval(pc.timer);pc.timer=null;}
+  if(!pc.run){if(!stil)pourSteps();return;}
+  pc.run=false;pc.total=Math.round(pc.el);
+  // doorlooptijd = vanaf de laatste giet tot nu
+  let laatste=null;
+  pc.steps.forEach((st,i)=>{if(st.g&&pc.marks[i]!=null)laatste=pc.marks[i];});
+  if(laatste!=null)pc.draw=Math.max(0,Math.round(pc.el-laatste));
+  const b=document.getElementById('pc-btn');if(b)b.textContent='start again';
+  if(!stil)pourSteps();
+}
+function pourTick(i){
+  if(!pc.run||i!==pc.idx)return;
+  pc.marks[i]=pc.el;
+  pc.shift=pc.el-pc.steps[i].t;
+  pc.idx++;pc.live=-1;
+  if(pc.idx>=pc.steps.length)pourStop();
+  else pourSteps();
+}
+// alles wat de coach weet doorgeven aan het gewone formulier
+function pourFinish(){
+  if(pc.run)pourStop();
+  const r=recipeById(pc.rid);
+  const dose=parseFloat(document.getElementById('pc-dose').value)||null;
+  const water=parseFloat(document.getElementById('pc-water').value)||null;
+  const temp=document.getElementById('pc-temp').value;
+  const grind=document.getElementById('pc-grind').value;
+  const bean=pc.bean;
+  const bloomG=pc.steps.length?pc.steps[0].g:null;
+  const bloomS=(pc.marks[0]!=null&&pc.marks[1]!=null)?Math.round(pc.marks[1]-pc.marks[0])
+              :(pc.steps.length>1?(pc.steps[1].t-pc.steps[0].t):null);
+  const tekst=r?(r.naam+' \u2014 '+(dose||r.dose)+' g op '+(water||'')+' g, '+r.maling+', '+(temp||r.temp)+'\u00b0C\n'+
+    pc.steps.map(st=>pourFmt(st.t)+'  '+st.d+(st.g?('  ('+st.g+' g)'):'')).join('\n')):'';
+  openForm(pc.mid);
+  if(bean){formBean=bean;renderFormBeans();}
+  if(dose)setVal('f-dose',dose);
+  if(water)setVal('f-yield',water);
+  if(dose&&water)setVal('f-ratio',(water/dose).toFixed(1));
+  if(temp)setVal('f-temp',temp);
+  if(grind)setVal('f-grind',grind);
+  if(pc.total!=null){const inp=document.getElementById('f-time');if(inp){inp.value=pourFmt(pc.total);normalizeTime(inp);}}
+  if(bloomG)setVal('f-bloom-g',bloomG);
+  if(bloomS)setVal('f-bloom-s',bloomS);
+  if(tekst){setVal('f-guide',tekst);const ta=document.getElementById('f-guide');if(ta)autoGrow(ta);}
+  if(pc.draw!=null)setVal('f-draw',pourFmt(pc.draw));
+  toast(pc.total!=null?'\u2713 pour logged \u2014 taste it and score it':'recipe filled in \u2014 add your numbers');
+}
+function pourSkip(){pourStop(true);openForm(pc.mid);}
+function pourCancel(){pourStop(true);go('home');}
 /* ---------------- puck-prep (espresso) ---------------- */
 function renderPrep(){
   const items=state.prepItems||[];
@@ -2202,6 +2458,7 @@ function removePrepItem(id){
 function beginBrew(methodId){
   const mid=methodId||(state.methods.filter(m=>m.on)[0]?.id);
   if(methodFamily(mid)==='espresso'){pendingTarget=null;formBean=null;formPrep={};pendingRecipe=null;openDialIn(mid);}
+  else if(featOn('pourcoach')&&recipesFor(mid).length)openPour(mid);
   else openForm(methodId);
 }
 function openDialIn(methodId){
