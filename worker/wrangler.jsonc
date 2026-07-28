@@ -10,11 +10,10 @@
     "crons": ["*/5 * * * *"]
   },
 
-  // KV-namespace met de push-abonnementen. Maak 'm aan met:
-  //   npx wrangler kv namespace create SUBS
-  // en plak de teruggegeven id hieronder.
+  // KV-namespace met de push-abonnementen. Deze is al aangemaakt
+  // (titel: lets-brew-push-SUBS), dus hier hoef je niets meer te doen.
   "kv_namespaces": [
-    { "binding": "SUBS", "id": "PLAK_HIER_JE_KV_NAMESPACE_ID" }
+    { "binding": "SUBS", "id": "610b6d1efd644301b7eb93b466a82620" }
   ],
 
   "vars": {

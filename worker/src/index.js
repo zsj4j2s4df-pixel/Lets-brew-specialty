@@ -94,12 +94,15 @@ async function sendDue(env) {
   } while (cursor);
 }
 
-// zit de huidige lokale tijd binnen [tijd, tijd + cron-interval) ?
+// Zit de huidige lokale tijd binnen [tijd, tijd + cron-interval)?
+// Modulo een etmaal, anders vallen wektijden vlak voor middernacht buiten de
+// boot: bij 23:58 draait de eerstvolgende cron om 00:00, en 0 >= 1438 is nooit
+// waar. Zo geteld is het verschil dan 2 minuten en gaat de melding wel uit.
 function isDue(targetHHMM, tz) {
   const now = timeInTz(tz);
   const [th, tm] = targetHHMM.split(':').map(Number);
-  const tgt = th * 60 + tm;
-  return now >= tgt && now < tgt + CRON_INTERVAL_MIN;
+  const sinds = (now - (th * 60 + tm) + 1440) % 1440;
+  return sinds < CRON_INTERVAL_MIN;
 }
 function timeInTz(tz) {
   const hm = new Intl.DateTimeFormat('en-GB', { timeZone: safeTz(tz), hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
