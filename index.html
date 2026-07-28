@@ -633,6 +633,18 @@
   .wn-ok{width:100%;margin-top:9px;background:var(--accent-soft);color:var(--cream);
     border:2px solid var(--ink);filter:url(#wobble);border-radius:14px;padding:7px;
     font-size:20px;cursor:pointer;}
+  /* doorlooptijd & koffiebed */
+  .fx-note{color:var(--ink-soft);font-size:14px;line-height:1.3;margin-top:4px;}
+  .bed-pick{display:flex;gap:10px;}
+  .bed-opt{flex:1;background:var(--card);border:2px solid var(--line);border-radius:16px;
+    filter:url(#wobble);padding:8px 4px 6px;cursor:pointer;font-family:inherit;color:var(--ink-soft);
+    display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .bed-opt.sel{border-color:var(--ink);color:var(--ink);}
+  .bed-opt svg{width:100%;max-width:56px;height:auto;fill:none;stroke:var(--ink-soft);
+    stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .bed-opt.sel svg{stroke:var(--ink);}
+  .bed-opt .bo-n{font-family:'Caveat',cursive;font-weight:700;font-size:19px;}
+  .bed-opt .bo-d{font-size:12.5px;line-height:1.15;text-align:center;}
   /* pour coach */
   .pc-over{color:var(--ink-soft);font-size:16px;line-height:1.35;margin:2px 2px 0;}
   .pc-lever{margin-top:11px;}
@@ -778,6 +790,22 @@
       <div class="field-row">
         <div class="field"><label>time (m:ss)</label><input id="f-time" placeholder="2:30" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)"></div>
         <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
+      </div>
+
+      <div id="filter-extra" style="display:none">
+        <div class="field"><label>drawdown (m:ss)</label>
+          <input id="f-draw" placeholder="0:35" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)">
+          <div class="fx-note">from your last pour until the bed runs dry — the filter version of shot time</div></div>
+        <div class="field"><label>the bed when it ran dry</label>
+          <div class="bed-pick" id="f-bed"></div></div>
+      </div>
+
+      <div class="field" id="filter-gear" style="display:none"><label>brewer &amp; paper</label>
+        <div class="field-row">
+          <div class="field"><input id="f-brewer" placeholder="brewer, e.g. Hario V60 02"></div>
+          <div class="field"><input id="f-paper" placeholder="paper, e.g. Cafec Abaca"></div>
+        </div>
+        <div class="link-pick" id="f-gearchips"></div>
       </div>
 
       <div class="field"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine"></div>
@@ -2033,6 +2061,7 @@ function renderStats_DISABLED(){
 
 /* ---------------- formulier + calculator ---------------- */
 let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null,formPrep={},pendingRecipe=null;
+let formBed=null;   // vlak / krater / muur, zoals het bed erbij lag
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
 // laat een tekstvak meegroeien met de inhoud (geen klein scroll-vakje meer)
 function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(el.scrollHeight+4,190)+'px';}
@@ -2163,13 +2192,16 @@ async function updateDialIn(beanId,method){
 function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
-  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s'].forEach(i=>setVal(i,''));
+  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper'].forEach(i=>setVal(i,''));
+  formBed=null;
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
   if(featOn('smartdefaults')){
     const last=state.brews.filter(x=>x.method===formMethod).sort((a,b)=>b.ts-a.ts)[0];
     if(last){setVal('f-dose',last.dose||'');setVal('f-yield',last.yield||'');setVal('f-ratio',last.ratio||'');
-      setVal('f-temp',last.temp||'');setVal('f-grind',last.grind||'');}
+      setVal('f-temp',last.temp||'');setVal('f-grind',last.grind||'');
+      // brewer en papier veranderen zelden: die mogen blijven staan
+      setVal('f-brewer',last.brewer||'');setVal('f-paper',last.paper||'');}
   }
   renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
 }
@@ -2182,6 +2214,7 @@ function openEdit(b){
   setVal('f-time',b.time);setVal('f-temp',b.temp);setVal('f-notes',b.notes);
   setVal('f-grind',b.grind||'');
   setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
+  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');formBed=b.bed||null;
   setVal('f-score',b.score||8);setVal('f-guide',b.guide||'');
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
@@ -2237,6 +2270,48 @@ function applyFamilyToForm(){
   // bloom alleen bij filter tonen
   const bf=document.getElementById('bloom-field');
   if(bf)bf.style.display=(fam==='filter')?'flex':'none';
+  // doorlooptijd, bedvorm, brewer en papier: alleen bij filter
+  const fx=document.getElementById('filter-extra');
+  if(fx)fx.style.display=(fam==='filter'&&featOn('drawdown'))?'block':'none';
+  const fg=document.getElementById('filter-gear');
+  if(fg)fg.style.display=(fam==='filter')?'block':'none';
+  if(fam==='filter'){renderBedPick();renderGearChips();}
+}
+/* ---------------- doorlooptijd & het koffiebed ----------------
+   Het bed vertelt je iets wat je in geen enkel getal terugziet: een krater
+   betekent te hard gegoten, een droge rand betekent dat een deel van je koffie
+   niet heeft meegedaan. Allebei gietfouten, geen maalfouten.            */
+const BED_SHAPES=[
+  {id:'vlak', n:'flat', d:'as it should be',
+   svg:'<path d="M6 8 Q22 5 38 8"/><path d="M7 8 Q15 23 20 31"/><path d="M37 8 Q29 23 24 31"/><path d="M20 31 Q22 33 24 31"/><path d="M11 18 Q22 15 33 18"/>'},
+  {id:'krater', n:'crater', d:'poured too hard',
+   svg:'<path d="M6 8 Q22 5 38 8"/><path d="M7 8 Q15 23 20 31"/><path d="M37 8 Q29 23 24 31"/><path d="M20 31 Q22 33 24 31"/><path d="M11 15 Q17 23 22 24 Q27 23 33 15"/>'},
+  {id:'muur', n:'wall', d:'dry rim left standing',
+   svg:'<path d="M6 8 Q22 5 38 8"/><path d="M7 8 Q15 23 20 31"/><path d="M37 8 Q29 23 24 31"/><path d="M20 31 Q22 33 24 31"/><path d="M10 12 Q16 21 22 21 Q28 21 34 12"/><path d="M11 11 Q12 15 13 17"/><path d="M33 11 Q32 15 31 17"/>'},
+];
+function renderBedPick(){
+  const el=document.getElementById('f-bed');if(!el)return;
+  el.innerHTML=BED_SHAPES.map(b=>
+    `<button type="button" class="bed-opt ${formBed===b.id?'sel':''}" onclick="pickBed('${b.id}')">
+      <svg viewBox="0 0 44 34">${b.svg}</svg>
+      <span class="bo-n">${esc(b.n)}</span><span class="bo-d">${esc(b.d)}</span>
+    </button>`).join('');
+}
+function pickBed(id){formBed=(formBed===id)?null:id;renderBedPick();}
+function bedName(id){const b=BED_SHAPES.find(x=>x.id===id);return b?b.n:'';}
+// snelkiezers uit je gear-lijst, zodat je een merk niet elke keer overtypt
+function renderGearChips(){
+  const el=document.getElementById('f-gearchips');if(!el)return;
+  const items=(state.gear||[]).filter(g=>g.category==='filter'||g.category==='algemeen');
+  el.innerHTML=items.map(g=>
+    `<button type="button" class="lp" onclick="fillGear('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
+}
+// vult het lege veld van de twee; staan ze allebei vol, dan de brewer
+function fillGear(naam){
+  const br=document.getElementById('f-brewer'), pa=document.getElementById('f-paper');
+  if(br&&!br.value.trim())br.value=naam;
+  else if(pa&&!pa.value.trim())pa.value=naam;
+  else if(br)br.value=naam;
 }
 /* ---------------- pour coach (filter) ----------------
    Een recept is een tijdlijn. De klok loopt, de stap die aan de beurt is licht
@@ -2704,6 +2779,10 @@ function saveBrew(){
     notes:document.getElementById('f-notes').value.trim(),
     grind:document.getElementById('f-grind').value.trim(),
     bloom:(function(){const g=document.getElementById('f-bloom-g').value.trim();const s=document.getElementById('f-bloom-s').value.trim();return (g||s)?{g,s}:null;})(),
+    draw:document.getElementById('f-draw').value.trim(),
+    bed:formBed||null,
+    brewer:document.getElementById('f-brewer').value.trim(),
+    paper:document.getElementById('f-paper').value.trim(),
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[...formTags],
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
@@ -2760,6 +2839,8 @@ function openDetail(id){
         <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
         <div class="stat"><div class="k">bloom</div><div class="v hand">${bloomTxt||'—'}</div></div>
         <div class="stat"><div class="k">time</div><div class="v hand">${esc(b.time||'—')}</div></div>
+        ${b.draw?'<div class="stat"><div class="k">drawdown</div><div class="v hand">'+esc(b.draw)+'</div></div>':''}
+        ${b.bed?'<div class="stat"><div class="k">bed</div><div class="v hand">'+esc(bedName(b.bed))+'</div></div>':''}
         <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
         <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
       </div>` : `
@@ -2780,6 +2861,7 @@ function openDetail(id){
     ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">target (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
     ${advice?'<div class="notes-card sketch soft"><div class="k">grind tip'+(fam==='espresso'?'':' — gear-aware')+'</div><div class="v">next time: grind '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
     ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'prep')+'</div>'+prepHtml+'</div>':''}
+    ${(b.brewer||b.paper)?'<div class="notes-card sketch soft"><div class="k">brewer &amp; paper</div><div class="v">'+[b.brewer,b.paper].filter(Boolean).map(esc).join(' · ')+'</div></div>':''}
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
       ${asArr(b.tags).length?'<div class="note-tags">'+asArr(b.tags).map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${asArr(b.custom).length?'<div style="margin-top:10px">'+asArr(b.custom).map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
