@@ -633,6 +633,26 @@
   .wn-ok{width:100%;margin-top:9px;background:var(--accent-soft);color:var(--cream);
     border:2px solid var(--ink);filter:url(#wobble);border-radius:14px;padding:7px;
     font-size:20px;cursor:pointer;}
+  /* filterkompas */
+  .cup-pick{display:flex;flex-wrap:wrap;gap:8px;}
+  .cup-opt{padding:8px 13px;border-radius:15px;background:var(--card);border:2px solid var(--line);
+    filter:url(#wobble);font-family:'Caveat',cursive;font-weight:700;font-size:20px;
+    color:var(--ink-soft);cursor:pointer;}
+  .cup-opt.sel{border-color:var(--ink);color:var(--ink);background:var(--card-2);}
+  .fc-card{margin-bottom:16px;padding:14px 16px 12px;}
+  .fc-card .k{color:var(--ink-soft);font-size:14px;text-transform:uppercase;letter-spacing:.1em;}
+  .fc-svg{width:100%;height:auto;display:block;margin:6px 0 2px;fill:none;stroke:var(--ink);
+    stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .fc-svg text{stroke:none;fill:var(--ink-soft);font-family:'Patrick Hand',cursive;font-size:12.5px;}
+  .fc-svg .dot{stroke:var(--accent-soft);stroke-width:2.4;}
+  .fc-svg .arr{stroke:var(--accent-soft);stroke-width:2;stroke-dasharray:6 5;}
+  .fc-fix{font-family:'Caveat',cursive;font-weight:700;font-size:23px;margin-top:6px;}
+  .fc-why{color:var(--ink-soft);font-size:16px;line-height:1.35;}
+  .fc-tds{display:flex;align-items:center;gap:9px;margin-top:10px;border-top:2px solid var(--line);
+    filter:url(#wobble);padding-top:9px;}
+  .fc-tds label{flex:1;color:var(--ink-soft);font-size:15px;}
+  .fc-tds input{width:82px;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);
+    border-radius:12px;padding:7px 9px;font-family:inherit;font-size:16px;color:var(--ink);}
   /* doorlooptijd & koffiebed */
   .fx-note{color:var(--ink-soft);font-size:14px;line-height:1.3;margin-top:4px;}
   .bed-pick{display:flex;gap:10px;}
@@ -799,6 +819,10 @@
         <div class="field"><label>the bed when it ran dry</label>
           <div class="bed-pick" id="f-bed"></div></div>
       </div>
+
+      <div class="field" id="filter-taste" style="display:none"><label>how did it taste?</label>
+        <div class="cup-pick" id="f-cup"></div>
+        <div class="fx-note">one tap — the compass turns it into a single next step</div></div>
 
       <div class="field" id="filter-gear" style="display:none"><label>brewer &amp; paper</label>
         <div class="field-row">
@@ -1969,7 +1993,7 @@ async function quickBrew(){
       (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept:\n${beansList}\n`
                      :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
       gearPromptBlock()+
-      (esp?('\n'+ESPRESSO_RULES+'\n'):'')+
+      ('\n'+(esp?ESPRESSO_RULES:FILTER_RULES)+'\n')+
       `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
       `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam. drink = melkdranknaam of "espresso" (laat leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord — GEEN uitleg of merknaam). grindNote = korte uitleg over de maling (mag molen noemen). dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
@@ -2062,6 +2086,7 @@ function renderStats_DISABLED(){
 /* ---------------- formulier + calculator ---------------- */
 let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null,formPrep={},pendingRecipe=null;
 let formBed=null;   // vlak / krater / muur, zoals het bed erbij lag
+let formCup=null;   // hoe de kop smaakte, voor het kompas
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
 // laat een tekstvak meegroeien met de inhoud (geen klein scroll-vakje meer)
 function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(el.scrollHeight+4,190)+'px';}
@@ -2193,7 +2218,7 @@ function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
   ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper'].forEach(i=>setVal(i,''));
-  formBed=null;
+  formBed=null;formCup=null;
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
   if(featOn('smartdefaults')){
@@ -2214,7 +2239,8 @@ function openEdit(b){
   setVal('f-time',b.time);setVal('f-temp',b.temp);setVal('f-notes',b.notes);
   setVal('f-grind',b.grind||'');
   setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
-  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');formBed=b.bed||null;
+  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');
+  formBed=b.bed||null;formCup=b.cup||null;
   setVal('f-score',b.score||8);setVal('f-guide',b.guide||'');
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
@@ -2275,7 +2301,90 @@ function applyFamilyToForm(){
   if(fx)fx.style.display=(fam==='filter'&&featOn('drawdown'))?'block':'none';
   const fg=document.getElementById('filter-gear');
   if(fg)fg.style.display=(fam==='filter')?'block':'none';
-  if(fam==='filter'){renderBedPick();renderGearChips();}
+  const ft=document.getElementById('filter-taste');
+  if(ft)ft.style.display=(fam==='filter'&&featOn('filtercompass'))?'block':'none';
+  if(fam==='filter'){renderBedPick();renderGearChips();renderCupPick();}
+}
+/* ---------------- het filterkompas ----------------
+   Twee assen, geen refractometer nodig. Links-rechts is de extractie (die stel
+   je bij met de maling), boven-onder de sterkte (die stel je bij met de ratio).
+   Wie wel een refractometer heeft mag zijn TDS invullen voor het echte cijfer. */
+const FILTER_CUPS=[
+  {id:'goed',   n:'just right', x:0,    y:0,    fix:'keep everything the same',
+   why:'nothing to change. Write down your grind so you can find your way back here.'},
+  {id:'zuur',   n:'sour & thin', x:-0.85, y:-0.45, fix:'grind one step finer',
+   why:'sour and thin is the signature of under-extraction: the water was through before it had taken enough with it.'},
+  {id:'scherp', n:'sharp but strong', x:-0.7, y:0.55, fix:'grind one step finer',
+   why:'enough coffee in the cup, but not enough of it dissolved. Finer, and leave the ratio alone.'},
+  {id:'vlak',   n:'flat & watery', x:0,   y:-0.85, fix:'use less water, or more coffee',
+   why:'this is a strength problem, not an extraction one. Move the ratio toward 1:15 before you touch the grind.'},
+  {id:'bitter', n:'bitter & dry', x:0.85, y:0.3,  fix:'grind one step coarser',
+   why:'you pulled too much out of it. Coarser is the first move; only then look at temperature.'},
+  {id:'droog',  n:'astringent', x:0.9,  y:-0.2, fix:'grind coarser and pour gentler',
+   why:'that dry, mouth-puckering edge usually comes from fines clogging the bed. Grind coarser, stir less, pour from lower.'},
+];
+function cupById(id){return FILTER_CUPS.find(c=>c.id===id)||null;}
+function renderCupPick(){
+  const el=document.getElementById('f-cup');if(!el)return;
+  el.innerHTML=FILTER_CUPS.map(c=>
+    `<button type="button" class="cup-opt ${formCup===c.id?'sel':''}" onclick="pickCup('${c.id}')">${esc(c.n)}</button>`).join('');
+}
+function pickCup(id){formCup=(formCup===id)?null:id;renderCupPick();}
+// echte extractie als je een refractometer hebt: het water dat eruit komt is
+// het water dat erin ging min wat het koffiebed vasthoudt (~2 g per gram koffie)
+function extractionYield(b){
+  const tds=parseFloat(b&&b.tds), dose=parseFloat(b&&b.dose), water=parseFloat(b&&b.yield);
+  if(!(tds>0&&dose>0&&water>0))return null;
+  const uit=water-dose*2;
+  if(uit<=0)return null;
+  const ey=(tds*uit)/dose;
+  return Math.round(ey*10)/10;
+}
+function setBrewTds(id,v){
+  const b=state.brews.find(x=>x.id===id);if(!b)return;
+  const n=parseFloat((v||'').replace(',','.'));
+  b.tds=(n>0?n:null);save();openDetail(id);
+}
+function filterCompassHTML(b){
+  if(!featOn('filtercompass'))return '';
+  const c=cupById(b.cup);
+  const ey=extractionYield(b);
+  if(!c&&ey==null&&!b.tds)return '';
+  // positie: de smaak is leidend, het meetcijfer mag hem verschuiven
+  let x=c?c.x:0, y=c?c.y:0;
+  if(ey!=null)x=Math.max(-1,Math.min(1,(ey-20)/3));
+  if(b.ratio)y=Math.max(-1,Math.min(1,(16-parseFloat(b.ratio))/2.5));
+  const px=170+x*100, py=100-y*60;
+  let fix=c?c.fix:'', why=c?c.why:'';
+  // een trage doorloop bij bitter wijst eerder op een verstopt bed dan op te fijn
+  if(c&&(c.id==='bitter'||c.id==='droog')&&parseTimeSec(b.draw)>60)
+    why+=' Your drawdown was over a minute, so the bed was choking — that is the part to fix first.';
+  if(c&&c.id==='vlak'&&b.ratio&&parseFloat(b.ratio)>16.5)
+    why+=' You brewed at 1:'+(+b.ratio).toFixed(1)+'; try 1:15.5 with the same grind.';
+  if(ey!=null)why+=' Measured extraction '+ey+' % (the window is 18 to 22 %).';
+  return `<div class="notes-card sketch soft fc-card">
+    <div class="k">filter compass</div>
+    <svg class="fc-svg" viewBox="0 0 300 200" role="img" aria-label="Kompas: extractie horizontaal, sterkte verticaal">
+      <path d="M52 22 Q54 100 52 176"/><path d="M44 170 Q150 172 288 169"/>
+      <path d="M48 30 L52 20 L57 31"/><path d="M280 163 L290 169 L280 175"/>
+      <path d="M130 68 Q170 65 211 69"/><path d="M212 67 Q214 100 211 133"/>
+      <path d="M211 132 Q170 136 130 132"/><path d="M129 134 Q126 100 131 66"/>
+      <path class="dot" d="M${(px+6).toFixed(1)} ${(py-6).toFixed(1)} Q${(px+9).toFixed(1)} ${py} ${(px+6).toFixed(1)} ${(py+6).toFixed(1)} Q${px} ${(py+9).toFixed(1)} ${(px-6).toFixed(1)} ${(py+6).toFixed(1)} Q${(px-9).toFixed(1)} ${py} ${(px-6).toFixed(1)} ${(py-6).toFixed(1)} Q${px} ${(py-9).toFixed(1)} ${(px+7).toFixed(1)} ${(py-5).toFixed(1)}"/>
+      ${(Math.abs(x)>0.25||Math.abs(y)>0.25)?`<path class="arr" d="M${px.toFixed(1)} ${py.toFixed(1)} L${(170-x*22).toFixed(1)} ${(100+y*14).toFixed(1)}"/>`:''}
+      <text x="64" y="42">sour &amp; strong</text><text x="215" y="42">bitter &amp; strong</text>
+      <text x="64" y="162">sour &amp; thin</text><text x="215" y="162">bitter &amp; dry</text>
+      <text x="140" y="104">on target</text>
+      <text x="96" y="190">&#8592; under</text><text x="196" y="190">over &#8594;</text>
+      <text x="8" y="56">strong</text><text x="16" y="160">thin</text>
+    </svg>
+    ${fix?'<div class="fc-fix">next time: '+esc(fix)+'</div>':''}
+    ${why?'<div class="fc-why">'+esc(why)+'</div>':''}
+    <div class="fc-tds">
+      <label>got a refractometer? enter TDS %</label>
+      <input value="${b.tds!=null?esc(String(b.tds)):''}" placeholder="1.35" inputmode="decimal"
+        onchange="setBrewTds('${b.id}',this.value)">
+    </div>
+  </div>`;
 }
 /* ---------------- doorlooptijd & het koffiebed ----------------
    Het bed vertelt je iets wat je in geen enkel getal terugziet: een krater
@@ -2781,6 +2890,8 @@ function saveBrew(){
     bloom:(function(){const g=document.getElementById('f-bloom-g').value.trim();const s=document.getElementById('f-bloom-s').value.trim();return (g||s)?{g,s}:null;})(),
     draw:document.getElementById('f-draw').value.trim(),
     bed:formBed||null,
+    cup:formCup||null,
+    tds:editingId?(state.brews.find(x=>x.id===editingId)?.tds??null):null,
     brewer:document.getElementById('f-brewer').value.trim(),
     paper:document.getElementById('f-paper').value.trim(),
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
@@ -2865,6 +2976,7 @@ function openDetail(id){
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
       ${asArr(b.tags).length?'<div class="note-tags">'+asArr(b.tags).map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${asArr(b.custom).length?'<div style="margin-top:10px">'+asArr(b.custom).map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
+    ${fam==='filter'?filterCompassHTML(b):''}
     ${tasteWheelStatic(b.tags,'taste')}
     ${freshGaugeHTML(bean,b.ts,'the bean on brew day')}
     ${b.guide?customGuideHTML(b.guide):guideHTML(b.method)}
@@ -3670,7 +3782,7 @@ async function aiRecipe(beanId,methodId){
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
     const espM=methodFamily(m)==='espresso';
     const milk=espM?` Je mag een melkdrank kiezen (espresso, flat white, cappuccino, latte, cortado, macchiato, americano); zet dan de melkstappen in "steps" en de dranknaam in "drink".`:'';
-    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}${milk}${espM?('\n'+ESPRESSO_RULES+'\n'):''}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
+    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}${milk}${'\n'+(espM?ESPRESSO_RULES:FILTER_RULES)+'\n'}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
