@@ -723,6 +723,9 @@
   .pc-step.nu{background:var(--card-2);border-color:var(--ink);filter:url(#wobble);cursor:pointer;}
   .pc-step.nu .ps-t,.pc-step.nu .ps-d{color:var(--ink);}
   .pc-step.klaar{opacity:.45;}
+  /* een afgeronde stap die al voorbij is: alleen nog een streep */
+  .pc-mini{height:0;border-top:2px solid var(--line);filter:url(#wobble);
+    margin:7px 22px 8px;opacity:.6;}
   .pc-step.klaar .ps-k{text-decoration:line-through;}
   .pc-step.straks{opacity:.72;}
   .hidden{display:none !important;}
@@ -2677,6 +2680,9 @@ function pourSteps(){
   el.innerHTML=pc.steps.map((st,i)=>{
     const at=st.t+pc.shift;
     const klaar=i<cur;
+    // alles wat verder terug ligt dan de vorige stap wordt een streepje,
+    // zodat de tekening in beeld blijft terwijl je giet
+    if(i<cur-1)return '<div class="pc-mini" title="'+esc(st.k)+' \u2014 done"></div>';
     const nu=(i===cur)&&pc.run;
     const cls=klaar?'klaar':(nu?'nu':'straks');
     const tijd=(klaar&&pc.marks[i]!=null)?pourFmt(pc.marks[i]):pourFmt(Math.max(0,at));
