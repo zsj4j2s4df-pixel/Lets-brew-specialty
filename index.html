@@ -684,6 +684,19 @@
   .bed-opt.sel svg{stroke:var(--ink);}
   .bed-opt .bo-n{font-family:'Caveat',cursive;font-weight:700;font-size:19px;}
   .bed-opt .bo-d{font-size:12.5px;line-height:1.15;text-align:center;}
+  /* receptkaart op de brews-tab */
+  .rcard{padding:13px 16px;position:relative;}
+  .rc-head{cursor:pointer;padding-right:26px;}
+  .rc-arr{flex:none;color:var(--ink-soft);font-size:17px;}
+  .rc-del{position:absolute;top:9px;right:11px;background:none;border:none;padding:2px;
+    cursor:pointer;line-height:0;opacity:.55;}
+  .rc-del svg{width:19px;height:19px;stroke:var(--ink-soft);}
+  .rc-del:hover,.rc-del:focus{opacity:1;}
+  .rc-body{display:none;margin-top:10px;border-top:2px solid var(--line);filter:url(#wobble);
+    padding-top:10px;}
+  .rcard.op .rc-body{display:block;}
+  .rc-over{color:var(--ink-soft);font-size:16px;line-height:1.35;margin-bottom:8px;}
+  .rc-steps{margin-bottom:4px;}
   /* receptenboek */
   .rb-draw{display:flex;justify-content:center;margin:2px 0 12px;}
   .rb-draw svg{width:100%;max-width:250px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.7;
@@ -1167,29 +1180,6 @@
     </div>
   </div>
 
-  <!-- RECEPTENBOEK -->
-  <div id="page-recipebook" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
-    <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
-    <div class="screen">
-      <div class="detail-top"><button onclick="go('learn')">&lsaquo;</button><div class="h hand">the recipe book</div><div style="width:24px"></div></div>
-      <div class="subtitle" style="text-align:center;margin:-6px 0 6px">tap one and the pour coach has it ready</div>
-      <div class="rb-draw"><svg viewBox="0 0 300 132" role="img" aria-label="Drie receptkaarten naast elkaar">
-        <path d="M10 26 Q12 74 10 122 Q46 126 84 122 Q86 74 84 26 Q47 22 10 26"/>
-        <path class="b" d="M14 30 Q15 74 13 118 Q47 121 80 118 Q82 74 80 30"/>
-        <path class="soft2" d="M22 48 L72 46"/><path class="soft2" d="M22 62 L64 60"/><path class="soft2" d="M22 76 L68 74"/>
-        <path d="M108 18 Q110 72 108 126 Q146 131 186 126 Q188 72 186 18 Q147 14 108 18"/>
-        <path class="b" d="M112 22 Q113 72 111 122 Q147 125 182 122 Q184 72 182 22"/>
-        <path class="soft2" d="M120 42 L174 40"/><path class="soft2" d="M120 56 L166 54"/>
-        <path class="soft2" d="M120 70 L170 68"/><path class="soft2" d="M120 84 L160 82"/>
-        <path d="M210 28 Q212 74 210 120 Q246 124 288 120 Q290 74 288 28 Q247 24 210 28"/>
-        <path class="b" d="M214 32 Q215 74 213 116 Q247 119 284 116 Q286 74 284 32"/>
-        <path class="soft2" d="M222 50 L278 48"/><path class="soft2" d="M222 64 L270 62"/><path class="soft2" d="M222 78 L274 76"/>
-      </svg></div>
-      <div id="rb-list"></div>
-      <button class="save-btn" onclick="openRecipe(null)" style="margin-top:6px">&#65291; write your own</button>
-    </div>
-  </div>
-
   <!-- EIGEN RECEPT -->
   <div id="page-recipe" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
@@ -1242,14 +1232,14 @@
   <div id="page-brews" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <h1 class="title hand">your brews</h1>
-      <div class="subtitle">everything you've brewed</div>
+      <h1 class="title hand">recipes</h1>
+      <div class="subtitle">tap one open, then brew it</div>
 
       <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ new brew</button>
 
       <div class="search-wrap" id="brew-search-wrap" style="display:none">
         <svg viewBox="0 0 24 24" class="acic search-ic"><path d="M14.4 8.1 Q17 11.6 14.2 14.6 Q11.1 16.9 7.6 14.9 Q4.8 12.3 6.5 8.5 Q9 5.3 12.6 6.3 Q14.2 7 15 8.7"/><path d="M14.6 14.9 Q17.4 17.6 20.4 20.5"/><path d="M7.6 8.9 Q8.6 7.1 10.7 7" opacity="0.5"/></svg>
-        <input id="brew-search" placeholder="search by bean, method, note…" oninput="renderAll()">
+        <input id="brew-search" placeholder="search a recipe, method or step…" oninput="renderAll()">
       </div>
 
       <div class="filter-bar">
@@ -1257,6 +1247,8 @@
       </div>
 
       <div id="all-list"></div>
+
+      <button class="btn-add sketch soft" onclick="openRecipe(null)" style="margin-top:4px">＋ write your own</button>
     </div>
   </div>
   <div id="page-methods" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
@@ -1356,13 +1348,6 @@
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.2 5.6 Q12 4.9 19.9 5.7"/><path d="M4.6 5.8 Q8.4 13.4 11.4 19.6"/><path d="M19.6 5.8 Q15.9 13.4 12.9 19.6"/><path d="M11.4 19.6 Q12.2 20.4 12.9 19.5"/><path d="M7 10.2 Q12 9.4 17.1 10.3" opacity="0.7"/><path d="M10.2 12.6 Q10.6 15.4 11.6 17.9" opacity="0.45"/><path d="M14 12.6 Q13.5 15.4 12.6 17.9" opacity="0.45"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">filter skills</div>
           <div class="lc-d">percolatie, bloom, doorlooptijd & gieten</div></div>
-        <div class="lc-arr">&rsaquo;</div>
-      </div>
-
-      <div class="learn-card sketch" id="book-card" style="background:var(--aeropress)" onclick="go('recipebook')">
-        <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.3 5.2 Q4 12 4.4 18.8"/><path d="M4.4 5.4 Q8 3.9 11.9 5.9"/><path d="M4.3 18.4 Q8.2 17.2 11.9 19.4"/><path d="M11.9 5.6 Q12.2 12.5 11.9 19.6"/><path d="M12 5.9 Q15.8 3.9 19.6 5.3"/><path d="M12 19.4 Q15.7 17.2 19.7 18.6"/><path d="M19.6 5.1 Q20 12 19.6 18.9"/><path d="M6.6 9.1 Q8.4 8.6 10.1 9.2 M6.6 12.1 Q8.4 11.6 10.1 12.2" opacity="0.5"/><path d="M14 9.2 Q15.8 8.6 17.5 9.1 M14 12.2 Q15.8 11.6 17.5 12.1" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">the recipe book</div>
-          <div class="lc-d">de klassiekers, op jouw dose \u2014 tik er een aan en de coach zet hem klaar</div></div>
         <div class="lc-arr">&rsaquo;</div>
       </div>
 
@@ -2088,8 +2073,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','recipe','recipebook','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',recipe:'learn',recipebook:'learn',detail:'home',
+const pages=['welcome','home','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
+const navMap={home:'home',form:'home',dialin:'home',recipe:'brews',detail:'home',
   cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
@@ -2116,7 +2101,6 @@ function go(p,isBack){
   if(p==='methods')renderMethods();
   if(p==='beans')renderBeans();
   if(p==='cupping')renderCupping();
-  if(p==='recipebook')renderBook();
   if(p==='gallery')renderGallery();
   if(p==='learn'){
     const w=document.getElementById('water-card');if(w)w.style.display=featOn('water')?'flex':'none';
@@ -2263,7 +2247,9 @@ let brewSort='new', filterMethod='all';
 function setSort(s){brewSort=s;document.querySelectorAll('.sortc').forEach(b=>b.classList.toggle('on',b.dataset.s===s));renderAll();}
 function setFilter(m){filterMethod=m;renderAll();}
 function renderFilterChips(){
-  const used=[...new Set(state.brews.map(b=>b.method))];
+  const verborgen=recipeVerborgen();
+  const alles=(state.recipes||[]).concat(FILTER_RECIPES.filter(r=>!verborgen.includes(r.id)));
+  const used=[...new Set(alles.map(methodForRecipe).filter(Boolean))];
   const methodChips=state.methods.filter(m=>used.includes(m.id));
   let html=`<button class="fc ${filterMethod==='all'?'sel':''}" onclick="setFilter('all')">all</button>`;
   html+=methodChips.map(m=>
@@ -2279,31 +2265,78 @@ function brewBeanGone(b){
 }
 let reserveOpen=false;
 function toggleReserve(){reserveOpen=!reserveOpen;renderAll();}
+/* ---------------- receptenkaarten op de brews-tab ----------------
+   Zelfde jasje als de oude brew-kaarten -- de methodetekening en de titel --
+   maar dan inklapbaar, met een prullenbakje rechtsboven. Een eigen recept gooi
+   je echt weg; een ingebouwde verdwijnt alleen uit je lijst en is terug te
+   halen, want die is niet van jou om te verwijderen.                       */
+let recOpen={};
+function recToggle(id){recOpen[id]=!recOpen[id];renderAll();}
+function recipeVerborgen(){return Array.isArray(state.hiddenRecipes)?state.hiddenRecipes:[];}
+function recTrash(id){
+  const r=recipeById(id);if(!r)return;
+  if(r.eigen){
+    if(!confirm('delete "'+r.naam+'"?'))return;
+    state.recipes=(state.recipes||[]).filter(x=>x.id!==id);
+    Object.keys(state.lastRecipe||{}).forEach(k=>{if(state.lastRecipe[k]===id)delete state.lastRecipe[k];});
+    toast('recipe deleted');
+  }else{
+    if(!Array.isArray(state.hiddenRecipes))state.hiddenRecipes=[];
+    state.hiddenRecipes.push(id);
+    toast('hidden \u2014 tap "show hidden" to bring it back');
+  }
+  pc.mid=null;save();renderAll();
+}
+function recRestore(){state.hiddenRecipes=[];save();renderAll();toast('\u2713 all recipes back');}
+function recipeCardHTML(r){
+  const mid=methodForRecipe(r);
+  const m=mid?methodById(mid):null;
+  const water=Math.round(r.dose*r.ratio);
+  const open=!!recOpen[r.id];
+  const meta=[m?m.name:'filter',r.dose+' g \u2192 '+water+' g',r.maling+', '+r.temp+'\u00b0C']
+    .concat(r.stand?[r.stand]:[]).join(' \u00b7 ');
+  const stappen=r.stappen.map(st=>
+    '<div class="pcs"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
+    ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.p?Math.round(water*st.p)+' g':'')+'</span></div>').join('');
+  return `<div class="card sketch rcard ${open?'op':''}" style="background:var(${(m&&m.tint)||'--v60'})">
+    <button type="button" class="rc-del" title="remove" aria-label="remove recipe"
+      onclick="event.stopPropagation();recTrash('${r.id}')">${ICO.del}</button>
+    <div class="row rc-head" onclick="recToggle('${r.id}')">
+      <div class="brew-thumb">${m?iconHTML(m,44):''}</div>
+      <div class="brew-main">
+        <div class="name hand">${r.eigen?'\u270e ':''}${esc(r.naam)}</div>
+        <div class="meta">${esc(meta)}</div>
+      </div>
+      <div class="rc-arr">${open?'\u25be':'\u25b8'}</div>
+    </div>
+    <div class="rc-body">
+      <div class="rc-over">${esc(r.over||'')}</div>
+      <div class="rc-steps">${stappen}</div>
+      ${mid?`<button class="rb-go" onclick="brewRecipe('${r.id}')">brew this \u2192</button>`
+           :'<div class="fx-note">turn on a filter method under methods to use this</div>'}
+      ${r.eigen?`<button class="rb-edit" onclick="openRecipe('${r.id}')">edit this recipe</button>`:''}
+    </div>
+  </div>`;
+}
 function renderAll(){
   renderFilterChips();
-  // zoekbalk pas tonen vanaf 6 brews
+  const verborgen=recipeVerborgen();
+  const alles=(state.recipes||[]).concat(FILTER_RECIPES.filter(r=>!verborgen.includes(r.id)));
   const sw=document.getElementById('brew-search-wrap');
-  if(sw)sw.style.display=(state.brews.length>=6)?'flex':'none';
-  const q=(state.brews.length>=6?(document.getElementById('brew-search')?.value||''):'').toLowerCase().trim();
-  let list=state.brews.filter(b=>{
-    if(filterMethod!=='all'&&b.method!==filterMethod)return false;
+  if(sw)sw.style.display=(alles.length>=6)?'flex':'none';
+  const q=(alles.length>=6?(document.getElementById('brew-search')?.value||''):'').toLowerCase().trim();
+  const lijst=alles.filter(r=>{
+    const mid=methodForRecipe(r);
+    if(filterMethod!=='all'&&mid!==filterMethod)return false;
     if(!q)return true;
-    const m=methodById(b.method);
-    const hay=[m.name,b.beans,b.notes,(b.tags||[]).join(' ')].join(' ').toLowerCase();
-    return hay.includes(q);
+    const m=mid?methodById(mid):null;
+    return [r.naam,r.over,r.maling,(m?m.name:''),r.stappen.map(x=>x.d).join(' ')]
+      .join(' ').toLowerCase().includes(q);
   });
-  const sorter=brewSort==='score'?(a,b)=>b.score-a.score||b.ts-a.ts:(a,b)=>b.ts-a.ts;
-  const active=list.filter(b=>!brewBeanGone(b)).sort(sorter);
-  const reserve=list.filter(brewBeanGone).sort(sorter);
-  let html=active.length?active.map(brewCard).join(''):(reserve.length?'':'<div class="empty-note">no brews found.</div>');
-  if(reserve.length){
-    html+=`<button class="extra-kast" onclick="toggleReserve()"><svg viewBox="0 0 24 24" class="acic"><path d="M5.8 9.3 Q5.4 7.2 7.3 7 Q12 6.6 16.7 7 Q18.6 7.2 18.2 9.2 M18.1 8.7 Q18.4 13 18.1 17.1 Q18.3 18.8 16.4 19 Q12 19.4 7.4 19 Q5.5 18.8 5.9 17 Q5.4 12.9 6.1 8.5"/><path d="M9.4 7.1 Q9.2 5.3 9.5 3.8 Q12 3.5 14.5 3.9 Q14.8 5.5 14.6 7.2" opacity="0.6"/><path d="M8.8 12.4 Q12 12 15.3 12.6" opacity="0.5"/></svg> the vault · ${reserve.length} brew${reserve.length===1?'':'s'} with a bean that's gone ${reserveOpen?'▾':'▸'}</button>`;
-    if(reserveOpen){
-      html+='<div class="kast-head">the bean is no longer in stock — your recipe stays saved</div>';
-      html+=reserve.map(brewCard).join('');
-    }
-  }
-  document.getElementById('all-list').innerHTML = html;
+  let uit=lijst.length?lijst.map(recipeCardHTML).join(''):'<div class="empty-note">no recipes found.</div>';
+  if(verborgen.length)uit+='<button class="extra-kast" onclick="recRestore()">'+ICO.del+
+    ' show hidden \u00b7 '+verborgen.length+' recipe'+(verborgen.length===1?'':'s')+'</button>';
+  document.getElementById('all-list').innerHTML=uit;
 }
 function renderStats_DISABLED(){
 }
@@ -2724,35 +2757,6 @@ function methodForRecipe(r){
   }
   return (aan[0]||{}).id||null;
 }
-function renderBook(){
-  const el=document.getElementById('rb-list');if(!el)return;
-  const eigen=(state.recipes||[]);
-  const kaart=r=>{
-    const mid=methodForRecipe(r);
-    const m=mid?methodById(mid):null;
-    const water=Math.round(r.dose*r.ratio);
-    const nums=[r.dose+' g',water+' g','1:'+r.ratio.toFixed(1),r.maling,r.temp+'\u00b0C']
-      .concat(r.stand?[r.stand]:[]).join('  \u00b7  ');
-    const stappen=r.stappen.map(st=>
-      '<div class="rb-s"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
-      ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.p?Math.round(water*st.p)+' g':'')+'</span></div>').join('');
-    return '<div class="rb-card sketch" style="background:var('+((m&&m.tint)||'--v60')+')">'+
-      '<div class="rb-top"><div class="rb-n hand">'+esc(r.naam)+'</div>'+
-      '<div class="rb-m">'+esc(m?m.name:'filter')+'</div></div>'+
-      '<div class="rb-o">'+esc(r.over||'')+'</div>'+
-      '<div class="rb-nums">'+esc(nums)+'</div>'+
-      '<div class="rb-steps">'+stappen+'</div>'+
-      (mid?'<button class="rb-go" onclick="brewRecipe(\''+r.id+'\')">brew this \u2192</button>'
-          :'<div class="fx-note">turn on a filter method under methods to use this</div>')+
-      (r.eigen?'<button class="rb-edit" onclick="openRecipe(\''+r.id+'\')">edit this recipe</button>':'')+
-      '</div>';
-  };
-  let h='';
-  if(eigen.length)h+='<div class="rb-sect">yours</div>'+eigen.map(kaart).join('');
-  if(eigen.length)h+='<div class="rb-sect">the classics</div>';
-  h+=FILTER_RECIPES.map(kaart).join('');
-  el.innerHTML=h;
-}
 // aantikken: recept klaarzetten en New brew openen met de coach erop
 function brewRecipe(id){
   const r=recipeById(id);if(!r)return;
@@ -2762,9 +2766,10 @@ function brewRecipe(id){
   state.lastRecipe[mid]=r.id;save();
   pc.mid=null;                       // de coach moet opnieuw kijken
   beginBrew(mid);
-  if(document.getElementById('pc-card').style.display!=='none')pourPickRecipe(r.id);
-  setTimeout(()=>{const c=document.getElementById('pc-card');
-    if(c&&c.style.display!=='none')c.scrollIntoView({behavior:'smooth',block:'center'});},250);
+  const stack=document.getElementById('pc-stack');
+  if(stack&&stack.style.display!=='none')pourPickRecipe(r.id);
+  setTimeout(()=>{const c=document.getElementById('pc-stack');
+    if(c&&c.style.display!=='none')c.scrollIntoView({behavior:'smooth',block:'start'});},250);
 }
 /* ---------------- eigen recepten ----------------
    Een recept is een lijstje stappen. Je vult ze zelf in of laat de AI een
@@ -2869,7 +2874,7 @@ function recAdd(){
   recSteps();
 }
 function recDel(i){recBewerk.stappen.splice(i,1);recSteps();}
-function cancelRecipe(){recBewerk=null;go('recipebook');}
+function cancelRecipe(){recBewerk=null;go('brews');}
 function saveRecipe(){
   const naam=(document.getElementById('rec-naam').value||'').trim();
   const dose=parseFloat(document.getElementById('rec-dose').value);
@@ -2894,7 +2899,7 @@ function saveRecipe(){
   state.lastRecipe[r.mid]=r.id;
   save();toast('\u2713 recipe saved');
   recBewerk=null;pc.mid=null;
-  go('recipebook');
+  go('brews');
 }
 function delRecipe(){
   if(!recBewerk||!recBewerk.id)return;
@@ -2902,7 +2907,7 @@ function delRecipe(){
   state.recipes=(state.recipes||[]).filter(x=>x.id!==recBewerk.id);
   const mid=recBewerk.mid;
   if(state.lastRecipe&&state.lastRecipe[mid]===recBewerk.id)delete state.lastRecipe[mid];
-  save();toast('recipe deleted');recBewerk=null;pc.mid=null;go('recipebook');
+  save();toast('recipe deleted');recBewerk=null;pc.mid=null;go('brews');
 }
 /* De AI schrijft het schema, jij houdt de pen. Alles komt in dezelfde lijst
    terecht, dus elke regel blijft daarna aan te passen.                     */
@@ -3179,7 +3184,7 @@ function pourRecipes(){
   }
   const l=document.getElementById('pc-links');
   if(l){
-    l.innerHTML='<a onclick="go(\'recipebook\')">recipe book \u203a</a>'+
+    l.innerHTML='<a onclick="go(\'brews\')">all recipes \u203a</a>'+
       (r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
                  :('<a onclick="openRecipe(null,pc.mid)">write your own</a>'));
   }
@@ -4683,8 +4688,8 @@ function renderLesson(elId,blocks){
 function learnToGallery(){go('gallery');}
 function learnToPour(){
   const f=state.methods.filter(m=>m.on&&methodFamily(m)==='filter')[0];
-  if(f){beginBrew(f.id);setTimeout(()=>{const c=document.getElementById('pc-card');
-    if(c&&c.style.display!=='none')c.scrollIntoView({behavior:'smooth',block:'center'});},250);}
+  if(f){beginBrew(f.id);setTimeout(()=>{const c=document.getElementById('pc-stack');
+    if(c&&c.style.display!=='none')c.scrollIntoView({behavior:'smooth',block:'start'});},250);}
   else toast('turn on a filter method first under methods');
 }
 function learnToDialIn(){
