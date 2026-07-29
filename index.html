@@ -726,6 +726,13 @@
   .rec-row .r-x{width:34px;flex:none;background:none;border:none;color:var(--ink-soft);
     font-size:24px;line-height:1;cursor:pointer;padding:6px 0 0;font-family:inherit;}
   .rec-empty{color:var(--ink-soft);font-size:16px;padding:6px 4px 2px;}
+  /* gear onder een methode */
+  .mm-gear{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+  .mg{font-size:13.5px;background:none;border:2px solid var(--line);filter:url(#wobble);
+    border-radius:11px;padding:2px 9px;font-family:inherit;color:var(--ink-soft);cursor:pointer;}
+  .mg.sel{border-color:var(--ink);color:var(--ink);background:var(--card-2);}
+  .mm-gear-leeg{font-size:13.5px;color:var(--ink-soft);margin-top:6px;}
+  .gc-bij{color:var(--ink-soft);font-size:13px;margin-left:7px;opacity:.8;}
   /* inklapbare kaarten in de pour coach */
   .pcard{margin-bottom:11px;overflow:hidden;}
   .pc-head{width:100%;background:none;border:none;display:flex;align-items:baseline;gap:10px;
@@ -2082,7 +2089,8 @@ function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:
 
 /* ---------------- navigatie ---------------- */
 const pages=['welcome','home','form','dialin','recipe','recipebook','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',recipe:'home',recipebook:'learn',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
+const navMap={home:'home',form:'home',dialin:'home',recipe:'learn',recipebook:'learn',detail:'home',
+  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -2095,6 +2103,8 @@ function go(p,isBack){
     if(navHistory.length>30)navHistory.shift();
   }
   currentPage=p;
+  // detail hoort bij de lijst waar je vandaan kwam, niet altijd bij home
+  if(p==='detail'&&navHistory.length)navMap.detail=(navHistory[navHistory.length-1]==='brews')?'brews':'home';
   pages.forEach(x=>document.getElementById('page-'+x).classList.add('hidden'));
   document.getElementById('page-'+p).classList.remove('hidden');
   const nav=document.getElementById('nav');
@@ -2209,7 +2219,7 @@ async function quickBrew(){
     const prompt=`Je bent een specialty-barista. Bedenk één concrete, nieuwe brew voor de methode "${method.name}".`+wxLine+milk+
       (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept:\n${beansList}\n`
                      :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
-      gearPromptBlock()+
+      gearPromptBlock(method.id)+
       ('\n'+(esp?ESPRESSO_RULES:FILTER_RULES)+'\n')+
       `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
       `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam. drink = melkdranknaam of "espresso" (laat leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord — GEEN uitleg of merknaam). grindNote = korte uitleg over de maling (mag molen noemen). dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
@@ -2502,7 +2512,7 @@ async function suggestGuide(){
   const prev=ta.value;const prevPh=ta.placeholder;
   ta.value='';ta.placeholder='AI is thinking…';
   const msg=[{role:"user",content:
-    `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:''}.${gearPromptBlock()} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}];
+    `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:''}.${gearPromptBlock(formMethod)} In het Nederlands, max 6 regels, concreet (dose, water, temp, tijd, stappen).`}];
   try{
     // streamen: tekst verschijnt direct en groeit mee -> voelt veel sneller
     await callClaudeStream(msg,500,(full)=>{ta.value=full;autoGrow(ta);});
@@ -2689,7 +2699,7 @@ function bedNL(id){const b=BED_SHAPES.find(x=>x.id===id);return b?(b.nl||b.n):''
 // snelkiezers uit je gear-lijst, zodat je een merk niet elke keer overtypt
 function renderGearChips(){
   const el=document.getElementById('f-gearchips');if(!el)return;
-  const items=(state.gear||[]).filter(g=>g.category==='filter'||g.category==='algemeen');
+  const items=gearVoor(formMethod);
   el.innerHTML=items.map(g=>
     `<button type="button" class="lp" onclick="fillGear('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
 }
@@ -2795,7 +2805,9 @@ function openRecipe(id,mid){
 }
 // je filtermolens uit de gear-lijst, zodat de maalstand bij een molen hoort
 function filterMolens(){
-  return (state.gear||[]).filter(g=>g.name&&(g.category==='filter'||g.category==='algemeen'));
+  const mid=(recBewerk&&recBewerk.mid)||formMethod;
+  const bij=gearVoor(mid).filter(g=>g.name);
+  return bij.length?bij:(state.gear||[]).filter(g=>g.name&&(g.category==='filter'||g.category==='algemeen'));
 }
 function recMolens(){
   const el=document.getElementById('rec-molens');if(!el)return;
@@ -2907,7 +2919,7 @@ async function aiRecipeSchema(){
     const prompt='Je bent een specialty-barista. Maak een giet-schema voor de filtermethode "'+
       (m?m.name:'v60')+'" met '+dose+' g koffie en '+water+' g water'+
       (bean?(' voor de boon '+bean.name+' ('+[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')+')'):'')+
-      '.'+gearPromptBlock()+'\n'+FILTER_RULES+'\n'+
+      '.'+gearPromptBlock(recBewerk.mid)+'\n'+FILTER_RULES+'\n'+
       (molen?('De gebruiker maalt met: '+molen+'. Geef de maalstand in de schaal van die molen (klikken of getal) en noem geen andere molen.\n'):'')+
       'Geef ALLEEN JSON zonder markdown: {"temp":93,"maling":"medium","stand":"","over":"","stappen":[{"t":"0:00","k":"bloom","g":45,"d":""}]}. '+
       'maling = omschrijving in woorden (bijvoorbeeld medium-grof). stand = KORTE maalstand voor het invulveld'+
@@ -3975,12 +3987,48 @@ function renderMethods(){
           · <a class="bean-link" onclick="openImgPicker('${m.id}')">drawing</a>
         </div>
         <div style="font-size:14px;color:var(--ink-soft);margin-top:2px">family: <a class="bean-link" onclick="toggleMethodFamily('${m.id}')">${methodFamily(m)} ⇄</a></div>
+        ${gearRowHTML(m)}
         <input type="file" id="mm-edit-img-${m.id}" accept="image/*" style="display:none" onchange="replaceMethodImg('${m.id}',event)">
       </div>
       <div class="toggle ${m.on?'on':''}" onclick="toggleMethod('${m.id}')"><div class="knob"></div></div>
     </div>`;}).join('');
 }
+/* ---------------- methodes en gear aan elkaar ----------------
+   Twee losse lijsten die niets van elkaar wisten. Hang je gear aan een methode
+   en de coach vult zich vanzelf, en de AI krijgt alleen wat er bij die methode
+   hoort in plaats van je hele kast.                                        */
+function methodGear(mid){
+  const m=methodById(mid);
+  const ids=(m&&Array.isArray(m.gear))?m.gear:[];
+  return (state.gear||[]).filter(g=>ids.includes(g.id));
+}
+function gearMethods(gid){
+  return (state.methods||[]).filter(m=>Array.isArray(m.gear)&&m.gear.includes(gid));
+}
+function toggleMethodGear(mid,gid){
+  const m=state.methods.find(x=>x.id===mid);if(!m)return;
+  if(!Array.isArray(m.gear))m.gear=[];
+  const i=m.gear.indexOf(gid);
+  if(i>=0)m.gear.splice(i,1);else m.gear.push(gid);
+  save();renderMethods();renderGear();
+}
+// welke gear stel je voor bij deze methode? gekoppeld eerst, anders op categorie
+function gearVoor(mid){
+  const gekoppeld=methodGear(mid);
+  if(gekoppeld.length)return gekoppeld;
+  const fam=methodFamily(mid);
+  return (state.gear||[]).filter(g=>g.category===fam||g.category==='algemeen');
+}
 function toggleMethod(id){const m=state.methods.find(x=>x.id===id);m.on=!m.on;save();renderMethods();toast(m.on?'✓ '+m.name+' on':'○ '+m.name+' off');}
+// de gear-knopjes onder een methode: aan = gekoppeld
+function gearRowHTML(m){
+  const alles=state.gear||[];
+  if(!alles.length)return '<div class="mm-gear-leeg">no gear yet \u2014 add it under profile</div>';
+  const gekoppeld=(Array.isArray(m.gear)?m.gear:[]);
+  return '<div class="mm-gear">'+alles.map(g=>
+    '<button type="button" class="mg '+(gekoppeld.includes(g.id)?'sel':'')+
+    '" onclick="toggleMethodGear(\''+m.id+'\',\''+g.id+'\')">'+esc(g.name)+'</button>').join('')+'</div>';
+}
 function toggleMethodFamily(id){
   const m=state.methods.find(x=>x.id===id);if(!m)return;
   m.family=(methodFamily(m)==='espresso')?'filter':'espresso';
@@ -4481,7 +4529,7 @@ async function aiRecipe(beanId,methodId){
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
     const espM=methodFamily(m)==='espresso';
     const milk=espM?` Je mag een melkdrank kiezen (espresso, flat white, cappuccino, latte, cortado, macchiato, americano); zet dan de melkstappen in "steps" en de dranknaam in "drink".`:'';
-    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock()}${milk}${'\n'+(espM?ESPRESSO_RULES:FILTER_RULES)+'\n'}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
+    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}\n${gearPromptBlock(m.id)}${milk}${'\n'+(espM?ESPRESSO_RULES:FILTER_RULES)+'\n'}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
@@ -5812,8 +5860,12 @@ function renderGear(){
     const items=g.filter(x=>x.category===cat);
     if(!items.length)return;
     html+='<div class="gear-cat-lbl">'+esc(label)+'</div><div class="gear-items">'+
-      items.map(it=>'<span class="gear-chip">'+esc(it.name)+'<button onclick="delGear(\''+it.id+'\')" aria-label="delete">×</button></span>').join('')+
-      '</div>';
+      items.map(it=>{
+        const bij=gearMethods(it.id).map(m=>m.name);
+        return '<span class="gear-chip">'+esc(it.name)+
+          (bij.length?'<span class="gc-bij">'+esc(bij.join(', '))+'</span>':'')+
+          '<button onclick="delGear(\''+it.id+'\')" aria-label="delete">×</button></span>';
+      }).join('')+'</div>';
   });
   // items met onbekende categorie tonen onder 'algemeen'
   const known=GEAR_CATS.map(c=>c[0]);
@@ -5823,7 +5875,12 @@ function renderGear(){
   el.innerHTML=html;
 }
 // beschrijvend blokje van de uitrusting voor in AI-prompts (leeg als er niets is)
-function gearPromptBlock(){
+function gearPromptBlock(mid){
+  // bij een methode met gekoppelde gear alleen die noemen; scheelt ruis in de prompt
+  if(mid){
+    const bij=methodGear(mid);
+    if(bij.length)return '\nUitrusting voor deze methode: '+bij.map(x=>x.name).join(', ')+'.';
+  }
   const g=state.gear||[];if(!g.length)return '';
   const cats={espresso:[],filter:[],algemeen:[]};
   g.forEach(it=>{(cats[it.category]||cats.algemeen).push(it.name);});
