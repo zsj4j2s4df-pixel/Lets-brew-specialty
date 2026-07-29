@@ -684,6 +684,30 @@
   .bed-opt.sel svg{stroke:var(--ink);}
   .bed-opt .bo-n{font-family:'Caveat',cursive;font-weight:700;font-size:19px;}
   .bed-opt .bo-d{font-size:12.5px;line-height:1.15;text-align:center;}
+  /* receptenboek */
+  .rb-draw{display:flex;justify-content:center;margin:2px 0 12px;}
+  .rb-draw svg{width:100%;max-width:250px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round;filter:url(#wobble-rough);}
+  .rb-draw svg .b{opacity:.55;stroke-width:1.3;}
+  .rb-draw svg .soft2{opacity:.3;}
+  .rb-sect{color:var(--ink-soft);font-size:14px;text-transform:uppercase;letter-spacing:.12em;
+    margin:16px 4px 8px;}
+  .rb-card{padding:15px 17px 14px;margin-bottom:13px;}
+  .rb-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  .rb-n{font-size:28px;line-height:1;}
+  .rb-m{color:var(--ink-soft);font-size:15px;flex:none;}
+  .rb-o{color:var(--ink-soft);font-size:16px;line-height:1.35;margin-top:4px;}
+  .rb-nums{font-family:'Caveat',cursive;font-weight:700;font-size:21px;margin-top:8px;}
+  .rb-steps{margin-top:8px;border-top:2px solid var(--line);filter:url(#wobble);padding-top:8px;}
+  .rb-s{display:flex;gap:10px;font-size:15px;color:var(--ink-soft);padding:2px 0;}
+  .rb-s .t{width:46px;flex:none;font-variant-numeric:tabular-nums;}
+  .rb-s .k{flex:1;min-width:0;}
+  .rb-s .g{flex:none;}
+  .rb-go{width:100%;margin-top:11px;background:var(--accent-soft);color:var(--cream);
+    border:2px solid var(--ink);filter:url(#wobble);border-radius:15px;padding:9px;
+    font-family:'Caveat',cursive;font-weight:700;font-size:21px;cursor:pointer;}
+  .rb-edit{display:block;width:100%;text-align:center;margin-top:6px;background:none;border:none;
+    color:var(--ink-soft);font-family:inherit;font-size:15px;cursor:pointer;}
   /* eigen recept */
   .rec-head{display:flex;gap:8px;color:var(--ink-soft);font-size:13px;text-transform:uppercase;
     letter-spacing:.1em;margin:2px 4px 6px;}
@@ -721,7 +745,11 @@
     #pc-art svg #bw-fill{transition:none;}
   }
   /* pour coach */
+  .pc-naam{font-size:27px;line-height:1.05;margin:2px 2px 0;}
   .pc-over{color:var(--ink-soft);font-size:16px;line-height:1.35;margin:2px 2px 0;}
+  .pc-links{display:flex;gap:16px;margin:7px 2px 2px;}
+  .pc-links a{color:var(--ink-soft);font-size:16px;cursor:pointer;
+    border-bottom:1.5px solid var(--line);}
   .pc-lever{margin-top:11px;}
   .pc-lever .pl-t{display:flex;justify-content:space-between;font-size:15px;color:var(--ink-soft);}
   .pc-lever input[type=range]{width:100%;margin:2px 0 0;accent-color:var(--accent-soft);}
@@ -852,8 +880,9 @@
 
       <div class="di-card sketch soft" id="pc-card" style="display:none">
         <div class="di-lbl hand">pour coach</div>
-        <div class="link-pick" id="pc-recipes"></div>
+        <div class="pc-naam hand" id="pc-naam"></div>
         <div class="pc-over" id="pc-over"></div>
+        <div class="pc-links" id="pc-links"></div>
         <div id="pc-levers"></div>
         <div id="pc-art"></div>
         <div class="pc-clockrow">
@@ -1078,6 +1107,29 @@
     </div>
   </div>
 
+  <!-- RECEPTENBOEK -->
+  <div id="page-recipebook" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
+    <div class="screen">
+      <div class="detail-top"><button onclick="go('learn')">&lsaquo;</button><div class="h hand">the recipe book</div><div style="width:24px"></div></div>
+      <div class="subtitle" style="text-align:center;margin:-6px 0 6px">tap one and the pour coach has it ready</div>
+      <div class="rb-draw"><svg viewBox="0 0 300 132" role="img" aria-label="Drie receptkaarten naast elkaar">
+        <path d="M10 26 Q12 74 10 122 Q46 126 84 122 Q86 74 84 26 Q47 22 10 26"/>
+        <path class="b" d="M14 30 Q15 74 13 118 Q47 121 80 118 Q82 74 80 30"/>
+        <path class="soft2" d="M22 48 L72 46"/><path class="soft2" d="M22 62 L64 60"/><path class="soft2" d="M22 76 L68 74"/>
+        <path d="M108 18 Q110 72 108 126 Q146 131 186 126 Q188 72 186 18 Q147 14 108 18"/>
+        <path class="b" d="M112 22 Q113 72 111 122 Q147 125 182 122 Q184 72 182 22"/>
+        <path class="soft2" d="M120 42 L174 40"/><path class="soft2" d="M120 56 L166 54"/>
+        <path class="soft2" d="M120 70 L170 68"/><path class="soft2" d="M120 84 L160 82"/>
+        <path d="M210 28 Q212 74 210 120 Q246 124 288 120 Q290 74 288 28 Q247 24 210 28"/>
+        <path class="b" d="M214 32 Q215 74 213 116 Q247 119 284 116 Q286 74 284 32"/>
+        <path class="soft2" d="M222 50 L278 48"/><path class="soft2" d="M222 64 L270 62"/><path class="soft2" d="M222 78 L274 76"/>
+      </svg></div>
+      <div id="rb-list"></div>
+      <button class="save-btn" onclick="openRecipe(null)" style="margin-top:6px">&#65291; write your own</button>
+    </div>
+  </div>
+
   <!-- EIGEN RECEPT -->
   <div id="page-recipe" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
@@ -1244,6 +1296,13 @@
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.2 5.6 Q12 4.9 19.9 5.7"/><path d="M4.6 5.8 Q8.4 13.4 11.4 19.6"/><path d="M19.6 5.8 Q15.9 13.4 12.9 19.6"/><path d="M11.4 19.6 Q12.2 20.4 12.9 19.5"/><path d="M7 10.2 Q12 9.4 17.1 10.3" opacity="0.7"/><path d="M10.2 12.6 Q10.6 15.4 11.6 17.9" opacity="0.45"/><path d="M14 12.6 Q13.5 15.4 12.6 17.9" opacity="0.45"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">filter skills</div>
           <div class="lc-d">percolatie, bloom, doorlooptijd & gieten</div></div>
+        <div class="lc-arr">&rsaquo;</div>
+      </div>
+
+      <div class="learn-card sketch" id="book-card" style="background:var(--aeropress)" onclick="go('recipebook')">
+        <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M4.3 5.2 Q4 12 4.4 18.8"/><path d="M4.4 5.4 Q8 3.9 11.9 5.9"/><path d="M4.3 18.4 Q8.2 17.2 11.9 19.4"/><path d="M11.9 5.6 Q12.2 12.5 11.9 19.6"/><path d="M12 5.9 Q15.8 3.9 19.6 5.3"/><path d="M12 19.4 Q15.7 17.2 19.7 18.6"/><path d="M19.6 5.1 Q20 12 19.6 18.9"/><path d="M6.6 9.1 Q8.4 8.6 10.1 9.2 M6.6 12.1 Q8.4 11.6 10.1 12.2" opacity="0.5"/><path d="M14 9.2 Q15.8 8.6 17.5 9.1 M14 12.2 Q15.8 11.6 17.5 12.1" opacity="0.5"/></svg></div>
+        <div class="lc-body"><div class="lc-t hand">the recipe book</div>
+          <div class="lc-d">de klassiekers, op jouw dose \u2014 tik er een aan en de coach zet hem klaar</div></div>
         <div class="lc-arr">&rsaquo;</div>
       </div>
 
@@ -1969,8 +2028,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',recipe:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
+const pages=['welcome','home','form','dialin','recipe','recipebook','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
+const navMap={home:'home',form:'home',dialin:'home',recipe:'home',recipebook:'learn',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -1994,6 +2053,7 @@ function go(p,isBack){
   if(p==='methods')renderMethods();
   if(p==='beans')renderBeans();
   if(p==='cupping')renderCupping();
+  if(p==='recipebook')renderBook();
   if(p==='gallery')renderGallery();
   if(p==='learn'){
     const w=document.getElementById('water-card');if(w)w.style.display=featOn('water')?'flex':'none';
@@ -2585,6 +2645,62 @@ function fillGear(naam){
   else if(pa&&!pa.value.trim())pa.value=naam;
   else if(br)br.value=naam;
 }
+/* ---------------- het receptenboek ----------------
+   De klassiekers staan hier, niet in de coach: kiezen doe je vooraf, gieten
+   doe je daarna. Aantikken zet het recept klaar en opent New brew.       */
+// bij welke van jouw methodes hoort dit recept?
+function methodForRecipe(r){
+  if(!r)return null;
+  const aan=state.methods.filter(m=>m.on&&methodFamily(m)==='filter');
+  if(r.mid&&aan.find(m=>m.id===r.mid))return r.mid;
+  for(const v of (r.voor||[])){
+    const m=aan.find(x=>x.id===v||(x.name||'').toLowerCase().includes(v));
+    if(m)return m.id;
+  }
+  return (aan[0]||{}).id||null;
+}
+function renderBook(){
+  const el=document.getElementById('rb-list');if(!el)return;
+  const eigen=(state.recipes||[]);
+  const kaart=r=>{
+    const mid=methodForRecipe(r);
+    const m=mid?methodById(mid):null;
+    const water=Math.round(r.dose*r.ratio);
+    const nums=[r.dose+' g',water+' g','1:'+r.ratio.toFixed(1),r.maling,r.temp+'\u00b0C']
+      .concat(r.stand?[r.stand]:[]).join('  \u00b7  ');
+    const stappen=r.stappen.map(st=>
+      '<div class="rb-s"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
+      ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.p?Math.round(water*st.p)+' g':'')+'</span></div>').join('');
+    return '<div class="rb-card sketch" style="background:var('+((m&&m.tint)||'--v60')+')">'+
+      '<div class="rb-top"><div class="rb-n hand">'+esc(r.naam)+'</div>'+
+      '<div class="rb-m">'+esc(m?m.name:'filter')+'</div></div>'+
+      '<div class="rb-o">'+esc(r.over||'')+'</div>'+
+      '<div class="rb-nums">'+esc(nums)+'</div>'+
+      '<div class="rb-steps">'+stappen+'</div>'+
+      (mid?'<button class="rb-go" onclick="brewRecipe(\''+r.id+'\')">brew this \u2192</button>'
+          :'<div class="fx-note">turn on a filter method under methods to use this</div>')+
+      (r.eigen?'<button class="rb-edit" onclick="openRecipe(\''+r.id+'\')">edit this recipe</button>':'')+
+      '</div>';
+  };
+  let h='';
+  if(eigen.length)h+='<div class="rb-sect">yours</div>'+eigen.map(kaart).join('');
+  if(eigen.length)h+='<div class="rb-sect">the classics</div>';
+  h+=FILTER_RECIPES.map(kaart).join('');
+  el.innerHTML=h;
+}
+// aantikken: recept klaarzetten en New brew openen met de coach erop
+function brewRecipe(id){
+  const r=recipeById(id);if(!r)return;
+  const mid=methodForRecipe(r);
+  if(!mid){toast('turn on a filter method under methods first');return;}
+  if(!state.lastRecipe)state.lastRecipe={};
+  state.lastRecipe[mid]=r.id;save();
+  pc.mid=null;                       // de coach moet opnieuw kijken
+  beginBrew(mid);
+  if(document.getElementById('pc-card').style.display!=='none')pourPickRecipe(r.id);
+  setTimeout(()=>{const c=document.getElementById('pc-card');
+    if(c&&c.style.display!=='none')c.scrollIntoView({behavior:'smooth',block:'center'});},250);
+}
 /* ---------------- eigen recepten ----------------
    Een recept is een lijstje stappen. Je vult ze zelf in of laat de AI een
    voorstel doen; in beide gevallen sta jij erin met de hand. Intern bewaren we
@@ -2686,7 +2802,7 @@ function recAdd(){
   recSteps();
 }
 function recDel(i){recBewerk.stappen.splice(i,1);recSteps();}
-function cancelRecipe(){recBewerk=null;openForm(formMethod);}
+function cancelRecipe(){recBewerk=null;go('recipebook');}
 function saveRecipe(){
   const naam=(document.getElementById('rec-naam').value||'').trim();
   const dose=parseFloat(document.getElementById('rec-dose').value);
@@ -2710,9 +2826,8 @@ function saveRecipe(){
   if(!state.lastRecipe)state.lastRecipe={};
   state.lastRecipe[r.mid]=r.id;
   save();toast('\u2713 recipe saved');
-  const mid=r.mid;recBewerk=null;
-  pc.mid=null;            // dwing de coach het nieuwe recept op te pakken
-  openForm(mid);
+  recBewerk=null;pc.mid=null;
+  go('recipebook');
 }
 function delRecipe(){
   if(!recBewerk||!recBewerk.id)return;
@@ -2720,7 +2835,7 @@ function delRecipe(){
   state.recipes=(state.recipes||[]).filter(x=>x.id!==recBewerk.id);
   const mid=recBewerk.mid;
   if(state.lastRecipe&&state.lastRecipe[mid]===recBewerk.id)delete state.lastRecipe[mid];
-  save();toast('recipe deleted');recBewerk=null;pc.mid=null;openForm(mid);
+  save();toast('recipe deleted');recBewerk=null;pc.mid=null;go('recipebook');
 }
 /* De AI schrijft het schema, jij houdt de pen. Alles komt in dezelfde lijst
    terecht, dus elke regel blijft daarna aan te passen.                     */
@@ -2891,17 +3006,21 @@ function renderPour(){
   pourRecipes();pourLevers();renderBrewerArt();pourBloom();pourSteps();
   const t=document.getElementById('pc-time');if(t)t.textContent=pourFmt(pc.el);
 }
+// welk recept staat er geladen? kiezen doe je in het receptenboek bij learn
 function pourRecipes(){
-  const el=document.getElementById('pc-recipes');if(!el)return;
-  el.innerHTML=recipesFor(pc.mid).map(r=>
-    '<button class="lp '+(r.id===pc.rid?'sel':'')+'" onclick="pourPickRecipe(\''+r.id+'\')">'+
-    (r.eigen?'\u270e ':'')+esc(r.naam)+'</button>').join('')+
-    '<button class="lp" onclick="openRecipe(null,pc.mid)">\uff0b own</button>';
-  const o=document.getElementById('pc-over');const r=recipeById(pc.rid);
+  const r=recipeById(pc.rid);
+  const naam=document.getElementById('pc-naam');
+  if(naam)naam.textContent=r?r.naam:'no recipe yet';
+  const o=document.getElementById('pc-over');
   if(o){
     const stand=r&&r.stand?('  \u00b7  '+esc(r.stand)+(r.molen?(' on your '+esc(r.molen)):'')):'';
-    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand+
-      (r.eigen?' \u00b7 <a class="bean-link" onclick="openRecipe(\''+r.id+'\')">edit</a>':'')):'';
+    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand):'';
+  }
+  const l=document.getElementById('pc-links');
+  if(l){
+    l.innerHTML='<a onclick="go(\'recipebook\')">recipe book \u203a</a>'+
+      (r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
+                 :('<a onclick="openRecipe(null,pc.mid)">write your own</a>'));
   }
 }
 function pourPickRecipe(id){
