@@ -684,6 +684,24 @@
   .bed-opt.sel svg{stroke:var(--ink);}
   .bed-opt .bo-n{font-family:'Caveat',cursive;font-weight:700;font-size:19px;}
   .bed-opt .bo-d{font-size:12.5px;line-height:1.15;text-align:center;}
+  /* eigen recept */
+  .rec-head{display:flex;gap:8px;color:var(--ink-soft);font-size:13px;text-transform:uppercase;
+    letter-spacing:.1em;margin:2px 4px 6px;}
+  .rec-head span:nth-child(1){width:58px;flex:none;}
+  .rec-head span:nth-child(2){flex:1;}
+  .rec-head span:nth-child(3){width:62px;flex:none;}
+  .rec-head span:nth-child(4){width:34px;flex:none;}
+  .rec-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
+  .rec-row .r-t{width:58px;flex:none;}
+  .rec-row .r-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+  .rec-row .r-g{width:62px;flex:none;}
+  .rec-row input,.rec-row select{width:100%;background:var(--paper);border:2px solid var(--line);
+    filter:url(#wobble);border-radius:12px;padding:8px 9px;font-family:inherit;font-size:16px;
+    color:var(--ink);}
+  .rec-row select{-webkit-appearance:none;appearance:none;}
+  .rec-row .r-x{width:34px;flex:none;background:none;border:none;color:var(--ink-soft);
+    font-size:24px;line-height:1;cursor:pointer;padding:6px 0 0;font-family:inherit;}
+  .rec-empty{color:var(--ink-soft);font-size:16px;padding:6px 4px 2px;}
   /* getekende zetter */
   #pc-art{display:flex;justify-content:center;margin:2px 0 8px;}
   #pc-art svg{width:100%;max-width:210px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.7;
@@ -1057,6 +1075,44 @@
       <button class="save-btn" onclick="saveDialInBrew(false)">dial-in nailed → save as brew</button>
       <button class="profile-btn" onclick="saveDialInBrew(true)" style="margin-top:2px">not good → try again later</button>
       <div class="set-d" style="text-align:center;margin-top:8px;font-size:14px">we save this attempt and give a new AI grind tip — so you can keep improving from here</div>
+    </div>
+  </div>
+
+  <!-- EIGEN RECEPT -->
+  <div id="page-recipe" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>&#9636; &#9689; &#9646;</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand" id="rec-title">own recipe</div><button onclick="cancelRecipe()">cancel</button></div>
+      <div class="subtitle">your own pour schedule &mdash; the coach will run it exactly like the built-in ones</div>
+
+      <div class="field"><label>name</label><input id="rec-naam" placeholder="e.g. my sunday v60" maxlength="40"></div>
+
+      <div class="field"><label>method</label><div class="link-pick" id="rec-methods"></div></div>
+
+      <div class="field-row">
+        <div class="field"><label>dose (g)</label><input id="rec-dose" type="number" inputmode="decimal" step="0.1" oninput="recWater()"></div>
+        <div class="field"><label>water (g)</label><input id="rec-water" type="number" inputmode="numeric" oninput="recRatio()"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>temp (&deg;C)</label><input id="rec-temp" type="number" inputmode="decimal"></div>
+        <div class="field"><label>grind</label><input id="rec-maling" placeholder="e.g. medium"></div>
+      </div>
+      <div class="field"><label>in one line</label><input id="rec-over" placeholder="what makes this recipe yours" maxlength="120"></div>
+
+      <button class="recipe-btn ai-only hidden" id="rec-ai" onclick="aiRecipeSchema()">
+        <svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M11.6 4.2 Q12.7 8.2 13.4 9.9 Q15.2 10.7 19.8 11.3 Q15 12.6 13.1 13.4 Q12.4 15.4 11.8 20.8 Q11.2 15 10.6 13.1 Q8.6 12.4 4.2 11.6 Q9.1 10.3 10.9 9.6 Q11.6 7.6 12.3 3.4"/><path d="M18.4 4.4 Q18.9 5.5 19.1 6.1 Q19.9 6.4 21.2 6.5 Q19.6 7.1 18.9 7.4 Q18.6 8.2 18.4 9.4 Q18.1 8 17.9 7.2 Q17 6.9 15.8 6.5 Q17.4 6.1 18.1 5.9 Q18.4 5 18.7 3.8" opacity="0.7"/></svg>
+        let AI draft the schedule</button>
+      <div class="set-d" id="rec-ai-note" style="margin:6px 2px 0;font-size:14px">it fills the list below &mdash; every line stays yours to change</div>
+
+      <div class="field" style="margin-top:14px"><label>the schedule</label>
+        <div class="rec-head"><span>at</span><span>what</span><span>to (g)</span><span></span></div>
+        <div id="rec-steps"></div>
+        <button class="profile-btn" onclick="recAdd()" style="margin-top:6px">&#65291; add a step</button>
+        <div class="fx-note">leave the gram box empty for a step you do not pour &mdash; a swirl, a wait, the drawdown</div>
+      </div>
+
+      <button class="save-btn" onclick="saveRecipe()">save recipe</button>
+      <button class="profile-btn" id="rec-del" onclick="delRecipe()" style="margin-top:2px;display:none">delete this recipe</button>
     </div>
   </div>
 
@@ -1650,14 +1706,18 @@ const FILTER_RECIPES=[
      {t:60,  p:0,    k:'wacht', d:'laten staan'},
      {t:75,  p:0,    k:'pers',  d:'rustig indrukken in 30 tot 45 seconden — stop bij het sissen'}]},
 ];
-// welke recepten passen bij deze methode? (val terug op alles wat filter is)
+// welke recepten passen bij deze methode? eerst je eigen, dan de ingebouwde
 function recipesFor(methodId){
   const m=methodById(methodId); const naam=((m&&m.name)||'').toLowerCase();
-  const hit=FILTER_RECIPES.filter(r=>r.voor.some(v=>v===methodId||naam.includes(v)));
-  if(hit.length)return hit;
-  return FILTER_RECIPES.filter(r=>r.id==='rao'||r.id==='hoffmann');
+  const eigen=(state.recipes||[]).filter(r=>r.mid===methodId);
+  let hit=FILTER_RECIPES.filter(r=>r.voor.some(v=>v===methodId||naam.includes(v)));
+  // een methode die we niet kennen (je eigen brewer) krijgt toch een startpunt
+  if(!hit.length)hit=FILTER_RECIPES.filter(r=>r.id==='rao'||r.id==='hoffmann');
+  return eigen.concat(hit);
 }
-function recipeById(id){return FILTER_RECIPES.find(r=>r.id===id)||null;}
+function recipeById(id){
+  return (state.recipes||[]).find(r=>r.id===id)||FILTER_RECIPES.find(r=>r.id===id)||null;
+}
 // gewichten uitrekenen voor jouw dose; hendels verschuiven de 4:6-verdeling
 function recipeSteps(r,dose,hendels){
   if(!r)return [];
@@ -1849,7 +1909,7 @@ function mergeMethodImages(){
 function asArr(v){return Array.isArray(v)?v:(v==null||v==='')?[]:[v];}
 function normaliseerData(st){
   if(!st||typeof st!=='object')return st;
-  ['brews','beans','methods','gear','prepItems','latteShots'].forEach(k=>{
+  ['brews','beans','methods','gear','prepItems','latteShots','recipes'].forEach(k=>{
     if(k in st && !Array.isArray(st[k]))st[k]=[];
   });
   (st.brews||[]).forEach(b=>{
@@ -1905,8 +1965,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
+const pages=['welcome','home','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
+const navMap={home:'home',form:'home',dialin:'home',recipe:'home',detail:'home',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -2500,6 +2560,153 @@ function fillGear(naam){
   else if(pa&&!pa.value.trim())pa.value=naam;
   else if(br)br.value=naam;
 }
+/* ---------------- eigen recepten ----------------
+   Een recept is een lijstje stappen. Je vult ze zelf in of laat de AI een
+   voorstel doen; in beide gevallen sta jij erin met de hand. Intern bewaren we
+   elk gietdoel als deel van het totaal, zodat het meeschaalt als je een andere
+   dose gebruikt dan waarmee je het opschreef.                              */
+const STAP_SOORTEN=['bloom','giet','swirl','roer','wacht','pers','doorloop'];
+let recBewerk=null;      // {id, mid, stappen:[{t,g,k,d}]}
+function openRecipe(id,mid){
+  const best=id?recipeById(id):null;
+  const methode=mid||(best&&best.mid)||formMethod||
+    (state.methods.filter(m=>m.on&&methodFamily(m)==='filter')[0]||{}).id;
+  if(best&&best.eigen){
+    const water=Math.round(best.dose*best.ratio);
+    recBewerk={id:best.id,mid:best.mid,
+      stappen:best.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,d:x.d}))};
+    setVal('rec-naam',best.naam);setVal('rec-dose',best.dose);setVal('rec-water',water);
+    setVal('rec-temp',best.temp);setVal('rec-maling',best.maling);setVal('rec-over',best.over||'');
+  }else{
+    // beginnen vanaf het recept dat nu geselecteerd staat, scheelt overtypen
+    const basis=best||recipeById((state.lastRecipe||{})[methode])||recipesFor(methode)[0];
+    const water=basis?Math.round(basis.dose*basis.ratio):250;
+    recBewerk={id:null,mid:methode,
+      stappen:basis?basis.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,d:x.d})):[]};
+    setVal('rec-naam',basis?('my '+basis.naam.toLowerCase()):'my recipe');
+    setVal('rec-dose',basis?basis.dose:15);setVal('rec-water',water);
+    setVal('rec-temp',basis?basis.temp:94);setVal('rec-maling',basis?basis.maling:'medium');
+    setVal('rec-over','');
+  }
+  document.getElementById('rec-title').textContent=(best&&best.eigen)?'edit recipe':'own recipe';
+  document.getElementById('rec-del').style.display=(best&&best.eigen)?'block':'none';
+  recMethods();recSteps();applyAIVisibility();go('recipe');
+}
+function recMethods(){
+  const el=document.getElementById('rec-methods');if(!el)return;
+  el.innerHTML=state.methods.filter(m=>m.on&&methodFamily(m)==='filter').map(m=>
+    `<button class="lp ${m.id===recBewerk.mid?'sel':''}" onclick="recPickMethod('${m.id}')">${esc(m.name)}</button>`).join('')
+    ||'<span class="rec-empty">turn on a filter method under methods first</span>';
+}
+function recPickMethod(id){recBewerk.mid=id;recMethods();}
+function recWater(){
+  // dose gewijzigd: water mee laten lopen met de ratio die er stond
+  const d=parseFloat(document.getElementById('rec-dose').value);
+  const w=parseFloat(document.getElementById('rec-water').value);
+  if(d>0&&w>0&&recBewerk)recBewerk.ratio=w/d;
+}
+function recRatio(){recWater();}
+function recSteps(){
+  const el=document.getElementById('rec-steps');if(!el)return;
+  if(!recBewerk.stappen.length){el.innerHTML='<div class="rec-empty">no steps yet &mdash; add one, or let AI draft it</div>';return;}
+  el.innerHTML=recBewerk.stappen.map((st,i)=>`<div class="rec-row">
+    <div class="r-t"><input value="${esc(pourFmt(st.t||0))}" inputmode="numeric" placeholder="0:00"
+      oninput="formatTime(this)" onblur="recSet(${i},'t',this.value)"></div>
+    <div class="r-mid">
+      <select onchange="recSet(${i},'k',this.value)">
+        ${STAP_SOORTEN.map(k=>`<option value="${k}" ${st.k===k?'selected':''}>${k}</option>`).join('')}
+      </select>
+      <input value="${esc(st.d||'')}" placeholder="what do you do?" oninput="recSet(${i},'d',this.value)">
+    </div>
+    <div class="r-g"><input value="${st.g===''||st.g==null?'':st.g}" type="number" inputmode="numeric"
+      placeholder="&mdash;" oninput="recSet(${i},'g',this.value)"></div>
+    <button class="r-x" onclick="recDel(${i})" title="remove" aria-label="remove step">&times;</button>
+  </div>`).join('');
+}
+function recSet(i,veld,v){
+  const st=recBewerk.stappen[i];if(!st)return;
+  if(veld==='t')st.t=parseTimeSec(v)||0;
+  else if(veld==='g')st.g=(v===''?'':(parseFloat(v)||0));
+  else st[veld]=v;
+  if(veld==='t')recSteps();   // opnieuw tekenen zodat de tijd netjes staat
+}
+function recAdd(){
+  const laatste=recBewerk.stappen[recBewerk.stappen.length-1];
+  recBewerk.stappen.push({t:(laatste?laatste.t+30:0),g:'',k:'giet',d:''});
+  recSteps();
+}
+function recDel(i){recBewerk.stappen.splice(i,1);recSteps();}
+function cancelRecipe(){recBewerk=null;openForm(formMethod);}
+function saveRecipe(){
+  const naam=(document.getElementById('rec-naam').value||'').trim();
+  const dose=parseFloat(document.getElementById('rec-dose').value);
+  const water=parseFloat(document.getElementById('rec-water').value);
+  if(!naam){toast('give it a name');return;}
+  if(!(dose>0&&water>0)){toast('fill in dose and water');return;}
+  if(!recBewerk.stappen.length){toast('add at least one step');return;}
+  const stappen=recBewerk.stappen.slice().sort((a,b)=>a.t-b.t).map(st=>({
+    t:st.t||0, p:(st.g===''||st.g==null)?0:Math.max(0,Math.min(1.5,st.g/water)),
+    k:st.k||'giet', d:(st.d||'').trim()||st.k||'giet'}));
+  const r={id:recBewerk.id||('r_'+uid().slice(0,6)),eigen:true,mid:recBewerk.mid,
+    naam,dose,ratio:water/dose,temp:parseFloat(document.getElementById('rec-temp').value)||94,
+    maling:(document.getElementById('rec-maling').value||'').trim()||'medium',
+    over:(document.getElementById('rec-over').value||'').trim()||'your own schedule',
+    voor:[recBewerk.mid],stappen};
+  if(!Array.isArray(state.recipes))state.recipes=[];
+  const i=state.recipes.findIndex(x=>x.id===r.id);
+  if(i>=0)state.recipes[i]=r;else state.recipes.push(r);
+  if(!state.lastRecipe)state.lastRecipe={};
+  state.lastRecipe[r.mid]=r.id;
+  save();toast('\u2713 recipe saved');
+  const mid=r.mid;recBewerk=null;
+  pc.mid=null;            // dwing de coach het nieuwe recept op te pakken
+  openForm(mid);
+}
+function delRecipe(){
+  if(!recBewerk||!recBewerk.id)return;
+  if(!confirm('delete this recipe?'))return;
+  state.recipes=(state.recipes||[]).filter(x=>x.id!==recBewerk.id);
+  const mid=recBewerk.mid;
+  if(state.lastRecipe&&state.lastRecipe[mid]===recBewerk.id)delete state.lastRecipe[mid];
+  save();toast('recipe deleted');recBewerk=null;pc.mid=null;openForm(mid);
+}
+/* De AI schrijft het schema, jij houdt de pen. Alles komt in dezelfde lijst
+   terecht, dus elke regel blijft daarna aan te passen.                     */
+async function aiRecipeSchema(){
+  const btn=document.getElementById('rec-ai');
+  const m=methodById(recBewerk.mid);
+  const bean=beanById(formBean);
+  const dose=parseFloat(document.getElementById('rec-dose').value)||15;
+  const water=parseFloat(document.getElementById('rec-water').value)||Math.round(dose*16);
+  const oud=btn.textContent;
+  btn.textContent='AI is thinking\u2026';btn.disabled=true;
+  try{
+    const prompt='Je bent een specialty-barista. Maak een giet-schema voor de filtermethode "'+
+      (m?m.name:'v60')+'" met '+dose+' g koffie en '+water+' g water'+
+      (bean?(' voor de boon '+bean.name+' ('+[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')+')'):'')+
+      '.'+gearPromptBlock()+'\n'+FILTER_RULES+'\n'+
+      'Geef ALLEEN JSON zonder markdown: {"temp":93,"maling":"medium","over":"","stappen":[{"t":"0:00","k":"bloom","g":45,"d":""}]}. '+
+      't = tijd vanaf start als mm:ss. k = een van: bloom, giet, swirl, roer, wacht, pers, doorloop. '+
+      'g = het TOTAAL aan water dat er na die stap in zit (dus oplopend, laatste giet = '+water+'); '+
+      'laat g weg bij een stap waarbij je niet giet. d = korte instructie in het Nederlands, max 12 woorden. '+
+      'Vier tot zeven stappen, eindig met een doorloop-stap. over = \u00e9\u00e9n korte zin over dit recept.';
+    const d=extractJSON(await callClaude([{role:'user',content:prompt}],900));
+    if(d.temp)setVal('rec-temp',d.temp);
+    if(d.maling)setVal('rec-maling',d.maling);
+    if(d.over)setVal('rec-over',d.over);
+    const rijen=(Array.isArray(d.stappen)?d.stappen:[]).map(x=>({
+      t:parseTimeSec(String(x.t||'0:00'))||0,
+      g:(x.g==null||x.g==='')?'':Math.round(parseFloat(x.g)||0),
+      k:STAP_SOORTEN.includes(x.k)?x.k:'giet',
+      d:(x.d||'').trim()}));
+    if(!rijen.length)throw new Error('geen stappen');
+    recBewerk.stappen=rijen.sort((a,b)=>a.t-b.t);
+    recSteps();toast('\u2713 draft filled in \u2014 change what you want');
+  }catch(e){
+    toast('AI not available \u2014 enter your key under profile');
+  }
+  btn.textContent=oud;btn.disabled=false;
+}
 /* ---------------- getekende zetters ----------------
    Wat de E61 voor espresso doet, doet dit voor filter: je ziet het water
    stijgen terwijl de klok loopt. De vulling zit in een eigen groep buiten het
@@ -2629,9 +2836,14 @@ function renderPour(){
 function pourRecipes(){
   const el=document.getElementById('pc-recipes');if(!el)return;
   el.innerHTML=recipesFor(pc.mid).map(r=>
-    '<button class="lp '+(r.id===pc.rid?'sel':'')+'" onclick="pourPickRecipe(\''+r.id+'\')">'+esc(r.naam)+'</button>').join('');
+    '<button class="lp '+(r.id===pc.rid?'sel':'')+'" onclick="pourPickRecipe(\''+r.id+'\')">'+
+    (r.eigen?'\u270e ':'')+esc(r.naam)+'</button>').join('')+
+    '<button class="lp" onclick="openRecipe(null,pc.mid)">\uff0b own</button>';
   const o=document.getElementById('pc-over');const r=recipeById(pc.rid);
-  if(o)o.textContent=r?(r.over+'  \u00b7  '+r.maling+', '+r.temp+'\u00b0C'):'';
+  if(o){
+    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+
+      (r.eigen?' \u00b7 <a class="bean-link" onclick="openRecipe(\''+r.id+'\')">edit</a>':'')):'';
+  }
 }
 function pourPickRecipe(id){
   if(pc.run){toast('the clock is running \u2014 stop it first');return;}
