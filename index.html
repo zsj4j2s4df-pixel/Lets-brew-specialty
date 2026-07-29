@@ -726,6 +726,26 @@
   .rec-row .r-x{width:34px;flex:none;background:none;border:none;color:var(--ink-soft);
     font-size:24px;line-height:1;cursor:pointer;padding:6px 0 0;font-family:inherit;}
   .rec-empty{color:var(--ink-soft);font-size:16px;padding:6px 4px 2px;}
+  /* inklapbare kaarten in de pour coach */
+  .pcard{margin-bottom:11px;overflow:hidden;}
+  .pc-head{width:100%;background:none;border:none;display:flex;align-items:baseline;gap:10px;
+    padding:12px 15px;font-family:inherit;color:var(--ink);cursor:pointer;text-align:left;}
+  .pc-head .pc-n{font-size:23px;flex:none;}
+  .pc-head .pc-sum{flex:1;min-width:0;color:var(--ink-soft);font-size:15px;line-height:1.25;}
+  .pc-head .pc-arr{flex:none;color:var(--ink-soft);font-size:19px;transition:transform .15s;}
+  .pcard.op .pc-head .pc-arr{transform:rotate(90deg);}
+  .pcard.op .pc-head .pc-sum{display:none;}
+  .pc-body{display:none;padding:0 15px 14px;}
+  .pcard.op .pc-body{display:block;}
+  .pc-body .field,.pc-body .field-row,.pc-body .ratio-row{margin-bottom:11px;}
+  .pc-body>*:last-child{margin-bottom:0;}
+  .pcard.klaar .pc-head .pc-n{color:var(--ink-soft);}
+  /* het schema zoals het in het receptenboek staat */
+  .pcs{display:flex;gap:10px;font-size:15px;color:var(--ink-soft);padding:2px 0;}
+  .pcs .t{width:44px;flex:none;font-variant-numeric:tabular-nums;}
+  .pcs .k{flex:1;min-width:0;}
+  .pcs .g{flex:none;}
+  .pcs-h{border-top:2px solid var(--line);filter:url(#wobble);padding-top:9px;margin-top:9px;}
   /* getekende zetter */
   #pc-art{display:flex;justify-content:center;margin:2px 0 8px;}
   #pc-art svg{width:100%;max-width:210px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.7;
@@ -873,32 +893,65 @@
       <div class="field"><label>method</label>
         <div class="method-pick" id="form-methods"></div></div>
 
-      <div class="field"><label>beans</label>
+      <div class="field" id="fb-beans"><label>beans</label>
         <div class="link-pick" id="form-beans"></div></div>
 
       <div id="dialin-hint" class="dialin-hint" style="display:none"></div>
 
-      <div class="di-card sketch soft" id="pc-card" style="display:none">
-        <div class="di-lbl hand">pour coach</div>
-        <div class="pc-naam hand" id="pc-naam"></div>
-        <div class="pc-over" id="pc-over"></div>
-        <div class="pc-links" id="pc-links"></div>
-        <div id="pc-levers"></div>
-        <div id="pc-art"></div>
-        <div class="pc-clockrow">
-          <div><span class="pc-time hand" id="pc-time">0:00</span><div class="pc-of" id="pc-of"></div></div>
-          <button type="button" class="e61-btn" id="pc-btn" onclick="pourToggle()">start</button>
+      <div id="pc-stack" style="display:none">
+        <div class="pcard sketch soft" id="pcard-recipe">
+          <button type="button" class="pc-head" onclick="cardToggle('recipe')">
+            <span class="pc-n hand">recipe</span><span class="pc-sum" id="sum-recipe"></span>
+            <span class="pc-arr">&rsaquo;</span></button>
+          <div class="pc-body" id="pcb-recipe">
+            <div class="pc-naam hand" id="pc-naam"></div>
+            <div class="pc-over" id="pc-over"></div>
+            <div class="pc-links" id="pc-links"></div>
+            <div id="pc-levers"></div>
+            <div id="pc-schema"></div>
+          </div>
         </div>
-        <div id="pc-steps"></div>
-        <div class="pc-bloom" id="pc-bloom"></div>
-        <div class="set-d" style="margin-top:8px;font-size:14px">the recipe runs with the clock. Off schedule? Tap the step when you actually do it and the rest shifts with you. Stop when the bed runs dry &mdash; the times land in the fields below</div>
+        <div class="pcard sketch soft" id="pcard-bean">
+          <button type="button" class="pc-head" onclick="cardToggle('bean')">
+            <span class="pc-n hand">bean</span><span class="pc-sum" id="sum-bean"></span>
+            <span class="pc-arr">&rsaquo;</span></button>
+          <div class="pc-body" id="pcb-bean">
+            <div class="pc-bloom" id="pc-bloom"></div>
+          </div>
+        </div>
+        <div class="pcard sketch soft" id="pcard-gear">
+          <button type="button" class="pc-head" onclick="cardToggle('gear')">
+            <span class="pc-n hand">gear</span><span class="pc-sum" id="sum-gear"></span>
+            <span class="pc-arr">&rsaquo;</span></button>
+          <div class="pc-body" id="pcb-gear"></div>
+        </div>
+        <div class="pcard sketch" id="pcard-pour">
+          <button type="button" class="pc-head" onclick="cardToggle('pour')">
+            <span class="pc-n hand">the pour</span><span class="pc-sum" id="sum-pour"></span>
+            <span class="pc-arr">&rsaquo;</span></button>
+          <div class="pc-body" id="pcb-pour">
+            <div id="pc-art"></div>
+            <div class="pc-clockrow" id="pc-clock">
+              <div><span class="pc-time hand" id="pc-time">0:00</span><div class="pc-of" id="pc-of"></div></div>
+              <button type="button" class="e61-btn" id="pc-btn" onclick="pourToggle()">start</button>
+            </div>
+            <div id="pc-steps"></div>
+            <div class="set-d" id="pc-note" style="margin-top:8px;font-size:14px">the recipe runs with the clock. Off schedule? Tap the step when you actually do it and the rest shifts with you. Stop when the bed runs dry.</div>
+          </div>
+        </div>
+        <div class="pcard sketch soft" id="pcard-log">
+          <button type="button" class="pc-head" onclick="cardToggle('log')">
+            <span class="pc-n hand">how was it</span><span class="pc-sum" id="sum-log"></span>
+            <span class="pc-arr">&rsaquo;</span></button>
+          <div class="pc-body" id="pcb-log"></div>
+        </div>
       </div>
 
-      <div class="field-row">
+      <div class="field-row" id="fb-doserow">
         <div class="field"><label>dose (g)</label><input id="f-dose" type="number" inputmode="decimal" step="0.1" oninput="calc('dose');pourRecalc()"></div>
         <div class="field"><label id="f-yield-label">yield (g)</label><input id="f-yield" type="number" inputmode="decimal" step="0.1" oninput="calc('yield')"></div>
       </div>
-      <div class="ratio-row">
+      <div class="ratio-row" id="fb-ratio">
         <span class="ratio-lbl">ratio 1:</span>
         <input id="f-ratio" class="ratio-input" type="number" inputmode="decimal" step="0.1" oninput="calc('ratio')">
         <span class="ratio-hint" id="f-ratio-hint">auto-calculates from dose + yield</span>
@@ -909,9 +962,9 @@
         <div class="field"><label>bloom (s)</label><input id="f-bloom-s" type="number" inputmode="numeric" placeholder="e.g. 30"></div>
       </div>
 
-      <div class="field-row">
-        <div class="field"><label>time (m:ss)</label><input id="f-time" placeholder="2:30" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)"></div>
-        <div class="field"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
+      <div class="field-row" id="fb-timerow">
+        <div class="field" id="fb-time"><label>time (m:ss)</label><input id="f-time" placeholder="2:30" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)"></div>
+        <div class="field" id="fb-temp"><label>temp (°C)</label><input id="f-temp" type="number" inputmode="decimal"></div>
       </div>
 
       <div id="filter-extra" style="display:none">
@@ -935,29 +988,29 @@
         <div class="link-pick" id="f-gearchips"></div>
       </div>
 
-      <div class="field"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine"></div>
+      <div class="field" id="fb-grind"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine"></div>
 
       <div class="field" id="prep-field" style="display:none"><label>puck-prep &amp; machine</label>
         <div id="prep-list"></div>
         <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
 
-      <div class="field"><label>score</label>
+      <div class="field" id="fb-score"><label>score</label>
         <div class="score-row"><input id="f-score" type="range" min="0" max="10" step="0.1" value="8" oninput="document.getElementById('score-big').textContent=(+this.value).toFixed(1)">
         <span class="score-big hand" id="score-big">8.0</span></div></div>
 
-      <div class="field"><label>taste notes</label>
+      <div class="field" id="fb-tastenotes"><label>taste notes</label>
         <div id="wheel-wrap" style="display:none"><svg id="taste-wheel" viewBox="0 0 200 200"></svg></div>
         <div class="tags" id="form-tags"></div>
         <div class="tag-new-row"><input id="f-tagnew" placeholder="add your own taste"><button class="tag-add-btn" onclick="addTag()">＋</button></div>
         <textarea id="f-notes" placeholder="free note (optional)" style="margin-top:10px"></textarea></div>
 
-      <div class="field"><label>custom fields</label>
+      <div class="field" id="fb-custom"><label>custom fields</label>
         <div id="custom-fields"></div>
         <button class="profile-btn" onclick="addCustomField()" style="margin-top:4px">＋ add custom field</button>
       </div>
 
-      <div class="field"><label>how to brew this? (your own steps)</label>
+      <div class="field" id="fb-guide"><label>how to brew this? (your own steps)</label>
         <textarea id="f-guide" placeholder="leave empty for the default recipe" style="min-height:190px;overflow:hidden" oninput="autoGrow(this)"></textarea>
         <button class="profile-btn ai-only hidden" onclick="suggestGuide()" style="margin-top:6px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M11.6 4.2 Q12.7 8.2 13.4 9.9 Q15.2 10.7 19.8 11.3 Q15 12.6 13.1 13.4 Q12.4 15.4 11.8 20.8 Q11.2 15 10.6 13.1 Q8.6 12.4 4.2 11.6 Q9.1 10.3 10.9 9.6 Q11.6 7.6 12.3 3.4"/><path d="M18.4 4.4 Q18.9 5.5 19.1 6.1 Q19.9 6.4 21.2 6.5 Q19.6 7.1 18.9 7.4 Q18.6 8.2 18.4 9.4 Q18.1 8 17.9 7.2 Q17 6.9 15.8 6.5 Q17.4 6.1 18.1 5.9 Q18.4 5 18.7 3.8" opacity="0.7"/></svg> let AI suggest one</button>
       </div>
@@ -2481,6 +2534,8 @@ function applyFamilyToForm(){
   const bf=document.getElementById('bloom-field');
   if(bf)bf.style.display=(fam==='filter')?'flex':'none';
   // doorlooptijd, bedvorm, brewer en papier: alleen bij filter
+  const kaarten=(fam==='filter')&&featOn('pourcoach')&&recipesFor(formMethod).length>0;
+  if(kaarten)kaartenAan(); else kaartenUit();
   const fx=document.getElementById('filter-extra');
   if(fx)fx.style.display=(fam==='filter'&&featOn('drawdown'))?'block':'none';
   const fg=document.getElementById('filter-gear');
@@ -2551,7 +2606,7 @@ function renderCupPick(){
   el.innerHTML=FILTER_CUPS.map(c=>
     `<button type="button" class="cup-opt ${formCup===c.id?'sel':''}" onclick="pickCup('${c.id}')">${esc(c.n)}</button>`).join('');
 }
-function pickCup(id){formCup=(formCup===id)?null:id;renderCupPick();}
+function pickCup(id){formCup=(formCup===id)?null:id;renderCupPick();cardSummaries();}
 // echte extractie als je een refractometer hebt: het water dat eruit komt is
 // het water dat erin ging min wat het koffiebed vasthoudt (~2 g per gram koffie)
 function extractionYield(b){
@@ -2639,7 +2694,7 @@ function renderGearChips(){
     `<button type="button" class="lp" onclick="fillGear('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
 }
 // vult het lege veld van de twee; staan ze allebei vol, dan de brewer
-function fillGear(naam){
+function fillGear(naam){cardSummaries();
   const br=document.getElementById('f-brewer'), pa=document.getElementById('f-paper');
   if(br&&!br.value.trim())br.value=naam;
   else if(pa&&!pa.value.trim())pa.value=naam;
@@ -2924,6 +2979,89 @@ function paintBrewer(){
   const v=el.querySelector('#bw-valve');
   if(v)v.classList.toggle('dicht',!!(st&&st.k==='wacht'));
 }
+/* ---------------- de kaartenstapel ----------------
+   Bij filter wordt het formulier een stapel kaarten: dicht is elke kaart één
+   regel met de kern erop, open is het hele blok. De velden zelf blijven precies
+   dezelfde elementen -- ze verhuizen alleen naar de kaart waar ze horen, en bij
+   espresso weer terug naar hun oorspronkelijke plek.                       */
+const KAART_INHOUD={
+  recipe:['fb-doserow','fb-ratio','fb-temp','fb-grind','bloom-field'],
+  bean:['fb-beans'],
+  gear:['filter-gear'],
+  pour:[],
+  log:['fb-time','filter-extra','filter-taste','fb-score','fb-tastenotes','fb-custom','fb-guide'],
+};
+const ALLE_BLOKKEN=[].concat(...Object.values(KAART_INHOUD));
+let pcOpen={recipe:false,bean:false,gear:false,pour:true,log:false};
+let formHerkomst=null;
+// waar stond elk blok oorspronkelijk? één keer onthouden, voor de weg terug
+function bewaarHerkomst(){
+  if(formHerkomst)return;
+  formHerkomst={};
+  ALLE_BLOKKEN.forEach(id=>{
+    const el=document.getElementById(id);if(!el||!el.parentNode)return;
+    formHerkomst[id]={p:el.parentNode,i:[...el.parentNode.children].indexOf(el)};
+  });
+}
+function kaartenAan(){
+  bewaarHerkomst();
+  Object.keys(KAART_INHOUD).forEach(k=>{
+    const doel=document.getElementById('pcb-'+k);if(!doel)return;
+    KAART_INHOUD[k].forEach(id=>{const el=document.getElementById(id);if(el)doel.appendChild(el);});
+  });
+  // de tijd-rij is leeg zolang zijn twee velden in de kaarten hangen
+  const tr=document.getElementById('fb-timerow');if(tr)tr.style.display='none';
+  const st=document.getElementById('pc-stack');if(st)st.style.display='block';
+}
+function kaartenUit(){
+  if(!formHerkomst)return;
+  // in oorspronkelijke volgorde terugzetten, anders schuift de index onder je weg
+  ALLE_BLOKKEN.slice().sort((a,b)=>(formHerkomst[a]?.i||0)-(formHerkomst[b]?.i||0)).forEach(id=>{
+    const el=document.getElementById(id),h=formHerkomst[id];
+    if(!el||!h)return;
+    h.p.insertBefore(el,[...h.p.children][h.i]||null);
+  });
+  const tr=document.getElementById('fb-timerow');if(tr)tr.style.display='';
+  const st=document.getElementById('pc-stack');if(st)st.style.display='none';
+}
+function cardToggle(k){pcOpen[k]=!pcOpen[k];renderCards();}
+function renderCards(){
+  Object.keys(pcOpen).forEach(k=>{
+    const c=document.getElementById('pcard-'+k);if(!c)return;
+    c.classList.toggle('op',!!pcOpen[k]);
+  });
+  cardSummaries();
+}
+// de regel die je ziet als een kaart dicht is
+function cardSummaries(){
+  const zet=(k,t)=>{const el=document.getElementById('sum-'+k);if(el)el.textContent=t;};
+  const r=recipeById(pc.rid);
+  const dose=document.getElementById('f-dose').value;
+  const water=document.getElementById('f-yield').value;
+  const stand=document.getElementById('f-grind').value;
+  zet('recipe',r?([r.naam,(dose&&water)?(dose+' g \u2192 '+water+' g'):'',stand]
+    .filter(Boolean).join('  \u00b7  ')):'pick one from the recipe book');
+
+  const bean=beanById(formBean);
+  const f=bean?beanFreshness(bean):null;
+  const h=f?freshBloomHint(f.days):null;
+  const dz=parseFloat(dose)||0;
+  zet('bean',bean?([bean.name,f?f.label:'',(h&&dz)?('bloom '+Math.round(dz*h.mult)+' g, '+h.sec+' s'):'']
+    .filter(Boolean).join('  \u00b7  ')):'no bean picked');
+
+  const g=['f-brewer','f-paper','f-water'].map(i=>document.getElementById(i).value.trim()).filter(Boolean);
+  zet('gear',g.length?g.join('  \u00b7  '):'brewer, paper & water \u2014 nothing set');
+
+  if(pc.total!=null)zet('pour','total '+pourFmt(pc.total)+(pc.draw!=null?(' \u00b7 drawdown '+pourFmt(pc.draw)):''));
+  else if(pc.run)zet('pour',pourFmt(pc.el)+' \u00b7 '+((pc.steps[pourCur()]||{}).k||''));
+  else zet('pour',r?('not started \u2014 '+r.stappen.length+' steps'):'no recipe');
+
+  const score=document.getElementById('f-score').value;
+  const cup=formCup?(cupById(formCup)||{}).n:'';
+  const tijd=document.getElementById('f-time').value;
+  zet('log',(pc.total!=null||tijd)?[tijd?('time '+tijd):'',cup,'score '+(+score).toFixed(1)].filter(Boolean).join('  \u00b7  ')
+    :'opens by itself when you stop the clock');
+}
 /* ---------------- pour coach (filter) ----------------
    Een recept is een tijdlijn. De klok loopt, de stap die aan de beurt is licht
    op, en tik je hem later aan dan gepland dan schuift al het volgende mee -- zo
@@ -2970,11 +3108,10 @@ function pourGieten(el){
 function pourFmt(sec){const m=Math.floor(sec/60),ss=Math.floor(sec%60);return m+':'+String(ss).padStart(2,'0');}
 // de coach klaarzetten voor de methode die nu in het formulier staat
 function pourInit(){
-  const card=document.getElementById('pc-card');if(!card)return;
+  const stack=document.getElementById('pc-stack');if(!stack)return;
   const aan=(methodFamily(formMethod)==='filter')&&featOn('pourcoach')&&recipesFor(formMethod).length>0;
-  card.style.display=aan?'block':'none';
   if(!aan){pourStop(true);return;}
-  if(pc.mid===formMethod&&pc.steps.length){renderPour();return;}   // niet resetten bij hertekenen
+  if(pc.mid===formMethod&&pc.steps.length){renderPour();renderCards();return;}   // niet resetten bij hertekenen
   pourStop(true);
   const lijst=recipesFor(formMethod);
   const bewaard=(state.lastRecipe||{})[formMethod];
@@ -2985,7 +3122,8 @@ function pourInit(){
   if(r&&!document.getElementById('f-dose').value)setVal('f-dose',r.dose);
   if(r&&!document.getElementById('f-temp').value)setVal('f-temp',r.temp);
   if(r&&r.stand&&!document.getElementById('f-grind').value)setVal('f-grind',r.stand);
-  pourBuild();
+  pcOpen={recipe:false,bean:false,gear:false,pour:true,log:false};
+  pourBuild();renderCards();
 }
 // het schema opnieuw uitrekenen voor de huidige dose en hendelstand
 function pourBuild(){
@@ -2998,13 +3136,24 @@ function pourBuild(){
   renderPour();
 }
 function pourRecalc(){
-  const card=document.getElementById('pc-card');
-  if(!card||card.style.display==='none'||pc.run)return;
+  const stack=document.getElementById('pc-stack');
+  if(!stack||stack.style.display==='none')return;
+  cardSummaries();
+  if(pc.run)return;
   pourBuild();
 }
 function renderPour(){
-  pourRecipes();pourLevers();renderBrewerArt();pourBloom();pourSteps();
+  pourRecipes();pourLevers();renderBrewerArt();pourBloom();pourSteps();pourSchema();
   const t=document.getElementById('pc-time');if(t)t.textContent=pourFmt(pc.el);
+  cardSummaries();
+}
+// het gietschema zoals het in het receptenboek staat, in de receptkaart
+function pourSchema(){
+  const el=document.getElementById('pc-schema');if(!el)return;
+  if(!pc.steps.length){el.innerHTML='';return;}
+  el.innerHTML='<div class="pcs-h"></div>'+pc.steps.map(st=>
+    '<div class="pcs"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
+    ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.g?st.g+' g':'')+'</span></div>').join('');
 }
 // welk recept staat er geladen? kiezen doe je in het receptenboek bij learn
 function pourRecipes(){
@@ -3108,6 +3257,7 @@ function pourStart(){
   pc.run=true;pc.t0=performance.now();pc.el=0;pc.done=0;pc.shift=0;pc.marks=[];pc.total=null;pc.draw=null;pc.live=-1;
   document.getElementById('pc-btn').textContent='stop';
   pc.timer=setInterval(pourTickClock,200);
+  pcOpen.pour=true;pcOpen.log=false;renderCards();
   pourSteps();paintBrewer();toast('\u23f1 running \u2014 tap a step if you drift');
 }
 function pourTickClock(){
@@ -3118,7 +3268,7 @@ function pourTickClock(){
   for(let k=0;k<cur;k++)if(pc.marks[k]==null)pc.marks[k]=pc.steps[k].t+pc.shift;
   // de lijst alleen hertekenen als er iets verschuift; het water elke tik
   if(cur!==pc.live){pc.live=cur;pourSteps();}
-  paintBrewer();
+  paintBrewer();cardSummaries();
 }
 function pourStop(stil){
   if(pc.timer){clearInterval(pc.timer);pc.timer=null;}
@@ -3130,7 +3280,9 @@ function pourStop(stil){
   if(laatste!=null&&pc.el>laatste)pc.draw=Math.max(0,Math.round(pc.el-laatste));
   const b=document.getElementById('pc-btn');if(b)b.textContent='start again';
   pourFill();
-  if(!stil){pourSteps();paintBrewer();}
+  // klaar met gieten: het oordeel-deel gaat vanzelf open, de coach vouwt dicht
+  pcOpen.log=true;pcOpen.pour=false;
+  if(!stil){pourSteps();paintBrewer();renderCards();}
 }
 // wat de klok zag landt meteen in de velden eronder
 function pourFill(){
@@ -3397,7 +3549,7 @@ function renderFormBeans(){
   html+='<button class="lp" onclick="openBeanForm()">＋ nieuw</button>';
   el.innerHTML=html;
 }
-function pickBean(id){formBean=id;renderFormBeans();
+function pickBean(id){formBean=id;renderFormBeans();cardSummaries();
   // auto-vul bean-naam als beans-veld leeg/zelfde; en stel methode voor
   const b=beanById(id);
   if(b&&b.method&&state.methods.find(m=>m.id===b.method&&m.on)){formMethod=b.method;renderFormMethods();}
