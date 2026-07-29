@@ -1097,6 +1097,10 @@
         <div class="field"><label>temp (&deg;C)</label><input id="rec-temp" type="number" inputmode="decimal"></div>
         <div class="field"><label>grind</label><input id="rec-maling" placeholder="e.g. medium"></div>
       </div>
+      <div class="field"><label>grind setting</label>
+        <input id="rec-stand" placeholder="on your grinder, e.g. 22 clicks">
+        <div class="link-pick" id="rec-molens"></div>
+        <div class="fx-note" id="rec-stand-note">the number you actually dial &mdash; it lands in the brew form when you pick this recipe</div></div>
       <div class="field"><label>in one line</label><input id="rec-over" placeholder="what makes this recipe yours" maxlength="120"></div>
 
       <button class="recipe-btn ai-only hidden" id="rec-ai" onclick="aiRecipeSchema()">
@@ -2285,25 +2289,45 @@ async function updateDialIn(beanId,method){
     const grinder=(state.gear||[]).filter(g=>g.name).map(g=>g.name).join(', ');
     // doel afleiden uit de laatste poging (yield/tijd) en de doorloopsnelheid vergelijken
     const last=attempts[attempts.length-1];
+    const esp=methodFamily(method)==='espresso';
     const tgt=last.target||{};
     const tY=parseFloat(tgt.yield)||36, tT=parseTimeSec(tgt.time)||28;
+    // bij filter is het doel de tijd van het recept, niet een opbrengst per seconde
+    const rcp=esp?null:recipeById((state.lastRecipe||{})[method]);
+    const fDoel=rcp?(rcp.stappen[rcp.stappen.length-1].t+40):190;
+    const fTijd=Math.floor(fDoel/60)+':'+String(fDoel%60).padStart(2,'0');
     const lines=attempts.map((a,i)=>{
       const aY=parseFloat(a.yield)||null, aT=parseTimeSec(a.time)||null;
-      const flow=(aY&&aT)?(aY/aT).toFixed(2):'?';
-      return `${i+1}) maling ${a.grind||'?'}: ${a.dose||'?'}g in → ${aY||'?'}g uit in ${a.time||'?'} (doorloop ${flow} g/s)`;
+      if(esp){
+        const flow=(aY&&aT)?(aY/aT).toFixed(2):'?';
+        return `${i+1}) maling ${a.grind||'?'}: ${a.dose||'?'}g in → ${aY||'?'}g uit in ${a.time||'?'} (doorloop ${flow} g/s)`;
+      }
+      const smaak=a.cup?(cupById(a.cup)||{}).nl:'';
+      return `${i+1}) maling ${a.grind||'?'}: ${a.dose||'?'}g op ${aY||'?'}g water, totaal ${a.time||'?'}`+
+        (a.draw?`, doorlooptijd ${a.draw}`:'')+(a.bed?`, bed ${bedNL(a.bed)}`:'')+(smaak?`, geproefd: ${smaak}`:'');
     }).join('\n');
     let richting='onbekend — te weinig data';
-    const laY=parseFloat(last.yield)||null, laT=parseTimeSec(last.time)||null;
-    if(laY&&laT){const f=laY/laT, ft=tY/tT;
-      richting = f<ft*0.85 ? 'TE LANGZAAM (te weinig opbrengst voor de tijd / choking) → GROVER malen'
-              : f>ft*1.15 ? 'TE SNEL (te veel/te snel opbrengst, waterig) → FIJNER malen'
-                          : 'op doel — maling ongeveer aanhouden';}
-    const prompt=`Je bent een espresso dial-in expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
+    if(esp){
+      const laY=parseFloat(last.yield)||null, laT=parseTimeSec(last.time)||null;
+      if(laY&&laT){const f=laY/laT, ft=tY/tT;
+        richting = f<ft*0.85 ? 'TE LANGZAAM (te weinig opbrengst voor de tijd / choking) → GROVER malen'
+                : f>ft*1.15 ? 'TE SNEL (te veel/te snel opbrengst, waterig) → FIJNER malen'
+                            : 'op doel — maling ongeveer aanhouden';}
+    }else{
+      const c=last.cup?cupById(last.cup):null;
+      const dw=parseTimeSec(last.draw);
+      if(c&&c.id!=='goed')richting=c.nl+' → '+c.fixnl;
+      else if(dw&&dw>75)richting='doorlooptijd boven de 75 s: het bed loopt vast → GROVER malen en minder roeren';
+      else if(c&&c.id==='goed')richting='op doel — maling aanhouden';
+    }
+    const prompt=`Je bent een ${esp?'espresso dial-in':'filter'}-expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
       (grinder?` Molen(s) van de gebruiker: ${grinder}. Als je de molen kent, gebruik de juiste getalsrichting (welk getal grover/fijner is).`:'')+
-      `\nDOEL: ${tY} g uit in ~${tT} s (ratio ~1:2), doelsnelheid ${(tY/tT).toFixed(2)} g/s.\n`+
-      ESPRESSO_RULES+`\n`+
+      (esp?`\nDOEL: ${tY} g uit in ~${tT} s (ratio ~1:2), doelsnelheid ${(tY/tT).toFixed(2)} g/s.\n`
+          :`\nDOEL: een schone kop met een totale tijd rond ${fTijd} en een doorlooptijd onder de minuut.\n`)+
+      (esp?ESPRESSO_RULES:FILTER_RULES)+`\n`+
       `Pogingen (oud→nieuw):\n${lines}\n`+
-      `Oordeel over de laatste shot: ${richting}.\n`+
+      `Oordeel over de laatste ${esp?'shot':'kop'}: ${richting}.\n`+
+      (esp?'':`De doorlooptijd (van de laatste giet tot het bed droogvalt) weegt zwaarder dan de totale tijd.\n`)+
       `Geef de beste maalstand voor de VOLGENDE poging, in exact die richting. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = KORTE maalstand (getal/klikken of relatief zoals "+1" of "-0.5", passend bij de schaal die de gebruiker gebruikt; GEEN uitleg). reason = één korte zin met de juiste richting (bv. "te weinig opbrengst → grover"). Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],250);
     const d=extractJSON(txt);
@@ -2448,17 +2472,17 @@ function waterCalc(){
    je bij met de maling), boven-onder de sterkte (die stel je bij met de ratio).
    Wie wel een refractometer heeft mag zijn TDS invullen voor het echte cijfer. */
 const FILTER_CUPS=[
-  {id:'goed',   n:'just right', x:0,    y:0,    fix:'keep everything the same',
+  {id:'goed',   n:'just right', nl:'precies goed', fixnl:'niets veranderen', x:0,    y:0,    fix:'keep everything the same',
    why:'nothing to change. Write down your grind so you can find your way back here.'},
-  {id:'zuur',   n:'sour & thin', x:-0.85, y:-0.45, fix:'grind one step finer',
+  {id:'zuur',   n:'sour & thin', nl:'zuur en dun', fixnl:'een stap FIJNER malen', x:-0.85, y:-0.45, fix:'grind one step finer',
    why:'sour and thin is the signature of under-extraction: the water was through before it had taken enough with it.'},
-  {id:'scherp', n:'sharp but strong', x:-0.7, y:0.55, fix:'grind one step finer',
+  {id:'scherp', n:'sharp but strong', nl:'scherp maar stevig', fixnl:'een stap FIJNER malen', x:-0.7, y:0.55, fix:'grind one step finer',
    why:'enough coffee in the cup, but not enough of it dissolved. Finer, and leave the ratio alone.'},
-  {id:'vlak',   n:'flat & watery', x:0,   y:-0.85, fix:'use less water, or more coffee',
+  {id:'vlak',   n:'flat & watery', nl:'vlak en waterig', fixnl:'minder water of meer koffie (ratio), niet de maling', x:0,   y:-0.85, fix:'use less water, or more coffee',
    why:'this is a strength problem, not an extraction one. Move the ratio toward 1:15 before you touch the grind.'},
-  {id:'bitter', n:'bitter & dry', x:0.85, y:0.3,  fix:'grind one step coarser',
+  {id:'bitter', n:'bitter & dry', nl:'bitter en droog', fixnl:'een stap GROVER malen', x:0.85, y:0.3,  fix:'grind one step coarser',
    why:'you pulled too much out of it. Coarser is the first move; only then look at temperature.'},
-  {id:'droog',  n:'astringent', x:0.9,  y:-0.2, fix:'grind coarser and pour gentler',
+  {id:'droog',  n:'astringent', nl:'droog en samentrekkend', fixnl:'GROVER malen, minder roeren, lager gieten', x:0.9,  y:-0.2, fix:'grind coarser and pour gentler',
    why:'that dry, mouth-puckering edge usually comes from fines clogging the bed. Grind coarser, stir less, pour from lower.'},
 ];
 function cupById(id){return FILTER_CUPS.find(c=>c.id===id)||null;}
@@ -2529,11 +2553,11 @@ function filterCompassHTML(b){
    betekent te hard gegoten, een droge rand betekent dat een deel van je koffie
    niet heeft meegedaan. Allebei gietfouten, geen maalfouten.            */
 const BED_SHAPES=[
-  {id:'vlak', n:'flat', d:'as it should be',
+  {id:'vlak', n:'flat', nl:'vlak', d:'as it should be',
    svg:'<path d="M6 8 Q22 5 38 8"/><path d="M7 8 Q15 23 20 31"/><path d="M37 8 Q29 23 24 31"/><path d="M20 31 Q22 33 24 31"/><path d="M11 18 Q22 15 33 18"/>'},
-  {id:'krater', n:'crater', d:'poured too hard',
+  {id:'krater', n:'crater', nl:'krater (te hard gegoten)', d:'poured too hard',
    svg:'<path d="M6 8 Q22 5 38 8"/><path d="M7 8 Q15 23 20 31"/><path d="M37 8 Q29 23 24 31"/><path d="M20 31 Q22 33 24 31"/><path d="M11 15 Q17 23 22 24 Q27 23 33 15"/>'},
-  {id:'muur', n:'wall', d:'dry rim left standing',
+  {id:'muur', n:'wall', nl:'droge rand blijven staan', d:'dry rim left standing',
    svg:'<path d="M6 8 Q22 5 38 8"/><path d="M7 8 Q15 23 20 31"/><path d="M37 8 Q29 23 24 31"/><path d="M20 31 Q22 33 24 31"/><path d="M10 12 Q16 21 22 21 Q28 21 34 12"/><path d="M11 11 Q12 15 13 17"/><path d="M33 11 Q32 15 31 17"/>'},
 ];
 function renderBedPick(){
@@ -2546,6 +2570,7 @@ function renderBedPick(){
 }
 function pickBed(id){formBed=(formBed===id)?null:id;renderBedPick();}
 function bedName(id){const b=BED_SHAPES.find(x=>x.id===id);return b?b.n:'';}
+function bedNL(id){const b=BED_SHAPES.find(x=>x.id===id);return b?(b.nl||b.n):'';}
 // snelkiezers uit je gear-lijst, zodat je een merk niet elke keer overtypt
 function renderGearChips(){
   const el=document.getElementById('f-gearchips');if(!el)return;
@@ -2577,6 +2602,7 @@ function openRecipe(id,mid){
       stappen:best.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,d:x.d}))};
     setVal('rec-naam',best.naam);setVal('rec-dose',best.dose);setVal('rec-water',water);
     setVal('rec-temp',best.temp);setVal('rec-maling',best.maling);setVal('rec-over',best.over||'');
+    setVal('rec-stand',best.stand||'');recBewerk.molen=best.molen||null;
   }else{
     // beginnen vanaf het recept dat nu geselecteerd staat, scheelt overtypen
     const basis=best||recipeById((state.lastRecipe||{})[methode])||recipesFor(methode)[0];
@@ -2587,10 +2613,34 @@ function openRecipe(id,mid){
     setVal('rec-dose',basis?basis.dose:15);setVal('rec-water',water);
     setVal('rec-temp',basis?basis.temp:94);setVal('rec-maling',basis?basis.maling:'medium');
     setVal('rec-over','');
+    // maalstand overnemen: eerst uit het basisrecept, anders uit je laatste brew
+    const vorige=state.brews.filter(x=>x.method===methode&&x.grind).sort((a,b)=>b.ts-a.ts)[0];
+    setVal('rec-stand',(basis&&basis.stand)||(vorige?vorige.grind:''));
+    recBewerk.molen=(basis&&basis.molen)||(filterMolens()[0]||{}).name||null;
   }
   document.getElementById('rec-title').textContent=(best&&best.eigen)?'edit recipe':'own recipe';
   document.getElementById('rec-del').style.display=(best&&best.eigen)?'block':'none';
-  recMethods();recSteps();applyAIVisibility();go('recipe');
+  recMethods();recMolens();recSteps();applyAIVisibility();go('recipe');
+}
+// je filtermolens uit de gear-lijst, zodat de maalstand bij een molen hoort
+function filterMolens(){
+  return (state.gear||[]).filter(g=>g.name&&(g.category==='filter'||g.category==='algemeen'));
+}
+function recMolens(){
+  const el=document.getElementById('rec-molens');if(!el)return;
+  const lijst=filterMolens();
+  const note=document.getElementById('rec-stand-note');
+  if(!lijst.length){
+    el.innerHTML='';
+    if(note)note.textContent='the number you actually dial \u2014 add your grinder under profile \u2192 gear and the AI can name it';
+    return;
+  }
+  el.innerHTML=lijst.map(g=>
+    `<button class="lp ${recBewerk&&recBewerk.molen===g.name?'sel':''}" onclick="recPickMolen('${esc(g.name).replace(/'/g,'&#39;')}')">${esc(g.name)}</button>`).join('');
+  if(note)note.textContent='the number you actually dial \u2014 tap which grinder it belongs to';
+}
+function recPickMolen(naam){
+  recBewerk.molen=(recBewerk.molen===naam)?null:naam;recMolens();
 }
 function recMethods(){
   const el=document.getElementById('rec-methods');if(!el)return;
@@ -2650,6 +2700,8 @@ function saveRecipe(){
   const r={id:recBewerk.id||('r_'+uid().slice(0,6)),eigen:true,mid:recBewerk.mid,
     naam,dose,ratio:water/dose,temp:parseFloat(document.getElementById('rec-temp').value)||94,
     maling:(document.getElementById('rec-maling').value||'').trim()||'medium',
+    stand:(document.getElementById('rec-stand').value||'').trim(),
+    molen:recBewerk.molen||null,
     over:(document.getElementById('rec-over').value||'').trim()||'your own schedule',
     voor:[recBewerk.mid],stappen};
   if(!Array.isArray(state.recipes))state.recipes=[];
@@ -2678,6 +2730,7 @@ async function aiRecipeSchema(){
   const bean=beanById(formBean);
   const dose=parseFloat(document.getElementById('rec-dose').value)||15;
   const water=parseFloat(document.getElementById('rec-water').value)||Math.round(dose*16);
+  const molen=recBewerk.molen||((filterMolens()[0]||{}).name)||'';
   const oud=btn.textContent;
   btn.textContent='AI is thinking\u2026';btn.disabled=true;
   try{
@@ -2685,7 +2738,10 @@ async function aiRecipeSchema(){
       (m?m.name:'v60')+'" met '+dose+' g koffie en '+water+' g water'+
       (bean?(' voor de boon '+bean.name+' ('+[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')+')'):'')+
       '.'+gearPromptBlock()+'\n'+FILTER_RULES+'\n'+
-      'Geef ALLEEN JSON zonder markdown: {"temp":93,"maling":"medium","over":"","stappen":[{"t":"0:00","k":"bloom","g":45,"d":""}]}. '+
+      (molen?('De gebruiker maalt met: '+molen+'. Geef de maalstand in de schaal van die molen (klikken of getal) en noem geen andere molen.\n'):'')+
+      'Geef ALLEEN JSON zonder markdown: {"temp":93,"maling":"medium","stand":"","over":"","stappen":[{"t":"0:00","k":"bloom","g":45,"d":""}]}. '+
+      'maling = omschrijving in woorden (bijvoorbeeld medium-grof). stand = KORTE maalstand voor het invulveld'+
+      (molen?(' op de '+molen):'')+' (alleen een getal of klikken, GEEN uitleg en GEEN merknaam). '+
       't = tijd vanaf start als mm:ss. k = een van: bloom, giet, swirl, roer, wacht, pers, doorloop. '+
       'g = het TOTAAL aan water dat er na die stap in zit (dus oplopend, laatste giet = '+water+'); '+
       'laat g weg bij een stap waarbij je niet giet. d = korte instructie in het Nederlands, max 12 woorden. '+
@@ -2693,6 +2749,7 @@ async function aiRecipeSchema(){
     const d=extractJSON(await callClaude([{role:'user',content:prompt}],900));
     if(d.temp)setVal('rec-temp',d.temp);
     if(d.maling)setVal('rec-maling',d.maling);
+    if(d.stand)setVal('rec-stand',conciseGrind(d.stand));
     if(d.over)setVal('rec-over',d.over);
     const rijen=(Array.isArray(d.stappen)?d.stappen:[]).map(x=>({
       t:parseTimeSec(String(x.t||'0:00'))||0,
@@ -2812,6 +2869,7 @@ function pourInit(){
   const r=recipeById(pc.rid);
   if(r&&!document.getElementById('f-dose').value)setVal('f-dose',r.dose);
   if(r&&!document.getElementById('f-temp').value)setVal('f-temp',r.temp);
+  if(r&&r.stand&&!document.getElementById('f-grind').value)setVal('f-grind',r.stand);
   pourBuild();
 }
 // het schema opnieuw uitrekenen voor de huidige dose en hendelstand
@@ -2841,7 +2899,8 @@ function pourRecipes(){
     '<button class="lp" onclick="openRecipe(null,pc.mid)">\uff0b own</button>';
   const o=document.getElementById('pc-over');const r=recipeById(pc.rid);
   if(o){
-    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+
+    const stand=r&&r.stand?('  \u00b7  '+esc(r.stand)+(r.molen?(' on your '+esc(r.molen)):'')):'';
+    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand+
       (r.eigen?' \u00b7 <a class="bean-link" onclick="openRecipe(\''+r.id+'\')">edit</a>':'')):'';
   }
 }
@@ -2850,7 +2909,14 @@ function pourPickRecipe(id){
   pc.rid=id;const r=recipeById(id);
   if(!state.lastRecipe)state.lastRecipe={};
   state.lastRecipe[pc.mid]=id;save();
-  if(r)setVal('f-temp',r.temp);
+  if(r){
+    setVal('f-temp',r.temp);
+    // de maalstand uit het recept is het startpunt; wat de app voor deze boon
+    // heeft geleerd gaat voor, want dat is op jouw molen gemeten
+    const bean=beanById(formBean);
+    const geleerd=(bean&&bean.dialIn&&bean.dialIn.method===pc.mid&&bean.dialIn.grind)?bean.dialIn.grind:null;
+    if(geleerd||r.stand)setVal('f-grind',geleerd||r.stand);
+  }
   pourBuild();
 }
 // de twee hendels van de 4:6 (alleen bij recepten die ze hebben)
