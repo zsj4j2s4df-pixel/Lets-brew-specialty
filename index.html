@@ -692,7 +692,7 @@
   #pc-art svg .soft2{opacity:.34;}
   #pc-art svg .bed{stroke:var(--accent-soft);stroke-width:2.2;opacity:.75;}
   #pc-art svg #bw-fill{fill:var(--accent-soft);opacity:.42;stroke:none;
-    transition:y .5s ease,height .5s ease;}
+    transition:y .22s linear,height .22s linear;}
   #pc-art svg #bw-stream{opacity:0;stroke:var(--accent-soft);stroke-dasharray:13 3;
     transition:opacity .2s;}
   #pc-art svg #bw-stream.on{opacity:1;animation:bwflow 1s linear infinite;}
@@ -841,7 +841,7 @@
         </div>
         <div id="pc-steps"></div>
         <div class="pc-bloom" id="pc-bloom"></div>
-        <div class="set-d" style="margin-top:8px;font-size:14px">tap a step the moment you actually do it &mdash; everything after it shifts with you, and the times land in the fields below</div>
+        <div class="set-d" style="margin-top:8px;font-size:14px">the recipe runs with the clock. Off schedule? Tap the step when you actually do it and the rest shifts with you. Stop when the bed runs dry &mdash; the times land in the fields below</div>
       </div>
 
       <div class="field-row">
@@ -2530,18 +2530,15 @@ function paintBrewer(){
   const fill=el.querySelector('#bw-fill');
   const stream=el.querySelector('#bw-stream');
   const totaal=pc.steps.length?pc.steps[pc.steps.length-1].water:0;
-  // hoeveel is er al ingegoten? de laatst afgetikte gietstap telt
-  let gedaan=0;
-  for(let i=0;i<pc.idx&&i<pc.steps.length;i++)if(pc.steps[i].g)gedaan=pc.steps[i].g;
+  const gedaan=pourPouredAt(pc.el);
   const deel=totaal?Math.max(0,Math.min(1,gedaan/totaal)):0;
   if(fill){
     const hoogte=deel*(l-h), y=l-hoogte;
     fill.setAttribute('y',y);fill.setAttribute('height',hoogte);
   }
-  // straal alleen zichtbaar zolang er een gietstap aan de beurt is
-  const st=pc.steps[pc.idx];
-  const giet=pc.run&&st&&st.g&&pc.el>=st.t+pc.shift;
-  if(stream)stream.classList.toggle('on',!!giet);
+  // de straal loopt precies zolang de giet zelf duurt
+  if(stream)stream.classList.toggle('on',!!(pc.run&&pourGieten(pc.el)));
+  const st=pc.steps[pourCur()];
   const v=el.querySelector('#bw-valve');
   if(v)v.classList.toggle('dicht',!!(st&&st.k==='wacht'));
 }
@@ -2549,8 +2546,45 @@ function paintBrewer(){
    Een recept is een tijdlijn. De klok loopt, de stap die aan de beurt is licht
    op, en tik je hem later aan dan gepland dan schuift al het volgende mee -- zo
    val je niet uit het recept als je een keer te laat bent.                */
-let pc={mid:null,rid:null,bean:null,steps:[],hendels:{zoet:0.5,sterk:0.5},
-        run:false,t0:0,el:0,timer:null,idx:0,shift:0,marks:[],total:null,draw:null,live:-1};
+let pc={mid:null,rid:null,steps:[],hendels:{zoet:0.5,sterk:0.5},
+        run:false,t0:0,el:0,timer:null,done:0,shift:0,marks:[],total:null,draw:null,live:-1};
+/* Welke stap is volgens de klok aan de beurt? De laatste waarvan de tijd
+   verstreken is. Tik je er zelf een aan, dan loop je voor op het schema en
+   telt die (pc.done) zwaarder.                                            */
+function pourAuto(){
+  let i=0;
+  for(let k=0;k<pc.steps.length;k++)if(pc.el>=pc.steps[k].t+pc.shift)i=k;
+  return i;
+}
+function pourCur(){return Math.min(pc.steps.length-1,Math.max(pourAuto(),pc.done||0));}
+/* Hoeveel water zit er op tijdstip el in de brewer? Een giet gaat niet in
+   één klap: reken met ongeveer 8 gram per seconde, dan stijgt het niveau
+   terwijl je giet en staat het stil terwijl je wacht.                     */
+function pourPouredAt(el){
+  let g=0;
+  for(const st of pc.steps){
+    if(!st.g)continue;
+    const start=st.t+pc.shift;
+    const duur=Math.max(3,Math.min(25,(st.g-g)/8));
+    if(el<=start)break;
+    if(el>=start+duur){g=st.g;continue;}
+    g=g+(st.g-g)*((el-start)/duur);
+    break;
+  }
+  return g;
+}
+function pourGieten(el){
+  let g=0;
+  for(const st of pc.steps){
+    if(!st.g)continue;
+    const start=st.t+pc.shift;
+    const duur=Math.max(3,Math.min(25,(st.g-g)/8));
+    if(el>=start&&el<start+duur)return true;
+    if(el<start)return false;
+    g=st.g;
+  }
+  return false;
+}
 function pourFmt(sec){const m=Math.floor(sec/60),ss=Math.floor(sec%60);return m+':'+String(ss).padStart(2,'0');}
 // de coach klaarzetten voor de methode die nu in het formulier staat
 function pourInit(){
@@ -2639,47 +2673,58 @@ function pourBloom(){
 }
 function pourSteps(){
   const el=document.getElementById('pc-steps');if(!el)return;
+  const cur=pourCur();
   el.innerHTML=pc.steps.map((st,i)=>{
     const at=st.t+pc.shift;
-    const klaar=i<pc.idx;
-    const nu=(i===pc.idx)&&pc.run&&pc.el>=at;
+    const klaar=i<cur;
+    const nu=(i===cur)&&pc.run;
     const cls=klaar?'klaar':(nu?'nu':'straks');
-    const tijd=klaar&&pc.marks[i]!=null?pourFmt(pc.marks[i]):pourFmt(Math.max(0,at));
+    const tijd=(klaar&&pc.marks[i]!=null)?pourFmt(pc.marks[i]):pourFmt(Math.max(0,at));
     const g=st.g?('<div class="ps-g">'+st.g+' g</div>'):'';
     const tik=nu?(' onclick="pourTick('+i+')"'):'';
     return '<div class="pc-step '+cls+'"'+tik+'><div class="ps-t">'+tijd+'</div>'+
       '<div class="ps-b"><div class="ps-k">'+esc(st.k)+'</div><div class="ps-d">'+esc(st.d)+'</div></div>'+g+'</div>';
   }).join('');
   const of=document.getElementById('pc-of');
-  if(of){
-    if(pc.total!=null)of.textContent='total '+pourFmt(pc.total)+(pc.draw!=null?(' \u00b7 drawdown '+pourFmt(pc.draw)):'');
-    else if(pc.idx<pc.steps.length)of.textContent='next: '+pc.steps[pc.idx].k+' at '+pourFmt(Math.max(0,pc.steps[pc.idx].t+pc.shift));
-    else of.textContent='';
+  if(!of)return;
+  if(pc.total!=null){
+    of.textContent='total '+pourFmt(pc.total)+(pc.draw!=null?(' \u00b7 drawdown '+pourFmt(pc.draw)):'');
+  }else if(!pc.run){
+    const eerste=pc.steps[0];
+    of.textContent=eerste?('starts with '+eerste.k+(eerste.g?(', '+eerste.g+' g'):'')):'';
+  }else{
+    const volgende=pc.steps[cur+1];
+    of.textContent=volgende
+      ? ('next: '+volgende.k+' at '+pourFmt(Math.max(0,volgende.t+pc.shift)))
+      : 'stop the clock when the bed runs dry';
   }
 }
 function pourToggle(){pc.run?pourStop():pourStart();}
 function pourStart(){
   if(!pc.steps.length)pourBuild();
-  pc.run=true;pc.t0=performance.now();pc.el=0;pc.idx=0;pc.shift=0;pc.marks=[];pc.total=null;pc.draw=null;pc.live=-1;
+  pc.run=true;pc.t0=performance.now();pc.el=0;pc.done=0;pc.shift=0;pc.marks=[];pc.total=null;pc.draw=null;pc.live=-1;
   document.getElementById('pc-btn').textContent='stop';
   pc.timer=setInterval(pourTickClock,200);
-  pourSteps();paintBrewer();toast('\u23f1 clock running \u2014 tap each step as you do it');
+  pourSteps();paintBrewer();toast('\u23f1 running \u2014 tap a step if you drift');
 }
 function pourTickClock(){
   pc.el=(performance.now()-pc.t0)/1000;
   const t=document.getElementById('pc-time');if(t)t.textContent=pourFmt(pc.el);
-  // alleen opnieuw tekenen als er echt iets verandert, anders flikkert het tikken weg
-  const actief=(pc.idx<pc.steps.length&&pc.el>=pc.steps[pc.idx].t+pc.shift)?pc.idx:-1;
-  if(actief!==pc.live){pc.live=actief;pourSteps();paintBrewer();}
+  const cur=pourCur();
+  // een stap die voorbijgaat zonder dat je hem aantikte krijgt zijn geplande tijd
+  for(let k=0;k<cur;k++)if(pc.marks[k]==null)pc.marks[k]=pc.steps[k].t+pc.shift;
+  // de lijst alleen hertekenen als er iets verschuift; het water elke tik
+  if(cur!==pc.live){pc.live=cur;pourSteps();}
+  paintBrewer();
 }
 function pourStop(stil){
   if(pc.timer){clearInterval(pc.timer);pc.timer=null;}
   if(!pc.run){if(!stil)pourSteps();return;}
   pc.run=false;pc.total=Math.round(pc.el);
-  // doorlooptijd = vanaf de laatste giet tot nu
+  // doorlooptijd = vanaf de laatste giet tot nu; niet aangetikt = geplande tijd
   let laatste=null;
-  pc.steps.forEach((st,i)=>{if(st.g&&pc.marks[i]!=null)laatste=pc.marks[i];});
-  if(laatste!=null)pc.draw=Math.max(0,Math.round(pc.el-laatste));
+  pc.steps.forEach((st,i)=>{if(st.g)laatste=(pc.marks[i]!=null)?pc.marks[i]:(st.t+pc.shift);});
+  if(laatste!=null&&pc.el>laatste)pc.draw=Math.max(0,Math.round(pc.el-laatste));
   const b=document.getElementById('pc-btn');if(b)b.textContent='start again';
   pourFill();
   if(!stil){pourSteps();paintBrewer();}
@@ -2700,12 +2745,13 @@ function pourFill(){
     autoGrow(g);
   }
 }
+// "ik doe hem nu" -- het schema schuift mee met het moment waarop je tikt
 function pourTick(i){
-  if(!pc.run||i!==pc.idx)return;
+  if(!pc.run||i!==pourCur())return;
   pc.marks[i]=pc.el;
   pc.shift=pc.el-pc.steps[i].t;
-  pc.idx++;pc.live=-1;
-  if(pc.idx>=pc.steps.length){pourStop();toast('\u2713 that is the brew \u2014 the times are filled in below');}
+  pc.done=i+1;pc.live=-1;
+  if(i>=pc.steps.length-1){pourStop();toast('\u2713 that is the brew \u2014 the times are filled in below');}
   else {pourSteps();paintBrewer();}
 }
 /* ---------------- puck-prep (espresso) ---------------- */
