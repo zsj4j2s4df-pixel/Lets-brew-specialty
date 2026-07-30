@@ -247,14 +247,16 @@
   .e61-tgt{color:var(--ink-soft);font-size:15px;}
   .e61-btn{border:2px solid var(--ink);background:var(--accent-soft);color:var(--cream);border-radius:15px;filter:url(#wobble);padding:10px 16px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;cursor:pointer;}
   /* dial-in journey grafiek */
-  #di-journey{width:100%;height:auto;}
-  #di-journey .axis{stroke:var(--ink-soft);stroke-width:1.5;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
-  #di-journey .band{fill:#5c7a4f;opacity:.16;}
-  #di-journey .ln{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
-  #di-journey .dot{fill:var(--paper);stroke:var(--ink);stroke-width:2;}
-  #di-journey .dot.hit{fill:var(--accent-soft);}
-  #di-journey text{font-family:'Patrick Hand',cursive;font-size:11px;fill:var(--ink-soft);}
-  #di-journey text.val{font-family:'Caveat',cursive;font-weight:700;font-size:14px;fill:var(--ink);}
+  .journey{width:100%;height:auto;}
+  .bean-journey{margin:10px 0 2px;padding-top:8px;border-top:1.5px dashed var(--line);}
+  .bj-h{font-family:'Caveat',cursive;font-weight:700;font-size:19px;color:var(--ink-soft);margin-bottom:2px;}
+  .journey .axis{stroke:var(--ink-soft);stroke-width:1.5;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
+  .journey .band{fill:#5c7a4f;opacity:.16;}
+  .journey .ln{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
+  .journey .dot{fill:var(--paper);stroke:var(--ink);stroke-width:2;}
+  .journey .dot.hit{fill:var(--accent-soft);}
+  .journey text{font-family:'Patrick Hand',cursive;font-size:11px;fill:var(--ink-soft);}
+  .journey text.val{font-family:'Caveat',cursive;font-weight:700;font-size:14px;fill:var(--ink);}
   .di-advice{color:var(--accent);font-size:18px;line-height:1.4;margin-top:6px;}
   .prep-row{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:20px;}
   .prep-cb{width:26px;height:26px;border:2px solid var(--ink);filter:url(#wobble);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent;cursor:pointer;}
@@ -1201,7 +1203,7 @@
 
       <div class="di-card sketch soft" id="di-journey-card">
         <div class="di-lbl hand">dial-in journey</div>
-        <svg id="di-journey" viewBox="0 0 360 185"></svg>
+        <svg id="di-journey" class="journey" viewBox="0 0 360 185"></svg>
         <div class="set-d" id="di-journey-note" style="font-size:14px"></div>
       </div>
 
@@ -3903,8 +3905,12 @@ function renderDiJourney(){
   const svg=document.getElementById('di-journey'),note=document.getElementById('di-journey-note');
   if(log.length<1){svg.innerHTML='';note.textContent='your attempts will be drawn here — every lever pull adds a dot.';return;}
   note.textContent=log.length===1?'first attempt on paper — pull another to draw the line.':'';
-  const t=pendingTarget||{};
-  const tT=parseTimeSec(t.time)||28, lo=Math.max(1,tT-2), hi=tT+2;
+  svg.innerHTML=journeySVG(log,parseTimeSec((pendingTarget||{}).time)||28);
+}
+/* De tekening zelf: pogingen op volgorde, de doelzone als band. Staat los van
+   het dial-in-scherm, zodat de boonkaart hem ook kan laten zien.            */
+function journeySVG(log,doelSec){
+  const tT=doelSec||28, lo=Math.max(1,tT-2), hi=tT+2;
   const times=log.map(a=>parseTimeSec(a.t)||0);
   const ymin=Math.min(lo-4,...times)-2, ymax=Math.max(hi+4,...times)+2;
   const W=360,H=185,L=40,R=14,T=14,B=36;
@@ -3922,7 +3928,7 @@ function renderDiJourney(){
     out+=`<text x="${X(i)}" y="${H-B+16}" text-anchor="middle">${esc(a.g||'?')}</text>`;
   });
   out+=`<text x="${W-R}" y="${H-B+30}" text-anchor="end">grind per attempt →</text>`;
-  svg.innerHTML=out;
+  return out;
 }
 
 function renderDiBeans(){
@@ -4704,6 +4710,28 @@ function brewBean(beanId){
   if(methodFamily(mid)==='espresso'){pendingTarget=null;formPrep={};pendingRecipe=null;openDialIn(mid);setTimeout(()=>pickDiBean(beanId),0);}
   else{openForm(mid);setTimeout(()=>pickBean(beanId),0);}
 }
+/* De dial-in journey van deze boon, per espressomethode. Dezelfde tekening als
+   in het dial-in-scherm; de doelzone leggen we om de tijd die je aftekende, of
+   anders om het doel van je laatste poging.                                  */
+function beanJourneyHTML(b){
+  if(!featOn('journey'))return '';
+  const log=state.dialLog||{};
+  const delen=Object.keys(log).filter(k=>{
+    const [bid,mid]=k.split('|');
+    return bid===b.id && methodFamily(mid)==='espresso' && (log[k]||[]).length;
+  }).map(k=>{
+    const mid=k.split('|')[1], m=methodById(mid);
+    const rij=log[k].slice(-6);
+    const vast=(b.dialed||{})[mid];
+    const laatste=state.brews.filter(x=>x.beanId===b.id&&x.method===mid&&x.target)
+      .sort((a,c)=>c.ts-a.ts)[0];
+    const doel=parseTimeSec(vast&&vast.time)||parseTimeSec(laatste&&laatste.target.time)||28;
+    const kop=((m&&m.name)||mid)+' \u00b7 '+rij.length+' attempt'+(rij.length===1?'':'s');
+    return '<div class="bean-journey"><div class="bj-h">'+esc(kop)+'</div>'+
+      '<svg class="journey" viewBox="0 0 360 185">'+journeySVG(rij,doel)+'</svg></div>';
+  });
+  return delen.join('');
+}
 // wat je op deze boon hebt afgetekend, per methode
 function dialLineHTML(b){
   const vast=beanDial(b,null);
@@ -4757,6 +4785,7 @@ function beanCardHTML(b){
       ${(featOn('cost')&&b.price&&b.bagsize)?'<br>≈ €'+((b.price/b.bagsize)*18).toFixed(2)+' per cup (18 g) · €'+(+b.price).toFixed(2)+' / '+b.bagsize+' g':''}
       <br>${cnt} brew${cnt===1?'':'s'} linked</div>
     ${freshGaugeHTML(b)}
+    ${beanJourneyHTML(b)}
     ${tasteWheelStatic([].concat(...state.brews.filter(x=>x.beanId===b.id).map(x=>x.tags||[])),
       'what you tasted in this bean')}
     <button class="stock-btn ${inStock?'in':'out'}" onclick="toggleStock('${b.id}')">
