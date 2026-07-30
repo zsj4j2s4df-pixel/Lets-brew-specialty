@@ -1264,7 +1264,7 @@
   <div id="page-brews" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <h1 class="title hand">brew</h1>
+      <h1 class="title hand">brews</h1>
 
       <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ new brew</button>
 
@@ -2698,7 +2698,8 @@ function renderAll(){
   });
   let uit='<div class="sect"><span class="hand">recipes</span><span class="sd">tap one open, then brew it</span></div>';
   if(!lijst.length)uit+='<div class="empty-note">no recipes found.</div>';
-  else{
+  else if(brewSort==='method'){
+    // alleen als je er zelf om vraagt staan espresso en filter uit elkaar
     const groepen=[['espresso','espresso'],['filter','filter']];
     const meer=groepen.filter(([f])=>lijst.some(r=>recipeFam(r)===f)).length>1;
     groepen.forEach(([f,label])=>{
@@ -2707,6 +2708,10 @@ function renderAll(){
       if(meer)uit+='<div class="rec-group">'+label+'</div>';
       uit+=deel.map(recipeCardHTML).join('');
     });
+  }else{
+    // anders lopen ze gewoon door elkaar heen, op naam
+    uit+=lijst.slice().sort((a,b)=>(a.naam||'').localeCompare(b.naam||''))
+      .map(recipeCardHTML).join('');
   }
   if(verborgen.length)uit+='<button class="extra-kast" onclick="recRestore()">'+ICO.del+
     ' show hidden \u00b7 '+verborgen.length+' recipe'+(verborgen.length===1?'':'s')+'</button>';
