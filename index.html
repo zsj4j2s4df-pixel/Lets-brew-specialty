@@ -944,6 +944,7 @@
             <span class="pc-n hand">recipe</span><span class="pc-sum" id="sum-recipe"></span>
             <span class="pc-arr">&rsaquo;</span></button>
           <div class="pc-body" id="pcb-recipe">
+            <div class="link-pick" id="pc-pick"></div>
             <div class="pc-naam hand" id="pc-naam"></div>
             <div class="pc-over" id="pc-over"></div>
             <div class="pc-links" id="pc-links"></div>
@@ -1069,6 +1070,7 @@
 
       <div class="di-card sketch soft" id="di-recipe-card">
         <div class="di-lbl hand">recipe</div>
+        <div class="link-pick" id="di-pick"></div>
         <div class="pc-naam hand" id="di-naam"></div>
         <div class="pc-over" id="di-over"></div>
         <div class="pc-links" id="di-links"></div>
@@ -3527,9 +3529,13 @@ function pourSchema(){
     '<div class="pcs"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
     ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.g?st.g+' g':'')+'</span></div>').join('');
 }
-// welk recept staat er geladen? kiezen doe je in het receptenboek bij learn
+// welk recept staat er geladen -- en de rij om een ander te kiezen
 function pourRecipes(){
   const r=recipeById(pc.rid);
+  const pick=document.getElementById('pc-pick');
+  if(pick)pick.innerHTML=recipesFor(pc.mid).map(x=>
+    '<button type="button" class="lp '+(x.id===pc.rid?'sel':'')+
+    '" onclick="pourPickRecipe(\''+x.id+'\')">'+esc(x.naam)+'</button>').join('');
   const naam=document.getElementById('pc-naam');
   if(naam)naam.textContent=r?r.naam:'no recipe yet';
   const o=document.getElementById('pc-over');
@@ -3539,9 +3545,8 @@ function pourRecipes(){
   }
   const l=document.getElementById('pc-links');
   if(l){
-    l.innerHTML='<a onclick="go(\'brews\')">all recipes \u203a</a>'+
-      (r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
-                 :('<a onclick="openRecipe(null,pc.mid)">write your own</a>'));
+    l.innerHTML=(r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
+                           :('<a onclick="openRecipe(null,pc.mid)">write your own</a>'));
   }
 }
 function pourPickRecipe(id){
@@ -3753,20 +3758,36 @@ let diRid=null;
 function renderDiRecipe(){
   const kaart=document.getElementById('di-recipe-card');if(!kaart)return;
   const r=recipeById(diRid);
+  const pick=document.getElementById('di-pick');
+  if(pick)pick.innerHTML=recipesFor(formMethod).map(x=>
+    '<button type="button" class="lp '+(x.id===diRid?'sel':'')+
+    '" onclick="diPickRecipe(\''+x.id+'\')">'+esc(x.naam)+'</button>').join('');
   const naam=document.getElementById('di-naam');
   if(naam)naam.textContent=r?r.naam:'no recipe loaded';
   const o=document.getElementById('di-over');
   if(o){
     const stand=r&&r.stand?('  \u00b7  '+esc(r.stand)):'';
     o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand)
-                 :'pick one under recipes &amp; brews, or just dial in from the target below';
+                 :'pick one above, or just dial in from the target below';
   }
   const l=document.getElementById('di-links');
   if(l){
-    l.innerHTML='<a onclick="go(\'brews\')">all recipes \u203a</a>'+
-      (r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
-                 :('<a onclick="openRecipe(null,formMethod)">write your own</a>'));
+    l.innerHTML=(r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
+                           :('<a onclick="openRecipe(null,formMethod)">write your own</a>'));
   }
+}
+// een espressorecept is een doel: aantikken vult het doel bovenin het dial-in
+function diPickRecipe(id){
+  const r=recipeById(id);if(!r)return;
+  diRid=id;
+  if(!state.lastRecipe)state.lastRecipe={};
+  state.lastRecipe[formMethod]=id;save();
+  const yld=String(Math.round(r.dose*r.ratio));
+  pendingTarget={dose:String(r.dose),yield:yld,time:r.tijd||'',grind:r.stand||''};
+  setVal('di-dose',String(r.dose));setVal('di-yield',yld);
+  if(r.stand)setVal('di-grind',r.stand);
+  renderDiRecipe();renderDiGoal();renderDiClock();
+  toast('\u2713 '+r.naam+' loaded as your target');
 }
 /* --- E61 shot clock: stopwatch, geen simulator — jouw waarden blijven leidend --- */
 let e61Run=false,e61T0=0,e61Raf=null;
