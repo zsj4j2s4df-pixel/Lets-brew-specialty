@@ -1633,6 +1633,18 @@
         <div class="set-d" style="margin-top:8px;font-size:14px">note: “restore a back-up” replaces your current data. “add from a friend” above adds to it instead.</div>
       </div>
 
+      <div class="settings-card sketch soft" id="api-card">
+        <button class="adv-head" onclick="document.getElementById('api-card').classList.toggle('open')"><span class="set-t hand">connect other software</span><span class="g-arr">&#9656;</span></button>
+        <div class="adv-body">
+          <div class="set-d" style="margin:10px 0 10px">your beans, brews and methods in one fixed shape, linked by id. Read-only, and nothing leaves this device unless you send it yourself.</div>
+          <div class="set-d" id="api-stat" style="margin:0 0 10px;color:var(--ink)"></div>
+          <button class="profile-btn ic-btn" onclick="apiCopy()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M8.6 7.4 Q8.2 4.6 10.2 4.4 Q14.4 4 18.6 4.4 Q20.5 4.6 20.1 7.3 Q20.4 12 20.1 16.6 Q20.2 18.4 18.3 18.6 Q14.3 19 10.3 18.6 Q8.3 18.4 8.7 16.4 Q8.3 11.9 8.8 7"/><path d="M15.3 19.2 Q15.6 20.9 13.7 21.1 Q9.4 21.5 5.2 21.1 Q3.4 20.9 3.8 19 Q3.4 14.4 3.8 9.8 Q3.6 8 5.5 7.9 Q6.7 7.8 8.4 7.9" opacity="0.7"/></svg> copy the data as JSON</button>
+          <button class="profile-btn ic-btn" onclick="apiDownload()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M11.9 3.1 Q12.4 8.6 12 13.5 M8.2 9.4 Q10.2 11.7 12.1 13.8 Q13.9 11.4 15.8 9 M4.6 17.1 Q12 17.8 19.4 16.9 M5.2 20 Q12 20.7 18.9 19.9"/></svg> download it as a file</button>
+          <button class="profile-btn ic-btn" onclick="apiCopyLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M10.3 13.9 Q8.1 16.4 5.9 18.6 Q3.2 17.4 3.6 14.4 Q5.6 11.9 7.9 9.8 Q10.4 10.4 10.6 12.6"/><path d="M13.6 10.2 Q15.9 7.7 18.1 5.5 Q20.8 6.7 20.4 9.7 Q18.4 12.2 16.1 14.3 Q13.6 13.7 13.4 11.5"/><path d="M9.4 14.7 Q12 12.1 14.7 9.5" opacity="0.6"/></svg> copy the read link</button>
+          <div class="set-d" style="margin-top:10px;font-size:14px">On this device other pages can read it as <b>window.LetsBrew</b> (<span class="path">beans()</span>, <span class="path">brews({beanId})</span>, <span class="path">beanGraph(id)</span>, <span class="path">graph()</span>), or ask for it with a <b>postMessage</b>. The read link opens the same data as plain JSON. Writing stays with you: only the screens and &ldquo;add from a friend&rdquo; change anything.</div>
+        </div>
+      </div>
+
       <div class="settings-card sketch soft" id="adv-card">
         <button class="adv-head" onclick="document.getElementById('adv-card').classList.toggle('open')"><span class="set-t hand">advanced</span><span class="g-arr">▸</span></button>
         <div class="adv-body">
@@ -6409,6 +6421,7 @@ function renderProfile(){
   renderGear();
   renderFeatures();
   renderShortcuts();
+  try{apiStat();}catch(e){}
   const bl=document.getElementById('bl-card');if(bl)bl.style.display=featOn('brewsletter')?'block':'none';
   const tm=document.getElementById('tm-card');if(tm)tm.style.display=featOn('tastememory')?'block':'none';
   const wk=document.getElementById('week-card');
@@ -6607,6 +6620,173 @@ function applyAIVisibility(){
 }
 
 /* ---------------- export / import ---------------- */
+const APP_VERSION='2026.08';
+/* ================= de datalaag =================================================
+   Binnen in de app is `state` gegroeid zoals het uitkwam. Dat is prima om mee te
+   werken, maar niets om andere software aan vast te knopen: verandert er iets aan
+   de binnenkant, dan breekt alles wat meekijkt.
+
+   Daarom ligt hier een tweede, vaste vorm eroverheen. Beans, brews en methods met
+   hun koppelingen expliciet als ids, één versienummer, en alles alleen te lezen.
+   De binnenkant mag daaronder blijven schuiven.                                */
+const LB_SCHEMA=1;
+// kopie zonder verbinding met state: wat je hier krijgt kun je niet stukmaken
+const lbKopie=v=>JSON.parse(JSON.stringify(v==null?null:v));
+const lbIso=ts=>{const d=new Date(ts||0);return isNaN(d.getTime())?null:d.toISOString();};
+
+function lbMethod(m){
+  return {id:m.id,name:m.name||'',family:methodFamily(m),enabled:m.on!==false,
+    gearIds:Array.isArray(m.gear)?m.gear.slice():[]};
+}
+function lbBean(b){
+  const f=beanFreshness(b);
+  const dials={};
+  Object.keys((b.dialed&&typeof b.dialed==='object')?b.dialed:{}).forEach(mid=>{
+    const d=b.dialed[mid];if(!d||!d.grind)return;
+    dials[mid]={grind:d.grind,dose:d.dose==null?null:d.dose,yield:d.yield==null?null:d.yield,
+      time:d.time||null,timeSec:parseTimeSec(d.time),drink:d.drink||null,at:lbIso(d.ts)};
+  });
+  return {id:b.id,name:b.name||'',roaster:b.roaster||null,origin:b.origin||null,
+    process:b.process||null,variety:b.variety||null,altitudeM:altitudeOf(b),
+    roastLevel:b.roast||null,roastDate:b.roastdate||null,daysSinceRoast:f?f.days:null,
+    roasterNotes:b.roasternotes||null,notes:b.notes||null,inStock:b.inStock!==false,
+    decaf:isDecaf(b),bagLabel:b.fam||null,
+    methodIds:(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).slice(),
+    dials,
+    brewIds:state.brews.filter(x=>x.beanId===b.id).map(x=>x.id)};
+}
+function lbBrew(x){
+  return {id:x.id,at:lbIso(x.ts),methodId:x.method||null,beanId:x.beanId||null,
+    beanName:x.beans||null,title:x.title||null,drink:x.drink||null,
+    dose:x.dose==null?null:x.dose,yield:x.yield==null?null:x.yield,
+    ratio:x.ratio==null?null:x.ratio,time:x.time||null,timeSec:parseTimeSec(x.time),
+    grind:x.grind||null,temp:x.temp==null?null:x.temp,
+    score:x.score==null?null:x.score,tags:asArr(x.tags).slice(),notes:x.notes||null,
+    isDialIn:isDialInBrew(x),target:x.target?lbKopie(x.target):null};
+}
+function lbRecipe(r){
+  return {id:r.id,name:r.naam||'',family:recipeFam(r),methodId:methodForRecipe(r),
+    dose:r.dose==null?null:r.dose,ratio:r.ratio==null?null:r.ratio,
+    temp:r.temp==null?null:r.temp,grind:r.maling||null,targetGrind:r.stand||null,
+    own:!!r.eigen};
+}
+// alle pogingen per boon+methode, in de volgorde waarin je ze deed
+function lbDialLog(){
+  const log=state.dialLog||{};
+  return Object.keys(log).map(k=>{
+    const i=k.indexOf('|');
+    return {beanId:k.slice(0,i)||null,methodId:k.slice(i+1),
+      attempts:(log[k]||[]).map(a=>({at:lbIso(a.ts),grind:a.g||null,time:a.t||null,
+        timeSec:parseTimeSec(a.t),yield:a.y==null?null:a.y,dose:a.d==null?null:a.d}))};
+  }).filter(x=>x.attempts.length);
+}
+// het hele model in één keer, koppelingen als ids
+function lbGraph(){
+  return {
+    app:'lets-brew-specialty', schema:LB_SCHEMA, appVersion:APP_VERSION,
+    generatedAt:new Date().toISOString(),
+    methods:(state.methods||[]).map(lbMethod),
+    beans:(state.beans||[]).map(lbBean),
+    brews:(state.brews||[]).slice().sort((a,b)=>b.ts-a.ts).map(lbBrew),
+    recipes:(state.recipes||[]).concat(ALLE_RECEPTEN()).map(lbRecipe),
+    dialLog:lbDialLog(),
+    gear:(state.gear||[]).map(g=>({id:g.id,name:g.name||'',category:g.category||null}))
+  };
+}
+/* De leeskant voor andere software op dit toestel. Alleen lezen, en alles komt er
+   als kopie uit -- een koppeling mag nooit je logboek kunnen wijzigen. Schrijven
+   loopt via de schermen zelf en via "add from a friend".                       */
+window.LetsBrew=Object.freeze({
+  schema:LB_SCHEMA,
+  appVersion:APP_VERSION,
+  methods:()=>lbGraph().methods,
+  beans:()=>lbGraph().beans,
+  recipes:()=>lbGraph().recipes,
+  gear:()=>lbGraph().gear,
+  method:id=>{const m=methodById(id);return m?lbMethod(m):null;},
+  bean:id=>{const b=beanById(id);return b?lbBean(b):null;},
+  brew:id=>{const x=(state.brews||[]).find(y=>y.id===id);return x?lbBrew(x):null;},
+  // filter: {beanId, methodId, since (ISO of ms), dialInOnly, limit}
+  brews:(f)=>{
+    f=f||{};
+    const sinds=f.since?(typeof f.since==='number'?f.since:Date.parse(f.since)):null;
+    let uit=(state.brews||[]).filter(x=>
+      (!f.beanId||x.beanId===f.beanId)&&
+      (!f.methodId||x.method===f.methodId)&&
+      (!sinds||(x.ts||0)>=sinds)&&
+      (!f.dialInOnly||isDialInBrew(x)));
+    uit=uit.sort((a,b)=>b.ts-a.ts);
+    if(f.limit>0)uit=uit.slice(0,f.limit);
+    return uit.map(lbBrew);
+  },
+  // alles wat aan één boon hangt, in één keer
+  beanGraph:id=>{
+    const b=beanById(id);if(!b)return null;
+    const bean=lbBean(b);
+    return {bean,
+      brews:(state.brews||[]).filter(x=>x.beanId===id).sort((a,c)=>c.ts-a.ts).map(lbBrew),
+      methods:bean.methodIds.map(m=>methodById(m)).filter(Boolean).map(lbMethod),
+      dialLog:lbDialLog().filter(d=>d.beanId===id)};
+  },
+  graph:()=>lbGraph()
+});
+/* Meekijken van buiten het venster: wie de app in een iframe zet of met
+   window.open opent, kan hem hetzelfde vragen. Vraag erin, antwoord eruit. */
+window.addEventListener('message',ev=>{
+  const q=ev.data;
+  if(!q||q.lb!=='query'||!ev.source)return;
+  let data=null,fout=null;
+  try{
+    const api=window.LetsBrew;
+    const fn=api[q.method];
+    data=(typeof fn==='function')?fn(q.arg):(fn===undefined?null:fn);
+    if(fn===undefined)fout='unknown method: '+q.method;
+  }catch(e){fout=e.message;}
+  ev.source.postMessage({lb:'result',id:q.id||null,schema:LB_SCHEMA,
+    data:fout?null:data,error:fout},'*');
+});
+function apiStat(){
+  const el=document.getElementById('api-stat');if(!el)return;
+  const g=lbGraph();
+  el.textContent='schema v'+g.schema+' \u00b7 '+g.beans.length+' bean'+(g.beans.length===1?'':'s')+
+    ', '+g.brews.length+' brew'+(g.brews.length===1?'':'s')+', '+
+    g.methods.filter(m=>m.enabled).length+' method'+(g.methods.filter(m=>m.enabled).length===1?'':'s')+'.';
+}
+function apiCopy(){
+  const t=JSON.stringify(lbGraph(),null,2);
+  (navigator.clipboard&&navigator.clipboard.writeText)
+    ? navigator.clipboard.writeText(t).then(()=>toast('\u2713 data copied as JSON'),()=>toast('couldn\u2019t copy \u2014 use the download instead'))
+    : toast('couldn\u2019t copy \u2014 use the download instead');
+}
+function apiDownload(){
+  const blob=new Blob([JSON.stringify(lbGraph(),null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='lets-brew-data.json';a.click();
+  URL.revokeObjectURL(url);toast('data file downloaded');
+}
+function apiCopyLink(){
+  const url=location.origin+location.pathname+'?api=graph';
+  (navigator.clipboard&&navigator.clipboard.writeText)
+    ? navigator.clipboard.writeText(url).then(()=>toast('read link copied'),()=>prompt('copy this link:',url))
+    : prompt('copy this link:',url);
+}
+/* ?api=graph -- de data als kale JSON, zodat een Shortcut of een ander programma
+   hem kan ophalen zonder de app te hoeven kennen.                            */
+let lbApiMode=false;
+function apiPagina(){
+  const q=/[?&]api=([a-z]+)/.exec(location.search);
+  if(!q)return false;
+  lbApiMode=true;
+  const data=(q[1]==='graph')?lbGraph():{error:'unknown api: '+q[1],schema:LB_SCHEMA};
+  document.open();
+  document.write('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>lets brew \u00b7 data</title><pre style="white-space:pre-wrap;word-break:break-word;'+
+    'font:13px ui-monospace,SFMono-Regular,Menlo,monospace;padding:14px;margin:0">'+
+    JSON.stringify(data,null,2).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</pre>');
+  document.close();
+  return true;
+}
 function exportData(){
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -6632,7 +6812,6 @@ function importData(ev){
 }
 
 /* ---------------- wat is er nieuw ---------------- */
-const APP_VERSION='2026.08';
 const NIEUWS=[
   ['pour coach','filterrecepten lopen mee met de klok'],
   ['zeven recepten','Hoffmann, 4:6, Rao en meer, op jouw dose'],
@@ -6680,7 +6859,7 @@ const loadPromise=load();
 if(navigator.storage&&navigator.storage.persist){
   navigator.storage.persist().catch(()=>{});
 }
-loadPromise.then(()=>{try{applyFeatures();}catch(e){}try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}});
+loadPromise.then(()=>{if(apiPagina())return;try{applyFeatures();}catch(e){}try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}});
 
 // app geopend vanuit een melding? -> pas na het laden/splash een nieuwe brew voorstellen
 let pendingQuickBrew=/[?&]quickbrew=1/.test(location.search);
@@ -6721,7 +6900,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 // splash: 4 frames van 0,75s (=3s), dan eind-fade 0,75s naar home (of naam-stap)
 setTimeout(()=>{
+  if(lbApiMode)return;              // ?api=... heeft de pagina al vervangen
   const ph=document.querySelector('.phone');
+  if(!ph)return;
   ph.classList.add('fading');
   setTimeout(async ()=>{
     try{await loadPromise;}catch(e){}   // data uit IndexedDB geladen voor home rendert
