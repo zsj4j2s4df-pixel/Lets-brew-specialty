@@ -755,6 +755,9 @@
   .mm-gear-leeg{font-size:13.5px;color:var(--ink-soft);margin-top:6px;}
   .gc-bij{color:var(--ink-soft);font-size:13px;margin-left:7px;opacity:.8;}
   .bean-fam{border:1.5px solid var(--line);filter:url(#wobble);border-radius:9px;padding:0 6px;font-size:14px;}
+  .start-hint{display:none;color:var(--ink-soft);font-size:15px;line-height:1.35;
+    border-left:2px solid var(--line);filter:url(#wobble);padding:2px 0 2px 10px;margin:0 2px 12px;}
+  .start-hint .sh-k{font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:var(--ink);}
   /* inklapbare kaarten in de pour coach */
   .pcard{margin-bottom:11px;overflow:hidden;}
   .pc-head{width:100%;background:none;border:none;display:flex;align-items:baseline;gap:10px;
@@ -946,6 +949,7 @@
             <span class="pc-arr">&rsaquo;</span></button>
           <div class="pc-body" id="pcb-bean">
             <div class="pc-bloom" id="pc-bloom"></div>
+          <div class="start-hint" id="pc-start"></div>
           </div>
         </div>
         <div class="pcard sketch soft" id="pcard-gear">
@@ -1063,6 +1067,7 @@
       </div>
 
       <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
+      <div class="start-hint" id="di-start"></div>
 
       <div class="di-goal sketch" id="di-goal"></div>
 
@@ -1342,6 +1347,9 @@
       <div class="field"><label>website / link to bean</label>
         <input id="b-url" type="url" inputmode="url" placeholder="https://...">
         <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M9.7 7.7 Q11.7 5.2 14.1 5.2 Q17.2 4.9 18.8 7.6 Q20.1 10.1 18.1 12.3 Q16.5 14.1 14.1 14.4 M14.2 16.3 Q12.1 18.8 9.8 18.8 Q6.7 19.1 5.2 16.4 Q3.9 13.9 5.9 11.7 Q7.5 9.9 9.8 9.6"/><path d="M9.2 14.9 Q12 12 15 9.1" opacity="0.6"/></svg> search for this bean (on roaster site)</button></div>
+      <div class="field"><label>roast level</label>
+        <div class="link-pick" id="b-roast"></div></div>
+
       <div class="field"><label>roasted for</label>
         <div class="link-pick" id="b-fam"></div>
         <div class="fx-note">only if the bag says so &mdash; it decides which methods the app puts first</div></div>
@@ -1746,6 +1754,132 @@ const ESPRESSO_RULES=
   '- Tussen ongeveer 7 en 21 dagen is de boon stabiel; dan hoef je niet voor versheid te corrigeren.\n'+
   '- Vanaf ongeveer 25 dagen is het CO2 grotendeels weg en is de boon brozer; de puck geeft minder weerstand en de shot loopt sneller -> iets FIJNER.\n'+
   '- Corrigeer nooit voor versheid tegen de gemeten doorloopsnelheid in: wat je werkelijk meet gaat voor.';
+/* ---------------- waar je maalstand begint ----------------
+   Drie dingen op de zak zeggen samen al veel over hoe snel een boon oplost, en
+   dus of je fijner of grover moet beginnen dan bij je vorige zak:
+
+   - BRANDING weegt het zwaarst. Donkerder branden maakt de boon brozer en beter
+     oplosbaar: hij loopt sneller door, dus grover. Licht gebrand is dichter en
+     trager: fijner, en warmer zetten.
+   - PROCES verandert de celstructuur. Een natural droogt met vrucht en al en
+     houdt een zwakkere structuur over: die extraheert het snelst, dus grover.
+     Washed houdt de stevigste structuur en loopt het traagst: fijner. Honey en
+     pulped natural zitten ertussenin.
+   - HOOGTE staat voor dichtheid. Boven ongeveer 1800 m groeit de boon langzamer
+     en wordt hij harder: trager, dus fijner. Onder de 1100 m juist zachter.
+
+   Decaf is een geval apart: het ontcafeïneren tast de celstructuur aan, de boon
+   is brozer en geeft meer fijn stof. De praktijk is verdeeld over de richting,
+   dus daar zeggen we: opnieuw afstellen in plaats van doorrekenen.
+
+   Alles wordt uitgedrukt in "stappen fijner" (positief) of grover (negatief).
+   Het is een startpunt, geen voorspelling — wat je meet gaat altijd voor.     */
+function altitudeOf(b){
+  const m=(''+(b&&b.altitude||'')).match(/\d{3,4}/g);
+  if(!m||!m.length)return null;
+  const g=m.map(Number).filter(x=>x>=300&&x<=3000);
+  if(!g.length)return null;
+  return Math.round(g.reduce((a,c)=>a+c,0)/g.length);
+}
+function isDecaf(b){
+  return /decaf|deca|cafe.?nevrij|caffeine.?free|zonder cafe/i.test(
+    [b&&b.name,b&&b.roasternotes,b&&b.notes,b&&b.process].filter(Boolean).join(' '));
+}
+// hoe traag lost deze boon op? hoger = dichter = fijner malen
+function beanDensity(b){
+  if(!b)return {score:0,redenen:[]};
+  const redenen=[];let score=0;
+  const ri=ROAST_LEVELS.indexOf(b.roast||'');
+  if(ri>=0){
+    const bij=(2-ri)*0.9;                       // light +1.8 ... dark -1.8
+    score+=bij;
+    if(ri<=1)redenen.push('licht gebrand: dichter en trager oplosbaar');
+    else if(ri>=3)redenen.push('donker gebrand: brozer en beter oplosbaar');
+  }
+  const proc=(b.process||'').toLowerCase();
+  if(/natural|dry|anaerob|carbonic/.test(proc)){score-=0.7;redenen.push('natural: zwakkere celstructuur, loopt sneller door');}
+  else if(/honey|pulped|semi/.test(proc)){score-=0.3;redenen.push('honey: zit tussen natural en washed in');}
+  else if(/washed|wet/.test(proc)){score+=0.4;redenen.push('washed: stevigste structuur, loopt het traagst');}
+  const alt=altitudeOf(b);
+  if(alt!=null){
+    if(alt>=1800){score+=0.6;redenen.push(alt+' m: harde, dichte boon');}
+    else if(alt>=1400){score+=0.3;}
+    else if(alt<1100){score-=0.4;redenen.push(alt+' m: zachtere boon');}
+  }
+  return {score,redenen,decaf:isDecaf(b)};
+}
+/* Het startpunt. Eerst kijken of je zoiets al eens gezet hebt op deze methode;
+   dat is jouw molen op jouw machine en verslaat elke vuistregel. Anders reken
+   we het verschil met je laatste zak om in stappen.                          */
+function grindStart(bean,methodId){
+  if(!bean||!methodId)return null;
+  const eerder=state.brews.filter(x=>x.method===methodId&&x.grind&&x.beanId)
+    .sort((a,b)=>b.ts-a.ts);
+  const bonenVan=id=>state.beans.find(y=>y.id===id);
+  const zelfde=eerder.find(x=>{
+    const o=bonenVan(x.beanId);if(!o||o.id===bean.id)return false;
+    return (o.process||'').toLowerCase().slice(0,4)===(bean.process||'').toLowerCase().slice(0,4)
+      && (o.roast||'')===(bean.roast||'') && (o.roast||bean.roast);
+  });
+  const eigen=eerder.find(x=>x.beanId===bean.id);
+  const laatste=eerder[0];
+  const d=beanDensity(bean);
+  if(eigen)return {stand:eigen.grind,bron:'deze boon',
+    waarom:['je zette hem eerder op '+eigen.grind],decaf:d.decaf};
+  if(zelfde){
+    const o=bonenVan(zelfde.beanId);
+    return {stand:zelfde.grind,bron:'zelfde soort',
+      waarom:['je '+[o.roast,o.process].filter(Boolean).join(' ')+' liep goed op '+zelfde.grind],
+      decaf:d.decaf};
+  }
+  if(!laatste)return {stand:null,bron:'niets',score:d.score,waarom:d.redenen.slice(0,2),decaf:d.decaf};
+  const o=bonenVan(laatste.beanId);
+  const verschil=d.score-beanDensity(o).score;
+  return {stand:laatste.grind,bron:'vorige zak',verschil,
+    tegenover:(o?o.name:'je vorige zak'),waarom:d.redenen.slice(0,2),decaf:d.decaf};
+}
+/* Hoe groot is het verschil? Bewust in woorden en niet in klikken: de ene molen
+   heeft dertig standen over hetzelfde bereik waar de andere er honderd heeft,
+   dus een getal zou een precisie suggereren die we niet hebben. */
+function grindStap(v){
+  const a=Math.abs(v);
+  if(a<0.5)return null;
+  const richting=v>0?'fijner':'grover';
+  if(a<1.5)return 'iets '+richting;
+  if(a<3)return 'merkbaar '+richting;
+  return 'duidelijk '+richting;
+}
+// heel korte vorm, voor op een dichtgeklapte kaart
+function grindStartShort(bean,methodId){
+  const g=grindStart(bean,methodId);if(!g)return '';
+  if(g.decaf)return 'decaf \u2014 opnieuw afstellen';
+  if(g.bron==='deze boon'||g.bron==='zelfde soort')return 'start ' + g.stand;
+  if(g.bron==='niets')return g.score>=0.8?'begin eerder fijn':g.score<=-0.8?'begin eerder grof':'';
+  const stap=grindStap(g.verschil);
+  return stap?(g.stand+', '+stap):('start '+g.stand);
+}
+// één regel om te tonen en om in een prompt te zetten
+function grindStartText(bean,methodId){
+  const g=grindStart(bean,methodId);if(!g)return '';
+  // decaf: een oude stand doorrekenen heeft geen zin, dus dat zeggen we ook zo
+  if(g.decaf){
+    return (g.stand?('je vorige stand was '+g.stand+', maar '):'')+
+      'decaf lost anders op en geeft meer fijn stof \u2014 stel opnieuw af en ga bij verstopping eerst grover.';
+  }
+  if(g.bron==='deze boon'||g.bron==='zelfde soort')
+    return 'begin op '+g.stand+' \u2014 '+g.waarom[0]+'.';
+  if(g.bron==='niets'){
+    const kant=g.score>=0.8?'aan de trage kant, dus eerder fijn beginnen'
+             :g.score<=-0.8?'aan de snelle kant, dus eerder grof beginnen'
+             :'redelijk neutraal';
+    return 'nog niets van gezet. Deze zak is '+kant+
+      (g.waarom.length?(' \u2014 '+g.waarom.join('; ')):'')+'.';
+  }
+  const stap=grindStap(g.verschil);
+  return 'begin bij je '+g.stand+' van '+g.tegenover+
+    (stap?(' en ga '+stap):' \u2014 ongeveer gelijk')+
+    (g.waarom.length?(' \u2014 '+g.waarom.join('; ')):'')+'.';
+}
 /* Vangrails die in élke brouw-prompt meegaan. ESPRESSO_RULES en FILTER_RULES
    gaan over de richting van je maling; dit gaat over de taal van de app: welke
    velden er zijn, in welke eenheden, en wat er nooit verzonnen mag worden. */
@@ -1761,6 +1895,16 @@ const APP_RULES=
   '- Weeg de versheid mee: 0 tot 4 dagen na branden zit vol CO2, na ongeveer vier weken is dat gas eruit.\n'+
   '- Staat er een brandingsvoorkeur bij de boon (espresso of filter), respecteer die en stel geen methode uit de andere familie voor.\n'+
   '- Geef \u00e9\u00e9n verandering tegelijk, niet drie tegelijk.';
+/* Wat de zak zegt over waar je maalstand begint. Deze richtingen mogen nooit
+   omgedraaid worden; ze volgen uit hoe snel een boon oplost.               */
+const BEAN_GRIND_RULES=
+  'ZAK LEZEN \u2192 MAALSTAND (niet omkeren):\n'+
+  '- BRANDING weegt het zwaarst. Donkerder gebrand = brozer en beter oplosbaar = loopt sneller = GROVER malen (en koeler zetten). Lichter gebrand = dichter en trager = FIJNER malen en warmer zetten, richting 95-96 graden.\n'+
+  '- PROCES: natural (en anaerobic/carbonic) heeft de zwakste celstructuur en extraheert het snelst -> GROVER. Washed heeft de stevigste structuur en loopt het traagst -> FIJNER. Honey en pulped natural zitten ertussenin.\n'+
+  '- HOOGTE staat voor dichtheid: boven ongeveer 1800 m is de boon hard en traag -> FIJNER. Onder ongeveer 1100 m zachter en sneller -> GROVER.\n'+
+  '- Decaf: het ontcafe\u00efneren tast de celstructuur aan, de boon is brozer en geeft meer fijn stof. Reken een oude stand niet door maar stel opnieuw af, en ga bij verstopping eerst grover.\n'+
+  '- Deze drie zijn een STARTPUNT, geen voorspelling. Heeft de gebruiker een gemeten stand van dezelfde boon of van een vergelijkbare zak, dan gaat die altijd voor.\n'+
+  '- Noem hooguit twee redenen, en zeg er altijd bij dat het een startpunt is.';
 /* Extra regels voor het gietschema, want daar gaat een model het snelst de mist
    in: gewichten die niet oplopen of een schema zonder doorloop. */
 const SCHEMA_RULES=
@@ -1778,6 +1922,7 @@ const BEAN_RULES=
   '- Neem alleen over wat er letterlijk staat. Verzin geen herkomst, hoogte, vari\u00eb'+'teit of smaaknotities.\n'+
   '- roasternotes exact overnemen zoals ze op de zak staan, komma-gescheiden, niet vertalen en niet aanvullen.\n'+
   '- process en variety in de gangbare term (washed, natural, honey, anaerobic).\n'+
+  '- roast alleen invullen als de zak een brandingsniveau noemt; gebruik dan exact een van: light, medium-light, medium, medium-dark, dark.\n'+
   '- fam alleen invullen als de zak het zelf zegt: staat er espresso -> "espresso", staat er filter of pour over -> "filter", staat er omni of espresso & filter -> "both". Staat er niets over, laat fam leeg.';
 // korte regel over de boon zelf, voor in elke prompt waar een boon bij hoort
 function beanPromptBlock(bean){
@@ -1786,8 +1931,14 @@ function beanPromptBlock(bean){
   const stukken=[];
   if(f)stukken.push(f.days+' dagen na branden');
   if(bean.fam)stukken.push('op de zak staat: '+(bean.fam==='both'?'omni (espresso \u00e9n filter)':bean.fam+'branding'));
+  if(bean.roast)stukken.push('branding '+bean.roast);
+  if(bean.process)stukken.push('proces '+bean.process);
+  if(altitudeOf(bean))stukken.push(altitudeOf(bean)+' m');
   if(bean.dialIn&&bean.dialIn.grind)stukken.push('eerder gebruikte maalstand '+bean.dialIn.grind+' bij '+(methodById(bean.dialIn.method)||{}).name);
-  return stukken.length?('\nOver deze boon: '+stukken.join('; ')+'.'):'';
+  let uit=stukken.length?('\nOver deze boon: '+stukken.join('; ')+'.'):'';
+  const start=grindStartText(bean,formMethod);
+  if(start)uit+='\nStartpunt maalstand volgens de app: '+start+'.';
+  return uit;
 }
 // vaste filterregels die de AI overal meekrijgt (spiegelbeeld van ESPRESSO_RULES)
 const FILTER_RULES=
@@ -2335,7 +2486,7 @@ async function quickBrew(){
       (inStock.length?` Kies uit deze bonen in voorraad de best passende bij deze methode en dit recept. Sla een boon over waarvan de zak een andere familie noemt dan deze methode:\n${beansList}\n`
                      :` Er zijn geen bonen in voorraad; kies een passend boontype.\n`)+
       gearPromptBlock(method.id)+
-      ('\n'+APP_RULES+'\n'+(esp?ESPRESSO_RULES:FILTER_RULES)+'\n')+
+      ('\n'+APP_RULES+'\n'+BEAN_GRIND_RULES+'\n'+(esp?ESPRESSO_RULES:FILTER_RULES)+'\n')+
       `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
       `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam. drink = melkdranknaam of "espresso" (laat leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord — GEEN uitleg of merknaam). grindNote = korte uitleg over de maling (mag molen noemen). dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
@@ -2695,7 +2846,7 @@ async function updateDialIn(beanId,method){
       (grinder?` Molen(s) van de gebruiker: ${grinder}. Als je de molen kent, gebruik de juiste getalsrichting (welk getal grover/fijner is).`:'')+
       (esp?`\nDOEL: ${tY} g uit in ~${tT} s (ratio ~1:2), doelsnelheid ${(tY/tT).toFixed(2)} g/s.\n`
           :`\nDOEL: een schone kop met een totale tijd rond ${fTijd} en een doorlooptijd onder de minuut.\n`)+
-      APP_RULES+`\n`+(esp?ESPRESSO_RULES:FILTER_RULES)+`\n`+beanPromptBlock(bean)+`\n`+
+      APP_RULES+`\n`+BEAN_GRIND_RULES+`\n`+(esp?ESPRESSO_RULES:FILTER_RULES)+`\n`+beanPromptBlock(bean)+`\n`+
       `Pogingen (oud→nieuw):\n${lines}\n`+
       `Oordeel over de laatste ${esp?'shot':'kop'}: ${richting}.\n`+
       (esp?'':`De doorlooptijd (van de laatste giet tot het bed droogvalt) weegt zwaarder dan de totale tijd.\n`)+
@@ -3309,7 +3460,8 @@ function cardSummaries(){
   const f=bean?beanFreshness(bean):null;
   const h=f?freshBloomHint(f.days):null;
   const dz=parseFloat(dose)||0;
-  zet('bean',bean?([bean.name,f?f.label:'',(h&&dz)?('bloom '+Math.round(dz*h.mult)+' g, '+h.sec+' s'):'']
+  const start=bean?grindStartShort(bean,pc.mid):'';
+  zet('bean',bean?([bean.name,f?f.label:'',(h&&dz)?('bloom '+Math.round(dz*h.mult)+' g, '+h.sec+' s'):'',start]
     .filter(Boolean).join('  \u00b7  ')):'no bean picked');
 
   const g=['f-brewer','f-paper','f-water'].map(i=>document.getElementById(i).value.trim()).filter(Boolean);
@@ -3474,6 +3626,7 @@ function pourLever(k,v){
 }
 // versheid -> bloom (de filterkant van de versheidsmeter)
 function pourBloom(){
+  renderStartHint('pc-start');
   const el=document.getElementById('pc-bloom');if(!el)return;
   const bean=beanById(formBean);
   const f=bean?beanFreshness(bean):null;
@@ -3627,7 +3780,17 @@ function openDialIn(methodId){
   }
   e61Reset();renderDialIn();go('dialin');
 }
-function renderDialIn(){renderDiRecipe();renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();}
+function renderDialIn(){renderDiRecipe();renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();renderStartHint('di-start');}
+/* Wat de zak zegt over waar je maalstand begint. Alleen tonen als er iets te
+   zeggen valt -- een lege boon levert geen zinnige gok op.                  */
+function renderStartHint(elId){
+  const el=document.getElementById(elId);if(!el)return;
+  const bean=beanById(formBean);
+  const t=bean?grindStartText(bean,formMethod):'';
+  if(!t){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML='<span class="sh-k">starting point</span> '+esc(t);
+}
 // welk espressorecept staat er geladen? kiezen doe je bij recipes & brews
 let diRid=null;
 function renderDiRecipe(){
@@ -3740,7 +3903,7 @@ function renderDiBeans(){
   html+=state.beans.filter(b=>b.inStock!==false).map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickDiBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
   el.innerHTML=html;
 }
-function pickDiBean(id){formBean=id;renderDiBeans();renderDiGoal();diAdvice();}
+function pickDiBean(id){formBean=id;renderDiBeans();renderDiGoal();diAdvice();renderStartHint('di-start');}
 function renderDiGoal(){
   const el=document.getElementById('di-goal');if(!el)return;
   const t=pendingTarget||{};
@@ -4584,7 +4747,8 @@ function openBeanForm(){
   document.getElementById('scan-status').textContent='';
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null;const lp=document.getElementById('label-preview');if(lp)lp.innerHTML='';
-  beanFormMethods=[];beanFormFam=null;renderBeanFormMethods();renderBeanFam();go('beanform');applyAIVisibility();
+  beanFormMethods=[];beanFormFam=null;beanFormRoast=null;
+  renderBeanFormMethods();renderBeanFam();renderBeanRoast();go('beanform');applyAIVisibility();
 }
 function editBean(id){
   const b=state.beans.find(x=>x.id===id);if(!b)return;
@@ -4602,6 +4766,7 @@ function editBean(id){
   if(lp)lp.innerHTML=b.photo?'<img src="'+b.photo+'" style="max-height:140px;border-radius:14px;border:2px solid var(--line)">':'';
   beanFormMethods=(Array.isArray(b.methods)&&b.methods.length?[...b.methods]:(b.method?[b.method]:[]));
   beanFormFam=b.fam||null;renderBeanFam();
+  beanFormRoast=b.roast||null;renderBeanRoast();
   renderBeanFormMethods();go('beanform');applyAIVisibility();
 }
 let beanFormMethods=[];
@@ -4610,6 +4775,14 @@ let beanFormMethods=[];
    iets donkerder en oplosbaarder, filter blijft lichter en dichter. */
 let beanFormFam=null;
 const BEAN_FAMS=[['espresso','espresso'],['filter','filter'],['both','omni \u2014 both']];
+const ROAST_LEVELS=['light','medium-light','medium','medium-dark','dark'];
+let beanFormRoast=null;
+function renderBeanRoast(){
+  const el=document.getElementById('b-roast');if(!el)return;
+  el.innerHTML=ROAST_LEVELS.map(v=>
+    '<button class="lp '+(beanFormRoast===v?'sel':'')+'" onclick="pickBeanRoast(\''+v+'\')">'+esc(v)+'</button>').join('');
+}
+function pickBeanRoast(v){beanFormRoast=(beanFormRoast===v)?null:v;renderBeanRoast();}
 function renderBeanFam(){
   const el=document.getElementById('b-fam');if(!el)return;
   el.innerHTML=BEAN_FAMS.map(([v,label])=>
@@ -4655,6 +4828,7 @@ function saveBean(){
     methods:[...beanFormMethods],
     method:beanFormMethods[0]||null,
     fam:beanFormFam||null,
+    roast:beanFormRoast||null,
     notes:document.getElementById('b-notes').value.trim()};
   if(editingBean){
     const ex=state.beans.find(b=>b.id===editingBean);
@@ -4774,7 +4948,7 @@ async function scanLabel(ev){
   try{
     const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
     const media=file.type||'image/jpeg';
-    const prompt='Dit is een foto van een etiket van een zak specialty koffie. Lees alle informatie en geef ALLEEN een JSON-object terug, zonder uitleg, zonder markdown. Velden (laat leeg als onbekend): {"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roasternotes":"","fam":"","url":""}. roasternotes = de smaakomschrijving van de brander, komma-gescheiden. url = de officiele website van de brander: als die letterlijk op de zak staat gebruik die, anders geef de meest waarschijnlijke officiele website-URL van deze brander op basis van wat je weet (bv. https://merknaam.com). Laat url alleen leeg als je echt geen idee hebt welke brander het is.\n'+BEAN_RULES;
+    const prompt='Dit is een foto van een etiket van een zak specialty koffie. Lees alle informatie en geef ALLEEN een JSON-object terug, zonder uitleg, zonder markdown. Velden (laat leeg als onbekend): {"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roasternotes":"","roast":"","fam":"","url":""}. roasternotes = de smaakomschrijving van de brander, komma-gescheiden. url = de officiele website van de brander: als die letterlijk op de zak staat gebruik die, anders geef de meest waarschijnlijke officiele website-URL van deze brander op basis van wat je weet (bv. https://merknaam.com). Laat url alleen leeg als je echt geen idee hebt welke brander het is.\n'+BEAN_RULES;
     const txt=await callClaude([{role:"user",content:[
       {type:"image",source:{type:"base64",media_type:media,data:b64}},
       {type:"text",text:prompt}
@@ -4786,6 +4960,8 @@ async function scanLabel(ev){
     // brandingsvoorkeur alleen overnemen als de zak er iets over zegt
     const fam=(d.fam||'').toLowerCase().trim();
     if(fam==='espresso'||fam==='filter'||fam==='both'){beanFormFam=fam;renderBeanFam();}
+    const roast=(d.roast||'').toLowerCase().trim();
+    if(ROAST_LEVELS.includes(roast)){beanFormRoast=roast;renderBeanRoast();}
     // url: als AI de brander-website vond -> gerichte zoeklink naar de specifieke boon
     // binnen die site. Anders een zoeklink op merknaam + boon.
     if(d.url && d.name){
@@ -4843,7 +5019,7 @@ async function aiRecipe(beanId,methodId){
     const info=`boon: ${bean.name}; roaster: ${bean.roaster||'?'}; origin: ${bean.origin||'?'}; proces: ${bean.process||'?'}; variëteit: ${bean.variety||'?'}; hoogte: ${bean.altitude||'?'}; smaaknotities brander: ${bean.roasternotes||'?'}`;
     const espM=methodFamily(m)==='espresso';
     const milk=espM?` Je mag een melkdrank kiezen (espresso, flat white, cappuccino, latte, cortado, macchiato, americano); zet dan de melkstappen in "steps" en de dranknaam in "drink".`:'';
-    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}${beanPromptBlock(bean)}\n${gearPromptBlock(m.id)}${milk}${'\n'+APP_RULES+'\n'+(espM?ESPRESSO_RULES:FILTER_RULES)+'\n'}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
+    const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}${beanPromptBlock(bean)}\n${gearPromptBlock(m.id)}${milk}${'\n'+APP_RULES+'\n'+BEAN_GRIND_RULES+'\n'+(espM?ESPRESSO_RULES:FILTER_RULES)+'\n'}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
     const txt=await callClaude([{role:"user",content:prompt}],900);
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
@@ -4941,6 +5117,8 @@ const LESSONS={
     {type:'p',h:'versheid → maalgraad',t:'Hoe verser de boon, hoe meer CO₂: de extractie remt en de shot loopt trager. Vuistregel: net na de rustperiode iets fijner malen, en naarmate de boon ouder wordt (minder gas) stap voor stap grover. In je bonenkast zie je per boon "X dagen vers" — gebruik dat als hint bij het afstellen.'},
     {type:'link',h:'meteen afstellen?',t:'Open het dial-in scherm en werk met doel vs. jouw shot naar de juiste maalstand toe.',label:'espresso afstellen (dial-in)',action:'learnToDialIn'},
     {type:'p',h:'roast-niveau → maling & temp',t:'Donker gebrande bonen zijn brozer en lossen sneller op: maal iets grover en zet iets koeler om bitterheid te vermijden. Lichte roasts zijn dichter en trager: maal fijner en zet warmer om genoeg zoetheid en body los te maken.'},
+    {type:'p',h:'de zak lezen voor je maalt',t:'Drie dingen op de zak vertellen samen al waar je ongeveer moet beginnen. De branding weegt het zwaarst: donkerder is brozer en beter oplosbaar, dus grover. Het proces bepaalt de celstructuur: een natural droogt met vrucht en al, houdt een zwakkere structuur over en extraheert het snelst — grover dus; washed is het stevigst en loopt het traagst, dus fijner; honey zit ertussenin. En de hoogte staat voor dichtheid: boven ongeveer 1800 meter groeit de boon langzaam en hard, wat weer fijner vraagt. Decaf is een geval apart: het ontcafeïneren tast de celstructuur aan, dus stel opnieuw af in plaats van je oude stand door te rekenen.'},
+    {type:'tip',t:'Vul branding, proces en hoogte in bij een nieuwe zak. De app rekent dan het verschil met je vorige zak om in stappen fijner of grover — en zodra je iets vergelijkbaars eerder zette, gebruikt hij die stand in plaats van de vuistregel.'},
     {type:'p',h:'extractie',t:'Koffie zetten is oplossen. Te weinig/te grof = onderextractie (zuur, dun, zout). Te veel/te fijn = overextractie (bitter, droog). De zoete balans zit ertussenin.'},
     {type:'p',h:'de vier knoppen',t:'Je stuurt smaak met vier dingen: maalgraad, dose/ratio, watertemperatuur en tijd. Verander er één tegelijk, anders weet je niet wat werkte.'},
     {type:'p',h:'water',t:'Koffie is ~98% water. Te zacht smaakt vlak, te hard maskeert en verkalkt je apparaat. Mineraalgehalte rond 75–150 ppm en gefilterd water werken het best.'},
