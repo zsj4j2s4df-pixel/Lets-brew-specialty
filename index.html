@@ -342,8 +342,8 @@
     cursor:pointer;padding:2px 12px;}
   .sortc.on{color:var(--ink);border-color:var(--ink);background:var(--card-2);}
   /* groepskop zonder streepje eronder */
-  .rec-group{font-family:'Caveat',cursive;font-weight:700;font-size:20px;color:var(--ink-soft);
-    margin:16px 2px 6px;}
+  .list-note{font-family:'Caveat',cursive;font-weight:700;font-size:20px;color:var(--ink-soft);
+    margin:2px 2px 8px;}
   .stats-toggle{width:100%;background:none;border:none;text-align:left;font-family:'Caveat',cursive;font-weight:700;font-size:24px;color:var(--ink);cursor:pointer;margin-bottom:8px;padding:4px 2px;}
   #stats-panel{padding:16px 20px;margin-bottom:16px;}
   .stat-line{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1.5px dashed var(--line);}
@@ -1270,7 +1270,7 @@
 
       <div class="search-wrap" id="brew-search-wrap" style="display:none">
         <svg viewBox="0 0 24 24" class="acic search-ic"><path d="M14.4 8.1 Q17 11.6 14.2 14.6 Q11.1 16.9 7.6 14.9 Q4.8 12.3 6.5 8.5 Q9 5.3 12.6 6.3 Q14.2 7 15 8.7"/><path d="M14.6 14.9 Q17.4 17.6 20.4 20.5"/><path d="M7.6 8.9 Q8.6 7.1 10.7 7" opacity="0.5"/></svg>
-        <input id="brew-search" placeholder="search a recipe, bean, method or note…" oninput="renderAll()">
+        <input id="brew-search" placeholder="search a bean, method or note…" oninput="renderAll()">
       </div>
 
       <div class="filter-bar">
@@ -1283,8 +1283,6 @@
       </div>
 
       <div id="all-list"></div>
-
-      <button class="btn-add sketch soft" onclick="openRecipe(null)" style="margin-top:4px">＋ write your own</button>
     </div>
   </div>
   <div id="page-methods" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
@@ -2558,14 +2556,17 @@ function brewSorter(){
 }
 function setFilter(m){filterMethod=m;renderAll();}
 function renderFilterChips(){
-  const verborgen=recipeVerborgen();
-  const alles=(state.recipes||[]).concat(ALLE_RECEPTEN().filter(r=>!verborgen.includes(r.id)));
-  const used=[...new Set(alles.map(methodForRecipe).filter(Boolean).concat(state.brews.map(b=>b.method)))];
+  // alleen de zetters waarmee je echt gezet hebt; anders staat de balk vol met
+  // knoppen die niets filteren
+  const used=[...new Set(state.brews.map(b=>b.method))];
   const methodChips=state.methods.filter(m=>used.includes(m.id));
   let html=`<button class="fc ${filterMethod==='all'?'sel':''}" onclick="setFilter('all')">all</button>`;
   html+=methodChips.map(m=>
     `<button class="fc ${m.id===filterMethod?'sel':''}" onclick="setFilter('${m.id}')"><span class="fc-ic">${iconHTML(m,22)}</span>${esc(m.name)}</button>`).join('');
   document.getElementById('filter-methods').innerHTML=html;
+  // een balk met alleen "all" erin valt niets te kiezen; die laten we weg
+  const fb=document.querySelector('#page-brews .filter-bar');
+  if(fb)fb.style.display=methodChips.length?'':'none';
 }
 // een brew hoort in de "reservekast" als zijn boon niet meer in de kast staat
 function brewBeanGone(b){
@@ -2576,60 +2577,6 @@ function brewBeanGone(b){
 }
 let reserveOpen=false;
 function toggleReserve(){reserveOpen=!reserveOpen;renderAll();}
-/* ---------------- receptenkaarten op de brews-tab ----------------
-   Zelfde jasje als de oude brew-kaarten -- de methodetekening en de titel --
-   maar dan inklapbaar, met een prullenbakje rechtsboven. Een eigen recept gooi
-   je echt weg; een ingebouwde verdwijnt alleen uit je lijst en is terug te
-   halen, want die is niet van jou om te verwijderen.                       */
-let recOpen={};
-function recToggle(id){recOpen[id]=!recOpen[id];renderAll();}
-function recipeVerborgen(){return Array.isArray(state.hiddenRecipes)?state.hiddenRecipes:[];}
-function recTrash(id){
-  const r=recipeById(id);if(!r)return;
-  if(r.eigen){
-    if(!confirm('delete "'+r.naam+'"?'))return;
-    state.recipes=(state.recipes||[]).filter(x=>x.id!==id);
-    Object.keys(state.lastRecipe||{}).forEach(k=>{if(state.lastRecipe[k]===id)delete state.lastRecipe[k];});
-    toast('recipe deleted');
-  }else{
-    if(!Array.isArray(state.hiddenRecipes))state.hiddenRecipes=[];
-    state.hiddenRecipes.push(id);
-    toast('hidden \u2014 tap "show hidden" to bring it back');
-  }
-  pc.mid=null;save();renderAll();
-}
-function recRestore(){state.hiddenRecipes=[];save();renderAll();toast('\u2713 all recipes back');}
-function recipeCardHTML(r){
-  const mid=methodForRecipe(r);
-  const m=mid?methodById(mid):null;
-  const water=Math.round(r.dose*r.ratio);
-  const open=!!recOpen[r.id];
-  const meta=[m?m.name:recipeFam(r),r.dose+' g \u2192 '+water+' g']
-    .concat(r.tijd?[r.tijd]:[]).concat([r.maling+', '+r.temp+'\u00b0C'])
-    .concat(r.stand?[r.stand]:[]).join(' \u00b7 ');
-  const stappen=r.stappen.map(st=>
-    '<div class="pcs"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
-    ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.p?Math.round(water*st.p)+' g':'')+'</span></div>').join('');
-  return `<div class="card sketch rcard ${open?'op':''}" style="background:var(${(m&&m.tint)||'--v60'})">
-    <button type="button" class="rc-del" title="remove" aria-label="remove recipe"
-      onclick="event.stopPropagation();recTrash('${r.id}')">${ICO.del}</button>
-    <div class="row rc-head" onclick="recToggle('${r.id}')">
-      <div class="brew-thumb">${m?iconHTML(m,44):''}</div>
-      <div class="brew-main">
-        <div class="name hand">${r.eigen?'\u270e ':''}${esc(r.naam)}</div>
-        <div class="meta">${esc(meta)}</div>
-      </div>
-      <div class="rc-arr">${open?'\u25be':'\u25b8'}</div>
-    </div>
-    <div class="rc-body">
-      <div class="rc-over">${esc(r.over||'')}</div>
-      <div class="rc-steps">${stappen}</div>
-      ${mid?`<button class="rb-go" onclick="brewRecipe('${r.id}')">brew this \u2192</button>`
-           :'<div class="fx-note">turn on a filter method under methods to use this</div>'}
-      ${r.eigen?`<button class="rb-edit" onclick="openRecipe('${r.id}')">edit this recipe</button>`:''}
-    </div>
-  </div>`;
-}
 /* ---------------- je brews, in dezelfde kaartstijl ----------------
    Zelfde jasje als de receptkaarten: tekening, titel, inklapbaar, prullenbakje
    rechtsboven. Open zie je de cijfers van die kop en kun je door naar het
@@ -2680,43 +2627,15 @@ function brewCardNew(b){
 }
 function renderAll(){
   renderFilterChips();renderSortChips();
-  const verborgen=recipeVerborgen();
-  const alles=(state.recipes||[]).concat(ALLE_RECEPTEN().filter(r=>!verborgen.includes(r.id)));
   const sb=document.getElementById('sort-bar');
   if(sb)sb.style.display=(state.brews.length>=2)?'flex':'none';
   const sw=document.getElementById('brew-search-wrap');
-  const zoekbaar=(alles.length+state.brews.length)>=6;
+  const zoekbaar=state.brews.length>=6;
   if(sw)sw.style.display=zoekbaar?'flex':'none';
   const q=(zoekbaar?(document.getElementById('brew-search')?.value||''):'').toLowerCase().trim();
-  const lijst=alles.filter(r=>{
-    const mid=methodForRecipe(r);
-    if(filterMethod!=='all'&&mid!==filterMethod)return false;
-    if(!q)return true;
-    const m=mid?methodById(mid):null;
-    return [r.naam,r.over,r.maling,(m?m.name:''),r.stappen.map(x=>x.d).join(' ')]
-      .join(' ').toLowerCase().includes(q);
-  });
-  let uit='<div class="sect"><span class="hand">recipes</span><span class="sd">tap one open, then brew it</span></div>';
-  if(!lijst.length)uit+='<div class="empty-note">no recipes found.</div>';
-  else if(brewSort==='method'){
-    // alleen als je er zelf om vraagt staan espresso en filter uit elkaar
-    const groepen=[['espresso','espresso'],['filter','filter']];
-    const meer=groepen.filter(([f])=>lijst.some(r=>recipeFam(r)===f)).length>1;
-    groepen.forEach(([f,label])=>{
-      const deel=lijst.filter(r=>recipeFam(r)===f);
-      if(!deel.length)return;
-      if(meer)uit+='<div class="rec-group">'+label+'</div>';
-      uit+=deel.map(recipeCardHTML).join('');
-    });
-  }else{
-    // anders lopen ze gewoon door elkaar heen, op naam
-    uit+=lijst.slice().sort((a,b)=>(a.naam||'').localeCompare(b.naam||''))
-      .map(recipeCardHTML).join('');
-  }
-  if(verborgen.length)uit+='<button class="extra-kast" onclick="recRestore()">'+ICO.del+
-    ' show hidden \u00b7 '+verborgen.length+' recipe'+(verborgen.length===1?'':'s')+'</button>';
+  let uit='';
 
-  // --- je geschiedenis, dezelfde zoekterm en dezelfde methodefilters ---
+  // --- je geschiedenis, met de zoekterm en de methodefilters erboven ---
   const brews=state.brews.filter(b=>{
     if(filterMethod!=='all'&&b.method!==filterMethod)return false;
     if(!q)return true;
@@ -2726,11 +2645,12 @@ function renderAll(){
   const sorter=brewSorter();
   const actief=brews.filter(b=>!brewBeanGone(b)).sort(sorter);
   const kast=brews.filter(brewBeanGone).sort(sorter);
-  const volgorde={date:'newest first',method:'grouped by method',score:'best first'}[brewSort]||'';
-  uit+='<div class="sect"><span class="hand">brews</span><span class="sd">'+
-    (q?('what matches "'+esc(q)+'"'):esc(volgorde))+'</span></div>';
+  // de titel boven de pagina zegt al "brews", dus hier alleen een regel als je zoekt
+  if(q)uit+='<div class="list-note">what matches "'+esc(q)+'"</div>';
   uit+=actief.length?actief.map(brewCardNew).join('')
-      :(kast.length?'':'<div class="empty-note">no brews found.</div>');
+      :(kast.length?''
+        :(state.brews.length?'<div class="empty-note">no brews found.</div>'
+          :'<div class="empty-note">no brews yet.<br>tap ＋ new brew to start.</div>'));
   if(kast.length){
     uit+='<button class="extra-kast" onclick="toggleReserve()"><svg viewBox="0 0 24 24" class="acic"><path d="M5.8 9.3 Q5.4 7.2 7.3 7 Q12 6.6 16.7 7 Q18.6 7.2 18.2 9.2 M18.1 8.7 Q18.4 13 18.1 17.1 Q18.3 18.8 16.4 19 Q12 19.4 7.4 19 Q5.5 18.8 5.9 17 Q5.4 12.9 6.1 8.5"/><path d="M9.4 7.1 Q9.2 5.3 9.5 3.8 Q12 3.5 14.5 3.9 Q14.8 5.5 14.6 7.2" opacity="0.6"/><path d="M8.8 12.4 Q12 12 15.3 12.6" opacity="0.5"/></svg> the vault \u00b7 '+
       kast.length+' brew'+(kast.length===1?'':'s')+' with a bean that\u2019s gone '+(reserveOpen?'\u25be':'\u25b8')+'</button>';
