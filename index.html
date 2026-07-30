@@ -3937,7 +3937,8 @@ function renderDiJourney(){
 function renderDiBeans(){
   const el=document.getElementById('di-beans');if(!el)return;
   let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickDiBean(null)">none</button>';
-  html+=state.beans.filter(b=>b.inStock!==false).map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickDiBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
+  html+=state.beans.filter(b=>b.inStock!==false||b.id===formBean)
+    .map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickDiBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
   el.innerHTML=html;
 }
 function pickDiBean(id){formBean=id;renderDiBeans();renderDiGoal();diAdvice();renderStartHint('di-start');}
@@ -4035,8 +4036,11 @@ async function saveDialInBrew(next){
 function pickMethod(id){formMethod=id;renderFormMethods();renderDialInHint();}
 function renderFormBeans(){
   const el=document.getElementById('form-beans');
+  // alleen wat er nog in de kast staat. Een boon die op is blijft staan zolang
+  // hij bij deze brew hoort, anders raak je hem kwijt zodra je iets bewerkt.
+  const kiesbaar=state.beans.filter(b=>b.inStock!==false||b.id===formBean);
   let html='<button class="lp '+(!formBean?'sel':'')+'" onclick="pickBean(null)">none</button>';
-  html+=state.beans.map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
+  html+=kiesbaar.map(b=>'<button class="lp '+(b.id===formBean?'sel':'')+'" onclick="pickBean(\''+b.id+'\')">'+esc(b.name)+'</button>').join('');
   html+='<button class="lp" onclick="openBeanForm()">＋ nieuw</button>';
   el.innerHTML=html;
 }
