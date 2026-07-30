@@ -1820,6 +1820,30 @@ function beanDensity(b){
   }
   return {score,redenen,decaf:isDecaf(b)};
 }
+// wat is er voor deze boon vastgelegd? per methode, of alles op een rij
+function beanDial(bean,methodId){
+  const d=bean&&bean.dialed;
+  if(!d||typeof d!=='object')return null;
+  if(methodId)return (d[methodId]&&d[methodId].grind)?Object.assign({method:methodId},d[methodId]):null;
+  const alle=Object.keys(d).filter(k=>d[k]&&d[k].grind)
+    .map(k=>Object.assign({method:k},d[k])).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  return alle.length?alle:null;
+}
+// hoe verhoudt de ene methode zich tot de andere? binnen dezelfde familie zit je
+// in dezelfde orde van grootte; espresso is en blijft de fijnste kant
+function dialOverstap(van,naar){
+  const fv=methodFamily(van), fn=methodFamily(naar);
+  if(fv===fn)return null;
+  return fn==='espresso'?'duidelijk fijner':'duidelijk grover';
+}
+// "18 g -> 36 g in 0:28", voor de kaart en voor de prompt
+function dialCijfers(d){
+  const stuk=[];
+  if(d.dose&&d.yield)stuk.push(d.dose+' g \u2192 '+d.yield+' g');
+  else if(d.dose)stuk.push(d.dose+' g');
+  if(d.time)stuk.push(d.time);
+  return stuk.join(' in ');
+}
 /* Het startpunt. Eerst kijken of je zoiets al eens gezet hebt op deze methode;
    dat is jouw molen op jouw machine en verslaat elke vuistregel. Anders reken
    we het verschil met je laatste zak om in stappen.                          */
@@ -1836,6 +1860,17 @@ function grindStart(bean,methodId){
   const eigen=eerder.find(x=>x.beanId===bean.id);
   const laatste=eerder[0];
   const d=beanDensity(bean);
+  // een dial die je zelf hebt afgetekend gaat voor alles
+  const vast=beanDial(bean,methodId);
+  if(vast)return {stand:vast.grind,bron:'vastgelegd',cijfers:dialCijfers(vast),decaf:d.decaf,
+    waarom:['hier stond hij goed op '+vast.grind]};
+  // op een andere methode wel afgetekend? dan is dat je ankerpunt
+  const anders=beanDial(bean,null);
+  if(anders&&anders.length){
+    const a=anders[0];
+    return {stand:a.grind,bron:'andere methode',vanaf:(methodById(a.method)||{}).name||a.method,
+      stap:dialOverstap(a.method,methodId),cijfers:dialCijfers(a),decaf:d.decaf,waarom:[]};
+  }
   if(eigen)return {stand:eigen.grind,bron:'deze boon',
     waarom:['je zette hem eerder op '+eigen.grind],decaf:d.decaf};
   if(zelfde){
@@ -1864,6 +1899,8 @@ function grindStap(v){
 // heel korte vorm, voor op een dichtgeklapte kaart
 function grindStartShort(bean,methodId){
   const g=grindStart(bean,methodId);if(!g)return '';
+  if(g.bron==='vastgelegd')return 'staat op '+g.stand;
+  if(g.bron==='andere methode')return g.stap?(g.stand+', '+g.stap):('start '+g.stand);
   if(g.decaf)return 'decaf \u2014 opnieuw afstellen';
   if(g.bron==='deze boon'||g.bron==='zelfde soort')return 'start ' + g.stand;
   if(g.bron==='niets')return g.score>=0.8?'begin eerder fijn':g.score<=-0.8?'begin eerder grof':'';
@@ -1873,6 +1910,14 @@ function grindStartShort(bean,methodId){
 // één regel om te tonen en om in een prompt te zetten
 function grindStartText(bean,methodId){
   const g=grindStart(bean,methodId);if(!g)return '';
+  // afgetekend op deze methode: geen gok meer nodig
+  if(g.bron==='vastgelegd')
+    return 'je tekende deze boon hier af op '+g.stand+
+      (g.cijfers?(' ('+g.cijfers+')'):'')+' \u2014 begin daar.';
+  if(g.bron==='andere methode')
+    return 'je tekende hem af op '+g.vanaf+': '+g.stand+(g.cijfers?(' ('+g.cijfers+')'):'')+
+      (g.stap?(' \u2014 hier ga je daar '+g.stap+' dan.')
+             :' \u2014 begin daar en stel bij.');
   // decaf: een oude stand doorrekenen heeft geen zin, dus dat zeggen we ook zo
   if(g.decaf){
     return (g.stand?('je vorige stand was '+g.stand+', maar '):'')+
@@ -1947,9 +1992,14 @@ function beanPromptBlock(bean){
   if(bean.process)stukken.push('proces '+bean.process);
   if(altitudeOf(bean))stukken.push(altitudeOf(bean)+' m');
   if(bean.dialIn&&bean.dialIn.grind)stukken.push('eerder gebruikte maalstand '+bean.dialIn.grind+' bij '+(methodById(bean.dialIn.method)||{}).name);
+  // wat je zelf hebt afgetekend weegt zwaarder dan elke vuistregel
+  const vast=beanDial(bean,null);
+  if(vast)stukken.push('door jou afgetekend: '+vast.map(d=>
+    ((methodById(d.method)||{}).name||d.method)+' op maalstand '+d.grind+
+    (dialCijfers(d)?(' ('+dialCijfers(d)+')'):'')).join(', '));
   let uit=stukken.length?('\nOver deze boon: '+stukken.join('; ')+'.'):'';
   const start=grindStartText(bean,formMethod);
-  if(start)uit+='\nStartpunt maalstand volgens de app: '+start+'.';
+  if(start)uit+='\nStartpunt maalstand volgens de app: '+start.replace(/\.$/,'')+'.';
   return uit;
 }
 // vaste filterregels die de AI overal meekrijgt (spiegelbeeld van ESPRESSO_RULES)
@@ -3961,6 +4011,16 @@ async function saveDialInBrew(next){
   const lk=(b.beanId||'')+'|'+b.method;
   (state.dialLog[lk]=state.dialLog[lk]||[]).push({ts:b.ts,g:b.grind||'',t:b.time||'',y:b.yield||null,d:b.dose||null});
   if(state.dialLog[lk].length>12)state.dialLog[lk]=state.dialLog[lk].slice(-12);
+  // "nailed" is een feit, geen suggestie: dat leggen we vast op de bóón, per
+  // methode. Een andere drank met dezelfde boon begint daar dan vanaf.
+  if(!next&&b.beanId&&(b.grind||b.time)){
+    const bn=beanById(b.beanId);
+    if(bn){
+      if(!bn.dialed||typeof bn.dialed!=='object')bn.dialed={};
+      bn.dialed[b.method]={grind:b.grind||'',dose:b.dose||null,yield:b.yield||null,
+        time:b.time||'',drink:b.drink||'',ts:b.ts};
+    }
+  }
   save();
   if(b.beanId)try{await updateDialIn(b.beanId,b.method);}catch(e){}
   if(next){
@@ -4644,6 +4704,17 @@ function brewBean(beanId){
   if(methodFamily(mid)==='espresso'){pendingTarget=null;formPrep={};pendingRecipe=null;openDialIn(mid);setTimeout(()=>pickDiBean(beanId),0);}
   else{openForm(mid);setTimeout(()=>pickBean(beanId),0);}
 }
+// wat je op deze boon hebt afgetekend, per methode
+function dialLineHTML(b){
+  const vast=beanDial(b,null);
+  if(!vast)return '';
+  return '<br>your dial: '+vast.map(d=>{
+    const m=methodById(d.method);
+    const c=dialCijfers(d);
+    return '<b>'+esc((m&&m.name)||d.method)+'</b> '+esc(d.grind)+(c?(' \u00b7 '+esc(c)):'')+
+      (d.drink?(' \u00b7 '+esc(d.drink)):'');
+  }).join('<br>\u2003');
+}
 function beanCardHTML(b){
   const expanded=expandedBeans.has(b.id);
   const mList=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).map(id=>methodById(id)).filter(Boolean);
@@ -4658,6 +4729,8 @@ function beanCardHTML(b){
     bits.push(inStock?'✓ in stock':'○ empty');
     if(beanFamLabel(b))bits.push('<span class="bean-fam">'+esc(beanFamLabel(b))+'</span>');
     if(fresh)bits.push('<span class="fresh">'+fresh.label+'</span>');
+    const vast=beanDial(b,null);
+    if(vast)bits.push('dial '+esc(vast[0].grind));
     return `<div class="bean-card sketch soft collapsed" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
       <div class="brow"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▸</span></div>
       <div class="bean-meta">${bits.join(' <span class="dot">·</span> ')}</div>
@@ -4678,6 +4751,7 @@ function beanCardHTML(b){
       ${b.roastdate?'<br>roast: '+esc(b.roastdate)+(fresh?' · '+esc(fresh.label):''):''}
       ${b.roasternotes?'<br>roaster: '+esc(b.roasternotes):''}
       ${methodLine}
+      ${dialLineHTML(b)}
       ${b.notes?'<br>'+esc(b.notes):''}
       ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">view online</a>':''}
       ${(featOn('cost')&&b.price&&b.bagsize)?'<br>≈ €'+((b.price/b.bagsize)*18).toFixed(2)+' per cup (18 g) · €'+(+b.price).toFixed(2)+' / '+b.bagsize+' g':''}
