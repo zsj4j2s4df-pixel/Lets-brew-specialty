@@ -1054,6 +1054,13 @@
       <div class="form-head"><div class="h hand">espresso · dial-in</div><button onclick="cancelForm()">cancel</button></div>
       <div class="subtitle" id="di-sub">machine espresso — work toward your target</div>
 
+      <div class="di-card sketch soft" id="di-recipe-card">
+        <div class="di-lbl hand">recipe</div>
+        <div class="pc-naam hand" id="di-naam"></div>
+        <div class="pc-over" id="di-over"></div>
+        <div class="pc-links" id="di-links"></div>
+      </div>
+
       <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
 
       <div class="di-goal sketch" id="di-goal"></div>
@@ -1201,7 +1208,7 @@
 
       <div class="field-row">
         <div class="field"><label>dose (g)</label><input id="rec-dose" type="number" inputmode="decimal" step="0.1" oninput="recWater()"></div>
-        <div class="field"><label>water (g)</label><input id="rec-water" type="number" inputmode="numeric" oninput="recRatio()"></div>
+        <div class="field"><label id="rec-water-lbl">water (g)</label><input id="rec-water" type="number" inputmode="numeric" oninput="recRatio()"></div>
       </div>
       <div class="field-row">
         <div class="field"><label>temp (&deg;C)</label><input id="rec-temp" type="number" inputmode="decimal"></div>
@@ -1211,6 +1218,9 @@
         <input id="rec-stand" placeholder="on your grinder, e.g. 22 clicks">
         <div class="link-pick" id="rec-molens"></div>
         <div class="fx-note" id="rec-stand-note">the number you actually dial &mdash; it lands in the brew form when you pick this recipe</div></div>
+      <div class="field" id="rec-tijd-veld" style="display:none"><label>target shot time (m:ss)</label>
+        <input id="rec-tijd" placeholder="0:28" inputmode="numeric" oninput="formatTime(this)" onblur="normalizeTime(this)"></div>
+
       <div class="field"><label>in one line</label><input id="rec-over" placeholder="what makes this recipe yours" maxlength="120"></div>
 
       <button class="recipe-btn ai-only hidden" id="rec-ai" onclick="aiRecipeSchema()">
@@ -1822,18 +1832,78 @@ const FILTER_RECIPES=[
      {t:60,  p:0,    k:'wacht', d:'laten staan'},
      {t:75,  p:0,    k:'pers',  d:'rustig indrukken in 30 tot 45 seconden — stop bij het sissen'}]},
 ];
+/* Espressorecepten hebben dezelfde vorm als de filterrecepten, zodat dezelfde
+   kaart ze kan tonen. Het verschil: ratio betekent hier yield-uit-dose, en de
+   stappen zijn je routine in plaats van een gietschema. tijd = de doeltijd
+   waar het dial-in-scherm naartoe werkt.                                    */
+const ESPRESSO_RECIPES=[
+  {id:'e-classic', fam:'espresso', naam:'classic 1:2', voor:['espresso'], dose:18, ratio:2, temp:93,
+   tijd:'0:28', maling:'fijn',
+   over:'Het moderne uitgangspunt. Werkt op vrijwel elke boon en is het eerlijkste vertrekpunt om vanaf te dial-innen.',
+   stappen:[
+     {t:0,p:0,k:'dose',  d:'weeg 18 g en verdeel het maalsel met een naaldje (WDT)'},
+     {t:0,p:0,k:'tamp',  d:'tamp recht en waterpas, kracht maakt minder uit dan gelijkheid'},
+     {t:0,p:0,k:'spoel', d:'spoel de groepskop en zet de portafilter erin'},
+     {t:0,p:0,k:'shot',  d:'start de shot en de klok'},
+     {t:28,p:0,k:'stop', d:'stop op 36 g uit en proef meteen'}]},
+
+  {id:'e-ristretto', fam:'espresso', naam:'ristretto 1:1.5', voor:['espresso'], dose:18, ratio:1.5, temp:94,
+   tijd:'0:28', maling:'fijner dan classic',
+   over:'Korter getrokken: dikker, zoeter en minder zuur. Mooi op donkerdere brandingen en in kleine melkdranken.',
+   stappen:[
+     {t:0,p:0,k:'dose', d:'zelfde dose, maar maal een stap fijner'},
+     {t:0,p:0,k:'shot', d:'start en let op: hij loopt trager op gang'},
+     {t:28,p:0,k:'stop',d:'stop al op 27 g uit — daarna wordt het snel bitter'}]},
+
+  {id:'e-lungo', fam:'espresso', naam:'lungo 1:3', voor:['espresso'], dose:18, ratio:3, temp:92,
+   tijd:'0:33', maling:'grover dan classic',
+   over:'Langer doorgetrokken voor meer aroma en een lichtere kop. Maal grover, anders haal je de bittere staart mee.',
+   stappen:[
+     {t:0,p:0,k:'dose', d:'maal een stap grover dan je classic'},
+     {t:0,p:0,k:'shot', d:'start; hij hoort vlot maar niet snel te lopen'},
+     {t:33,p:0,k:'stop',d:'stop op 54 g uit'}]},
+
+  {id:'e-light', fam:'espresso', naam:'light roast 1:2.5', voor:['espresso'], dose:18, ratio:2.5, temp:95,
+   tijd:'0:31', maling:'fijn',
+   over:'Lichte brandingen zijn dichter en lossen trager op. Een langere ratio en hetere zet halen de zoetheid eruit in plaats van alleen het zuur.',
+   stappen:[
+     {t:0,p:0,k:'temp', d:'zet zo warm als je machine toelaat, richting 95–96 °C'},
+     {t:0,p:0,k:'dose', d:'18 g, fijn gemalen en goed verdeeld'},
+     {t:0,p:0,k:'shot', d:'start; de eerste druppels mogen best laat komen'},
+     {t:31,p:0,k:'stop',d:'stop op 45 g uit'}]},
+
+  {id:'e-turbo', fam:'espresso', naam:'turbo shot', voor:['espresso'], dose:20, ratio:2.5, temp:93,
+   tijd:'0:18', maling:'grof voor espresso',
+   over:'Grover malen en snel doorlopen. Weinig weerstand, dus vergevingsgezind — en verrassend zoet op lichte brandingen.',
+   stappen:[
+     {t:0,p:0,k:'dose', d:'20 g, duidelijk grover dan je normale espresso'},
+     {t:0,p:0,k:'shot', d:'start; hij komt vrijwel meteen op gang'},
+     {t:18,p:0,k:'stop',d:'stop op 50 g uit, ergens tussen 15 en 22 seconden'}]},
+
+  {id:'e-milk', fam:'espresso', naam:'melkbasis', voor:['espresso'], dose:20, ratio:1.8, temp:94,
+   tijd:'0:29', maling:'fijn',
+   over:'Iets korter en met een hogere dose, zodat de koffie door de melk heen komt in een flat white of cappuccino.',
+   stappen:[
+     {t:0,p:0,k:'dose', d:'20 g in je mand — meer koffie, kortere ratio'},
+     {t:0,p:0,k:'shot', d:'start en mik op 36 g uit'},
+     {t:29,p:0,k:'melk', d:'schuim ondertussen je melk op tot 55–65 °C'}]},
+];
 // welke recepten passen bij deze methode? eerst je eigen, dan de ingebouwde
 function recipesFor(methodId){
   const m=methodById(methodId); const naam=((m&&m.name)||'').toLowerCase();
   const eigen=(state.recipes||[]).filter(r=>r.mid===methodId);
+  if(methodFamily(methodId)==='espresso')return eigen.concat(ESPRESSO_RECIPES);
   let hit=FILTER_RECIPES.filter(r=>r.voor.some(v=>v===methodId||naam.includes(v)));
   // een methode die we niet kennen (je eigen brewer) krijgt toch een startpunt
   if(!hit.length)hit=FILTER_RECIPES.filter(r=>r.id==='rao'||r.id==='hoffmann');
   return eigen.concat(hit);
 }
 function recipeById(id){
-  return (state.recipes||[]).find(r=>r.id===id)||FILTER_RECIPES.find(r=>r.id===id)||null;
+  return (state.recipes||[]).find(r=>r.id===id)
+    ||FILTER_RECIPES.find(r=>r.id===id)||ESPRESSO_RECIPES.find(r=>r.id===id)||null;
 }
+function recipeFam(r){return (r&&r.fam)||'filter';}
+const ALLE_RECEPTEN=()=>FILTER_RECIPES.concat(ESPRESSO_RECIPES);
 // gewichten uitrekenen voor jouw dose; hendels verschuiven de 4:6-verdeling
 function recipeSteps(r,dose,hendels){
   if(!r)return [];
@@ -2256,7 +2326,7 @@ function setSort(s){brewSort=s;document.querySelectorAll('.sortc').forEach(b=>b.
 function setFilter(m){filterMethod=m;renderAll();}
 function renderFilterChips(){
   const verborgen=recipeVerborgen();
-  const alles=(state.recipes||[]).concat(FILTER_RECIPES.filter(r=>!verborgen.includes(r.id)));
+  const alles=(state.recipes||[]).concat(ALLE_RECEPTEN().filter(r=>!verborgen.includes(r.id)));
   const used=[...new Set(alles.map(methodForRecipe).filter(Boolean).concat(state.brews.map(b=>b.method)))];
   const methodChips=state.methods.filter(m=>used.includes(m.id));
   let html=`<button class="fc ${filterMethod==='all'?'sel':''}" onclick="setFilter('all')">all</button>`;
@@ -2301,7 +2371,8 @@ function recipeCardHTML(r){
   const m=mid?methodById(mid):null;
   const water=Math.round(r.dose*r.ratio);
   const open=!!recOpen[r.id];
-  const meta=[m?m.name:'filter',r.dose+' g \u2192 '+water+' g',r.maling+', '+r.temp+'\u00b0C']
+  const meta=[m?m.name:recipeFam(r),r.dose+' g \u2192 '+water+' g']
+    .concat(r.tijd?[r.tijd]:[]).concat([r.maling+', '+r.temp+'\u00b0C'])
     .concat(r.stand?[r.stand]:[]).join(' \u00b7 ');
   const stappen=r.stappen.map(st=>
     '<div class="pcs"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
@@ -2377,7 +2448,7 @@ function brewCardNew(b){
 function renderAll(){
   renderFilterChips();
   const verborgen=recipeVerborgen();
-  const alles=(state.recipes||[]).concat(FILTER_RECIPES.filter(r=>!verborgen.includes(r.id)));
+  const alles=(state.recipes||[]).concat(ALLE_RECEPTEN().filter(r=>!verborgen.includes(r.id)));
   const sw=document.getElementById('brew-search-wrap');
   const zoekbaar=(alles.length+state.brews.length)>=6;
   if(sw)sw.style.display=zoekbaar?'flex':'none';
@@ -2391,7 +2462,17 @@ function renderAll(){
       .join(' ').toLowerCase().includes(q);
   });
   let uit='<div class="sect"><span class="hand">recipes</span><span class="sd">tap one open, then brew it</span></div>';
-  uit+=lijst.length?lijst.map(recipeCardHTML).join(''):'<div class="empty-note">no recipes found.</div>';
+  if(!lijst.length)uit+='<div class="empty-note">no recipes found.</div>';
+  else{
+    const groepen=[['espresso','espresso'],['filter','filter']];
+    const meer=groepen.filter(([f])=>lijst.some(r=>recipeFam(r)===f)).length>1;
+    groepen.forEach(([f,label])=>{
+      const deel=lijst.filter(r=>recipeFam(r)===f);
+      if(!deel.length)return;
+      if(meer)uit+='<div class="feat-group">'+label+'</div>';
+      uit+=deel.map(recipeCardHTML).join('');
+    });
+  }
   if(verborgen.length)uit+='<button class="extra-kast" onclick="recRestore()">'+ICO.del+
     ' show hidden \u00b7 '+verborgen.length+' recipe'+(verborgen.length===1?'':'s')+'</button>';
 
@@ -2830,7 +2911,7 @@ function fillGear(naam){cardSummaries();
 // bij welke van jouw methodes hoort dit recept?
 function methodForRecipe(r){
   if(!r)return null;
-  const aan=state.methods.filter(m=>m.on&&methodFamily(m)==='filter');
+  const aan=state.methods.filter(m=>m.on&&methodFamily(m)===recipeFam(r));
   if(r.mid&&aan.find(m=>m.id===r.mid))return r.mid;
   for(const v of (r.voor||[])){
     const m=aan.find(x=>x.id===v||(x.name||'').toLowerCase().includes(v));
@@ -2842,10 +2923,20 @@ function methodForRecipe(r){
 function brewRecipe(id){
   const r=recipeById(id);if(!r)return;
   const mid=methodForRecipe(r);
-  if(!mid){toast('turn on a filter method under methods first');return;}
+  if(!mid){toast('turn on a '+recipeFam(r)+' method under methods first');return;}
   if(!state.lastRecipe)state.lastRecipe={};
   state.lastRecipe[mid]=r.id;save();
   pc.mid=null;                       // de coach moet opnieuw kijken
+  if(recipeFam(r)==='espresso'){
+    // een espressorecept is een doel: dat vult het dial-in-scherm
+    formBean=null;formPrep={};pendingRecipe=null;
+    pendingTarget={dose:String(r.dose),yield:String(Math.round(r.dose*r.ratio)),
+      time:r.tijd||'',grind:r.stand||''};
+    openDialIn(mid);
+    diRid=r.id;renderDiRecipe();
+    toast('\u2713 '+r.naam+' loaded as your target');
+    return;
+  }
   beginBrew(mid);
   const stack=document.getElementById('pc-stack');
   if(stack&&stack.style.display!=='none')pourPickRecipe(r.id);
@@ -2869,7 +2960,7 @@ function openRecipe(id,mid){
       stappen:best.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,d:x.d}))};
     setVal('rec-naam',best.naam);setVal('rec-dose',best.dose);setVal('rec-water',water);
     setVal('rec-temp',best.temp);setVal('rec-maling',best.maling);setVal('rec-over',best.over||'');
-    setVal('rec-stand',best.stand||'');recBewerk.molen=best.molen||null;
+    setVal('rec-stand',best.stand||'');setVal('rec-tijd',best.tijd||'');recBewerk.molen=best.molen||null;
   }else{
     // beginnen vanaf het recept dat nu geselecteerd staat, scheelt overtypen
     const basis=best||recipeById((state.lastRecipe||{})[methode])||recipesFor(methode)[0];
@@ -2883,11 +2974,15 @@ function openRecipe(id,mid){
     // maalstand overnemen: eerst uit het basisrecept, anders uit je laatste brew
     const vorige=state.brews.filter(x=>x.method===methode&&x.grind).sort((a,b)=>b.ts-a.ts)[0];
     setVal('rec-stand',(basis&&basis.stand)||(vorige?vorige.grind:''));
+    setVal('rec-tijd',(basis&&basis.tijd)||'');
     recBewerk.molen=(basis&&basis.molen)||(filterMolens()[0]||{}).name||null;
   }
   document.getElementById('rec-title').textContent=(best&&best.eigen)?'edit recipe':'own recipe';
   document.getElementById('rec-del').style.display=(best&&best.eigen)?'block':'none';
-  recMethods();recMolens();recSteps();applyAIVisibility();go('recipe');
+  recMethods();recMolens();recSteps();applyAIVisibility();
+  const ai=document.getElementById('rec-ai');
+  if(ai)ai.style.display=(methodFamily(recBewerk.mid)==='espresso')?'none':'';
+  go('recipe');
 }
 // je filtermolens uit de gear-lijst, zodat de maalstand bij een molen hoort
 function filterMolens(){
@@ -2913,11 +3008,26 @@ function recPickMolen(naam){
 }
 function recMethods(){
   const el=document.getElementById('rec-methods');if(!el)return;
-  el.innerHTML=state.methods.filter(m=>m.on&&methodFamily(m)==='filter').map(m=>
+  el.innerHTML=state.methods.filter(m=>m.on).map(m=>
     `<button class="lp ${m.id===recBewerk.mid?'sel':''}" onclick="recPickMethod('${m.id}')">${esc(m.name)}</button>`).join('')
-    ||'<span class="rec-empty">turn on a filter method under methods first</span>';
+    ||'<span class="rec-empty">turn on a method under methods first</span>';
+  recFamilie();
 }
-function recPickMethod(id){recBewerk.mid=id;recMethods();}
+function recPickMethod(id){
+  recBewerk.mid=id;recMethods();recMolens();
+  const ai=document.getElementById('rec-ai');
+  if(ai)ai.style.display=(methodFamily(id)==='espresso')?'none':'';
+}
+// bij espresso heet het water een yield, en hoort er een doeltijd bij
+function recFamilie(){
+  const esp=methodFamily(recBewerk.mid)==='espresso';
+  const l=document.getElementById('rec-water-lbl');
+  if(l)l.textContent=esp?'yield (g)':'water (g)';
+  const t=document.getElementById('rec-tijd-veld');
+  if(t)t.style.display=esp?'block':'none';
+  const note=document.getElementById('rec-stand-note');
+  if(note&&esp)note.textContent='the number you actually dial on your espresso grinder';
+}
 function recWater(){
   // dose gewijzigd: water mee laten lopen met de ratio die er stond
   const d=parseFloat(document.getElementById('rec-dose').value);
@@ -2967,6 +3077,8 @@ function saveRecipe(){
     t:st.t||0, p:(st.g===''||st.g==null)?0:Math.max(0,Math.min(1.5,st.g/water)),
     k:st.k||'giet', d:(st.d||'').trim()||st.k||'giet'}));
   const r={id:recBewerk.id||('r_'+uid().slice(0,6)),eigen:true,mid:recBewerk.mid,
+    fam:methodFamily(recBewerk.mid),
+    tijd:(document.getElementById('rec-tijd').value||'').trim(),
     naam,dose,ratio:water/dose,temp:parseFloat(document.getElementById('rec-temp').value)||94,
     maling:(document.getElementById('rec-maling').value||'').trim()||'medium',
     stand:(document.getElementById('rec-stand').value||'').trim(),
@@ -3445,6 +3557,14 @@ function openDialIn(methodId){
   editingId=null;
   const valid=methodId&&state.methods.find(m=>m.id===methodId&&methodFamily(m)==='espresso');
   formMethod=valid?methodId:(state.methods.filter(m=>m.on&&methodFamily(m)==='espresso')[0]?.id||'espresso');
+  // geen doel meegekregen? val terug op het recept dat je hier het laatst koos
+  const bewaard=(state.lastRecipe||{})[formMethod];
+  const rec=recipeById(bewaard);
+  diRid=(rec&&recipeFam(rec)==='espresso')?rec.id:null;
+  if(!pendingTarget&&rec&&recipeFam(rec)==='espresso'){
+    pendingTarget={dose:String(rec.dose),yield:String(Math.round(rec.dose*rec.ratio)),
+      time:rec.tijd||'',grind:rec.stand||''};
+  }
   const t=pendingTarget||{};
   setVal('di-dose',t.dose||'');setVal('di-yield',t.yield||'');setVal('di-time','');
   setVal('di-grind',t.grind||'');   // startpunt: de doel-maalstand, aan te passen
@@ -3454,7 +3574,27 @@ function openDialIn(methodId){
   }
   e61Reset();renderDialIn();go('dialin');
 }
-function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();}
+function renderDialIn(){renderDiRecipe();renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();}
+// welk espressorecept staat er geladen? kiezen doe je bij recipes & brews
+let diRid=null;
+function renderDiRecipe(){
+  const kaart=document.getElementById('di-recipe-card');if(!kaart)return;
+  const r=recipeById(diRid);
+  const naam=document.getElementById('di-naam');
+  if(naam)naam.textContent=r?r.naam:'no recipe loaded';
+  const o=document.getElementById('di-over');
+  if(o){
+    const stand=r&&r.stand?('  \u00b7  '+esc(r.stand)):'';
+    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand)
+                 :'pick one under recipes &amp; brews, or just dial in from the target below';
+  }
+  const l=document.getElementById('di-links');
+  if(l){
+    l.innerHTML='<a onclick="go(\'brews\')">all recipes \u203a</a>'+
+      (r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
+                 :('<a onclick="openRecipe(null,formMethod)">write your own</a>'));
+  }
+}
 /* --- E61 shot clock: stopwatch, geen simulator — jouw waarden blijven leidend --- */
 let e61Run=false,e61T0=0,e61Raf=null;
 function e61Fmt(sec){const m=Math.floor(sec/60),ss=Math.floor(sec%60);return m+':'+String(ss).padStart(2,'0');}
@@ -3555,7 +3695,7 @@ function renderDiGoal(){
   const aiGrind=(bean&&bean.dialIn&&bean.dialIn.method===formMethod)?bean.dialIn.grind:'';
   const shownGrind=t.grind||aiGrind||'';
   const isAI=aiGrind&&shownGrind===aiGrind;
-  el.innerHTML=`<div class="di-t"><span><svg class="acic" viewBox="0 0 24 24" style="width:19px;height:19px;vertical-align:-3px"><path d="M18.4 9.4 Q21.4 14.4 17.2 18.5 Q12.5 21.3 7.5 18.6 Q3.3 15.3 4.6 10.1 Q6.6 4.9 12.1 3.8 Q16.5 3.9 19 8.3"/><path d="M15 9.3 Q17.2 12.4 14.6 15.2 Q11.5 17 8.8 14.8 Q6.9 12.1 9 9.5 Q11.5 7.2 14.5 8.6"/><path d="M12.9 11.2 Q13.7 12.6 12.2 13.3 Q10.8 13.1 10.9 11.6 Q11.4 10.8 12.6 11.1"/></svg> target</span><span>ratio 1:2</span></div>
+  el.innerHTML=`<div class="di-t"><span><svg class="acic" viewBox="0 0 24 24" style="width:19px;height:19px;vertical-align:-3px"><path d="M18.4 9.4 Q21.4 14.4 17.2 18.5 Q12.5 21.3 7.5 18.6 Q3.3 15.3 4.6 10.1 Q6.6 4.9 12.1 3.8 Q16.5 3.9 19 8.3"/><path d="M15 9.3 Q17.2 12.4 14.6 15.2 Q11.5 17 8.8 14.8 Q6.9 12.1 9 9.5 Q11.5 7.2 14.5 8.6"/><path d="M12.9 11.2 Q13.7 12.6 12.2 13.3 Q10.8 13.1 10.9 11.6 Q11.4 10.8 12.6 11.1"/></svg> target</span><span>ratio 1:${(t.dose&&t.yield)?(parseFloat(t.yield)/parseFloat(t.dose)).toFixed(1).replace('.0',''):'2'}</span></div>
     <div class="di-grid">
       <div><div class="k">dose in</div><div class="v hand">${t.dose?esc(t.dose)+' <small>g</small>':'18 <small>g</small>'}</div></div>
       <div><div class="k">yield out</div><div class="v hand">${t.yield?esc(t.yield)+' <small>g</small>':'36 <small>g</small>'}</div></div>
