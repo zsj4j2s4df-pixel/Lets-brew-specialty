@@ -334,8 +334,16 @@
   .bean-method-ic img,.bean-method-ic .glyph{max-height:17px;}
   .fc.sel{border-color:var(--ink);color:var(--ink);background:var(--card-2);}
   .sort-row{display:flex;align-items:center;gap:8px;font-size:16px;color:var(--ink-soft);margin-bottom:14px;flex-wrap:wrap;}
-  .sortc{background:none;border:none;border-bottom:2px solid transparent;font-family:inherit;font-size:16px;color:var(--ink-soft);cursor:pointer;padding:2px 2px;}
-  .sortc.on{color:var(--ink);border-bottom-color:var(--ink);}
+  .sort-bar{display:flex;align-items:center;gap:11px;margin:0 2px 14px;}
+  .sort-lbl{color:var(--ink-soft);font-size:13px;text-transform:uppercase;letter-spacing:.12em;flex:none;}
+  .sort-chips{display:flex;gap:7px;flex-wrap:wrap;}
+  .sortc{background:none;border:2px solid var(--line);filter:url(#wobble);border-radius:13px;
+    font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:var(--ink-soft);
+    cursor:pointer;padding:2px 12px;}
+  .sortc.on{color:var(--ink);border-color:var(--ink);background:var(--card-2);}
+  /* groepskop zonder streepje eronder */
+  .rec-group{font-family:'Caveat',cursive;font-weight:700;font-size:20px;color:var(--ink-soft);
+    margin:16px 2px 6px;}
   .stats-toggle{width:100%;background:none;border:none;text-align:left;font-family:'Caveat',cursive;font-weight:700;font-size:24px;color:var(--ink);cursor:pointer;margin-bottom:8px;padding:4px 2px;}
   #stats-panel{padding:16px 20px;margin-bottom:16px;}
   .stat-line{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1.5px dashed var(--line);}
@@ -1256,8 +1264,7 @@
   <div id="page-brews" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <h1 class="title hand">recipes &amp; brews</h1>
-      <div class="subtitle">your schedules on top, everything you brewed below</div>
+      <h1 class="title hand">brew</h1>
 
       <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ new brew</button>
 
@@ -1268,6 +1275,11 @@
 
       <div class="filter-bar">
         <div class="filter-chips" id="filter-methods"></div>
+      </div>
+
+      <div class="sort-bar" id="sort-bar">
+        <span class="sort-lbl">sort</span>
+        <div class="sort-chips" id="sort-chips"></div>
       </div>
 
       <div id="all-list"></div>
@@ -2525,8 +2537,25 @@ async function quickBrew(){
     toast('couldn\'t make an AI brew — fill in the rest yourself');
   }
 }
-let brewSort='new', filterMethod='all';
-function setSort(s){brewSort=s;document.querySelectorAll('.sortc').forEach(b=>b.classList.toggle('on',b.dataset.s===s));renderAll();}
+let brewSort='date', filterMethod='all';
+/* Sorteren van je brews. De volgorde waarin je ze zette is de standaard; op
+   methode groepeert per zetter, op score zet je beste bovenaan.            */
+const BREW_SORTS=[['date','brew order'],['method','method'],['score','score']];
+function setSort(s){brewSort=s;renderAll();}
+function renderSortChips(){
+  const el=document.getElementById('sort-chips');if(!el)return;
+  el.innerHTML=BREW_SORTS.map(([v,label])=>
+    '<button class="sortc '+(brewSort===v?'on':'')+'" onclick="setSort(\''+v+'\')">'+esc(label)+'</button>').join('');
+}
+// de vergelijker die bij de gekozen volgorde hoort
+function brewSorter(){
+  if(brewSort==='score')return (a,b)=>(b.score||0)-(a.score||0)||b.ts-a.ts;
+  if(brewSort==='method')return (a,b)=>{
+    const na=(methodById(a.method)||{}).name||'', nb=(methodById(b.method)||{}).name||'';
+    return na.localeCompare(nb)||b.ts-a.ts;
+  };
+  return (a,b)=>b.ts-a.ts;
+}
 function setFilter(m){filterMethod=m;renderAll();}
 function renderFilterChips(){
   const verborgen=recipeVerborgen();
@@ -2650,9 +2679,11 @@ function brewCardNew(b){
   </div>`;
 }
 function renderAll(){
-  renderFilterChips();
+  renderFilterChips();renderSortChips();
   const verborgen=recipeVerborgen();
   const alles=(state.recipes||[]).concat(ALLE_RECEPTEN().filter(r=>!verborgen.includes(r.id)));
+  const sb=document.getElementById('sort-bar');
+  if(sb)sb.style.display=(state.brews.length>=2)?'flex':'none';
   const sw=document.getElementById('brew-search-wrap');
   const zoekbaar=(alles.length+state.brews.length)>=6;
   if(sw)sw.style.display=zoekbaar?'flex':'none';
@@ -2673,7 +2704,7 @@ function renderAll(){
     groepen.forEach(([f,label])=>{
       const deel=lijst.filter(r=>recipeFam(r)===f);
       if(!deel.length)return;
-      if(meer)uit+='<div class="feat-group">'+label+'</div>';
+      if(meer)uit+='<div class="rec-group">'+label+'</div>';
       uit+=deel.map(recipeCardHTML).join('');
     });
   }
@@ -2687,11 +2718,12 @@ function renderAll(){
     const m=methodById(b.method);
     return [m.name,b.beans,b.notes,b.title,asArr(b.tags).join(' ')].join(' ').toLowerCase().includes(q);
   });
-  const sorter=(a,b)=>b.ts-a.ts;
+  const sorter=brewSorter();
   const actief=brews.filter(b=>!brewBeanGone(b)).sort(sorter);
   const kast=brews.filter(brewBeanGone).sort(sorter);
+  const volgorde={date:'newest first',method:'grouped by method',score:'best first'}[brewSort]||'';
   uit+='<div class="sect"><span class="hand">brews</span><span class="sd">'+
-    (q?('what matches "'+esc(q)+'"'):'everything you\u2019ve brewed')+'</span></div>';
+    (q?('what matches "'+esc(q)+'"'):esc(volgorde))+'</span></div>';
   uit+=actief.length?actief.map(brewCardNew).join('')
       :(kast.length?'':'<div class="empty-note">no brews found.</div>');
   if(kast.length){
