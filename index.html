@@ -720,6 +720,14 @@
   .rc-body{display:none;margin-top:10px;border-top:2px solid var(--line);filter:url(#wobble);
     padding-top:10px;}
   .rcard.op .rc-body{display:block;}
+  /* gieten-galerij: dichtgeklapt een rij met duimnagel, open de hele foto */
+  .lshot-row{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .lshot-thumb{width:52px;height:52px;flex:none;border-radius:12px;object-fit:cover;
+    border:2px solid var(--line);filter:url(#wobble);}
+  .lshot-main{flex:1;min-width:0;}
+  .lshot-when{font-family:'Caveat',cursive;font-weight:700;font-size:19px;color:var(--ink);}
+  .lshot-fb{color:var(--ink-soft);font-size:14px;margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .rc-over{color:var(--ink-soft);font-size:16px;line-height:1.35;margin-bottom:8px;}
   .rc-steps{margin-bottom:4px;}
   /* receptenboek */
@@ -6213,24 +6221,47 @@ async function addLatteShot(ev){
   try{
     const img=await fileToDataURL(file,520,false);
     if(!Array.isArray(state.latteShots))state.latteShots=[];
-    state.latteShots.unshift({id:uid(),ts:Date.now(),img,fb:''});
+    const nieuw={id:uid(),ts:Date.now(),img,fb:''};
+    state.latteShots.unshift(nieuw);
+    latteOpen[nieuw.id]=true;   // je eigen nieuwe giet zie je meteen, niet dichtgeklapt
     save();renderGallery();toast('✓ giet toegevoegd');
   }catch(e){toast('kon de foto niet laden');}
   ev.target.value='';
 }
+// welke gieten staan open? dichtgeklapt is de standaard -- zo blijft een lange
+// reeks pogingen overzichtelijk in plaats van een eindeloze scroll van foto's
+let latteOpen={};
+function latteToggle(id){latteOpen[id]=!latteOpen[id];renderGallery();}
 function renderGallery(){
   const el=document.getElementById('gallery-list');if(!el)return;
   const shots=state.latteShots||[];
   if(!shots.length){el.innerHTML='<div class="empty-note">nog geen gieten.<br>fotografeer je volgende flat white en zie jezelf vooruitgaan.</div>';return;}
-  el.innerHTML=shots.map(sh=>`<div class="settings-card sketch soft">
-    <img src="${sh.img}" style="width:100%;border-radius:14px;border:2px solid var(--line)">
-    <div class="set-d" style="margin-top:6px">${timeAgo(sh.ts)}</div>
-    ${sh.fb?'<div class="set-d" style="margin-top:6px;color:var(--ink)">✦ '+esc(sh.fb).replace(/\n/g,'<br>')+'</div>':''}
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" style="margin-top:0;flex:1" onclick="latteCoach('${sh.id}')">✦ laat de coach kijken</button>
-      <button class="icon-btn" title="delete" onclick="delLatteShot('${sh.id}')">${ICO.del}</button>
-    </div>
-  </div>`).join('');
+  el.innerHTML=shots.map(sh=>{
+    const open=!!latteOpen[sh.id];
+    const kop=timeAgo(sh.ts);
+    if(!open)return `<div class="settings-card sketch soft">
+      <div class="lshot-row" onclick="latteToggle('${sh.id}')">
+        <img class="lshot-thumb" src="${sh.img}">
+        <div class="lshot-main">
+          <div class="lshot-when">${esc(kop)}</div>
+          <div class="lshot-fb">${sh.fb?'✦ '+esc(sh.fb):'no feedback yet'}</div>
+        </div>
+        <span class="bchev">▸</span>
+      </div>
+    </div>`;
+    return `<div class="settings-card sketch soft">
+      <div class="lshot-row" onclick="latteToggle('${sh.id}')">
+        <div class="lshot-main"><div class="lshot-when">${esc(kop)}</div></div>
+        <span class="bchev">▾</span>
+      </div>
+      <img src="${sh.img}" style="width:100%;border-radius:14px;border:2px solid var(--line);margin-top:8px">
+      ${sh.fb?'<div class="set-d" style="margin-top:6px;color:var(--ink)">✦ '+esc(sh.fb).replace(/\n/g,'<br>')+'</div>':''}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" style="margin-top:0;flex:1" onclick="latteCoach('${sh.id}')">✦ laat de coach kijken</button>
+        <button class="icon-btn" title="delete" onclick="delLatteShot('${sh.id}')">${ICO.del}</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 function delLatteShot(id){
   if(!confirm('deze giet verwijderen?'))return;
@@ -6245,7 +6276,7 @@ async function latteCoach(id){
     const media=(sh.img.match(/^data:([^;]+)/)||[])[1]||'image/jpeg';
     const prompt='Dit is een foto van latte art van een thuisbarista. Geef vriendelijke, concrete feedback in het Nederlands (max 4 zinnen): wat gaat goed, en één duidelijk verbeterpunt over melktextuur, giethoogte of trekbeweging.';
     const txt=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:media,data:b64}},{type:"text",text:prompt}]}],400);
-    sh.fb=(txt||'').trim();save();renderGallery();
+    sh.fb=(txt||'').trim();latteOpen[sh.id]=true;save();renderGallery();
   }catch(e){toast("couldn't reach the coach");}
 }
 
