@@ -253,6 +253,8 @@
   .journey .axis{stroke:var(--ink-soft);stroke-width:1.5;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
   .journey .band{fill:#5c7a4f;opacity:.16;}
   .journey .ln{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
+  .journey .exp{stroke:var(--accent);stroke-width:1.6;stroke-dasharray:4 3;opacity:.75;filter:url(#wobble-rough);}
+  .journey text.exp-lbl{font-family:'Caveat',cursive;font-weight:700;font-size:13px;fill:var(--accent);}
   .journey .dot{fill:var(--paper);stroke:var(--ink);stroke-width:2;cursor:pointer;}
   .journey .dot.hit{fill:var(--accent-soft);}
   .journey .dot.sel{stroke:var(--accent);stroke-width:3.2;}
@@ -3954,6 +3956,26 @@ function journeySVG(log,doelSec,key){
   out+=`<rect class="band" x="${L-6}" y="${Y(hi)}" width="${W-L-R+12}" height="${Y(lo)-Y(hi)}" rx="6"/>`;
   out+=`<text x="${L-8}" y="${Y(tT)+4}" text-anchor="end">${lo}–${hi}s</text>`;
   out+=`<path class="axis" d="M${L} ${T} L${L} ${H-B} L${W-R} ${H-B}"/>`;
+  /* de verwachte volgende maalstand: tussen je laatste twee pogingen zoeken we
+     waar de trend de doeltijd zou raken, en zetten daar een stippellijn met
+     het cijfer erbij. Alleen zolang je nog niet in de zone zit -- ben je er
+     al, dan heeft een volgende gok niets meer te voorspellen.              */
+  if(log.length>=2){
+    const a1=log[log.length-2], a2=log[log.length-1];
+    const y1=parseTimeSec(a1.t)||0, y2=parseTimeSec(a2.t)||0;
+    const g1=parseFloat(a1.g), g2=parseFloat(a2.g);
+    const laatsteHit=y2>=lo&&y2<=hi;
+    if(!laatsteHit&&y1!==y2&&isFinite(g1)&&isFinite(g2)){
+      const f=(tT-y1)/(y2-y1);
+      if(f>0&&f<1){
+        const xf=X(log.length-2)+f*(X(log.length-1)-X(log.length-2));
+        const gf=g1+f*(g2-g1), gr=Math.round(gf*10)/10;
+        const gTxt=Number.isInteger(gr)?String(gr):gr.toFixed(1);
+        out+=`<line class="exp" x1="${xf-0.6}" y1="${T}" x2="${xf+0.6}" y2="${H-B}"/>`;
+        out+=`<text class="exp-lbl" x="${xf}" y="${T+15}" text-anchor="middle">try ${gTxt}</text>`;
+      }
+    }
+  }
   if(log.length>1)out+=`<polyline class="ln" points="${log.map((a,i)=>X(i)+','+Y(parseTimeSec(a.t)||0)).join(' ')}"/>`;
   log.forEach((a,i)=>{
     const tv=parseTimeSec(a.t)||0,hit=tv>=lo&&tv<=hi;
