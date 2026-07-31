@@ -253,8 +253,15 @@
   .journey .axis{stroke:var(--ink-soft);stroke-width:1.5;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
   .journey .band{fill:#5c7a4f;opacity:.16;}
   .journey .ln{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
-  .journey .dot{fill:var(--paper);stroke:var(--ink);stroke-width:2;}
+  .journey .dot{fill:var(--paper);stroke:var(--ink);stroke-width:2;cursor:pointer;}
   .journey .dot.hit{fill:var(--accent-soft);}
+  .journey .dot.sel{stroke:var(--accent);stroke-width:3.2;}
+  .journey-info{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--card2);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;
+    padding:9px 12px;margin-top:8px;font-family:'Patrick Hand',cursive;font-size:15px;color:var(--ink);}
+  .ji-del{flex:none;background:none;border:none;padding:2px;cursor:pointer;display:flex;}
+  .ji-del svg{width:19px;height:19px;stroke:var(--ink-soft);}
+  .ji-del:hover svg,.ji-del:active svg{stroke:var(--warn-line,#a5673a);}
   .journey text{font-family:'Patrick Hand',cursive;font-size:11px;fill:var(--ink-soft);}
   .journey text.val{font-family:'Caveat',cursive;font-weight:700;font-size:14px;fill:var(--ink);}
   .di-advice{color:var(--accent);font-size:18px;line-height:1.4;margin-top:6px;}
@@ -1204,6 +1211,7 @@
       <div class="di-card sketch soft" id="di-journey-card">
         <div class="di-lbl hand">dial-in journey</div>
         <svg id="di-journey" class="journey" viewBox="0 0 360 185"></svg>
+        <div id="di-journey-info"></div>
         <div class="set-d" id="di-journey-note" style="font-size:14px"></div>
       </div>
 
@@ -3913,21 +3921,27 @@ function renderDiJourney(){
   card.style.display=featOn('journey')?'block':'none';
   if(!featOn('journey'))return;
   const key=(formBean||'')+'|'+formMethod;
-  const log=((state.dialLog||{})[key]||[]).slice(-6);
+  const fullLog=(state.dialLog||{})[key]||[];
+  const log=fullLog.slice(-6);
   const svg=document.getElementById('di-journey'),note=document.getElementById('di-journey-note');
-  if(log.length<1){svg.innerHTML='';note.textContent='your attempts will be drawn here — every lever pull adds a dot.';return;}
+  const info=document.getElementById('di-journey-info');
+  if(log.length<1){svg.innerHTML='';note.textContent='your attempts will be drawn here — every lever pull adds a dot.';if(info)info.innerHTML='';return;}
   note.textContent=log.length===1?'first attempt on paper — pull another to draw the line.':'';
-  svg.innerHTML=journeySVG(log,parseTimeSec((pendingTarget||{}).time)||28);
+  svg.innerHTML=journeySVG(log,parseTimeSec((pendingTarget||{}).time)||28,key);
+  if(info)info.innerHTML=journeyInfoHTML(key,fullLog);
 }
 /* De tekening zelf: pogingen op volgorde, de doelzone als band. Staat los van
-   het dial-in-scherm, zodat de boonkaart hem ook kan laten zien.            */
-function journeySVG(log,doelSec){
+   het dial-in-scherm, zodat de boonkaart hem ook kan laten zien. Met een key
+   erbij wordt elke stip klikbaar: aantikken selecteert 'm (zie journeyInfoHTML),
+   nog een keer tikken heft de selectie weer op.                              */
+function journeySVG(log,doelSec,key){
   const tT=doelSec||28, lo=Math.max(1,tT-2), hi=tT+2;
   const times=log.map(a=>parseTimeSec(a.t)||0);
   const ymin=Math.min(lo-4,...times)-2, ymax=Math.max(hi+4,...times)+2;
   const W=360,H=185,L=40,R=14,T=14,B=36;
   const X=i=>log.length===1?(L+(W-L-R)/2):(L+(W-L-R)*(i/(log.length-1)));
   const Y=v=>T+(H-T-B)*(1-(v-ymin)/(ymax-ymin));
+  const selTs=key?journeySel[key]:null;
   let out='';
   out+=`<rect class="band" x="${L-6}" y="${Y(hi)}" width="${W-L-R+12}" height="${Y(lo)-Y(hi)}" rx="6"/>`;
   out+=`<text x="${L-8}" y="${Y(tT)+4}" text-anchor="end">${lo}–${hi}s</text>`;
@@ -3935,12 +3949,50 @@ function journeySVG(log,doelSec){
   if(log.length>1)out+=`<polyline class="ln" points="${log.map((a,i)=>X(i)+','+Y(parseTimeSec(a.t)||0)).join(' ')}"/>`;
   log.forEach((a,i)=>{
     const tv=parseTimeSec(a.t)||0,hit=tv>=lo&&tv<=hi;
-    out+=`<circle class="dot${hit?' hit':''}" cx="${X(i)}" cy="${Y(tv)}" r="6.5"/>`;
+    const sel=key&&a.ts&&a.ts===selTs;
+    const klik=key?` onclick="journeyPick('${key}',${a.ts||0})"`:'';
+    out+=`<circle class="dot${hit?' hit':''}${sel?' sel':''}" cx="${X(i)}" cy="${Y(tv)}" r="6.5"${klik}/>`;
     out+=`<text class="val" x="${X(i)}" y="${Y(tv)-12}" text-anchor="middle">${tv}s</text>`;
     out+=`<text x="${X(i)}" y="${H-B+16}" text-anchor="middle">${esc(a.g||'?')}</text>`;
   });
   out+=`<text x="${W-R}" y="${H-B+30}" text-anchor="end">grind per attempt →</text>`;
   return out;
+}
+// welke poging staat er aangetikt? key -> ts. Weg = niets geselecteerd.
+let journeySel={};
+// "18 g → 36 g in 0:28 · grind 4.2", voor onder de tekening
+function journeyAttemptLine(a){
+  const stuk=[];
+  if(a.d&&a.y)stuk.push(a.d+' g \u2192 '+a.y+' g');
+  else if(a.d)stuk.push(a.d+' g');
+  if(a.t)stuk.push('in '+a.t);
+  const cijfers=stuk.join(' ');
+  return (cijfers?cijfers+' \u00b7 ':'')+'grind '+(a.g||'?');
+}
+function journeyInfoHTML(key,log){
+  const ts=journeySel[key];if(!ts)return '';
+  const a=(log||[]).find(x=>x.ts===ts);if(!a)return '';
+  return '<div class="journey-info"><span>'+esc(journeyAttemptLine(a))+'</span>'+
+    '<button type="button" class="ji-del" title="remove this attempt" aria-label="remove this attempt" '+
+    'onclick="journeyRemove(\''+key+'\','+ts+')">'+ICO.del+'</button></div>';
+}
+// aantikken selecteert of heft de selectie op; nooit twee tegelijk voor dezelfde key
+function journeyPick(key,ts){
+  journeySel[key]=(journeySel[key]===ts)?null:ts;
+  journeyRefresh();
+}
+function journeyRemove(key,ts){
+  if(!confirm('remove this attempt from the journey?'))return;
+  const log=state.dialLog||{};
+  if(Array.isArray(log[key]))log[key]=log[key].filter(a=>a.ts!==ts);
+  journeySel[key]=null;
+  save();toast('attempt removed');
+  journeyRefresh();
+}
+// dezelfde tekening staat mogelijk op het dial-in-scherm én op een boonkaart
+function journeyRefresh(){
+  try{if(currentPage==='dialin')renderDiJourney();}catch(e){}
+  try{if(currentPage==='beans')renderBeans();}catch(e){}
 }
 
 function renderDiBeans(){
@@ -4740,7 +4792,8 @@ function beanJourneyHTML(b){
     const doel=parseTimeSec(vast&&vast.time)||parseTimeSec(laatste&&laatste.target.time)||28;
     const kop=((m&&m.name)||mid)+' \u00b7 '+rij.length+' attempt'+(rij.length===1?'':'s');
     return '<div class="bean-journey"><div class="bj-h">'+esc(kop)+'</div>'+
-      '<svg class="journey" viewBox="0 0 360 185">'+journeySVG(rij,doel)+'</svg></div>';
+      '<svg class="journey" viewBox="0 0 360 185">'+journeySVG(rij,doel,k)+'</svg>'+
+      journeyInfoHTML(k,log[k])+'</div>';
   });
   return delen.join('');
 }
