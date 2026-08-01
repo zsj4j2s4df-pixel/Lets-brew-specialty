@@ -941,6 +941,17 @@
     </div>
   </div>
 
+  <!-- KIES EERST EEN BOON -->
+  <div id="page-choosebean" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand">new brew</div><button onclick="go('brews')">cancel</button></div>
+      <div class="subtitle">pick a bean — we'll take you to the right screen for it</div>
+      <div id="choosebean-list"></div>
+      <button class="profile-btn" onclick="beginBrew(null)" style="margin-top:6px">no bean — just pick a method</button>
+    </div>
+  </div>
+
   <!-- BREW FORM -->
   <div id="page-form" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
@@ -1082,14 +1093,6 @@
       <div class="form-head"><div class="h hand">espresso · dial-in</div><button onclick="cancelForm()">cancel</button></div>
       <div class="subtitle" id="di-sub">machine espresso — work toward your target</div>
 
-      <div class="di-card sketch soft" id="di-recipe-card">
-        <div class="di-lbl hand">recipe</div>
-        <div class="link-pick" id="di-pick"></div>
-        <div class="pc-naam hand" id="di-naam"></div>
-        <div class="pc-over" id="di-over"></div>
-        <div class="pc-links" id="di-links"></div>
-      </div>
-
       <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
       <div class="start-hint" id="di-start"></div>
 
@@ -1207,6 +1210,11 @@
         <div class="di-advice" id="di-advice"></div>
       </div>
 
+      <button class="shelf-do" id="di-latteart-link" onclick="go('gallery')" style="display:none">
+        <svg viewBox="0 0 24 24" class="acic"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M7.7 14.2 Q10 10.4 12.1 12.6 Q14.5 8.9 16.8 13.2" opacity="0.8"/><path d="M10.3 8.7 Q10.7 10.4 9 10.5 Q7.5 10.4 7.7 8.9 Q8 7.5 9.6 7.7 Q10.3 7.9 10.6 8.4" opacity="0.6"/></svg>
+        <span>pouring milk? log it under pouring shapes</span><span class="ll-arr">›</span>
+      </button>
+
       <div class="di-card sketch soft">
         <div class="di-lbl hand">puck-prep &amp; machine</div>
         <div id="di-prep-list"></div>
@@ -1283,7 +1291,7 @@
     <div class="screen">
       <h1 class="title hand">brews</h1>
 
-      <button class="btn-add sketch soft" onclick="beginBrew(filterMethod!=='all'?filterMethod:null)" style="margin-bottom:16px">＋ new brew</button>
+      <button class="btn-add sketch soft" onclick="go('choosebean')" style="margin-bottom:16px">＋ new brew</button>
 
       <div class="search-wrap" id="brew-search-wrap" style="display:none">
         <svg viewBox="0 0 24 24" class="acic search-ic"><path d="M14.4 8.1 Q17 11.6 14.2 14.6 Q11.1 16.9 7.6 14.9 Q4.8 12.3 6.5 8.5 Q9 5.3 12.6 6.3 Q14.2 7 15 8.7"/><path d="M14.6 14.9 Q17.4 17.6 20.4 20.5"/><path d="M7.6 8.9 Q8.6 7.1 10.7 7" opacity="0.5"/></svg>
@@ -2439,8 +2447,8 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
-const navMap={home:'home',form:'home',dialin:'home',recipe:'brews',detail:'home',
+const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery'];
+const navMap={home:'home',choosebean:'brews',form:'home',dialin:'home',recipe:'brews',detail:'home',
   cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
@@ -2466,6 +2474,7 @@ function go(p,isBack){
   if(p==='brews')renderAll();
   if(p==='methods')renderMethods();
   if(p==='beans')renderBeans();
+  if(p==='choosebean')renderChooseBean();
   if(p==='cupping')renderCupping();
   if(p==='gallery')renderGallery();
   if(p==='learn'){
@@ -3141,30 +3150,6 @@ function methodForRecipe(r){
   }
   return (aan[0]||{}).id||null;
 }
-// aantikken: recept klaarzetten en New brew openen met de coach erop
-function brewRecipe(id){
-  const r=recipeById(id);if(!r)return;
-  const mid=methodForRecipe(r);
-  if(!mid){toast('turn on a '+recipeFam(r)+' method under methods first');return;}
-  if(!state.lastRecipe)state.lastRecipe={};
-  state.lastRecipe[mid]=r.id;save();
-  pc.mid=null;                       // de coach moet opnieuw kijken
-  if(recipeFam(r)==='espresso'){
-    // een espressorecept is een doel: dat vult het dial-in-scherm
-    formBean=null;formPrep={};pendingRecipe=null;
-    pendingTarget={dose:String(r.dose),yield:String(Math.round(r.dose*r.ratio)),
-      time:r.tijd||'',grind:r.stand||''};
-    openDialIn(mid);
-    diRid=r.id;renderDiRecipe();
-    toast('\u2713 '+r.naam+' loaded as your target');
-    return;
-  }
-  beginBrew(mid);
-  const stack=document.getElementById('pc-stack');
-  if(stack&&stack.style.display!=='none')pourPickRecipe(r.id);
-  setTimeout(()=>{const c=document.getElementById('pc-stack');
-    if(c&&c.style.display!=='none')c.scrollIntoView({behavior:'smooth',block:'start'});},250);
-}
 /* ---------------- eigen recepten ----------------
    Een recept is een lijstje stappen. Je vult ze zelf in of laat de AI een
    voorstel doen; in beide gevallen sta jij erin met de hand. Intern bewaren we
@@ -3780,7 +3765,6 @@ function openDialIn(methodId){
   // geen doel meegekregen? val terug op het recept dat je hier het laatst koos
   const bewaard=(state.lastRecipe||{})[formMethod];
   const rec=recipeById(bewaard);
-  diRid=(rec&&recipeFam(rec)==='espresso')?rec.id:null;
   if(!pendingTarget&&rec&&recipeFam(rec)==='espresso'){
     pendingTarget={dose:String(rec.dose),yield:String(Math.round(rec.dose*rec.ratio)),
       time:rec.tijd||'',grind:rec.stand||''};
@@ -3794,7 +3778,10 @@ function openDialIn(methodId){
   }
   e61Reset();renderDialIn();go('dialin');
 }
-function renderDialIn(){renderDiRecipe();renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();renderStartHint('di-start');}
+function renderDialIn(){renderDiBeans();renderDiGoal();renderPrep();diAdvice();renderDiClock();renderDiJourney();renderStartHint('di-start');
+  const laLink=document.getElementById('di-latteart-link');
+  if(laLink)laLink.style.display=featOn('latteart')?'flex':'none';
+}
 /* Wat de zak zegt over waar je maalstand begint. Alleen tonen als er iets te
    zeggen valt -- een lege boon levert geen zinnige gok op.                  */
 function renderStartHint(elId){
@@ -3804,42 +3791,6 @@ function renderStartHint(elId){
   if(!t){el.innerHTML='';el.style.display='none';return;}
   el.style.display='block';
   el.innerHTML='<span class="sh-k">starting point</span> '+esc(t);
-}
-// welk espressorecept staat er geladen? kiezen doe je bij recipes & brews
-let diRid=null;
-function renderDiRecipe(){
-  const kaart=document.getElementById('di-recipe-card');if(!kaart)return;
-  const r=recipeById(diRid);
-  const pick=document.getElementById('di-pick');
-  if(pick)pick.innerHTML=recipesFor(formMethod).map(x=>
-    '<button type="button" class="lp '+(x.id===diRid?'sel':'')+
-    '" onclick="diPickRecipe(\''+x.id+'\')">'+esc(x.naam)+'</button>').join('');
-  const naam=document.getElementById('di-naam');
-  if(naam)naam.textContent=r?r.naam:'no recipe loaded';
-  const o=document.getElementById('di-over');
-  if(o){
-    const stand=r&&r.stand?('  \u00b7  '+esc(r.stand)):'';
-    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand)
-                 :'pick one above, or just dial in from the target below';
-  }
-  const l=document.getElementById('di-links');
-  if(l){
-    l.innerHTML=(r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
-                           :('<a onclick="openRecipe(null,formMethod)">write your own</a>'));
-  }
-}
-// een espressorecept is een doel: aantikken vult het doel bovenin het dial-in
-function diPickRecipe(id){
-  const r=recipeById(id);if(!r)return;
-  diRid=id;
-  if(!state.lastRecipe)state.lastRecipe={};
-  state.lastRecipe[formMethod]=id;save();
-  const yld=String(Math.round(r.dose*r.ratio));
-  pendingTarget={dose:String(r.dose),yield:yld,time:r.tijd||'',grind:r.stand||''};
-  setVal('di-dose',String(r.dose));setVal('di-yield',yld);
-  if(r.stand)setVal('di-grind',r.stand);
-  renderDiRecipe();renderDiGoal();renderDiClock();
-  toast('\u2713 '+r.naam+' loaded as your target');
 }
 /* --- E61 shot clock: stopwatch, geen simulator — jouw waarden blijven leidend --- */
 let e61Run=false,e61T0=0,e61Raf=null;
@@ -4761,6 +4712,29 @@ function freshBloomHint(days){
     t:'barely any gas. A long bloom only cools the bed now — keep it short and grind finer.'};
 }
 // start een brew met deze boon (respecteert espresso -> dial-in, filter -> formulier)
+// eerst een boon, dan pas de methode: elke rij hergebruikt brewBean() om
+// zelf uit te zoeken welk scherm daarbij hoort (dial-in of het formulier)
+function renderChooseBean(){
+  const el=document.getElementById('choosebean-list');if(!el)return;
+  const inBeans=state.beans.filter(b=>b.inStock!==false);
+  if(!inBeans.length){
+    el.innerHTML='<div class="empty-note">no beans in stock.<br>add one under beans, or start without one below.</div>';
+    return;
+  }
+  el.innerHTML=inBeans.map(b=>{
+    const mList=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).map(id=>methodById(id)).filter(Boolean);
+    const m=mList[0]||null;
+    const tint=m?('var('+m.tint+')'):'var(--card)';
+    const fresh=beanFreshness(b);
+    const bits=[];
+    if(m)bits.push('<span class="bean-mic">'+iconHTML(m,18)+'</span> '+esc(m.name));
+    if(beanFamLabel(b))bits.push('<span class="bean-fam">'+esc(beanFamLabel(b))+'</span>');
+    if(fresh)bits.push('<span class="fresh">'+fresh.label+'</span>');
+    return '<div class="bean-card sketch soft collapsed" style="background:'+tint+'" onclick="brewBean(\''+b.id+'\')">'+
+      '<div class="brow"><div class="bn hand">'+esc(b.name)+'</div><span class="bchev">›</span></div>'+
+      '<div class="bean-meta">'+bits.join(' <span class="dot">·</span> ')+'</div></div>';
+  }).join('');
+}
 function brewBean(beanId){
   const b=beanById(beanId);if(!b)return;
   const mList=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[]));
