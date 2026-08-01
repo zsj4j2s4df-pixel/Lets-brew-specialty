@@ -1,0 +1,283 @@
+<style>
+/* ================= aanwijs-laag =================================
+   Ligt over de app heen. Uit staat hij volledig opzij: je gebruikt de app
+   gewoon. Aan vangt hij elke tik op, zodat aanwijzen niet per ongeluk een
+   knop indrukt -- de app eronder bevriest dan.                            */
+.ann-vel{position:absolute;inset:0;z-index:60;pointer-events:none;overflow:hidden;}
+.ann-vel.aan{pointer-events:auto;background:rgba(192,57,43,.05);cursor:crosshair;touch-action:none;}
+.ann-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+.ann-svg .lus{fill:none;stroke:#c0392b;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+.ann-svg .pin-c{fill:#c0392b;}
+.ann-svg .pin-t{fill:#fff;font:700 15px ui-rounded,system-ui,sans-serif;
+  text-anchor:middle;dominant-baseline:central;}
+
+.ann-knop{position:absolute;right:12px;bottom:78px;z-index:62;
+  display:flex;align-items:center;gap:7px;
+  background:#e7ded0;color:#3a302a;border:2px solid #3a302a;border-radius:22px;
+  padding:9px 15px;font:600 15px ui-rounded,system-ui,sans-serif;cursor:pointer;
+  box-shadow:0 3px 12px rgba(40,32,25,.22);}
+.ann-knop.aan{background:#c0392b;color:#fff;border-color:#c0392b;}
+.ann-knop .bol{width:11px;height:11px;border-radius:50%;background:#c0392b;flex:none;}
+.ann-knop.aan .bol{background:#fff;}
+.ann-tel{position:absolute;left:12px;bottom:78px;z-index:62;
+  background:#3a302a;color:#f2ead9;border:none;border-radius:22px;padding:9px 15px;
+  font:600 15px ui-rounded,system-ui,sans-serif;cursor:pointer;
+  box-shadow:0 3px 12px rgba(40,32,25,.22);}
+.ann-tel[hidden]{display:none;}
+
+/* het overzicht */
+.ann-blad{position:absolute;inset:0;z-index:70;background:#efe9dd;color:#3a302a;
+  display:none;flex-direction:column;font:16px/1.45 ui-rounded,system-ui,sans-serif;}
+.ann-blad.op{display:flex;}
+.ann-kop{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:2px solid #b8a98f;}
+.ann-kop h2{font-size:20px;margin:0;flex:1;}
+.ann-kop button{background:none;border:2px solid #b8a98f;border-radius:12px;
+  padding:8px 13px;font:inherit;font-size:15px;color:#3a302a;cursor:pointer;}
+.ann-lijst{flex:1;overflow-y:auto;padding:14px 16px 20px;-webkit-overflow-scrolling:touch;}
+.ann-pag{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:#7a6c5e;
+  margin:16px 0 8px;padding-bottom:5px;border-bottom:1.5px solid #b8a98f;}
+.ann-pag:first-child{margin-top:0;}
+.ann-item{display:grid;grid-template-columns:28px 1fr 26px;gap:9px;align-items:start;margin-bottom:11px;}
+.ann-nr{width:28px;height:28px;border-radius:50%;background:#c0392b;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+  margin-top:3px;cursor:pointer;}
+.ann-veld{min-width:0;}
+.ann-anker{font-size:13px;color:#7a6c5e;margin-bottom:3px;}
+.ann-item textarea{width:100%;min-height:42px;resize:none;overflow:hidden;
+  background:#e7ded0;color:#3a302a;border:2px solid #b8a98f;border-radius:11px;
+  padding:9px 10px;font:15.5px/1.35 ui-rounded,system-ui,sans-serif;}
+.ann-item textarea:focus{outline:none;border-color:#7d6650;}
+.ann-weg{background:none;border:none;color:#7a6c5e;font-size:20px;cursor:pointer;padding:5px 0;}
+.ann-leeg{color:#7a6c5e;}
+.ann-voet{padding:12px 16px;border-top:2px solid #b8a98f;display:flex;gap:8px;}
+.ann-voet button{flex:1;border-radius:13px;padding:12px;font:600 15px ui-rounded,system-ui,sans-serif;cursor:pointer;
+  background:#7d6650;color:#f2ead9;border:2px solid #7d6650;}
+.ann-voet .zacht{background:none;color:#3a302a;border-color:#b8a98f;font-weight:400;}
+.ann-uit{width:100%;min-height:180px;background:#e7ded0;color:#3a302a;border:2px solid #b8a98f;
+  border-radius:11px;padding:10px;font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
+  white-space:pre;overflow:auto;}
+</style>
+
+<script>
+/* ================= aanwijzen in de app zelf ======================
+   Waarom in de app en niet op een schermafbeelding: hier weet ik van elk
+   punt op wélke pagina het staat en op welk element je wees. Dat levert een
+   opdracht op waar direct mee te werken valt.                            */
+(function(){
+  const phone=document.querySelector('.phone');
+  if(!phone)return;
+  if(getComputedStyle(phone).position==='static')phone.style.position='relative';
+
+  let aan=false, punten=[], bezig=null, volgPag='home';
+
+  const vel=document.createElement('div');vel.className='ann-vel';
+  vel.innerHTML='<svg class="ann-svg"><g class="ann-shift"></g></svg>';
+  const shift=vel.querySelector('.ann-shift');
+  phone.appendChild(vel);
+
+  const knop=document.createElement('button');
+  knop.className='ann-knop';knop.type='button';
+  knop.innerHTML='<span class="bol"></span><span class="lbl">aanwijzen</span>';
+  phone.appendChild(knop);
+
+  const tel=document.createElement('button');
+  tel.className='ann-tel';tel.type='button';tel.hidden=true;
+  phone.appendChild(tel);
+
+  const blad=document.createElement('div');
+  blad.className='ann-blad';
+  blad.innerHTML=
+    '<div class="ann-kop"><h2>Wat er anders moet</h2><button class="dicht">terug</button></div>'+
+    '<div class="ann-lijst"></div>'+
+    '<div class="ann-voet"><button class="pak">maak de opdracht</button>'+
+    '<button class="zacht wis">wis alles</button></div>';
+  phone.appendChild(blad);
+  const lijst=blad.querySelector('.ann-lijst');
+
+  /* ---- welke pagina is in beeld? de app houdt dat zelf bij ---- */
+  function huidigePag(){
+    try{if(typeof currentPage==='string'&&currentPage)return currentPage;}catch(e){}
+    const z=[...document.querySelectorAll('[id^="page-"]')].find(el=>!el.classList.contains('hidden'));
+    return z?z.id.replace(/^page-/,''):'onbekend';
+  }
+  /* ---- waar wees je op? het label van het element eronder ----
+     Dit is het nuttigste stukje van de hele tool: "bij «＋ new brew»" is
+     iets om mee te werken, een coördinaat niet. We lopen van het binnenste
+     element naar buiten en pakken het eerste korte, betekenisvolle label.
+     innerText en niet textContent: die laatste plakt losse spans aan elkaar
+     tot "surprise mea surprise brew with...".                            */
+  function kort(s){
+    s=(s||'').trim().replace(/\s+/g,' ');
+    return s.length<=45?s:s.slice(0,42).trim()+'\u2026';
+  }
+  function ankerOp(x,y){
+    const stapel=document.elementsFromPoint(x,y)
+      .filter(el=>!el.closest('.ann-vel,.ann-knop,.ann-tel,.ann-blad'));
+    let terugval='';
+    for(const el of stapel){
+      const aria=el.getAttribute&&(el.getAttribute('aria-label')||
+                 el.getAttribute('placeholder')||el.getAttribute('title'));
+      if(aria&&aria.trim())return kort(aria);
+      const ruw=(typeof el.innerText==='string'?el.innerText:el.textContent)||'';
+      const eerste=ruw.trim().split('\n')[0].trim();
+      if(!eerste)continue;
+      if(eerste.length<=45)return eerste;
+      if(!terugval)terugval=kort(eerste);
+    }
+    return terugval;
+  }
+  function pos(e){
+    const r=phone.getBoundingClientRect();
+    return {x:e.clientX-r.left, y:e.clientY-r.top+phone.scrollTop};
+  }
+
+  /* ---- tekenen ---- */
+  function verf(){
+    const pag=huidigePag();
+    const mijn=punten.filter(p=>p.pag===pag);
+    let s='';
+    mijn.forEach(p=>{
+      if(p.soort==='lus'){
+        s+='<polyline class="lus" points="'+p.p.map(q=>q.x+','+q.y).join(' ')+'"/>';
+      }else{
+        const nr=punten.filter(q=>q.soort==='pin').indexOf(p)+1;
+        s+='<circle class="pin-c" cx="'+p.x+'" cy="'+p.y+'" r="14"/>'+
+           '<text class="pin-t" x="'+p.x+'" y="'+p.y+'">'+nr+'</text>';
+      }
+    });
+    if(bezig&&bezig.pag===pag&&bezig.soort==='lus')
+      s+='<polyline class="lus" points="'+bezig.p.map(q=>q.x+','+q.y).join(' ')+'"/>';
+    shift.innerHTML=s;
+    shift.setAttribute('transform','translate(0,'+(-phone.scrollTop)+')');
+    const n=punten.filter(p=>p.soort==='pin').length;
+    tel.hidden=!punten.length;
+    tel.textContent=n?(n+' punt'+(n===1?'':'en')+' ›'):'bekijk ›';
+  }
+  phone.addEventListener('scroll',()=>{
+    shift.setAttribute('transform','translate(0,'+(-phone.scrollTop)+')');
+  },{passive:true});
+
+  /* ---- tikken en slepen ---- */
+  let neer=null;
+  vel.addEventListener('pointerdown',e=>{
+    if(!aan)return;
+    vel.setPointerCapture(e.pointerId);
+    neer={t:Date.now(),x:e.clientX,y:e.clientY,anker:ankerOp(e.clientX,e.clientY)};
+    bezig={soort:'lus',pag:huidigePag(),p:[pos(e)]};
+  });
+  vel.addEventListener('pointermove',e=>{
+    if(!aan||!bezig)return;
+    bezig.p.push(pos(e));verf();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>vel.addEventListener(ev,e=>{
+    if(!aan||!bezig)return;
+    const b=bezig;bezig=null;
+    const ver=Math.hypot(e.clientX-neer.x,e.clientY-neer.y);
+    if(ver<12){                                   // korte tik = een punt
+      const p=pos(e);
+      punten.push({soort:'pin',pag:b.pag,x:p.x,y:p.y,anker:neer.anker,tekst:''});
+    }else if(b.p.length>3){
+      punten.push(b);
+    }
+    verf();
+  }));
+
+  /* ---- knoppen ---- */
+  knop.addEventListener('click',()=>{
+    aan=!aan;
+    vel.classList.toggle('aan',aan);
+    knop.classList.toggle('aan',aan);
+    knop.querySelector('.lbl').textContent=aan?'klaar met aanwijzen':'aanwijzen';
+  });
+  tel.addEventListener('click',()=>{toonLijst();blad.classList.add('op');});
+  blad.querySelector('.dicht').addEventListener('click',()=>blad.classList.remove('op'));
+  blad.querySelector('.wis').addEventListener('click',()=>{
+    if(punten.length&&!confirm('Alle punten en tekeningen wissen?'))return;
+    punten=[];verf();toonLijst();
+  });
+
+  /* ---- het overzicht, gegroepeerd per pagina ---- */
+  function groei(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
+  function toonLijst(){
+    const pins=punten.filter(p=>p.soort==='pin');
+    if(!punten.length){
+      lijst.innerHTML='<p class="ann-leeg">Nog niets aangewezen. Zet <b>aanwijzen</b> aan, '+
+        'loop door de app en tik op wat er anders moet — slepen tekent een cirkel.</p>';
+      return;
+    }
+    const paginas=[...new Set(punten.map(p=>p.pag))];
+    let h='';
+    paginas.forEach(pag=>{
+      h+='<div class="ann-pag">'+pag+'</div>';
+      punten.forEach(p=>{
+        if(p.pag!==pag)return;
+        if(p.soort==='lus'){
+          h+='<div class="ann-item"><span class="ann-nr" style="background:#7a6c5e">○</span>'+
+             '<div class="ann-veld"><div class="ann-anker">een cirkel op deze pagina</div></div>'+
+             '<button class="ann-weg" data-i="'+punten.indexOf(p)+'">×</button></div>';
+          return;
+        }
+        const nr=pins.indexOf(p)+1;
+        h+='<div class="ann-item"><span class="ann-nr" data-ga="'+pag+'">'+nr+'</span>'+
+           '<div class="ann-veld">'+
+           (p.anker?'<div class="ann-anker">bij «'+p.anker.replace(/[<>&]/g,'')+'»</div>':'')+
+           '<textarea rows="1" placeholder="wat moet hier anders?" data-i="'+punten.indexOf(p)+'"></textarea>'+
+           '</div><button class="ann-weg" data-i="'+punten.indexOf(p)+'">×</button></div>';
+      });
+    });
+    lijst.innerHTML=h;
+    lijst.querySelectorAll('textarea').forEach(t=>{
+      t.value=punten[+t.dataset.i].tekst||'';groei(t);
+      t.addEventListener('input',()=>{punten[+t.dataset.i].tekst=t.value;groei(t);});
+    });
+    lijst.querySelectorAll('.ann-weg').forEach(b=>b.addEventListener('click',()=>{
+      punten.splice(+b.dataset.i,1);verf();toonLijst();
+    }));
+    lijst.querySelectorAll('.ann-nr[data-ga]').forEach(b=>b.addEventListener('click',()=>{
+      blad.classList.remove('op');
+      try{go(b.dataset.ga);}catch(e){}
+      setTimeout(verf,60);
+    }));
+  }
+
+  /* ---- de opdracht ---- */
+  blad.querySelector('.pak').addEventListener('click',()=>{
+    const pins=punten.filter(p=>p.soort==='pin');
+    const paginas=[...new Set(punten.map(p=>p.pag))];
+    let s='Opdracht voor Lets Brew — '+pins.length+' punt'+(pins.length===1?'':'en')+'\n';
+    paginas.forEach(pag=>{
+      const lussen=punten.filter(p=>p.pag===pag&&p.soort==='lus').length;
+      s+='\n\u2500\u2500 '+pag+' \u2500\u2500\n';
+      punten.forEach(p=>{
+        if(p.pag!==pag||p.soort!=='pin')return;
+        s+=(pins.indexOf(p)+1)+'. '+(p.anker?'bij \u00ab'+p.anker+'\u00bb\n   ':'')+
+           ((p.tekst||'').trim()||'(nog geen uitleg)')+'\n';
+      });
+      if(lussen)s+='('+lussen+' omcirkeld op deze pagina)\n';
+    });
+    lijst.innerHTML='<p class="ann-leeg" style="margin-bottom:9px">Kopieer dit en plak het in de chat:</p>'+
+      '<textarea class="ann-uit" readonly></textarea>';
+    const ta=lijst.querySelector('.ann-uit');ta.value=s;
+    const voet=blad.querySelector('.ann-voet');
+    voet.innerHTML='<button class="kop">kopieer</button><button class="zacht terug">terug naar de lijst</button>';
+    voet.querySelector('.kop').addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(s);voet.querySelector('.kop').textContent='gekopieerd ✓';}
+      catch(e){ta.removeAttribute('readonly');ta.select();
+        try{document.execCommand('copy');voet.querySelector('.kop').textContent='gekopieerd ✓';}
+        catch(e2){voet.querySelector('.kop').textContent='selecteer en kopieer met de hand';}
+        ta.setAttribute('readonly','');}
+    });
+    voet.querySelector('.terug').addEventListener('click',()=>{
+      voet.innerHTML='<button class="pak">maak de opdracht</button><button class="zacht wis">wis alles</button>';
+      location.reload();
+    });
+  });
+
+  /* ---- de app wisselt van pagina: dan andere punten tonen ---- */
+  setInterval(()=>{
+    const p=huidigePag();
+    if(p!==volgPag){volgPag=p;verf();}
+  },220);
+  verf();
+})();
+</script>
