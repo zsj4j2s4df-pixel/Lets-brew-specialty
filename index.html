@@ -437,6 +437,39 @@
 
   .la-steam,.la-pour{padding:14px 16px 16px;background:var(--card);border:2px solid var(--ink);
     filter:url(#wobble);border-radius:24px;margin-bottom:4px;}
+  /* de schuifbalk waarmee je door het opschuimen loopt, en de hoogteknoppen */
+  .la-scrub{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;}
+  .la-clock{font-family:'Caveat',cursive;font-weight:700;font-size:38px;line-height:1;
+    min-width:66px;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .la-scrub input{flex:1;min-width:150px;accent-color:var(--accent-soft);height:26px;}
+  .la-phases{display:flex;flex-direction:column;margin-top:8px;}
+  .la-phase{display:grid;grid-template-columns:74px 1fr;gap:12px;padding:9px 12px;
+    border-left:3px solid var(--line);opacity:.45;transition:opacity .2s;}
+  .la-phase[data-on="1"]{opacity:1;border-left-color:var(--accent-soft);background:var(--card-2);
+    filter:url(#wobble);border-radius:0 16px 16px 0;}
+  .la-phase .pt{font-size:17px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .la-phase[data-on="1"] .pt{color:var(--ink);}
+  .la-phase .pn{font-family:'Caveat',cursive;font-weight:700;font-size:21px;}
+  .la-phase .pd{font-size:15px;line-height:1.4;color:var(--ink-soft);}
+  .la-heights{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .la-heights button{flex:1;min-width:0;background:var(--card-2);border:2px solid var(--line);
+    filter:url(#wobble);border-radius:16px;padding:10px 6px;cursor:pointer;
+    font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:var(--ink);}
+  .la-heights button[aria-pressed="true"]{background:var(--accent-soft);color:var(--cream);border-color:var(--ink);}
+  .la-hexpl{font-size:16px;line-height:1.4;color:var(--ink-soft);margin-top:8px;min-height:4.2em;}
+  .la-pool{stroke:var(--la-coffee);}
+  /* de vormkiezer: dezelfde kopjes als bij de vormen, maar klein en aantikbaar */
+  .la-shapepick{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 6px;}
+  .la-shapepick button{flex:none;background:none;border:none;padding:0;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;width:62px;opacity:.55;}
+  .la-shapepick button[aria-pressed="true"]{opacity:1;}
+  .la-shapepick svg{width:52px;height:52px;border:2px solid var(--line);border-radius:50%;
+    filter:url(#wobble-rough);background:var(--card-2);}
+  .la-shapepick button[aria-pressed="true"] svg{border-color:var(--ink);border-width:2.5px;}
+  .la-shapepick .sp-n{font-family:'Caveat',cursive;font-weight:700;font-size:14px;
+    color:var(--ink-soft);line-height:1.05;text-align:center;}
+  .la-shapepick button[aria-pressed="true"] .sp-n{color:var(--ink);}
+  .lshot-shape{font-family:'Caveat',cursive;font-weight:700;font-size:15px;color:var(--ink-soft);}
   .la-steps{margin-top:8px;}
   .la-step{display:flex;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);}
   .la-step:last-child{border-bottom:none;}
@@ -1533,6 +1566,14 @@
     <div class="screen">
       <div class="form-head"><div class="h hand">pouring shapes</div><button onclick="go('learn')">klaar</button></div>
       <div class="subtitle">elke giet vastgelegd — zie je rozet beter worden.</div>
+
+      <div class="settings-card sketch soft" id="ga-help">
+        <button class="adv-head" onclick="document.getElementById('ga-help').classList.toggle('open')"><span class="set-t hand">hoe je giet</span><span class="g-arr">▸</span></button>
+        <div class="adv-body" id="ga-help-body"></div>
+      </div>
+
+      <div class="field"><label>welke vorm ga je gieten?</label>
+        <div class="la-shapepick" id="ga-shapepick"></div></div>
       <button class="scan-btn" onclick="document.getElementById('latte-input').click()">＋ voeg een foto toe</button>
       <input type="file" id="latte-input" accept="image/*" style="display:none" onchange="addLatteShot(event)">
       <div id="gallery-list"></div>
@@ -2505,7 +2546,7 @@ function go(p,isBack){
   if(p==='beans')renderBeans();
   if(p==='choosebean')renderChooseBean();
   if(p==='cupping')renderCupping();
-  if(p==='gallery')renderGallery();
+  if(p==='gallery'){renderGaHelp();renderGaShapePick();renderGallery();}
   if(p==='learn'){
     const w=document.getElementById('water-card');if(w)w.style.display=featOn('water')?'flex':'none';
     if(featOn('water')){waterPresets();waterCalc();}
@@ -5380,41 +5421,108 @@ function toggleCheck(key,i,row){
   localStorage.setItem(k,JSON.stringify(done));
 }
 // maakt een compacte samenvatting van je bonen + recente brews voor de AI
+/* Alles wat de app over jou weet, als leesbare tekst voor de coach. Vraag je
+   iets over "die boon die ik gisteren dialde", dan moet hij die boon kunnen
+   vinden en er de echte cijfers bij hebben -- niet alleen de naam.          */
+function beanRegel(b){
+  const p=[b.name];
+  if(b.roaster)p.push('van '+b.roaster);
+  if(b.origin)p.push(b.origin);
+  if(b.process)p.push(b.process);
+  if(b.variety)p.push('variëteit '+b.variety);
+  if(b.roast)p.push('branding '+b.roast);
+  if(altitudeOf(b))p.push(altitudeOf(b)+' m');
+  const f=beanFreshness(b);
+  if(f)p.push(f.days+' dagen na branden');
+  if(b.fam)p.push('zak zegt: '+(b.fam==='both'?'omni':b.fam));
+  if(isDecaf(b))p.push('DECAF');
+  if(b.roasternotes)p.push('smaaknotities: '+b.roasternotes);
+  const ms=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[]))
+    .map(id=>(methodById(id)||{}).name).filter(Boolean);
+  if(ms.length)p.push('methodes: '+ms.join('/'));
+  // wat er echt is afgetekend weegt het zwaarst -- dat zijn gemeten waarden
+  const vast=beanDial(b,null);
+  if(vast)p.push('AFGETEKEND: '+vast.map(d=>
+    ((methodById(d.method)||{}).name||d.method)+' op maalstand '+d.grind+
+    (dialCijfers(d)?(' ('+dialCijfers(d)+')'):'')).join(' | '));
+  if(b.dialIn&&b.dialIn.grind)p.push('laatste AI-maaltip: '+b.dialIn.grind+
+    (b.dialIn.reason?(' — '+b.dialIn.reason):''));
+  if(b.notes)p.push('jouw notitie: '+b.notes);
+  return '- '+p.join(', ');
+}
+function brewRegel(b){
+  const m=methodById(b.method);
+  const bits=[(m&&m.name)||b.method];
+  bits.push(timeAgo(b.ts));
+  if(b.drink)bits.push(b.drink);
+  if(b.beans)bits.push('boon: '+b.beans);
+  if(b.dose)bits.push(b.dose+'g in');
+  if(b.yield)bits.push(b.yield+'g uit');
+  if(b.ratio)bits.push('ratio 1:'+(+b.ratio).toFixed(1));
+  if(b.time)bits.push('tijd '+b.time);
+  if(b.grind)bits.push('maalstand '+b.grind);
+  if(b.temp)bits.push(b.temp+'°C');
+  if(b.draw)bits.push('doorlooptijd '+b.draw);
+  if(b.bed)bits.push('bed '+bedNL(b.bed));
+  if(b.cup)bits.push('geproefd: '+((cupById(b.cup)||{}).nl||b.cup));
+  if(b.score!=null&&b.score!=='')bits.push('score '+(+b.score).toFixed(1)+'/10');
+  if(asArr(b.tags).length)bits.push('smaak: '+asArr(b.tags).join('/'));
+  if(b.notes)bits.push('notitie: '+b.notes);
+  if(isDialInBrew(b))bits.push('(dial-in)');
+  return '- '+bits.join(', ');
+}
 function myCoffeeContext(){
   let ctx='';
   const inHuis=state.beans.filter(b=>b.inStock!==false);
+  const op=state.beans.filter(b=>b.inStock===false);
   if(inHuis.length){
     ctx+='=== BONEN IN KAST (nu in huis — gebruik dit als eerste) ===\n';
-    inHuis.slice(0,20).forEach(b=>{
-      const parts=[b.name];
-      if(b.roaster)parts.push('van '+b.roaster);
-      if(b.origin)parts.push(b.origin);
-      if(b.process)parts.push(b.process);
-      if(b.roasternotes)parts.push('smaaknotities: '+b.roasternotes);
-      const ms=(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).map(id=>methodById(id).name);
-      if(ms.length)parts.push('methodes: '+ms.join('/'));
-      ctx+='- '+parts.join(', ')+'\n';
-    });
+    inHuis.slice(0,20).forEach(b=>{ctx+=beanRegel(b)+'\n';});
   }else{
     ctx+='=== BONEN IN KAST ===\n(geen bonen als "in huis" gemarkeerd)\n';
   }
-  const recent=[...state.brews].sort((a,b)=>b.ts-a.ts).slice(0,8);
+  if(op.length){
+    ctx+='\n=== ZAKKEN DIE OP ZIJN (niet meer te zetten, wel om naar te verwijzen) ===\n';
+    op.slice(0,10).forEach(b=>{ctx+=beanRegel(b)+'\n';});
+  }
+  const recent=[...state.brews].sort((a,b)=>b.ts-a.ts).slice(0,16);
   if(recent.length){
-    ctx+='\n=== BREW-GESCHIEDENIS (eerder gezet — gebruik dit als tweede) ===\n';
-    recent.forEach(b=>{
-      const m=methodById(b.method).name;
-      const bits=[m];
-      if(b.beans)bits.push(b.beans);
-      if(b.ratio)bits.push('ratio 1:'+(+b.ratio).toFixed(1));
-      if(b.dose)bits.push(b.dose+'g in');
-      if(b.yield)bits.push(b.yield+'g uit');
-      if(b.time)bits.push(b.time);
-      if(b.temp)bits.push(b.temp+'°C');
-      if(b.score!=null&&b.score!=='')bits.push('score '+(+b.score).toFixed(1)+'/10');
-      if(b.notes)bits.push('notitie: '+b.notes);
-      ctx+='- '+bits.join(', ')+'\n';
+    ctx+='\n=== BREW-GESCHIEDENIS, nieuwste eerst (gebruik dit als tweede) ===\n';
+    recent.forEach(b=>{ctx+=brewRegel(b)+'\n';});
+  }
+  // de dial-in-reeksen: hoe hij naar een stand toe werkte, niet alleen het eindpunt
+  const log=state.dialLog||{};
+  const keys=Object.keys(log).filter(k=>(log[k]||[]).length>1);
+  if(keys.length){
+    ctx+='\n=== DIAL-IN POGINGEN (oud → nieuw, per boon en methode) ===\n';
+    keys.slice(0,6).forEach(k=>{
+      const i=k.indexOf('|'), bean=beanById(k.slice(0,i)), mid=k.slice(i+1);
+      const naam=(bean&&bean.name)||'onbekende boon';
+      ctx+='- '+naam+' op '+((methodById(mid)||{}).name||mid)+': '+
+        log[k].slice(-8).map(a=>'maling '+(a.g||'?')+' → '+(a.t||'?')+
+          (a.y?(' / '+a.y+'g'):'')).join(' ; ')+'\n';
     });
   }
+  const gear=state.gear||[];
+  if(gear.length){
+    ctx+='\n=== UITRUSTING ===\n';
+    gear.forEach(g=>{
+      const soort=g.kind==='grinder'?'molen':(g.kind==='brewer'?'brewer/machine':'tool');
+      ctx+='- '+gearLabel(g)+' ('+soort+', voor '+
+        (g.category==='algemeen'?'espresso én filter':g.category)+')\n';
+    });
+  }
+  const aan=state.methods.filter(m=>m.on);
+  if(aan.length)ctx+='\n=== METHODES DIE AANSTAAN ===\n'+
+    aan.map(m=>'- '+m.name+' ('+methodFamily(m)+')').join('\n')+'\n';
+  const eigen=(state.recipes||[]).filter(r=>r.eigen);
+  if(eigen.length)ctx+='\n=== EIGEN RECEPTEN ===\n'+
+    eigen.map(r=>'- '+r.naam+' ('+((methodById(methodForRecipe(r))||{}).name||recipeFam(r))+
+      ', '+r.dose+'g, 1:'+r.ratio+', '+r.temp+'°C'+(r.stand?', maalstand '+r.stand:'')+')').join('\n')+'\n';
+  const shots=(state.latteShots||[]).filter(x=>x.shape||x.fb);
+  if(shots.length)ctx+='\n=== LATTE ART, laatste gieten ===\n'+
+    shots.slice(0,5).map(x=>'- '+timeAgo(x.ts)+(x.shape?', doel: '+x.shape:'')+
+      (x.fb?', feedback: '+x.fb:'')).join('\n')+'\n';
   return ctx;
 }
 async function askCoach(){
@@ -5428,11 +5536,18 @@ async function askCoach(){
       "Beantwoord de vraag kort en praktisch in het Nederlands, max 5 zinnen, concreet en bruikbaar. "+
       "Gaat het over espresso-maling of dial-in, houd je strikt aan deze regels:\n"+ESPRESSO_RULES+"\n"+
       "Gaat het over filter, dan gelden deze:\n"+FILTER_RULES+"\n"+
-      (ctx?("Hieronder staan de gegevens van deze gebruiker. Volg deze volgorde bij je advies:\n"+
-        "1) Kijk EERST naar de bonen die de gebruiker IN KAST (in huis) heeft en baseer je advies daar zoveel mogelijk op — dat is wat ze nu echt kunnen zetten.\n"+
-        "2) Kijk DAARNA naar hun brew-geschiedenis om te zien wat ze eerder deden, wat goed/slecht scoorde en wat past bij hun smaak.\n"+
-        "3) Noem pas als LAATSTE eventuele andere opties (bijv. iets nieuws proberen of aanschaffen) als de bonen in kast en de geschiedenis geen goed antwoord geven.\n"+
-        "Verwijs concreet naar hun eigen bonen/brews. Verzin geen gegevens die er niet staan.\n\n"+ctx+"\n"):"")+
+      (ctx?("Hieronder staat alles wat de app van deze gebruiker weet: hun bonen (in kast én op), "+
+        "brew-geschiedenis, dial-in-pogingen, uitrusting, methodes, eigen recepten en latte art.\n"+
+        "Noemt de vraag een boon, een methode of een moment ('gisteren', 'die zak van vorige week'), "+
+        "zoek die dan op in de gegevens hieronder en antwoord met de ECHTE cijfers die erbij staan — "+
+        "maalstand, dose, opbrengst, tijd, score. Dat is de kern van je nut.\n"+
+        "Verder deze volgorde:\n"+
+        "1) Kijk EERST naar de bonen die IN KAST staan — dat is wat ze nu echt kunnen zetten.\n"+
+        "2) Kijk DAARNA naar de brew-geschiedenis en de dial-in-pogingen: wat deden ze, wat scoorde goed.\n"+
+        "3) Noem pas als LAATSTE andere opties als kast en geschiedenis geen antwoord geven.\n"+
+        "Een AFGETEKENDE maalstand is gemeten op hun eigen molen en gaat vóór elke vuistregel. "+
+        "Ken je hun molen mét bereik, houd een voorgestelde stap dan in verhouding tot die schaal.\n"+
+        "Verzin nooit gegevens die er niet staan; staat iets er niet, zeg dat dan.\n\n"+ctx+"\n"):"")+
       "\nVraag: "+q;
     const txt=await callClaude([{role:"user",content:sys}],600);
     a.innerHTML='<div class="recipe-card sketch" style="background:var(--v60)">'+esc(txt).replace(/\n/g,'<br>')+'</div>';
@@ -5826,39 +5941,10 @@ function renderLatte(){
   </div>
 
   <div class="sect"><span class="hand">opschuimen</span><span class="sd">lucht erin, dan glad draaien</span></div>
-  <div class="la-steam sketch">
-    ${laPitcherSVG()}
-    <div class="la-steps">
-      <div class="la-step"><span class="ls-n hand">1</span><div><b class="hand">lucht — 2 tot 5 seconden</b>
-        <div>Tuit nét onder het oppervlak. Je hoort een rustige «tsss». Elke tel lucht is
-        ongeveer een centimeter schuim; voor een flat white heb je er weinig nodig.</div></div></div>
-      <div class="la-step"><span class="ls-n hand">2</span><div><b class="hand">rollen</b>
-        <div>Zak een centimeter dieper en zet de kan schuin, zodat de melk gaat draaien.
-        De draaikolk slaat de grote bellen kapot tot microfoam.</div></div></div>
-      <div class="la-step"><span class="ls-n hand">3</span><div><b class="hand">stop bij 55–65 °C</b>
-        <div>De kan wordt te heet om vast te houden: dat is je thermometer. Warmer dan 65 °C
-        en de melk verliest zijn zoetheid en zakt in.</div></div></div>
-      <div class="la-step"><span class="ls-n hand">4</span><div><b class="hand">tik en swirl</b>
-        <div>Tik de kan op tafel, draai tot de melk glanst als natte verf. Geen zichtbare
-        bellen meer. Nu heb je ongeveer twintig seconden voordat schuim en melk scheiden.</div></div></div>
-    </div>
-  </div>
+  ${laSteamBenchHTML()}
 
   <div class="sect"><span class="hand">gieten</span><span class="sd">drie hoogtes, één beweging</span></div>
-  <div class="la-pour sketch">
-    ${laPourSVG()}
-    <div class="la-steps">
-      <div class="la-step"><span class="ls-n hand">1</span><div><b class="hand">hoog — inmengen</b>
-        <div>Ongeveer een handbreedte boven de kop, in het diepste punt van de espresso.
-        Zo zakt de melk eronder en meng je crema en melk. Blijf hoog tot de kop halfvol is.</div></div></div>
-      <div class="la-step"><span class="ls-n hand">2</span><div><b class="hand">laag — tekenen</b>
-        <div>Zak tot de tuit het oppervlak bijna raakt. Nu blijft het schuim bovenop liggen
-        en verschijnt het wit. Hier gebeurt het patroon.</div></div></div>
-      <div class="la-step"><span class="ls-n hand">3</span><div><b class="hand">optillen — doortrekken</b>
-        <div>Til de kan iets op zodat de straal dun wordt, en trek in één vloeiende beweging
-        door je vorm heen naar je toe. Niet stoppen, niet aarzelen.</div></div></div>
-    </div>
-  </div>
+  ${laPourBenchHTML()}
 
   <div class="sect"><span class="hand">de vormen</span><span class="sd">van makkelijk naar levenswerk</span></div>
   <div class="la-key">
@@ -5895,9 +5981,31 @@ function renderLatte(){
       <span>leg je giet vast bij pouring shapes</span><span class="ll-arr">›</span></button>`;
   }
   el.innerHTML=h;
+  laInit();
 }
 
 /* kan met stoompijp: de luchtfase en de draaikolk */
+function laSteamBenchHTML(){
+  return `<div class="la-steam sketch">
+    ${laPitcherSVG()}
+    <div class="la-scrub">
+      <span class="la-clock">0 s</span>
+      <input type="range" class="la-sc" min="0" max="40" step="1" value="0"
+             aria-label="Seconden opschuimen" oninput="laSteam(this)">
+    </div>
+    <div class="la-phases">${laPhasesHTML()}</div>
+  </div>`;
+}
+function laPourBenchHTML(){
+  return `<div class="la-pour sketch">
+    ${laPourSVG()}
+    <div class="la-heights" role="group" aria-label="Giethoogte">
+      ${LA_HEIGHTS.map((h,i)=>'<button type="button" aria-pressed="'+(i===0?'true':'false')+
+        '" onclick="laSetHeight(this,'+i+')">'+esc(h.lab)+'</button>').join('')}
+    </div>
+    <div class="la-hexpl"></div>
+  </div>`;
+}
 function laPitcherSVG(){
   return `<div class="la-draw"><svg viewBox="0 0 260 175" role="img" aria-label="Melkkan met stoompijp in de melk">
     <path d="M83 42 C107 31 163 31 181 37 C194 33 208 36 217 41"/>
@@ -5915,37 +6023,112 @@ function laPitcherSVG(){
     <path d="M51 96 C58 102 66 105 74 107"/>
     <path d="M74 107 C78 105 80 101 80 96"/>
     <path d="M66 60 C57 65 53 73 55 82 C57 90 65 97 74 100" opacity="0.5"/>
-    <path d="M215 2 C200 22 176 48 152 74"/>
-    <path d="M164 60 C170 66 171 72 166 77"/>
-    <g class="la-swirl" id="la-foam">
-      <path d="M88 72 C114 62 156 62 182 73 C156 84 112 84 86 73"/>
-    </g>
-    <g class="la-swirl">
+    <g class="la-wand"><path d="M215 2 C200 22 176 48 152 74"/>
+      <path d="M164 60 C170 66 171 72 166 77"/></g>
+    <g class="la-swirl la-foam"></g>
+    <g class="la-swirl la-vortex" style="display:none">
       <path d="M96 90 C118 98 152 98 174 88" opacity="0.5"/>
       <path d="M108 80 C122 74 148 74 162 79" opacity="0.35"/>
     </g>
-    <path class="la-jet" d="M152 84 C150 91 154 96 152 103 M166 86 C164 92 168 97 166 104"/>
+    <path class="la-jet la-hiss" d="M152 84 C150 91 154 96 152 103 M166 86 C164 92 168 97 166 104"/>
   </svg></div>`;
+}
+/* De vier fasen van opschuimen. De schuifbalk loopt van 0 tot 40 seconden en
+   zet de tekening in de stand die bij dat moment hoort -- lucht erin zie je de
+   schuimlaag groeien, daarna alleen nog draaien.                            */
+const LA_PHASES=[
+  {t:0, n:'lucht', d:'Tuit n\u00e9t onder het oppervlak. Je hoort een rustige «tsss». Elke tel is ongeveer een centimeter schuim — voor een flat white heb je er weinig nodig.'},
+  {t:5, n:'rollen', d:'Zak een centimeter dieper en zet de kan schuin. De draaikolk slaat de grote bellen kapot tot microfoam. Geen geluid meer, alleen draaiing.'},
+  {t:28,n:'stop', d:'De kan is te heet om vast te houden: dat is je thermometer, ergens tussen 55 en 65 \u00b0C. Warmer en de melk verliest zijn zoetheid.'},
+  {t:34,n:'tik & swirl', d:'Tik de kan op tafel, draai tot de melk glanst als natte verf. Vanaf nu heb je ongeveer twintig seconden voordat schuim en melk scheiden.'},
+];
+function laPhasesHTML(){
+  return LA_PHASES.map((p,i)=>{
+    const eind=LA_PHASES[i+1];
+    const label=eind?(p.t+'\u2013'+eind.t+' s'):(p.t+' s +');
+    return '<div class="la-phase" data-on="0"><div class="pt">'+label+'</div>'+
+      '<div><div class="pn">'+esc(p.n)+'</div><div class="pd">'+esc(p.d)+'</div></div></div>';
+  }).join('');
+}
+/* De schuifbalk uitlezen en alles wat meebeweegt op die stand zetten. Alles
+   binnen de eigen kaart opzoeken: dezelfde tekening staat ook op de
+   gieterij-pagina, en die twee mogen elkaar niet besturen.                  */
+function laSteam(sc){
+  const box=sc&&sc.closest?sc.closest('.la-steam'):null;if(!box)return;
+  const t=+sc.value;
+  const q=c=>box.querySelector('.'+c);
+  const clk=q('la-clock');if(clk)clk.textContent=t+' s';
+  let cur=0;LA_PHASES.forEach((p,i)=>{if(t>=p.t)cur=i;});
+  box.querySelectorAll('.la-phase').forEach((el,i)=>el.dataset.on=(i===cur?'1':'0'));
+  // de schuimlaag groeit alleen tijdens de luchtfase
+  const lucht=Math.min(t,5)/5, y=73-lucht*13;
+  const foam=q('la-foam');
+  if(foam)foam.innerHTML='<path d="M88 '+y+' C114 '+(y-10)+' 156 '+(y-10)+' 182 '+(y+1)+
+    ' C156 '+(y+12)+' 112 '+(y+12)+' 86 '+(y+1)+'"/>';
+  const hiss=q('la-hiss');
+  if(hiss)hiss.style.display=(t>0&&t<5)?'':'none';
+  const vort=q('la-vortex');
+  if(vort)vort.style.display=(t>=5&&t<28)?'':'none';
+  // de pijp zakt na de luchtfase dieper, en gaat er aan het eind uit
+  const wand=q('la-wand');
+  if(wand){
+    wand.style.transition='transform .35s ease';
+    wand.style.transform=(t>=5&&t<28)?'translateY(8px)':(t>=28?'translate(34px,-34px)':'');
+  }
 }
 /* kop met de drie giethoogtes */
 function laPourSVG(){
-  return `<div class="la-draw"><svg viewBox="0 0 200 150" role="img" aria-label="De drie giethoogtes boven de kop">
+  return `<div class="la-draw"><svg viewBox="0 0 200 150" role="img" aria-label="De kan boven de kop, op de gekozen giethoogte">
     <path d="M30 88 C54 78 102 80 108 90"/>
     <path d="M108 89 C86 97 54 97 30 89" opacity="0.7"/>
     <path d="M31 90 C34 114 46 130 68 133 C92 135 105 124 108 104 C109 97 109 93 108 89"/>
     <path d="M108 98 C126 94 135 105 129 116 C123 123 112 122 106 117"/>
     <path d="M38 143 C68 150 104 149 122 142" opacity="0.45"/>
-    <path class="la-milkline" d="M68 14 C70 34 67 60 68 86"/>
-    <path d="M56 10 C60 5 80 5 84 10" opacity="0.5"/>
-    <g class="la-mark">
-      <path d="M78 20 C90 21 100 21 110 20"/>
-      <path d="M78 52 C90 53 100 53 110 52"/>
-      <path d="M78 80 C90 80 100 79 110 78"/>
+    <g class="la-pool"><path d="M40 91 C64 83 96 83 106 91 C92 98 56 98 38 91" opacity="0.5"/></g>
+    <path class="la-milkline la-stream" d="M68 18 C70 38 67 62 68 86"/>
+    <g class="la-jug">
+      <path d="M50 4 C68 -1 88 2 92 8"/>
+      <path d="M92 8 C89 16 85 23 79 27"/>
+      <path d="M50 4 C49 13 53 21 58 26"/>
+      <path d="M57 25 C65 29 74 29 80 26"/>
+      <path d="M78 24 C83 25 85 28 82 30 C79 31 77 29 77 27"/>
+      <path d="M49 8 C39 9 35 18 43 22"/>
+      <path d="M52 2 C70 -2 88 1 91 6" opacity="0.5"/>
     </g>
-    <text x="115" y="24" class="la-lab">hoog</text>
-    <text x="115" y="56" class="la-lab">laag</text>
-    <text x="115" y="82" class="la-lab">doortrekken</text>
+    <g class="la-mark la-ticks"><path d="M84 20 C94 21 102 21 112 20"/></g>
   </svg></div>`;
+}
+/* De drie giethoogtes. Aantikken verplaatst de kan, verlengt de straal en zet
+   de streep op die hoogte -- zo zie je het verschil in plaats van te lezen. */
+const LA_HEIGHTS=[
+  {lab:'hoog', y:20, jug:0,
+   d:'Ongeveer een handbreedte boven de kop, in het diepste punt van de espresso. De melk duikt eronder en mengt zich met de crema in plaats van erop te blijven liggen. Blijf hier tot de kop halfvol is.'},
+  {lab:'laag', y:64, jug:46,
+   d:'Zak tot de tuit het oppervlak bijna raakt. Nu blijft het schuim bovenop drijven en verschijnt het wit. Alles wat je van je patroon ziet, ontstaat in deze stand.'},
+  {lab:'doortrekken', y:46, jug:28,
+   d:'Til de kan iets op zodat de straal dun wordt, en trek in \u00e9\u00e9n doorlopende beweging door je vorm heen naar je toe. Geen pauze tussen de wiebel en de streep — daar sneuvelen de meeste hartjes.'},
+];
+function laSetHeight(btn,i){
+  const box=btn&&btn.closest?btn.closest('.la-pour'):null;if(!box)return;
+  const h=LA_HEIGHTS[i];if(!h)return;
+  const q=c=>box.querySelector('.'+c);
+  box.querySelectorAll('.la-heights button').forEach((b,j)=>
+    b.setAttribute('aria-pressed',j===i?'true':'false'));
+  const ex=q('la-hexpl');if(ex)ex.textContent=h.d;
+  const jug=q('la-jug');
+  if(jug){jug.style.transition='transform .4s ease';jug.style.transform='translateY('+h.jug+'px)';}
+  const st=q('la-stream');
+  if(st)st.setAttribute('d','M68 '+(h.y+4)+' C70 '+(h.y+22)+' 67 62 68 86');
+  const tk=q('la-ticks');
+  if(tk)tk.innerHTML='<path d="M84 '+h.y+' C94 '+(h.y+1)+' 102 '+(h.y+1)+' 112 '+h.y+'"/>';
+  const pool=q('la-pool');
+  if(pool)pool.style.opacity=(i===0?'0.35':'0.75');
+}
+// elke tekening op de pagina in zijn beginstand zetten, nadat hij in de DOM staat
+function laInit(){
+  document.querySelectorAll('.la-steam .la-sc').forEach(sc=>{try{laSteam(sc);}catch(e){}});
+  document.querySelectorAll('.la-pour .la-heights button:first-child')
+    .forEach(b=>{try{laSetHeight(b,0);}catch(e){}});
 }
 
 /* ---------------- cupping session ---------------- */
@@ -6214,12 +6397,37 @@ async function addLatteShot(ev){
   try{
     const img=await fileToDataURL(file,520,false);
     if(!Array.isArray(state.latteShots))state.latteShots=[];
-    const nieuw={id:uid(),ts:Date.now(),img,fb:''};
+    const nieuw={id:uid(),ts:Date.now(),img,fb:'',shape:gaShape||''};
     state.latteShots.unshift(nieuw);
     latteOpen[nieuw.id]=true;   // je eigen nieuwe giet zie je meteen, niet dichtgeklapt
     save();renderGallery();toast('✓ giet toegevoegd');
   }catch(e){toast('kon de foto niet laden');}
   ev.target.value='';
+}
+/* Welke vorm was je van plan? Dat is de helft van bruikbare feedback: zonder
+   het doel kan de coach alleen zeggen wat hij ziet, niet of het gelukt is.  */
+let gaShape=null;
+function gaPickShape(naam){
+  gaShape=(gaShape===naam)?null:naam;
+  renderGaShapePick();
+}
+function renderGaShapePick(){
+  const el=document.getElementById('ga-shapepick');if(!el)return;
+  el.innerHTML=LA_PATTERNS.map(p=>
+    '<button type="button" aria-pressed="'+(gaShape===p.n?'true':'false')+
+    '" onclick="gaPickShape(\''+p.n.replace(/'/g,"\\'")+'\')">'+
+    '<svg viewBox="0 0 100 100" role="img" aria-label="'+esc(p.n)+'">'+LA_CUP+p.svg+'</svg>'+
+    '<span class="sp-n">'+esc(p.n)+'</span></button>').join('');
+}
+// de uitleg boven de galerij: dezelfde twee bewegende tekeningen als bij learn
+function renderGaHelp(){
+  const el=document.getElementById('ga-help-body');if(!el)return;
+  if(el.dataset.vol==='1')return;          // maar één keer opbouwen
+  el.innerHTML='<div class="set-d" style="margin:8px 0 10px">de melk bepaalt of het lukt; '+
+    'de hoogte bepaalt wat je ziet. Schuif door het opschuimen en tik de drie giethoogtes aan.</div>'+
+    laSteamBenchHTML()+laPourBenchHTML();
+  el.dataset.vol='1';
+  laInit();
 }
 // welke gieten staan open? dichtgeklapt is de standaard -- zo blijft een lange
 // reeks pogingen overzichtelijk in plaats van een eindeloze scroll van foto's
@@ -6236,7 +6444,7 @@ function renderGallery(){
       <div class="lshot-row" onclick="latteToggle('${sh.id}')">
         <img class="lshot-thumb" src="${sh.img}">
         <div class="lshot-main">
-          <div class="lshot-when">${esc(kop)}</div>
+          <div class="lshot-when">${esc(kop)}${sh.shape?' <span class="lshot-shape">· '+esc(sh.shape)+'</span>':''}</div>
           <div class="lshot-fb">${sh.fb?'✦ '+esc(sh.fb):'no feedback yet'}</div>
         </div>
         <span class="bchev">▸</span>
@@ -6244,7 +6452,7 @@ function renderGallery(){
     </div>`;
     return `<div class="settings-card sketch soft">
       <div class="lshot-row" onclick="latteToggle('${sh.id}')">
-        <div class="lshot-main"><div class="lshot-when">${esc(kop)}</div></div>
+        <div class="lshot-main"><div class="lshot-when">${esc(kop)}${sh.shape?' <span class="lshot-shape">· '+esc(sh.shape)+'</span>':''}</div></div>
         <span class="bchev">▾</span>
       </div>
       <img src="${sh.img}" style="width:100%;border-radius:14px;border:2px solid var(--line);margin-top:8px">
@@ -6267,7 +6475,15 @@ async function latteCoach(id){
   try{
     const b64=sh.img.split(',')[1];
     const media=(sh.img.match(/^data:([^;]+)/)||[])[1]||'image/jpeg';
-    const prompt='Dit is een foto van latte art van een thuisbarista. Geef vriendelijke, concrete feedback in het Nederlands (max 4 zinnen): wat gaat goed, en één duidelijk verbeterpunt over melktextuur, giethoogte of trekbeweging.';
+    // wist je wat je wilde gieten? dan gaat het over dat doel, niet over "een vorm"
+    const pat=sh.shape?LA_PATTERNS.find(p=>p.n===sh.shape):null;
+    const doel=sh.shape
+      ? ' De barista probeerde bewust een "'+sh.shape+'"'+(pat?' ('+pat.en+')':'')+' te gieten.'+
+        (pat?' Zo hoort die te ontstaan: '+pat.d+(pat.tip?' Bekend struikelblok: '+pat.tip:''):'')+
+        ' Beoordeel het resultaat tegen dat doel: is de vorm herkenbaar geworden, en zo niet, waar ging het mis?'
+      : ' De barista gaf niet op welke vorm het moest worden; beschrijf dan wat je ziet.';
+    const prompt='Dit is een foto van latte art van een thuisbarista.'+doel+
+      ' Geef vriendelijke, concrete feedback in het Nederlands (max 4 zinnen): wat gaat goed, en \u00e9\u00e9n duidelijk verbeterpunt over melktextuur, giethoogte of trekbeweging.';
     const txt=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:media,data:b64}},{type:"text",text:prompt}]}],400);
     sh.fb=(txt||'').trim();latteOpen[sh.id]=true;save();renderGallery();
   }catch(e){toast("couldn't reach the coach");}
