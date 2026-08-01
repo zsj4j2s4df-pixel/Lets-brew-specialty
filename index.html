@@ -1071,11 +1071,6 @@
         <button class="profile-btn" onclick="addCustomField()" style="margin-top:4px">＋ add custom field</button>
       </div>
 
-      <div class="field" id="fb-guide"><label>how to brew this? (your own steps)</label>
-        <textarea id="f-guide" placeholder="leave empty for the default recipe" style="min-height:190px;overflow:hidden" oninput="autoGrow(this)"></textarea>
-        <button class="profile-btn ai-only hidden" onclick="suggestGuide()" style="margin-top:6px"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M11.6 4.2 Q12.7 8.2 13.4 9.9 Q15.2 10.7 19.8 11.3 Q15 12.6 13.1 13.4 Q12.4 15.4 11.8 20.8 Q11.2 15 10.6 13.1 Q8.6 12.4 4.2 11.6 Q9.1 10.3 10.9 9.6 Q11.6 7.6 12.3 3.4"/><path d="M18.4 4.4 Q18.9 5.5 19.1 6.1 Q19.9 6.4 21.2 6.5 Q19.6 7.1 18.9 7.4 Q18.6 8.2 18.4 9.4 Q18.1 8 17.9 7.2 Q17 6.9 15.8 6.5 Q17.4 6.1 18.1 5.9 Q18.4 5 18.7 3.8" opacity="0.7"/></svg> let AI suggest one</button>
-      </div>
-
       <button class="save-btn" onclick="saveBrew()">save brew</button>
     </div>
   </div>
@@ -2487,7 +2482,6 @@ function go(p,isBack){
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLatte();
   if(p==='profile')renderProfile();
-  if(p==='form')requestAnimationFrame(()=>autoGrow(document.getElementById('f-guide')));
   applyAIVisibility();
   document.querySelector('.phone').scrollTop=0;
 }
@@ -2611,7 +2605,6 @@ async function quickBrew(){
       if(gShort)setText('f-grind',gShort);
       if(Array.isArray(d.tags)){formTags=d.tags.filter(Boolean).map(t=>(''+t).toLowerCase());renderFormTags();}
       renderDialInHint();
-      if(guide){const g=document.getElementById('f-guide');if(g){g.value=guide;autoGrow(g);}}
       toast('✓ '+method.name+(bean?' with '+bean.name:'')+' — check & save');
     }
   }catch(e){
@@ -2806,7 +2799,7 @@ function brewAgain(id){
   }
   openForm(src.method);
   setVal('f-dose',src.dose);setVal('f-yield',src.yield);setVal('f-ratio',src.ratio);
-  setVal('f-grind',src.grind||'');setVal('f-temp',src.temp);setVal('f-guide',src.guide||'');
+  setVal('f-grind',src.grind||'');setVal('f-temp',src.temp);
   formBean=src.beanId||null;renderFormBeans();
   formTags=Array.isArray(src.tags)?[...src.tags]:[];renderFormTags();
   // doel meenemen: de vorige target, anders de vorige brew zelf als richtlijn
@@ -2904,7 +2897,7 @@ async function updateDialIn(beanId,method){
 function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
-  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-guide','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper','f-water'].forEach(i=>setVal(i,''));
+  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper','f-water'].forEach(i=>setVal(i,''));
   formBed=null;formCup=null;
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
@@ -2928,7 +2921,7 @@ function openEdit(b){
   setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
   setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');setVal('f-water',b.water||'');
   formBed=b.bed||null;formCup=b.cup||null;
-  setVal('f-score',b.score||8);setVal('f-guide',b.guide||'');
+  setVal('f-score',b.score||8);
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
   formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
   formCustom=Array.isArray(b.custom)?JSON.parse(JSON.stringify(b.custom)):[];
@@ -2946,24 +2939,6 @@ function renderCustomFields(){
     </div>`).join('');
 }
 function addCustomField(){formCustom.push({k:'',v:''});renderCustomFields();}
-async function suggestGuide(){
-  const m=methodById(formMethod);const bean=beanById(formBean);
-  const ta=document.getElementById('f-guide');
-  const prev=ta.value;const prevPh=ta.placeholder;
-  ta.value='';ta.placeholder='AI is thinking…';
-  const msg=[{role:"user",content:
-    `Geef een kort, praktisch zetrecept/stappenplan voor de methode "${m.name}" ${bean?`voor de boon ${bean.name} (${[bean.origin,bean.process,bean.roasternotes].filter(Boolean).join(', ')})`:''}.${gearPromptBlock(formMethod)}${beanPromptBlock(bean)}\n${APP_RULES}\n${methodFamily(formMethod)==='espresso'?ESPRESSO_RULES:FILTER_RULES}\nGeef max 6 regels, concreet (dose, water, temp, tijd, stappen).`}];
-  try{
-    // streamen: tekst verschijnt direct en groeit mee -> voelt veel sneller
-    await callClaudeStream(msg,500,(full)=>{ta.value=full;autoGrow(ta);});
-    ta.value=ta.value.trim();autoGrow(ta);
-  }catch(e){
-    // val terug op de gewone (niet-streamende) aanroep
-    try{const txt=await callClaude(msg,500);ta.value=txt.trim();}
-    catch(e2){ta.value=prev;toast('AI not available — enter your key under profile');}
-  }
-  ta.placeholder=prevPh;
-}
 function renderFormMethods(){
   document.getElementById('form-methods').innerHTML=state.methods.filter(m=>m.on).map(m=>
     `<button class="mp ${m.id===formMethod?'sel':''}" onclick="pickMethod('${m.id}')"><span class="mp-ic">${iconHTML(m,30)}</span> ${esc(m.name)}</button>`
@@ -2986,8 +2961,10 @@ function applyFamilyToForm(){
   // doorlooptijd, bedvorm, brewer en papier: alleen bij filter
   const kaarten=(fam==='filter')&&featOn('pourcoach')&&recipesFor(formMethod).length>0;
   if(kaarten)kaartenAan(); else kaartenUit();
+  // drawdown en bedvorm horen bij een zichtbaar bed (v60, chemex, kalita...):
+  // bij AeroPress pers je het weg, dus is er geen bed dat "droogloopt"
   const fx=document.getElementById('filter-extra');
-  if(fx)fx.style.display=(fam==='filter'&&featOn('drawdown'))?'block':'none';
+  if(fx)fx.style.display=(fam==='filter'&&featOn('drawdown')&&formMethod!=='aeropress')?'block':'none';
   const fg=document.getElementById('filter-gear');
   if(fg)fg.style.display=(fam==='filter')?'block':'none';
   const ft=document.getElementById('filter-taste');
@@ -3444,7 +3421,7 @@ const KAART_INHOUD={
   bean:['fb-beans'],
   gear:['filter-gear'],
   pour:[],
-  log:['fb-time','filter-extra','filter-taste','fb-score','fb-tastenotes','fb-custom','fb-guide'],
+  log:['fb-time','filter-extra','filter-taste','fb-score','fb-tastenotes','fb-custom'],
 };
 const ALLE_BLOKKEN=[].concat(...Object.values(KAART_INHOUD));
 let pcOpen={recipe:false,bean:false,gear:false,pour:true,log:false};
@@ -3752,13 +3729,6 @@ function pourFill(){
   const bs=(pc.marks[0]!=null&&pc.marks[1]!=null)?Math.round(pc.marks[1]-pc.marks[0])
           :(pc.steps.length>1?(pc.steps[1].t-pc.steps[0].t):null);
   if(bs)setVal('f-bloom-s',bs);
-  const r=recipeById(pc.rid);
-  const g=document.getElementById('f-guide');
-  if(r&&g&&!g.value.trim()){
-    g.value=r.naam+' \u2014 '+r.maling+'\n'+pc.steps.map(st=>
-      pourFmt(st.t)+'  '+st.d+(st.g?('  ('+st.g+' g)'):'')).join('\n');
-    autoGrow(g);
-  }
 }
 // "ik doe hem nu" -- het schema schuift mee met het moment waarop je tikt
 function pourTick(i){
@@ -4192,7 +4162,7 @@ function saveBrew(){
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[...formTags],
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
-    guide:document.getElementById('f-guide').value.trim(),
+    guide:editingId?(state.brews.find(x=>x.id===editingId)?.guide||''):'',
     target:editingId?(state.brews.find(x=>x.id===editingId)?.target||null):(pendingTarget||null),
     prep:(function(){const p={};Object.keys(formPrep).forEach(k=>{const s=formPrep[k];if(s&&(s.on||s.val))p[k]={on:!!s.on,val:s.val||''};});return Object.keys(p).length?p:null;})(),
     ts:editingId?(state.brews.find(x=>x.id===editingId)?.ts||Date.now()):Date.now()
@@ -5245,8 +5215,6 @@ function useRecipe(beanId){
     if(gShort)setText('f-grind',gShort);
     pendingTarget={dose:numOf(d.dose),grind:gShort,time:cleanTime(d.time),yield:numOf(d.yield)};
     renderDialInHint();
-    const g=document.getElementById('f-guide');
-    if(g&&guide){g.value=guide;autoGrow(g);}
     toast('✓ recipe applied');
   },30);
 }
