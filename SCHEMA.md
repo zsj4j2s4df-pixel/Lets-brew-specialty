@@ -152,7 +152,13 @@ twaalf.
 
 ### gear
 
-`{id, name, category}`.
+`{id, name, category, kind, grindMin, grindMax}` — `category` is de methodefamilie
+waar het bij hoort (`espresso` / `filter` / `algemeen`). `kind` zegt wat het
+ding zelf is: `"grinder"`, `"brewer"`, of `null` voor een los accessoire (tamper,
+WDT-tool, puckscreen). Alleen bij `kind:"grinder"` zijn `grindMin`/`grindMax`
+ooit ingevuld — het volledige bereik van die molen, in wat voor eenheid hij
+ook gebruikt (klikken, een schaal 1–100, noem het). Zonder opgegeven bereik
+zijn beide `null`.
 
 ## Waar de maalstand vandaan komt
 

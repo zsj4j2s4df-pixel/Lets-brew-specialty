@@ -190,9 +190,6 @@
   .tag-add-btn{flex:none;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:16px;padding:0 18px;font-family:'Caveat',cursive;font-weight:700;font-size:24px;color:var(--ink);cursor:pointer;}
   .note-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
   .note-tags .nt{background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 13px;font-size:17px;color:var(--ink);}
-  .gear-add{display:flex;gap:8px;align-items:stretch;}
-  .gear-add select{flex:none;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:0 8px;font-family:'Patrick Hand',cursive;font-size:16px;color:var(--ink);}
-  .gear-add input{flex:1;min-width:0;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:10px 12px;font-family:'Patrick Hand',cursive;font-size:17px;color:var(--ink);}
   .gear-cat-lbl{color:var(--ink-soft);font-size:15px;margin:12px 2px 6px;}
   .gear-items{display:flex;flex-wrap:wrap;gap:8px;}
   .gear-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card-2);border:1.5px solid var(--line);filter:url(#wobble);border-radius:14px;padding:5px 8px 5px 13px;font-size:17px;color:var(--ink);}
@@ -781,6 +778,8 @@
   .mg.sel{border-color:var(--ink);color:var(--ink);background:var(--card-2);}
   .mm-gear-leeg{font-size:13.5px;color:var(--ink-soft);margin-top:6px;}
   .gc-bij{color:var(--ink-soft);font-size:13px;margin-left:7px;opacity:.8;}
+  .gc-kind{background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:0 6px;
+    font-size:12px;color:var(--ink-soft);margin-left:7px;text-transform:uppercase;letter-spacing:.06em;}
   .bean-fam{border:1.5px solid var(--line);filter:url(#wobble);border-radius:9px;padding:0 6px;font-size:14px;}
   .start-hint{display:none;color:var(--ink-soft);font-size:15px;line-height:1.35;
     border-left:2px solid var(--line);filter:url(#wobble);padding:2px 0 2px 10px;margin:0 2px 12px;}
@@ -1552,15 +1551,29 @@
         <div class="set-t hand">my gear</div>
         <div class="set-d" style="margin:4px 0 10px">add your grinder, machine and tools — then the AI makes the brew suggestion more specific (grind setting for your grinder, technique for your tools).</div>
         <div id="gear-list"></div>
-        <div class="gear-add">
-          <select id="gear-cat">
-            <option value="espresso">espresso</option>
-            <option value="filter">filter</option>
-            <option value="algemeen">general</option>
-          </select>
-          <input id="gear-name" placeholder="e.g. Eureka Libra 65" onkeydown="if(event.key==='Enter')addGear()">
-          <button class="tag-add-btn" onclick="addGear()">＋</button>
+        <div class="field"><input id="gear-name" placeholder="e.g. Eureka Libra 65" onkeydown="if(event.key==='Enter')addGear()"></div>
+        <div class="field-row">
+          <div class="field"><label>what is it</label>
+            <select id="gear-kind" onchange="renderGearRangeField()">
+              <option value="">tool / accessory</option>
+              <option value="grinder">grinder</option>
+              <option value="brewer">brewer / machine</option>
+            </select>
+          </div>
+          <div class="field"><label>for</label>
+            <select id="gear-cat">
+              <option value="espresso">espresso</option>
+              <option value="filter">filter</option>
+              <option value="algemeen">general</option>
+            </select>
+          </div>
         </div>
+        <div class="field-row" id="gear-range-row" style="display:none">
+          <div class="field"><label>grind range — from</label><input id="gear-range-min" type="number" inputmode="decimal" step="0.5" placeholder="e.g. 1"></div>
+          <div class="field"><label>to</label><input id="gear-range-max" type="number" inputmode="decimal" step="0.5" placeholder="e.g. 100"></div>
+        </div>
+        <div class="set-d" id="gear-range-note" style="display:none;font-size:14px;margin:-2px 0 8px">the full scale of your grinder — clicks, numbers, whatever it uses. This lets the app judge how big a step really is on your grinder.</div>
+        <button class="profile-btn" onclick="addGear()" style="margin-top:2px">＋ add</button>
       
         <div id="pair-card" style="display:none;border-top:1.5px dashed var(--line);margin-top:14px;padding-top:12px">
         <div class="set-t hand" style="font-size:19px;margin-top:4px">pairing</div>
@@ -2851,7 +2864,7 @@ async function updateDialIn(beanId,method){
     .sort((a,b)=>a.ts-b.ts);
   if(!attempts.length||!aiReady())return;   // zonder AI: gewoon opgeslagen, geen berekening
   try{
-    const grinder=(state.gear||[]).filter(g=>g.name).map(g=>g.name).join(', ');
+    const grinder=(state.gear||[]).filter(g=>g.kind==='grinder'&&g.name).map(gearLabel).join(', ');
     // doel afleiden uit de laatste poging (yield/tijd) en de doorloopsnelheid vergelijken
     const last=attempts[attempts.length-1];
     const esp=methodFamily(method)==='espresso';
@@ -2886,7 +2899,7 @@ async function updateDialIn(beanId,method){
       else if(c&&c.id==='goed')richting='op doel — maling aanhouden';
     }
     const prompt=`Je bent een ${esp?'espresso dial-in':'filter'}-expert. Boon "${bean.name}", methode "${methodById(method).name}".`+
-      (grinder?` Molen(s) van de gebruiker: ${grinder}. Als je de molen kent, gebruik de juiste getalsrichting (welk getal grover/fijner is).`:'')+
+      (grinder?` Molen(s) van de gebruiker: ${grinder}. Als je de molen kent, gebruik de juiste getalsrichting (welk getal grover/fijner is); staat er een grind range bij, laat de grootte van je voorgestelde stap in verhouding staan tot die schaal (op een schaal van 1-100 is +1 piepklein, op een schaal van 1-10 is dat al een flinke sprong).`:'')+
       (esp?`\nDOEL: ${tY} g uit in ~${tT} s (ratio ~1:2), doelsnelheid ${(tY/tT).toFixed(2)} g/s.\n`
           :`\nDOEL: een schone kop met een totale tijd rond ${fTijd} en een doorlooptijd onder de minuut.\n`)+
       APP_RULES+`\n`+BEAN_GRIND_RULES+`\n`+(esp?ESPRESSO_RULES:FILTER_RULES)+`\n`+beanPromptBlock(bean)+`\n`+
@@ -3978,7 +3991,7 @@ function diAdvice(){
   const aY=parseFloat(document.getElementById('di-yield')?.value)||null;
   const tT=parseTimeSec(t.time)||28;
   const tY=parseFloat(t.yield)||36;
-  const grinder=(state.gear||[]).filter(g=>g.category==='espresso'&&g.name).map(g=>g.name)[0];
+  const grinder=(state.gear||[]).filter(g=>g.kind==='grinder'&&g.name).map(gearLabel)[0];
   const bean=beanById(formBean);
   const clock='<svg class="acic" viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px"><path d="M18.3 9.6 Q21 14.3 17 18.3 Q12.4 21 7.6 18.4 Q3.6 15.2 4.8 10.2 Q6.8 5.2 12 4.1 Q16.3 4.2 18.8 8.5"/><path d="M12 6.9 Q12.2 9.6 12.1 12.3 Q13.8 13.2 15.7 14.3"/></svg> ';
   const shot=document.getElementById('di-time')?.value||'';
@@ -6479,17 +6492,48 @@ function renderProfile(){
   const cr=document.getElementById('b-cost-row');if(cr)cr.style.display=featOn('cost')?'flex':'none';
   applyAIVisibility();
 }
-/* ---------------- mijn uitrusting (gear) ---------------- */
+/* ---------------- mijn uitrusting (gear) ----------------
+   Een naam alleen zegt niet wat iets IS: "Eureka Libra" kan voor een mens
+   duidelijk een molen zijn, voor de app niet. Daarom een kind erbij (grinder/
+   brewer/los) en bij een molen meteen het bereik -- daarmee kan een AI-tip
+   straks "+1" vertalen naar wat dat betekent op JOUW schaal.               */
 const GEAR_CATS=[['espresso','espresso'],['filter','filter'],['algemeen','general']];
+const GEAR_KIND_LABEL={grinder:'grinder',brewer:'brewer'};
+function renderGearRangeField(){
+  const kind=document.getElementById('gear-kind').value;
+  const rij=document.getElementById('gear-range-row'),note=document.getElementById('gear-range-note');
+  const aan=kind==='grinder';
+  if(rij)rij.style.display=aan?'flex':'none';
+  if(note)note.style.display=aan?'block':'none';
+}
 function addGear(){
   const inp=document.getElementById('gear-name');
   const name=(inp.value||'').trim();if(!name){toast('enter a name');return;}
   const category=document.getElementById('gear-cat').value||'algemeen';
+  const kind=document.getElementById('gear-kind').value||'';
+  const item={id:uid(),name,category};
+  if(kind)item.kind=kind;
+  if(kind==='grinder'){
+    const lo=parseFloat(document.getElementById('gear-range-min').value);
+    const hi=parseFloat(document.getElementById('gear-range-max').value);
+    if(isFinite(lo))item.grindMin=lo;
+    if(isFinite(hi))item.grindMax=hi;
+  }
   if(!Array.isArray(state.gear))state.gear=[];
-  state.gear.push({id:uid(),name,category});
-  inp.value='';save();renderGear();
+  state.gear.push(item);
+  inp.value='';document.getElementById('gear-kind').value='';
+  document.getElementById('gear-range-min').value='';document.getElementById('gear-range-max').value='';
+  renderGearRangeField();
+  save();renderGear();
 }
 function delGear(id){state.gear=(state.gear||[]).filter(g=>g.id!==id);save();renderGear();}
+// naam plus, bij een molen met een ingevuld bereik, dat bereik erachter --
+// gebruikt in de gearlijst en in elke AI-prompt die uitrusting noemt
+function gearLabel(g){
+  if(g.kind==='grinder'&&g.grindMin!=null&&g.grindMax!=null)
+    return g.name+' (grind range '+g.grindMin+'–'+g.grindMax+')';
+  return g.name;
+}
 function renderGear(){
   const el=document.getElementById('gear-list');if(!el)return;
   const g=state.gear||[];
@@ -6501,7 +6545,9 @@ function renderGear(){
     html+='<div class="gear-cat-lbl">'+esc(label)+'</div><div class="gear-items">'+
       items.map(it=>{
         const bij=gearMethods(it.id).map(m=>m.name);
-        return '<span class="gear-chip">'+esc(it.name)+
+        const kindLbl=GEAR_KIND_LABEL[it.kind];
+        return '<span class="gear-chip">'+esc(gearLabel(it))+
+          (kindLbl?'<span class="gc-kind">'+esc(kindLbl)+'</span>':'')+
           (bij.length?'<span class="gc-bij">'+esc(bij.join(', '))+'</span>':'')+
           '<button onclick="delGear(\''+it.id+'\')" aria-label="delete">×</button></span>';
       }).join('')+'</div>';
@@ -6510,7 +6556,7 @@ function renderGear(){
   const known=GEAR_CATS.map(c=>c[0]);
   const rest=g.filter(x=>!known.includes(x.category));
   if(rest.length){html+='<div class="gear-cat-lbl">overig</div><div class="gear-items">'+
-    rest.map(it=>'<span class="gear-chip">'+esc(it.name)+'<button onclick="delGear(\''+it.id+'\')">×</button></span>').join('')+'</div>';}
+    rest.map(it=>'<span class="gear-chip">'+esc(gearLabel(it))+'<button onclick="delGear(\''+it.id+'\')">×</button></span>').join('')+'</div>';}
   el.innerHTML=html;
 }
 // beschrijvend blokje van de uitrusting voor in AI-prompts (leeg als er niets is)
@@ -6518,11 +6564,11 @@ function gearPromptBlock(mid){
   // bij een methode met gekoppelde gear alleen die noemen; scheelt ruis in de prompt
   if(mid){
     const bij=methodGear(mid);
-    if(bij.length)return '\nUitrusting voor deze methode: '+bij.map(x=>x.name).join(', ')+'.';
+    if(bij.length)return '\nUitrusting voor deze methode: '+bij.map(gearLabel).join(', ')+'.';
   }
   const g=state.gear||[];if(!g.length)return '';
   const cats={espresso:[],filter:[],algemeen:[]};
-  g.forEach(it=>{(cats[it.category]||cats.algemeen).push(it.name);});
+  g.forEach(it=>{(cats[it.category]||cats.algemeen).push(gearLabel(it));});
   const parts=[];
   if(cats.espresso.length)parts.push('espresso: '+cats.espresso.join(', '));
   if(cats.filter.length)parts.push('filter: '+cats.filter.join(', '));
@@ -6738,7 +6784,8 @@ function lbGraph(){
     brews:(state.brews||[]).slice().sort((a,b)=>b.ts-a.ts).map(lbBrew),
     recipes:(state.recipes||[]).concat(ALLE_RECEPTEN()).map(lbRecipe),
     dialLog:lbDialLog(),
-    gear:(state.gear||[]).map(g=>({id:g.id,name:g.name||'',category:g.category||null}))
+    gear:(state.gear||[]).map(g=>({id:g.id,name:g.name||'',category:g.category||null,kind:g.kind||null,
+      grindMin:g.grindMin==null?null:g.grindMin,grindMax:g.grindMax==null?null:g.grindMax}))
   };
 }
 /* De leeskant voor andere software op dit toestel. Alleen lezen, en alles komt er
