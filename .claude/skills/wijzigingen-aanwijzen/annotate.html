@@ -126,9 +126,28 @@
     }
     return terugval;
   }
+  /* ---- het scrollende vlak ----
+     .phone staat op overflow:hidden en scrollt dus nooit. Wat wél scrollt is
+     de .screen ván de pagina die in beeld is -- elke pagina heeft een eigen.
+     Rekenen we tegen .phone, dan blijven de punten aan het scherm plakken in
+     plaats van aan de inhoud.                                              */
+  function actiefScherm(){
+    const pag=document.getElementById('page-'+huidigePag());
+    return (pag&&pag.querySelector('.screen'))||null;
+  }
   function pos(e){
-    const r=phone.getBoundingClientRect();
-    return {x:e.clientX-r.left, y:e.clientY-r.top+phone.scrollTop};
+    const sc=actiefScherm();
+    const r=(sc||phone).getBoundingClientRect();
+    return {x:e.clientX-r.left, y:e.clientY-r.top+(sc?sc.scrollTop:0)};
+  }
+  // de punten staan in de inhoud van dat vlak; deze verschuiving zet ze terug
+  // op hun plek op het scherm
+  function zetShift(){
+    const sc=actiefScherm();
+    if(!sc){shift.setAttribute('transform','translate(0,0)');return;}
+    const pr=phone.getBoundingClientRect(), sr=sc.getBoundingClientRect();
+    shift.setAttribute('transform',
+      'translate('+(sr.left-pr.left)+','+(sr.top-pr.top-sc.scrollTop)+')');
   }
 
   /* ---- tekenen ---- */
@@ -148,14 +167,14 @@
     if(bezig&&bezig.pag===pag&&bezig.soort==='lus')
       s+='<polyline class="lus" points="'+bezig.p.map(q=>q.x+','+q.y).join(' ')+'"/>';
     shift.innerHTML=s;
-    shift.setAttribute('transform','translate(0,'+(-phone.scrollTop)+')');
+    zetShift();
     const n=punten.filter(p=>p.soort==='pin').length;
     tel.hidden=!punten.length;
     tel.textContent=n?(n+' punt'+(n===1?'':'en')+' ›'):'bekijk ›';
   }
-  phone.addEventListener('scroll',()=>{
-    shift.setAttribute('transform','translate(0,'+(-phone.scrollTop)+')');
-  },{passive:true});
+  // scroll-events bubbelen niet, maar ze doen wél de capture-fase aan
+  phone.addEventListener('scroll',zetShift,{passive:true,capture:true});
+  window.addEventListener('resize',zetShift);
 
   /* ---- tikken en slepen ---- */
   let neer=null;
