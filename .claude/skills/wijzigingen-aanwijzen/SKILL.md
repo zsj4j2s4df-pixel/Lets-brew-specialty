@@ -76,6 +76,11 @@ Twee dingen die de opdracht een stuk bruikbaarder maken:
 
 Elk punt heeft een eigen kleur; hetzelfde nummer heeft overal dezelfde kleur.
 
+**📷 foto** legt de pagina waar hij op staat vast — de hele pagina, ook het
+stuk onder de rand, met de gekleurde nummers erop. De foto's staan bovenin het
+overzicht; tikken maakt ze groot, en daar bewaart hij ze in zijn fotorol om in
+de chat mee te sturen.
+
 ---
 
 # Deel B · een geplakte opdracht afwerken
@@ -93,7 +98,13 @@ Opdracht voor Lets Brew — 2 punten
 2. verbindt «Hoffmann V60 · 18 g → 301 g» ↔ «gear»
    + bij «brewer»
    laat deze informatie samenwerken
+📷 foto 1 — punt 2 staat erop
 ```
+
+Regels die met 📷 beginnen horen bij een **afbeelding die hij meestuurt**: die
+pagina met de nummers erop. Staat er zo'n regel maar zit er geen afbeelding bij
+het bericht, zeg dat dan — dan is hij hem vergeten mee te sturen. Kijk bij een
+onduidelijk punt eerst naar de foto van die pagina voor je iets vraagt.
 
 De paginanaam is de `currentPage` van de app, dus `brews` betekent letterlijk
 `page-brews`. De tekst tussen « » is het label van het element waarop de

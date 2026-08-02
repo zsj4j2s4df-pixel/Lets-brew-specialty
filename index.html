@@ -1083,16 +1083,16 @@
         <div class="cup-pick" id="f-cup"></div>
         <div class="fx-note">one tap — the compass turns it into a single next step</div></div>
 
-      <div class="field" id="filter-gear" style="display:none"><label>brewer, paper &amp; water</label>
-        <div class="field-row">
-          <div class="field"><input id="f-brewer" placeholder="brewer, e.g. Hario V60 02"></div>
-          <div class="field"><input id="f-paper" placeholder="paper, e.g. Cafec Abaca"></div>
-        </div>
-        <input id="f-water" placeholder="water, e.g. 70/40 recipe or filtered tap" style="margin-top:8px">
+      <div class="field" id="filter-gear" style="display:none"><label>brewer &amp; grinder</label>
+        <input id="f-brewer" placeholder="brewer, e.g. Hario V60 02">
         <div class="link-pick" id="f-gearchips"></div>
+        <div class="fx-note" style="margin-top:10px">which grinder did you dial?</div>
+        <div class="link-pick" id="f-molens"></div>
+        <div class="fx-note" id="f-molen-note"></div>
       </div>
 
-      <div class="field" id="fb-grind"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine"></div>
+      <div class="field" id="fb-grind"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine">
+        <div class="fx-note" id="f-grind-note" style="display:none"></div></div>
 
       <div class="field" id="prep-field" style="display:none"><label>puck-prep &amp; machine</label>
         <div id="prep-list"></div>
@@ -2254,6 +2254,13 @@ const ESPRESSO_RECIPES=[
      {t:0,p:0,k:'shot', d:'start en mik op 36 g uit'},
      {t:29,p:0,k:'melk', d:'schuim ondertussen je melk op tot 55–65 °C'}]},
 ];
+/* Alleen jouw eigen recepten kun je kiezen. De ingebouwde schema's hieronder
+   zijn geen keuze meer maar een startpunt: ze vullen de recepteditor voor als
+   je er zelf een schrijft. Een kant-en-klaar recept in de coach maakte het
+   scherm druk en het was niet van jou.                                     */
+function eigenRecepten(methodId){
+  return (state.recipes||[]).filter(r=>r.mid===methodId);
+}
 // welke recepten passen bij deze methode? eerst je eigen, dan de ingebouwde
 function recipesFor(methodId){
   const m=methodById(methodId); const naam=((m&&m.name)||'').toLowerCase();
@@ -2826,6 +2833,8 @@ function renderStats_DISABLED(){
 let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendingTarget=null,formPrep={},pendingRecipe=null;
 let formBed=null;   // vlak / krater / muur, zoals het bed erbij lag
 let formCup=null;   // hoe de kop smaakte, voor het kompas
+let formMolen=null; // de molen waarop je deze maalstand draaide
+let formOud={};     // velden van een oudere brew die geen invoerveld meer hebben
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
 // laat een tekstvak meegroeien met de inhoud (geen klein scroll-vakje meer)
 function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(el.scrollHeight+4,190)+'px';}
@@ -2976,18 +2985,18 @@ async function updateDialIn(beanId,method){
 function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
-  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-bloom-g','f-bloom-s','f-draw','f-brewer','f-paper','f-water'].forEach(i=>setVal(i,''));
-  formBed=null;formCup=null;
+  ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-bloom-g','f-bloom-s','f-draw','f-brewer'].forEach(i=>setVal(i,''));
+  formBed=null;formCup=null;formMolen=null;formOud={};
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
   if(featOn('smartdefaults')){
     const last=state.brews.filter(x=>x.method===formMethod).sort((a,b)=>b.ts-a.ts)[0];
     if(last){setVal('f-dose',last.dose||'');setVal('f-yield',last.yield||'');setVal('f-ratio',last.ratio||'');
       setVal('f-temp',last.temp||'');setVal('f-grind',last.grind||'');
-      // brewer en papier veranderen zelden: die mogen blijven staan
-      setVal('f-brewer',last.brewer||'');setVal('f-paper',last.paper||'');setVal('f-water',last.water||'');}
+      // brewer en molen veranderen zelden: die mogen blijven staan
+      setVal('f-brewer',last.brewer||'');formMolen=last.grinder||null;}
   }
-  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
+  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();renderFormMolens();applyAIVisibility();go('form');
 }
 function openEdit(b){
   if(!b)return;
@@ -2998,7 +3007,10 @@ function openEdit(b){
   setVal('f-time',b.time);setVal('f-temp',b.temp);setVal('f-notes',b.notes);
   setVal('f-grind',b.grind||'');
   setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
-  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');setVal('f-paper',b.paper||'');setVal('f-water',b.water||'');
+  setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');
+  formMolen=b.grinder||null;
+  // papier en water hebben geen veld meer; van oudere brews gooien we ze niet weg
+  formOud={paper:b.paper||'',water:b.water||''};
   formBed=b.bed||null;formCup=b.cup||null;
   setVal('f-score',b.score||8);
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
@@ -3006,7 +3018,7 @@ function openEdit(b){
   formCustom=Array.isArray(b.custom)?JSON.parse(JSON.stringify(b.custom)):[];
   pendingTarget=b.target||null;
   formPrep=b.prep?JSON.parse(JSON.stringify(b.prep)):{};
-  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();applyAIVisibility();go('form');
+  renderFormMethods();renderFormBeans();renderFormTags();renderCustomFields();renderDialInHint();renderFormMolens();applyAIVisibility();go('form');
 }
 function renderCustomFields(){
   const el=document.getElementById('custom-fields');if(!el)return;
@@ -3048,7 +3060,7 @@ function applyFamilyToForm(){
   if(fg)fg.style.display=(fam==='filter')?'block':'none';
   const ft=document.getElementById('filter-taste');
   if(ft)ft.style.display=(fam==='filter'&&featOn('filtercompass'))?'block':'none';
-  if(fam==='filter'){renderBedPick();renderGearChips();renderCupPick();}
+  if(fam==='filter'){renderBedPick();renderGearChips();renderFormMolens();renderCupPick();}
   pourInit();
 }
 /* ---------------- de waterkaart ----------------
@@ -3192,19 +3204,50 @@ function renderBedPick(){
 function pickBed(id){formBed=(formBed===id)?null:id;renderBedPick();}
 function bedName(id){const b=BED_SHAPES.find(x=>x.id===id);return b?b.n:'';}
 function bedNL(id){const b=BED_SHAPES.find(x=>x.id===id);return b?(b.nl||b.n):'';}
-// snelkiezers uit je gear-lijst, zodat je een merk niet elke keer overtypt
+// snelkiezers uit je gear-lijst, zodat je een merk niet elke keer overtypt.
+// molens staan hier niet tussen: die hebben hun eigen rij, want zij horen bij
+// de maalstand en niet bij de brewer.
 function renderGearChips(){
   const el=document.getElementById('f-gearchips');if(!el)return;
-  const items=gearVoor(formMethod);
-  el.innerHTML=items.map(g=>
+  el.innerHTML=gearVoor(formMethod).filter(g=>g.kind!=='grinder').map(g=>
     `<button type="button" class="lp" onclick="fillGear('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
 }
-// vult het lege veld van de twee; staan ze allebei vol, dan de brewer
-function fillGear(naam){cardSummaries();
-  const br=document.getElementById('f-brewer'), pa=document.getElementById('f-paper');
-  if(br&&!br.value.trim())br.value=naam;
-  else if(pa&&!pa.value.trim())pa.value=naam;
-  else if(br)br.value=naam;
+function fillGear(naam){
+  const br=document.getElementById('f-brewer');
+  if(br)br.value=naam;
+  cardSummaries();
+}
+/* De molen bij deze brew. Een maalstand zonder molen zegt niets -- 1.3 op de
+   ene molen is grof en op de andere fijn -- dus kies je hem hier aan, en het
+   maalbereik uit gear komt onder het maalstandveld te staan.               */
+function molensVoor(mid){
+  const bij=gearVoor(mid).filter(g=>g.kind==='grinder');
+  return bij.length?bij:(state.gear||[]).filter(g=>g.kind==='grinder');
+}
+function renderFormMolens(){
+  const el=document.getElementById('f-molens');if(!el)return;
+  const lijst=molensVoor(formMethod), note=document.getElementById('f-molen-note');
+  if(formMolen&&!lijst.some(g=>g.name===formMolen))formMolen=null;
+  if(!formMolen&&lijst.length===1)formMolen=lijst[0].name;
+  el.innerHTML=lijst.map(g=>
+    `<button type="button" class="lp ${g.name===formMolen?'sel':''}" onclick="pickFormMolen('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
+  if(note)note.textContent=lijst.length?'':
+    'no grinder in your gear yet — add one under profile → gear with its grind range';
+  renderGrindNote();
+}
+function pickFormMolen(naam){
+  formMolen=(formMolen===naam)?null:naam;
+  renderFormMolens();cardSummaries();
+}
+// het bereik van de gekozen molen, pal onder het maalstandveld
+function renderGrindNote(){
+  const el=document.getElementById('f-grind-note');if(!el)return;
+  const g=(state.gear||[]).find(x=>x.kind==='grinder'&&x.name===formMolen);
+  if(!g){el.style.display='none';el.textContent='';return;}
+  el.style.display='';
+  el.textContent=(g.grindMin!=null&&g.grindMax!=null)
+    ? ('on your '+g.name+' — '+g.grindMin+' to '+g.grindMax)
+    : ('on your '+g.name);
 }
 /* ---------------- het receptenboek ----------------
    De klassiekers staan hier, niet in de coach: kiezen doe je vooraf, gieten
@@ -3227,7 +3270,10 @@ function methodForRecipe(r){
    dose gebruikt dan waarmee je het opschreef.                              */
 const STAP_SOORTEN=['bloom','giet','swirl','roer','wacht','pers','doorloop'];
 let recBewerk=null;      // {id, mid, stappen:[{t,g,k,d}]}
+let recTerug=null;       // waar je vandaan kwam: daar hoor je na het opslaan weer
+let recVers=null;        // net geschreven recept; dat mag het formulier overschrijven
 function openRecipe(id,mid){
+  recTerug=(currentPage==='form')?'form':'brews';
   const best=id?recipeById(id):null;
   const methode=mid||(best&&best.mid)||formMethod||
     (state.methods.filter(m=>m.on&&methodFamily(m)==='filter')[0]||{}).id;
@@ -3342,7 +3388,16 @@ function recAdd(){
   recSteps();
 }
 function recDel(i){recBewerk.stappen.splice(i,1);recSteps();}
-function cancelRecipe(){recBewerk=null;go('brews');}
+function cancelRecipe(){const t=recTerug;recBewerk=null;recTerug=null;go(t==='form'?'form':'brews');}
+/* Terug naar het formulier met dit recept in de hand: pc.mid leegmaken laat
+   pourInit opnieuw opbouwen, en recVers zorgt dat de getallen die je net
+   opschreef het formulier ook echt vullen. Dat is het hele punt -- wat in de
+   receptkaart staat, staat daarna in the pour.                            */
+function terugNaarBrew(rid){
+  pc.mid=null;recVers=rid||null;
+  go('form');renderFormMethods();
+  pcOpen={recipe:false,bean:false,gear:false,pour:true,log:false};renderCards();
+}
 function saveRecipe(){
   const naam=(document.getElementById('rec-naam').value||'').trim();
   const dose=parseFloat(document.getElementById('rec-dose').value);
@@ -3368,8 +3423,9 @@ function saveRecipe(){
   if(!state.lastRecipe)state.lastRecipe={};
   state.lastRecipe[r.mid]=r.id;
   save();toast('\u2713 recipe saved');
-  recBewerk=null;pc.mid=null;
-  go('brews');
+  const terug=recTerug;recBewerk=null;recTerug=null;
+  if(terug==='form')terugNaarBrew(r.id);
+  else{pc.mid=null;go('brews');}
 }
 function delRecipe(){
   if(!recBewerk||!recBewerk.id)return;
@@ -3377,7 +3433,9 @@ function delRecipe(){
   state.recipes=(state.recipes||[]).filter(x=>x.id!==recBewerk.id);
   const mid=recBewerk.mid;
   if(state.lastRecipe&&state.lastRecipe[mid]===recBewerk.id)delete state.lastRecipe[mid];
-  save();toast('recipe deleted');recBewerk=null;pc.mid=null;go('brews');
+  const terug=recTerug;
+  save();toast('recipe deleted');recBewerk=null;recTerug=null;pc.mid=null;
+  if(terug==='form')terugNaarBrew(null);else go('brews');
 }
 /* De AI schrijft het schema, jij houdt de pen. Alles komt in dezelfde lijst
    terecht, dus elke regel blijft daarna aan te passen.                     */
@@ -3527,7 +3585,7 @@ function cardSummaries(){
   const water=document.getElementById('f-yield').value;
   const stand=document.getElementById('f-grind').value;
   zet('recipe',r?([r.naam,(dose&&water)?(dose+' g \u2192 '+water+' g'):'',stand]
-    .filter(Boolean).join('  \u00b7  ')):'pick one from the recipe book');
+    .filter(Boolean).join('  \u00b7  ')):'write how you brew this');
 
   const bean=beanById(formBean);
   const f=bean?beanFreshness(bean):null;
@@ -3537,8 +3595,8 @@ function cardSummaries(){
   zet('bean',bean?([bean.name,f?f.label:'',(h&&dz)?('bloom '+Math.round(dz*h.mult)+' g, '+h.sec+' s'):'',start]
     .filter(Boolean).join('  \u00b7  ')):'no bean picked');
 
-  const g=['f-brewer','f-paper','f-water'].map(i=>document.getElementById(i).value.trim()).filter(Boolean);
-  zet('gear',g.length?g.join('  \u00b7  '):'brewer, paper & water \u2014 nothing set');
+  const g=[document.getElementById('f-brewer').value.trim(),formMolen].filter(Boolean);
+  zet('gear',g.length?g.join('  \u00b7  '):'brewer & grinder \u2014 nothing set');
 
   if(pc.total!=null)zet('pour','total '+pourFmt(pc.total)+(pc.draw!=null?(' \u00b7 drawdown '+pourFmt(pc.draw)):''));
   else if(pc.run)zet('pour',pourFmt(pc.el)+' \u00b7 '+((pc.steps[pourCur()]||{}).k||''));
@@ -3601,17 +3659,33 @@ function pourInit(){
   if(!aan){pourStop(true);return;}
   if(pc.mid===formMethod&&pc.steps.length){renderPour();renderCards();return;}   // niet resetten bij hertekenen
   pourStop(true);
-  const lijst=recipesFor(formMethod);
+  const lijst=eigenRecepten(formMethod);
   const bewaard=(state.lastRecipe||{})[formMethod];
   pc={mid:formMethod,rid:(lijst.find(r=>r.id===bewaard)||lijst[0]||{}).id||null,steps:[],
       hendels:{zoet:0.5,sterk:0.5},run:false,t0:0,el:0,timer:null,idx:0,shift:0,
       marks:[],total:null,draw:null,live:-1};
-  const r=recipeById(pc.rid);
-  if(r&&!document.getElementById('f-dose').value)setVal('f-dose',r.dose);
-  if(r&&!document.getElementById('f-temp').value)setVal('f-temp',r.temp);
-  if(r&&r.stand&&!document.getElementById('f-grind').value)setVal('f-grind',r.stand);
-  pcOpen={recipe:false,bean:false,gear:false,pour:true,log:false};
+  pcOpen={recipe:!pc.rid,bean:false,gear:false,pour:!!pc.rid,log:false};
+  if(pc.rid)pourVulUitRecept(pc.rid,pc.rid===recVers);
+  recVers=null;
   pourBuild();renderCards();
+}
+/* ---- van de receptkaart naar the pour ----
+   Alles wat in het recept staat is meteen de opzet van deze brew: de dose, het
+   water, de temperatuur en de maalstand. Zo hoef je niets over te typen en
+   loopt de gietklok op precies de getallen die je hebt opgeschreven.       */
+function pourVulUitRecept(id,overschrijf){
+  const r=recipeById(id);if(!r)return;
+  const leeg=i=>!String(document.getElementById(i).value||'').trim();
+  if(overschrijf||leeg('f-dose'))setVal('f-dose',r.dose);
+  if(overschrijf||leeg('f-temp'))setVal('f-temp',r.temp);
+  // wat de app voor deze boon heeft geleerd gaat voor de maalstand uit het
+  // recept: die is op jouw molen gemeten
+  const bean=beanById(formBean);
+  const geleerd=(bean&&bean.dialIn&&bean.dialIn.method===pc.mid&&bean.dialIn.grind)?bean.dialIn.grind:null;
+  const stand=geleerd||r.stand;
+  if(stand&&(overschrijf||leeg('f-grind')))setVal('f-grind',stand);
+  // de molen waarop het recept geschreven is, als je er nog geen koos
+  if(r.molen&&(overschrijf||!formMolen)){formMolen=r.molen;renderFormMolens();}
 }
 // het schema opnieuw uitrekenen voor de huidige dose en hendelstand
 function pourBuild(){
@@ -3646,36 +3720,32 @@ function pourSchema(){
 // welk recept staat er geladen -- en de rij om een ander te kiezen
 function pourRecipes(){
   const r=recipeById(pc.rid);
+  const eigen=eigenRecepten(pc.mid);
   const pick=document.getElementById('pc-pick');
-  if(pick)pick.innerHTML=recipesFor(pc.mid).map(x=>
+  if(pick)pick.innerHTML=(eigen.length>1)?eigen.map(x=>
     '<button type="button" class="lp '+(x.id===pc.rid?'sel':'')+
-    '" onclick="pourPickRecipe(\''+x.id+'\')">'+esc(x.naam)+'</button>').join('');
+    '" onclick="pourPickRecipe(\''+x.id+'\')">'+esc(x.naam)+'</button>').join(''):'';
   const naam=document.getElementById('pc-naam');
   if(naam)naam.textContent=r?r.naam:'no recipe yet';
   const o=document.getElementById('pc-over');
   if(o){
     const stand=r&&r.stand?('  \u00b7  '+esc(r.stand)+(r.molen?(' on your '+esc(r.molen)):'')):'';
-    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand):'';
+    o.innerHTML=r?(esc(r.over)+'  \u00b7  '+esc(r.maling)+', '+esc(String(r.temp))+'\u00b0C'+stand)
+                 :'write down how you brew this and the pour runs it with you';
   }
   const l=document.getElementById('pc-links');
   if(l){
-    l.innerHTML=(r&&r.eigen?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>')
-                           :('<a onclick="openRecipe(null,pc.mid)">write your own</a>'));
+    l.innerHTML=(r?('<a onclick="openRecipe(\''+r.id+'\')">edit this one</a>'+
+                    '<a onclick="openRecipe(null,pc.mid)">write another</a>')
+                  :('<a onclick="openRecipe(null,pc.mid)">write your recipe</a>'));
   }
 }
 function pourPickRecipe(id){
   if(pc.run){toast('the clock is running \u2014 stop it first');return;}
-  pc.rid=id;const r=recipeById(id);
+  pc.rid=id;
   if(!state.lastRecipe)state.lastRecipe={};
   state.lastRecipe[pc.mid]=id;save();
-  if(r){
-    setVal('f-temp',r.temp);
-    // de maalstand uit het recept is het startpunt; wat de app voor deze boon
-    // heeft geleerd gaat voor, want dat is op jouw molen gemeten
-    const bean=beanById(formBean);
-    const geleerd=(bean&&bean.dialIn&&bean.dialIn.method===pc.mid&&bean.dialIn.grind)?bean.dialIn.grind:null;
-    if(geleerd||r.stand)setVal('f-grind',geleerd||r.stand);
-  }
+  pourVulUitRecept(id,true);
   pourBuild();
 }
 // de twee hendels van de 4:6 (alleen bij recepten die ze hebben)
@@ -3714,6 +3784,13 @@ function pourBloom(){
 }
 function pourSteps(){
   const el=document.getElementById('pc-steps');if(!el)return;
+  const of0=document.getElementById('pc-of');
+  if(!pc.steps.length){
+    el.innerHTML='<div class="rec-empty">no schedule yet — open <b>recipe</b> above and write '+
+      'how you brew this. Every step you put there lands here, and the clock runs it with you.</div>';
+    if(of0)of0.textContent='';
+    return;
+  }
   const cur=pourCur();
   el.innerHTML=pc.steps.map((st,i)=>{
     const at=st.t+pc.shift;
@@ -4178,8 +4255,9 @@ function saveBrew(){
     cup:formCup||null,
     tds:editingId?(state.brews.find(x=>x.id===editingId)?.tds??null):null,
     brewer:document.getElementById('f-brewer').value.trim(),
-    paper:document.getElementById('f-paper').value.trim(),
-    water:document.getElementById('f-water').value.trim(),
+    grinder:formMolen||'',
+    paper:formOud.paper||'',
+    water:formOud.water||'',
     beanId:formBean,beans:(beanById(formBean)?.name)||'',
     tags:[...formTags],
     custom:formCustom.filter(c=>c.k.trim()||c.v.trim()),
@@ -4258,7 +4336,7 @@ function openDetail(id){
     ${(fam==='espresso'&&b.target&&fmtShot(b.target))?'<div class="notes-card sketch soft"><div class="k">target (dial-in)</div><div class="v">'+esc(fmtShot(b.target))+'</div></div>':''}
     ${advice?'<div class="notes-card sketch soft"><div class="k">grind tip'+(fam==='espresso'?'':' — gear-aware')+'</div><div class="v">next time: grind '+esc(advice.grind)+(advice.reason?' <span style="color:var(--ink-soft)">— '+esc(advice.reason)+'</span>':'')+'</div></div>':''}
     ${prepHtml?'<div class="notes-card sketch soft"><div class="k">'+(fam==='espresso'?'puck-prep & machine':'prep')+'</div>'+prepHtml+'</div>':''}
-    ${(b.brewer||b.paper||b.water)?'<div class="notes-card sketch soft"><div class="k">brewer, paper &amp; water</div><div class="v">'+[b.brewer,b.paper,b.water].filter(Boolean).map(esc).join(' · ')+'</div></div>':''}
+    ${(b.brewer||b.grinder||b.paper||b.water)?'<div class="notes-card sketch soft"><div class="k">gear</div><div class="v">'+[b.brewer,b.grinder,b.paper,b.water].filter(Boolean).map(esc).join(' · ')+'</div></div>':''}
     <div class="notes-card sketch soft"><div class="k">notes</div><div class="v">${esc(b.notes||(b.tags&&b.tags.length?'':'no notes'))}</div>
       ${asArr(b.tags).length?'<div class="note-tags">'+asArr(b.tags).map(t=>'<span class="nt">'+esc(t)+'</span>').join('')+'</div>':''}
       ${asArr(b.custom).length?'<div style="margin-top:10px">'+asArr(b.custom).map(c=>'<div class="rstep"><span style="color:var(--ink-soft)">'+esc(c.k)+':</span> '+esc(c.v)+'</div>').join('')+'</div>':''}</div>
@@ -5460,7 +5538,7 @@ function brewRegel(b){
   if(b.yield)bits.push(b.yield+'g uit');
   if(b.ratio)bits.push('ratio 1:'+(+b.ratio).toFixed(1));
   if(b.time)bits.push('tijd '+b.time);
-  if(b.grind)bits.push('maalstand '+b.grind);
+  if(b.grind)bits.push('maalstand '+b.grind+(b.grinder?(' op '+b.grinder):''));
   if(b.temp)bits.push(b.temp+'°C');
   if(b.draw)bits.push('doorlooptijd '+b.draw);
   if(b.bed)bits.push('bed '+bedNL(b.bed));

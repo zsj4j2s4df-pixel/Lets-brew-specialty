@@ -129,6 +129,8 @@ suggestie. Leeg zolang je op die methode niets hebt afgetekend.
 | `dose` `yield` `ratio` | number \| null | gram in, gram uit |
 | `time` `timeSec` | string \| number \| null | |
 | `grind` | string \| null | vrije tekst: molens tellen niet hetzelfde |
+| `grinder` | string \| null | de naam van de molen waarop `grind` gedraaid is |
+| `brewer` | string \| null | waar je in brouwde, zoals ingetypt |
 | `temp` `score` | number \| null | score van 0 tot 10 |
 | `tags` | string[] | wat je proefde |
 | `notes` | string \| null | |

@@ -71,6 +71,27 @@
 .ann-uit{width:100%;min-height:190px;background:#e7ded0;color:#3a302a;border:2px solid #b8a98f;
   border-radius:11px;padding:10px;font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
   white-space:pre;overflow:auto;}
+
+/* ---- foto's: de pagina zoals hij eruitzag, mét de nummers erop ---- */
+.ann-foto{display:none;}
+.ann-bar.aan .ann-foto{display:block;}
+.ann-foto[disabled]{opacity:.5;}
+.ann-fotos{display:flex;gap:9px;overflow-x:auto;padding:0 0 8px;margin-bottom:16px;
+  border-bottom:2px solid #b8a98f;-webkit-overflow-scrolling:touch;}
+.ann-fot{flex:0 0 auto;width:76px;padding:0;border:none;background:none;cursor:pointer;
+  color:#7a6c5e;font:12px/1.25 ui-rounded,system-ui,sans-serif;text-align:center;}
+.ann-fot img{width:76px;height:99px;display:block;margin-bottom:4px;background:#e7ded0;
+  object-fit:contain;border:2px solid #b8a98f;border-radius:9px;}
+.ann-kijk{position:absolute;inset:0;z-index:80;background:#3a302a;color:#f2ead9;
+  display:none;flex-direction:column;font:15px ui-rounded,system-ui,sans-serif;}
+.ann-kijk.op{display:flex;}
+.ann-kijk .kk{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+.ann-kijk .kk span{flex:1;}
+.ann-kijk .kk button{background:none;border:1.5px solid #f2ead9;color:#f2ead9;
+  border-radius:11px;padding:7px 12px;font:inherit;cursor:pointer;}
+.ann-kijk .kb{flex:1;overflow:auto;padding:0 10px 14px;-webkit-overflow-scrolling:touch;}
+.ann-kijk img{width:100%;display:block;border-radius:7px;}
+.ann-kijk .tip{padding:9px 14px 14px;font-size:13px;opacity:.75;}
 </style>
 
 <script>
@@ -113,9 +134,11 @@
       '<button type="button" data-g="'+id+'" aria-pressed="'+(id==='pin')+'">'+
       '<svg viewBox="0 0 24 24">'+svg+'</svg><span>'+lbl+'</span></button>').join('')+'</div>'+
     '<div class="ann-rij"><button type="button" class="ann-tel" hidden></button>'+
+    '<button type="button" class="ann-foto">📷 foto</button>'+
     '<button type="button" class="ann-aan">aanwijzen</button></div>';
   phone.appendChild(bar);
   const tel=bar.querySelector('.ann-tel'), aanKnop=bar.querySelector('.ann-aan');
+  const fotoKnop=bar.querySelector('.ann-foto');
   const bijBalk=bar.querySelector('.ann-bij'), bijTxt=bar.querySelector('.bij-t');
 
   const blad=document.createElement('div');
@@ -127,6 +150,17 @@
     '<button class="zacht wis">wis alles</button></div>';
   phone.appendChild(blad);
   const lijst=blad.querySelector('.ann-lijst');
+
+  const kijk=document.createElement('div');
+  kijk.className='ann-kijk';
+  kijk.innerHTML='<div class="kk"><span></span><a class="bewaar" download>bewaar</a>'+
+    '<button type="button" class="kk-dicht">terug</button></div>'+
+    '<div class="kb"><img alt=""></div>'+
+    '<div class="tip">houd de foto ingedrukt om hem in je fotorol te zetten — daarna stuur je hem mee in de chat</div>';
+  phone.appendChild(kijk);
+  kijk.querySelector('.kk-dicht').addEventListener('click',()=>kijk.classList.remove('op'));
+  const bewaarLink=kijk.querySelector('.bewaar');
+  bewaarLink.style.cssText='color:#f2ead9;font-size:14px;text-decoration:underline';
 
   /* ---- welke pagina is in beeld? de app houdt dat zelf bij ---- */
   function huidigePag(){
@@ -219,8 +253,9 @@
     shift.innerHTML=s;
     zetShift();
     const n=opdr.length;
-    tel.hidden=!n;
-    tel.textContent=n+' punt'+(n===1?'':'en')+' ›';
+    tel.hidden=!(n||fotos.length);
+    tel.textContent=(n?(n+' punt'+(n===1?'':'en')):'foto\'s')+
+      (fotos.length?(' · '+fotos.length+' 📷'):'')+' ›';
   }
 
   /* ---- markeringen aanraken: lang indrukken = verschuiven ---- */
@@ -291,6 +326,114 @@
     verf();
   }));
 
+  /* ================= foto's =================================
+     De hele pagina in beeld brengen, ook het stuk dat onder de rand valt, mét
+     de gekleurde nummers erop. Zo hoort bij elk cijfer een plaatje en hoef je
+     niet uit te leggen wáár iets stond.
+
+     Hoe: de app in een <foreignObject> tekenen en dat als afbeelding op een
+     canvas zetten. Twee dingen waar het op vastloopt, allebei hieronder
+     opgelost: de serializer moet XML maken (gewone outerHTML is geen geldige
+     XML en het plaatje laadt dan niet), en de afbeelding moet via een
+     data:-URL binnenkomen -- een blob:-URL besmet het canvas en dan mag je er
+     niets meer uit halen.                                                  */
+  let fotos=[];    // {n, pag, nrs:[punten], png, w, h}
+
+  // invoervelden dragen hun waarde in een property, niet in een attribuut;
+  // zonder dit staat alles wat je hebt ingetypt niet op de foto
+  function zetWaarden(bron,kloon){
+    const a=bron.querySelectorAll('input,textarea,select');
+    const b=kloon.querySelectorAll('input,textarea,select');
+    for(let i=0;i<a.length&&i<b.length;i++){
+      const v=a[i], k=b[i];
+      if(v.tagName==='SELECT'){
+        [...k.options].forEach((o,j)=>{
+          if(j===v.selectedIndex)o.setAttribute('selected','selected');
+          else o.removeAttribute('selected');
+        });
+      }else if(v.type==='checkbox'||v.type==='radio'){
+        if(v.checked)k.setAttribute('checked','checked');else k.removeAttribute('checked');
+      }else if(v.tagName==='TEXTAREA'){k.textContent=v.value;}
+      else k.setAttribute('value',v.value);
+    }
+  }
+  function vangPagina(){
+    const pag=huidigePag(), sc=actiefScherm();
+    const pr=phone.getBoundingClientRect();
+    const w=phone.clientWidth;
+    const h=sc?Math.max(sc.scrollHeight+(sc.getBoundingClientRect().top-pr.top),phone.clientHeight)
+             :phone.clientHeight;
+
+    const kloon=phone.cloneNode(true);
+    kloon.querySelectorAll('.ann-vel,.ann-bar,.ann-blad,.ann-kijk').forEach(x=>x.remove());
+    zetWaarden(phone,kloon);
+    kloon.style.width=w+'px';kloon.style.height=h+'px';kloon.style.overflow='visible';
+    const ksc=kloon.querySelector('#page-'+pag+' .screen');
+    if(ksc){ksc.style.height='auto';ksc.style.maxHeight='none';ksc.style.overflow='visible';}
+
+    // de markeringen van deze pagina, op dezelfde plek als in de app
+    const mijn=marks.filter(m=>m.pag===pag);
+    let laag='';
+    if(mijn.length&&sc){
+      const sr=sc.getBoundingClientRect();
+      laag='<g transform="translate('+(sr.left-pr.left)+','+(sr.top-pr.top)+')">'+
+        mijn.map(m=>tekenMark(m,true)).join('')+'</g>';
+    }
+
+    const wrap=document.createElement('div');
+    wrap.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+    const st=document.createElement('style');
+    st.textContent=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+    wrap.appendChild(st);wrap.appendChild(kloon);
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'+
+      '<foreignObject x="0" y="0" width="'+w+'" height="'+h+'">'+
+      new XMLSerializer().serializeToString(wrap)+'</foreignObject>'+
+      '<g class="ann-svg">'+laag+'</g></svg>';
+    return {pag,w,h,svg,nrs:[...new Set(mijn.map(m=>m.grp))].sort((a,b)=>a-b)};
+  }
+  async function maakFoto(){
+    if(fotoKnop.disabled)return;
+    fotoKnop.disabled=true;const oud=fotoKnop.textContent;fotoKnop.textContent='momentje…';
+    try{
+      const v=vangPagina();
+      const img=new Image();
+      const goed=await new Promise(res=>{
+        img.onload=()=>res(true);img.onerror=()=>res(false);
+        img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(v.svg);
+      });
+      if(!goed)throw new Error('de pagina liet zich niet tekenen');
+      const c=document.createElement('canvas');
+      c.width=v.w*2;c.height=v.h*2;
+      const ctx=c.getContext('2d');ctx.scale(2,2);ctx.drawImage(img,0,0);
+      fotos.push({n:fotos.length+1,pag:v.pag,nrs:v.nrs,png:c.toDataURL('image/png'),w:v.w,h:v.h});
+      fotoKnop.textContent='foto '+fotos.length+' ✓';
+      setTimeout(()=>{fotoKnop.textContent=oud;},1400);
+      verf();
+    }catch(e){
+      fotoKnop.textContent='lukt niet';
+      setTimeout(()=>{fotoKnop.textContent=oud;},1800);
+    }finally{fotoKnop.disabled=false;}
+  }
+  fotoKnop.addEventListener('click',maakFoto);
+  function toonFoto(i){
+    const f=fotos[i];if(!f)return;
+    kijk.querySelector('.kk span').textContent='foto '+f.n+' · '+f.pag+
+      (f.nrs.length?(' · '+(f.nrs.length===1?'punt ':'punten ')+lijstje(f.nrs)):'');
+    kijk.querySelector('img').src=f.png;
+    bewaarLink.href=f.png;bewaarLink.download='lets-brew-foto-'+f.n+'.png';
+    kijk.classList.add('op');
+  }
+  function lijstje(a){
+    if(a.length<2)return a.join('');
+    return a.slice(0,-1).join(', ')+' en '+a[a.length-1];
+  }
+  function fotoStrook(){
+    if(!fotos.length)return '';
+    return '<div class="ann-fotos">'+fotos.map((f,i)=>
+      '<button type="button" class="ann-fot" data-f="'+i+'"><img src="'+f.png+'" alt=""/>'+
+      'foto '+f.n+'<br/>'+esc2(f.pag)+'</button>').join('')+'</div>';
+  }
+
   /* ---- knoppen ---- */
   aanKnop.addEventListener('click',()=>{
     aan=!aan;
@@ -316,8 +459,8 @@
   tel.addEventListener('click',()=>{toonLijst();blad.classList.add('op');});
   blad.querySelector('.dicht').addEventListener('click',()=>blad.classList.remove('op'));
   blad.querySelector('.wis').addEventListener('click',()=>{
-    if(marks.length&&!confirm('Alle punten en tekeningen wissen?'))return;
-    marks=[];opdr=[];stopBij();verf();toonLijst();
+    if((marks.length||fotos.length)&&!confirm('Alle punten, tekeningen en foto\'s wissen?'))return;
+    marks=[];opdr=[];fotos=[];stopBij();verf();toonLijst();
   });
 
   /* ---- het overzicht: per opdracht, met al zijn plekken ---- */
@@ -331,12 +474,13 @@
   function groei(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
   function toonLijst(){
     if(!opdr.length){
-      lijst.innerHTML='<p class="ann-leeg">Nog niets aangewezen. Zet <b>aanwijzen</b> aan, '+
+      lijst.innerHTML=fotoStrook()+'<p class="ann-leeg">Nog niets aangewezen. Zet <b>aanwijzen</b> aan, '+
         'kies gereedschap en tik of sleep op wat er anders moet. '+
         'Hoort iets bij een punt dat er al staat, gebruik dan <i>+ nog een plek</i>.</p>';
+      knoopFotos();
       return;
     }
-    lijst.innerHTML=opdr.map(o=>{
+    lijst.innerHTML=fotoStrook()+opdr.map(o=>{
       const mijn=marks.filter(m=>m.grp===o.n);
       const paginas=[...new Set(mijn.map(m=>m.pag))];
       return '<div class="ann-item"><span class="ann-nr" style="background:'+kleur(o.n)+'">'+o.n+'</span>'+
@@ -359,18 +503,25 @@
       marks=marks.filter(m=>m.grp!==n); opdr=opdr.filter(o=>o.n!==n);
       verf();toonLijst();
     }));
+    knoopFotos();
+  }
+  function knoopFotos(){
+    lijst.querySelectorAll('.ann-fot').forEach(b=>
+      b.addEventListener('click',()=>toonFoto(+b.dataset.f)));
   }
   function esc2(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
 
   /* ---- de opdracht ---- */
   blad.querySelector('.maak').addEventListener('click',()=>{
-    let s='Opdracht voor Lets Brew — '+opdr.length+' punt'+(opdr.length===1?'':'en')+'\n';
+    let s='Opdracht voor Lets Brew — '+opdr.length+' punt'+(opdr.length===1?'':'en')+
+      (fotos.length?(', '+fotos.length+' foto'+(fotos.length===1?'':'\'s')):'')+'\n';
     const perPag={};
     opdr.forEach(o=>{
       const mijn=marks.filter(m=>m.grp===o.n);
       const pag=(mijn[0]&&mijn[0].pag)||'onbekend';
       (perPag[pag]=perPag[pag]||[]).push(o);
     });
+    fotos.forEach(f=>{if(!perPag[f.pag])perPag[f.pag]=[];});
     Object.keys(perPag).forEach(pag=>{
       s+='\n── '+pag+' ──\n';
       perPag[pag].forEach(o=>{
@@ -379,7 +530,12 @@
              (m.pag!==pag?(' [op '+m.pag+']'):'')).join('\n   + ')+'\n';
         s+='   '+((o.tekst||'').trim()||'(nog geen uitleg)')+'\n';
       });
+      fotos.filter(f=>f.pag===pag).forEach(f=>{
+        s+='📷 foto '+f.n+(f.nrs.length?(' — '+(f.nrs.length===1?'punt ':'punten ')+lijstje(f.nrs)
+                                          +' staan erop'):' — deze pagina, zonder punten')+'\n';
+      });
     });
+    if(fotos.length)s+='\n(de foto\'s zitten als afbeelding bij dit bericht)\n';
     lijst.innerHTML='<p class="ann-leeg" style="margin-bottom:9px">Kopieer dit en plak het in de chat:</p>'+
       '<textarea class="ann-uit" readonly></textarea>';
     lijst.querySelector('.ann-uit').value=s;
@@ -403,7 +559,7 @@
 
   /* ---- haakje voor de testronde; zie references/onderhoud.md ---- */
   window.__ann={
-    marks:()=>marks, opdr:()=>opdr,
+    marks:()=>marks, opdr:()=>opdr, fotos:()=>fotos, foto:maakFoto,
     kies:g=>{gereed=g;bar.querySelectorAll('.ann-ger button').forEach(x=>
       x.setAttribute('aria-pressed',x.dataset.g===g?'true':'false'));},
   };

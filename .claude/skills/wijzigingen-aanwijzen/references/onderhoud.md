@@ -54,6 +54,14 @@ tekenen, maar die wordt bij het loslaten weggegooid (`delete b.grp`) zodat
   `"surprise mea surprise brew with..."`. Alleen de eerste regel, max 45 tekens.
 - **De laag hoort in `.phone`**, niet in `body`: hij moet meeschuiven met het
   telefoonkader en boven de navigatiebalk blijven.
+- **De foto is een `<foreignObject>` op een canvas**, en dat gaat op precies
+  twee manieren mis. Serialiseren moet met `XMLSerializer` — `outerHTML` levert
+  HTML op, dat is geen geldige XML, en het plaatje laadt dan zonder foutmelding
+  gewoon niet. En de afbeelding moet via een **`data:`-URL** binnenkomen: een
+  `blob:`-URL besmet het canvas, waarna `toDataURL()` een `SecurityError`
+  gooit. Verder: een gekloond invoerveld draagt zijn waarde in een *property*,
+  niet in een attribuut, dus zonder `zetWaarden()` staat alles wat hij intikte
+  niet op de foto.
 - **Lang indrukken botst met slepen.** `pointerdown` zoekt met `raakt()` een
   markering onder de vinger en zet een timer van 380 ms; beweegt de vinger
   vóór die tijd meer dan 8 px, dan gaat de timer eruit en is het gewoon een
@@ -82,12 +90,18 @@ krijgt. Draai in Chromium op 390×844 en loop na:
 7. **de punten blijven aan de inhoud hangen**: zet een punt, scroll de `.screen`
    260 px, en het punt moet exact 260 px meeschuiven. Zet daarna een punt op een
    al gescrolde pagina — dat moet onder de vinger landen, niet verschoven
-8. *maak de opdracht* levert **echte regeleinden**, geen letterlijke `\n` (die
+8. **foto**: zet een punt, druk op 📷 — `window.__ann.fotos()[0].png` begint met
+   `data:image/png`, `nrs` bevat dat punt, en de hoogte is de hele pagina, niet
+   die van het scherm. Sla hem op en kijk ernaar: de nummers moeten op dezelfde
+   plek staan als in de app
+9. *maak de opdracht* levert **echte regeleinden**, geen letterlijke `\n` (die
    bug is er al eens in geslopen door dubbel escapen in een patch-script), en de
    plekregels kloppen: `verbindt «X» ↔ «Y»`, `van «X» naar «Y»`, extra plekken
-   met `+` ervoor
+   met `+` ervoor, foto's als `📷 foto 1 — punten 1 en 2 staan erop`
 
-Punten 5 en 6 lees je niet uit de DOM — de code zit in een IIFE. Gebruik het
-haakje `window.__ann`: `marks()`, `opdr()` en `kies('pijl')` om van gereedschap
-te wisselen zonder op de balk te klikken. En let op: Playwright's `click()`
-scrollt zelf, dus een `boundingBox()` van vóór de klik klopt daarna niet meer.
+Punten 5, 6 en 8 lees je niet uit de DOM — de code zit in een IIFE. Gebruik het
+haakje `window.__ann`: `marks()`, `opdr()`, `fotos()`, `foto()` en `kies('pijl')`
+om van gereedschap te wisselen zonder op de balk te klikken. Twee valkuilen in
+de testronde zelf: Playwright's `click()` scrollt, dus een `boundingBox()` van
+vóór de klik klopt daarna niet meer, en de foto móet je over `http://` testen —
+op `file://` is de herkomst leeg en besmet zelfs een `data:`-URL het canvas.
