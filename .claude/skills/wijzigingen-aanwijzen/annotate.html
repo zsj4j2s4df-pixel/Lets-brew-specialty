@@ -2,30 +2,47 @@
 /* ================= aanwijs-laag =================================
    Ligt over de app heen. Uit staat hij volledig opzij: je gebruikt de app
    gewoon. Aan vangt hij elke tik op, zodat aanwijzen niet per ongeluk een
-   knop indrukt -- de app eronder bevriest dan.                            */
+   knop indrukt -- de app eronder bevriest dan.
+
+   Eén opdracht kan méér dan één plek hebben: een pijl hier, een cirkel daar.
+   Ze delen hun nummer en hun kleur, zodat "zie punt 6" niet meer nodig is. */
 .ann-vel{position:absolute;inset:0;z-index:60;pointer-events:none;overflow:hidden;}
-.ann-vel.aan{pointer-events:auto;background:rgba(192,57,43,.05);cursor:crosshair;touch-action:none;}
+.ann-vel.aan{pointer-events:auto;background:rgba(58,48,42,.045);cursor:crosshair;touch-action:none;}
 .ann-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.ann-svg .lus{fill:none;stroke:#c0392b;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
-.ann-svg .pin-c{fill:#c0392b;}
+.ann-svg .lijn{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+.ann-svg .kop{stroke:none;}
 .ann-svg .pin-t{fill:#fff;font:700 15px ui-rounded,system-ui,sans-serif;
   text-anchor:middle;dominant-baseline:central;}
+.ann-svg .pak{opacity:.35;}
 
-.ann-knop{position:absolute;right:12px;bottom:78px;z-index:62;
-  display:flex;align-items:center;gap:7px;
-  background:#e7ded0;color:#3a302a;border:2px solid #3a302a;border-radius:22px;
-  padding:9px 15px;font:600 15px ui-rounded,system-ui,sans-serif;cursor:pointer;
-  box-shadow:0 3px 12px rgba(40,32,25,.22);}
-.ann-knop.aan{background:#c0392b;color:#fff;border-color:#c0392b;}
-.ann-knop .bol{width:11px;height:11px;border-radius:50%;background:#c0392b;flex:none;}
-.ann-knop.aan .bol{background:#fff;}
-.ann-tel{position:absolute;left:12px;bottom:78px;z-index:62;
-  background:#3a302a;color:#f2ead9;border:none;border-radius:22px;padding:9px 15px;
-  font:600 15px ui-rounded,system-ui,sans-serif;cursor:pointer;
-  box-shadow:0 3px 12px rgba(40,32,25,.22);}
+/* ---- de balk onderin ---- */
+.ann-bar{position:absolute;left:8px;right:8px;bottom:74px;z-index:62;
+  display:flex;flex-direction:column;gap:7px;font:15px ui-rounded,system-ui,sans-serif;}
+.ann-ger{display:none;gap:6px;}
+.ann-bar.aan .ann-ger{display:flex;}
+.ann-ger button{flex:1;min-width:0;background:#e7ded0;color:#3a302a;
+  border:2px solid #b8a98f;border-radius:14px;padding:8px 4px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  font:600 11.5px ui-rounded,system-ui,sans-serif;line-height:1;
+  box-shadow:0 2px 8px rgba(40,32,25,.16);}
+.ann-ger button svg{width:21px;height:21px;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.ann-ger button[aria-pressed="true"]{background:#3a302a;color:#f2ead9;border-color:#3a302a;}
+.ann-rij{display:flex;gap:7px;align-items:center;}
+.ann-rij button{background:#e7ded0;color:#3a302a;border:2px solid #3a302a;
+  border-radius:20px;padding:9px 15px;cursor:pointer;
+  font:600 15px ui-rounded,system-ui,sans-serif;box-shadow:0 2px 10px rgba(40,32,25,.2);}
+.ann-aan{margin-left:auto;}
+.ann-bar.aan .ann-aan{background:#3a302a;color:#f2ead9;}
+.ann-tel{background:#7d6650!important;color:#f2ead9!important;border-color:#7d6650!important;}
 .ann-tel[hidden]{display:none;}
+.ann-bij{display:none;align-items:center;gap:8px;background:#3a302a;color:#f2ead9;
+  border-radius:14px;padding:8px 12px;font-size:14px;}
+.ann-bij.op{display:flex;}
+.ann-bij button{background:none;border:1.5px solid #f2ead9;color:#f2ead9;
+  border-radius:10px;padding:4px 10px;font:inherit;font-size:13px;cursor:pointer;margin-left:auto;}
 
-/* het overzicht */
+/* ---- het overzicht ---- */
 .ann-blad{position:absolute;inset:0;z-index:70;background:#efe9dd;color:#3a302a;
   display:none;flex-direction:column;font:16px/1.45 ui-rounded,system-ui,sans-serif;}
 .ann-blad.op{display:flex;}
@@ -34,26 +51,24 @@
 .ann-kop button{background:none;border:2px solid #b8a98f;border-radius:12px;
   padding:8px 13px;font:inherit;font-size:15px;color:#3a302a;cursor:pointer;}
 .ann-lijst{flex:1;overflow-y:auto;padding:14px 16px 20px;-webkit-overflow-scrolling:touch;}
-.ann-pag{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:#7a6c5e;
-  margin:16px 0 8px;padding-bottom:5px;border-bottom:1.5px solid #b8a98f;}
-.ann-pag:first-child{margin-top:0;}
-.ann-item{display:grid;grid-template-columns:28px 1fr 26px;gap:9px;align-items:start;margin-bottom:11px;}
-.ann-nr{width:28px;height:28px;border-radius:50%;background:#c0392b;color:#fff;
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
-  margin-top:3px;cursor:pointer;}
+.ann-item{display:grid;grid-template-columns:30px 1fr 24px;gap:9px;align-items:start;margin-bottom:14px;}
+.ann-nr{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;
+  align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-top:2px;}
 .ann-veld{min-width:0;}
-.ann-anker{font-size:13px;color:#7a6c5e;margin-bottom:3px;}
+.ann-plek{font-size:13px;color:#7a6c5e;margin-bottom:2px;}
 .ann-item textarea{width:100%;min-height:42px;resize:none;overflow:hidden;
   background:#e7ded0;color:#3a302a;border:2px solid #b8a98f;border-radius:11px;
   padding:9px 10px;font:15.5px/1.35 ui-rounded,system-ui,sans-serif;}
 .ann-item textarea:focus{outline:none;border-color:#7d6650;}
-.ann-weg{background:none;border:none;color:#7a6c5e;font-size:20px;cursor:pointer;padding:5px 0;}
+.ann-erbij{background:none;border:none;color:#7d6650;font:600 13.5px ui-rounded,system-ui,sans-serif;
+  padding:5px 0 0;cursor:pointer;text-decoration:underline;}
+.ann-weg{background:none;border:none;color:#7a6c5e;font-size:20px;cursor:pointer;padding:4px 0;}
 .ann-leeg{color:#7a6c5e;}
 .ann-voet{padding:12px 16px;border-top:2px solid #b8a98f;display:flex;gap:8px;}
-.ann-voet button{flex:1;border-radius:13px;padding:12px;font:600 15px ui-rounded,system-ui,sans-serif;cursor:pointer;
-  background:#7d6650;color:#f2ead9;border:2px solid #7d6650;}
+.ann-voet button{flex:1;border-radius:13px;padding:12px;cursor:pointer;
+  font:600 15px ui-rounded,system-ui,sans-serif;background:#7d6650;color:#f2ead9;border:2px solid #7d6650;}
 .ann-voet .zacht{background:none;color:#3a302a;border-color:#b8a98f;font-weight:400;}
-.ann-uit{width:100%;min-height:180px;background:#e7ded0;color:#3a302a;border:2px solid #b8a98f;
+.ann-uit{width:100%;min-height:190px;background:#e7ded0;color:#3a302a;border:2px solid #b8a98f;
   border-radius:11px;padding:10px;font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
   white-space:pre;overflow:auto;}
 </style>
@@ -61,35 +76,54 @@
 <script>
 /* ================= aanwijzen in de app zelf ======================
    Waarom in de app en niet op een schermafbeelding: hier weet ik van elk
-   punt op wélke pagina het staat en op welk element je wees. Dat levert een
-   opdracht op waar direct mee te werken valt.                            */
+   punt op wélke pagina het staat en op welk element je wees.
+
+   Eén opdracht, meerdere plekken: markeringen delen een nummer en een kleur.
+   Daarmee vervalt het "zie punt 6" dat een opdracht over losse regels
+   uitsmeerde.                                                            */
 (function(){
   const phone=document.querySelector('.phone');
   if(!phone)return;
   if(getComputedStyle(phone).position==='static')phone.style.position='relative';
 
-  let aan=false, punten=[], bezig=null, volgPag='home';
+  const PALET=['#c0392b','#2c6e9b','#4a7c3f','#7a4b8c','#c97b1e'];
+  const kleur=n=>PALET[(n-1)%PALET.length];
+
+  let aan=false, gereed='pin', bijGroep=null, volgPag='';
+  let marks=[];              // {grp,soort,pag,...maten,anker,anker2}
+  let opdr=[];               // {n,tekst}
+  let bezig=null, sleep=null, drukTimer=null, neer=null;
 
   const vel=document.createElement('div');vel.className='ann-vel';
   vel.innerHTML='<svg class="ann-svg"><g class="ann-shift"></g></svg>';
   const shift=vel.querySelector('.ann-shift');
   phone.appendChild(vel);
 
-  const knop=document.createElement('button');
-  knop.className='ann-knop';knop.type='button';
-  knop.innerHTML='<span class="bol"></span><span class="lbl">aanwijzen</span>';
-  phone.appendChild(knop);
-
-  const tel=document.createElement('button');
-  tel.className='ann-tel';tel.type='button';tel.hidden=true;
-  phone.appendChild(tel);
+  const GEREEDSCHAP=[
+    ['pin','aanwijzen','<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/>'],
+    ['pijl','pijl','<path d="M4 19 19 5"/><path d="M12.5 5H19v6.5"/>'],
+    ['dubbel','dubbele pijl','<path d="M5 18 19 6"/><path d="M5 11.5V18h6.5"/><path d="M12.5 6H19v6.5"/>'],
+    ['lijn','omcirkel','<path d="M16.5 6.4C20 8.6 20.4 13.6 17 16.4c-3.6 3-9.6 2.6-12-.9C3 12.3 4.6 7.7 8.6 6.2c2.6-1 5.6-.7 7.7.9"/>'],
+  ];
+  const bar=document.createElement('div');
+  bar.className='ann-bar';
+  bar.innerHTML=
+    '<div class="ann-bij"><span class="bij-t"></span><button type="button" class="bij-uit">klaar</button></div>'+
+    '<div class="ann-ger">'+GEREEDSCHAP.map(([id,lbl,svg])=>
+      '<button type="button" data-g="'+id+'" aria-pressed="'+(id==='pin')+'">'+
+      '<svg viewBox="0 0 24 24">'+svg+'</svg><span>'+lbl+'</span></button>').join('')+'</div>'+
+    '<div class="ann-rij"><button type="button" class="ann-tel" hidden></button>'+
+    '<button type="button" class="ann-aan">aanwijzen</button></div>';
+  phone.appendChild(bar);
+  const tel=bar.querySelector('.ann-tel'), aanKnop=bar.querySelector('.ann-aan');
+  const bijBalk=bar.querySelector('.ann-bij'), bijTxt=bar.querySelector('.bij-t');
 
   const blad=document.createElement('div');
   blad.className='ann-blad';
   blad.innerHTML=
     '<div class="ann-kop"><h2>Wat er anders moet</h2><button class="dicht">terug</button></div>'+
     '<div class="ann-lijst"></div>'+
-    '<div class="ann-voet"><button class="pak">maak de opdracht</button>'+
+    '<div class="ann-voet"><button class="maak">maak de opdracht</button>'+
     '<button class="zacht wis">wis alles</button></div>';
   phone.appendChild(blad);
   const lijst=blad.querySelector('.ann-lijst');
@@ -101,18 +135,14 @@
     return z?z.id.replace(/^page-/,''):'onbekend';
   }
   /* ---- waar wees je op? het label van het element eronder ----
-     Dit is het nuttigste stukje van de hele tool: "bij «＋ new brew»" is
-     iets om mee te werken, een coördinaat niet. We lopen van het binnenste
-     element naar buiten en pakken het eerste korte, betekenisvolle label.
-     innerText en niet textContent: die laatste plakt losse spans aan elkaar
-     tot "surprise mea surprise brew with...".                            */
-  function kort(s){
-    s=(s||'').trim().replace(/\s+/g,' ');
-    return s.length<=45?s:s.slice(0,42).trim()+'\u2026';
-  }
+     Het nuttigste stukje van de hele tool: "bij «＋ new brew»" is iets om mee
+     te werken, een coördinaat niet. innerText en niet textContent -- die
+     laatste plakt losse spans aan elkaar tot "surprise mea surprise brew". */
+  function kort(s){s=(s||'').trim().replace(/\s+/g,' ');
+    return s.length<=45?s:s.slice(0,42).trim()+'…';}
   function ankerOp(x,y){
     const stapel=document.elementsFromPoint(x,y)
-      .filter(el=>!el.closest('.ann-vel,.ann-knop,.ann-tel,.ann-blad'));
+      .filter(el=>!el.closest('.ann-vel,.ann-bar,.ann-blad'));
     let terugval='';
     for(const el of stapel){
       const aria=el.getAttribute&&(el.getAttribute('aria-label')||
@@ -127,21 +157,17 @@
     return terugval;
   }
   /* ---- het scrollende vlak ----
-     .phone staat op overflow:hidden en scrollt dus nooit. Wat wél scrollt is
-     de .screen ván de pagina die in beeld is -- elke pagina heeft een eigen.
-     Rekenen we tegen .phone, dan blijven de punten aan het scherm plakken in
-     plaats van aan de inhoud.                                              */
+     .phone staat op overflow:hidden en scrollt nooit. Wat wél scrollt is de
+     .screen ván de pagina die in beeld is; elke pagina heeft een eigen.
+     Rekenen tegen .phone laat de punten aan het scherm plakken.           */
   function actiefScherm(){
     const pag=document.getElementById('page-'+huidigePag());
     return (pag&&pag.querySelector('.screen'))||null;
   }
   function pos(e){
-    const sc=actiefScherm();
-    const r=(sc||phone).getBoundingClientRect();
+    const sc=actiefScherm(), r=(sc||phone).getBoundingClientRect();
     return {x:e.clientX-r.left, y:e.clientY-r.top+(sc?sc.scrollTop:0)};
   }
-  // de punten staan in de inhoud van dat vlak; deze verschuiving zet ze terug
-  // op hun plek op het scherm
   function zetShift(){
     const sc=actiefScherm();
     if(!sc){shift.setAttribute('transform','translate(0,0)');return;}
@@ -149,154 +175,241 @@
     shift.setAttribute('transform',
       'translate('+(sr.left-pr.left)+','+(sr.top-pr.top-sc.scrollTop)+')');
   }
-
-  /* ---- tekenen ---- */
-  function verf(){
-    const pag=huidigePag();
-    const mijn=punten.filter(p=>p.pag===pag);
-    let s='';
-    mijn.forEach(p=>{
-      if(p.soort==='lus'){
-        s+='<polyline class="lus" points="'+p.p.map(q=>q.x+','+q.y).join(' ')+'"/>';
-      }else{
-        const nr=punten.filter(q=>q.soort==='pin').indexOf(p)+1;
-        s+='<circle class="pin-c" cx="'+p.x+'" cy="'+p.y+'" r="14"/>'+
-           '<text class="pin-t" x="'+p.x+'" y="'+p.y+'">'+nr+'</text>';
-      }
-    });
-    if(bezig&&bezig.pag===pag&&bezig.soort==='lus')
-      s+='<polyline class="lus" points="'+bezig.p.map(q=>q.x+','+q.y).join(' ')+'"/>';
-    shift.innerHTML=s;
-    zetShift();
-    const n=punten.filter(p=>p.soort==='pin').length;
-    tel.hidden=!punten.length;
-    tel.textContent=n?(n+' punt'+(n===1?'':'en')+' ›'):'bekijk ›';
-  }
-  // scroll-events bubbelen niet, maar ze doen wél de capture-fase aan
   phone.addEventListener('scroll',zetShift,{passive:true,capture:true});
   window.addEventListener('resize',zetShift);
 
-  /* ---- tikken en slepen ---- */
-  let neer=null;
+  /* ---- tekenen ---- */
+  function pijlKop(x1,y1,x2,y2,k){
+    const a=Math.atan2(y2-y1,x2-x1), L=13;
+    return '<path class="kop" fill="'+k+'" d="M'+x2+' '+y2+
+      'L'+(x2-L*Math.cos(a-0.42))+' '+(y2-L*Math.sin(a-0.42))+
+      'L'+(x2-L*Math.cos(a+0.42))+' '+(y2-L*Math.sin(a+0.42))+'Z"/>';
+  }
+  function tekenMark(m,vast){
+    const k=kleur(m.grp), extra=vast?'':' class="pak"';
+    if(m.soort==='pin'){
+      const n=m.grp;
+      return '<g'+extra+'><circle cx="'+m.x+'" cy="'+m.y+'" r="14" fill="'+k+'"/>'+
+        '<text class="pin-t" x="'+m.x+'" y="'+m.y+'">'+n+'</text></g>';
+    }
+    if(m.soort==='lijn'){
+      return '<g'+extra+'><polyline class="lijn" stroke="'+k+'" points="'+
+        m.p.map(q=>q.x+','+q.y).join(' ')+'"/>'+etiket(m,k)+'</g>';
+    }
+    // pijl en dubbele pijl
+    let s='<g'+extra+'><line class="lijn" stroke="'+k+'" x1="'+m.x+'" y1="'+m.y+
+      '" x2="'+m.x2+'" y2="'+m.y2+'"/>'+pijlKop(m.x,m.y,m.x2,m.y2,k);
+    if(m.soort==='dubbel')s+=pijlKop(m.x2,m.y2,m.x,m.y,k);
+    return s+etiket(m,k)+'</g>';
+  }
+  // het nummer bij een pijl of cirkel, zodat je ziet bij welke opdracht hij hoort
+  function etiket(m,k){
+    let cx,cy;
+    if(m.soort==='lijn'){
+      const xs=m.p.map(q=>q.x), ys=m.p.map(q=>q.y);
+      cx=(Math.min(...xs)+Math.max(...xs))/2; cy=Math.min(...ys)-4;
+    }else{cx=(m.x+m.x2)/2; cy=(m.y+m.y2)/2;}
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="11" fill="'+k+'"/>'+
+      '<text class="pin-t" x="'+cx+'" y="'+cy+'" style="font-size:13px">'+m.grp+'</text>';
+  }
+  function verf(){
+    const pag=huidigePag();
+    let s=marks.filter(m=>m.pag===pag).map(m=>tekenMark(m,true)).join('');
+    if(bezig&&bezig.pag===pag)s+=tekenMark(bezig,false);
+    shift.innerHTML=s;
+    zetShift();
+    const n=opdr.length;
+    tel.hidden=!n;
+    tel.textContent=n+' punt'+(n===1?'':'en')+' ›';
+  }
+
+  /* ---- markeringen aanraken: lang indrukken = verschuiven ---- */
+  function raakt(m,p){
+    if(m.soort==='pin')return Math.hypot(m.x-p.x,m.y-p.y)<24;
+    if(m.soort==='lijn')return m.p.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<18);
+    const dx=m.x2-m.x, dy=m.y2-m.y, L2=dx*dx+dy*dy||1;
+    let t=((p.x-m.x)*dx+(p.y-m.y)*dy)/L2; t=Math.max(0,Math.min(1,t));
+    return Math.hypot(m.x+t*dx-p.x, m.y+t*dy-p.y)<18;
+  }
+  function verplaats(m,dx,dy){
+    if(m.soort==='lijn'){m.p.forEach(q=>{q.x+=dx;q.y+=dy;});return;}
+    m.x+=dx;m.y+=dy;
+    if(m.x2!=null){m.x2+=dx;m.y2+=dy;}
+  }
+
+  /* ---- een nieuwe markering opnemen ---- */
+  function nieuwNummer(){
+    const n=opdr.length?Math.max(...opdr.map(o=>o.n))+1:1;
+    opdr.push({n,tekst:''});return n;
+  }
+  function voegToe(m,anker,anker2){
+    m.grp=bijGroep||nieuwNummer();
+    m.anker=anker||''; if(anker2)m.anker2=anker2;
+    marks.push(m);
+  }
+
   vel.addEventListener('pointerdown',e=>{
     if(!aan)return;
     vel.setPointerCapture(e.pointerId);
-    neer={t:Date.now(),x:e.clientX,y:e.clientY,anker:ankerOp(e.clientX,e.clientY)};
-    bezig={soort:'lus',pag:huidigePag(),p:[pos(e)]};
+    const p=pos(e), pag=huidigePag();
+    neer={x:e.clientX,y:e.clientY,p,anker:ankerOp(e.clientX,e.clientY)};
+    // lang indrukken op een bestaande markering: verschuiven voor precisie
+    const raak=marks.filter(m=>m.pag===pag).reverse().find(m=>raakt(m,p));
+    if(raak){
+      drukTimer=setTimeout(()=>{
+        drukTimer=null; sleep={m:raak,vorig:p};
+        try{navigator.vibrate&&navigator.vibrate(12);}catch(x){}
+      },380);
+    }
+    if(gereed!=='pin')bezig={soort:gereed,pag,grp:bijGroep||(opdr.length?Math.max(...opdr.map(o=>o.n))+1:1),
+      x:p.x,y:p.y,x2:p.x,y2:p.y,p:[p]};
   });
   vel.addEventListener('pointermove',e=>{
-    if(!aan||!bezig)return;
-    bezig.p.push(pos(e));verf();
+    if(!aan)return;
+    const p=pos(e);
+    if(sleep){verplaats(sleep.m,p.x-sleep.vorig.x,p.y-sleep.vorig.y);sleep.vorig=p;verf();return;}
+    if(drukTimer&&Math.hypot(e.clientX-neer.x,e.clientY-neer.y)>8){clearTimeout(drukTimer);drukTimer=null;}
+    if(!bezig)return;
+    if(bezig.soort==='lijn')bezig.p.push(p); else {bezig.x2=p.x;bezig.y2=p.y;}
+    verf();
   });
   ['pointerup','pointercancel'].forEach(ev=>vel.addEventListener(ev,e=>{
-    if(!aan||!bezig)return;
-    const b=bezig;bezig=null;
+    if(!aan)return;
+    if(drukTimer){clearTimeout(drukTimer);drukTimer=null;}
+    if(sleep){sleep=null;bezig=null;verf();return;}
+    const b=bezig; bezig=null;
     const ver=Math.hypot(e.clientX-neer.x,e.clientY-neer.y);
-    if(ver<12){                                   // korte tik = een punt
-      const p=pos(e);
-      punten.push({soort:'pin',pag:b.pag,x:p.x,y:p.y,anker:neer.anker,tekst:''});
-    }else if(b.p.length>3){
-      punten.push(b);
+    if(gereed==='pin'){
+      if(ver<14)voegToe({soort:'pin',pag:huidigePag(),x:neer.p.x,y:neer.p.y},neer.anker);
+    }else if(b){
+      const goed=(b.soort==='lijn')?b.p.length>3:ver>18;
+      if(goed){
+        delete b.grp;
+        voegToe(b,neer.anker,(b.soort==='lijn')?'':ankerOp(e.clientX,e.clientY));
+      }
     }
     verf();
   }));
 
   /* ---- knoppen ---- */
-  knop.addEventListener('click',()=>{
+  aanKnop.addEventListener('click',()=>{
     aan=!aan;
     vel.classList.toggle('aan',aan);
-    knop.classList.toggle('aan',aan);
-    knop.querySelector('.lbl').textContent=aan?'klaar met aanwijzen':'aanwijzen';
+    bar.classList.toggle('aan',aan);
+    aanKnop.textContent=aan?'klaar':'aanwijzen';
+    if(!aan)stopBij();
   });
+  bar.querySelector('.ann-ger').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    gereed=b.dataset.g;
+    bar.querySelectorAll('.ann-ger button').forEach(x=>
+      x.setAttribute('aria-pressed',x===b?'true':'false'));
+  });
+  function startBij(n){
+    bijGroep=n; bijBalk.classList.add('op');
+    bijTxt.textContent='je voegt plekken toe aan punt '+n;
+    blad.classList.remove('op');
+    if(!aan)aanKnop.click();
+  }
+  function stopBij(){bijGroep=null;bijBalk.classList.remove('op');}
+  bar.querySelector('.bij-uit').addEventListener('click',stopBij);
   tel.addEventListener('click',()=>{toonLijst();blad.classList.add('op');});
   blad.querySelector('.dicht').addEventListener('click',()=>blad.classList.remove('op'));
   blad.querySelector('.wis').addEventListener('click',()=>{
-    if(punten.length&&!confirm('Alle punten en tekeningen wissen?'))return;
-    punten=[];verf();toonLijst();
+    if(marks.length&&!confirm('Alle punten en tekeningen wissen?'))return;
+    marks=[];opdr=[];stopBij();verf();toonLijst();
   });
 
-  /* ---- het overzicht, gegroepeerd per pagina ---- */
+  /* ---- het overzicht: per opdracht, met al zijn plekken ---- */
+  const SOORT={pin:'aangewezen',pijl:'pijl',dubbel:'dubbele pijl',lijn:'omcirkeld'};
+  function plekTekst(m){
+    if(m.soort==='dubbel'&&m.anker&&m.anker2)return 'verbindt «'+m.anker+'» ↔ «'+m.anker2+'»';
+    if(m.soort==='pijl'&&m.anker&&m.anker2)return 'van «'+m.anker+'» naar «'+m.anker2+'»';
+    if(m.anker)return (m.soort==='lijn'?'omcirkeld bij ':'bij ')+'«'+m.anker+'»';
+    return SOORT[m.soort]+' op deze pagina';
+  }
   function groei(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
   function toonLijst(){
-    const pins=punten.filter(p=>p.soort==='pin');
-    if(!punten.length){
+    if(!opdr.length){
       lijst.innerHTML='<p class="ann-leeg">Nog niets aangewezen. Zet <b>aanwijzen</b> aan, '+
-        'loop door de app en tik op wat er anders moet — slepen tekent een cirkel.</p>';
+        'kies gereedschap en tik of sleep op wat er anders moet. '+
+        'Hoort iets bij een punt dat er al staat, gebruik dan <i>+ nog een plek</i>.</p>';
       return;
     }
-    const paginas=[...new Set(punten.map(p=>p.pag))];
-    let h='';
-    paginas.forEach(pag=>{
-      h+='<div class="ann-pag">'+pag+'</div>';
-      punten.forEach(p=>{
-        if(p.pag!==pag)return;
-        if(p.soort==='lus'){
-          h+='<div class="ann-item"><span class="ann-nr" style="background:#7a6c5e">○</span>'+
-             '<div class="ann-veld"><div class="ann-anker">een cirkel op deze pagina</div></div>'+
-             '<button class="ann-weg" data-i="'+punten.indexOf(p)+'">×</button></div>';
-          return;
-        }
-        const nr=pins.indexOf(p)+1;
-        h+='<div class="ann-item"><span class="ann-nr" data-ga="'+pag+'">'+nr+'</span>'+
-           '<div class="ann-veld">'+
-           (p.anker?'<div class="ann-anker">bij «'+p.anker.replace(/[<>&]/g,'')+'»</div>':'')+
-           '<textarea rows="1" placeholder="wat moet hier anders?" data-i="'+punten.indexOf(p)+'"></textarea>'+
-           '</div><button class="ann-weg" data-i="'+punten.indexOf(p)+'">×</button></div>';
-      });
-    });
-    lijst.innerHTML=h;
+    lijst.innerHTML=opdr.map(o=>{
+      const mijn=marks.filter(m=>m.grp===o.n);
+      const paginas=[...new Set(mijn.map(m=>m.pag))];
+      return '<div class="ann-item"><span class="ann-nr" style="background:'+kleur(o.n)+'">'+o.n+'</span>'+
+        '<div class="ann-veld">'+
+        mijn.map(m=>'<div class="ann-plek">'+esc2(plekTekst(m))+
+          (paginas.length>1?' <i>('+m.pag+')</i>':'')+'</div>').join('')+
+        '<textarea rows="1" placeholder="wat moet hier anders?" data-n="'+o.n+'"></textarea>'+
+        '<button class="ann-erbij" data-n="'+o.n+'">+ nog een plek</button>'+
+        '</div><button class="ann-weg" data-n="'+o.n+'">×</button></div>';
+    }).join('');
     lijst.querySelectorAll('textarea').forEach(t=>{
-      t.value=punten[+t.dataset.i].tekst||'';groei(t);
-      t.addEventListener('input',()=>{punten[+t.dataset.i].tekst=t.value;groei(t);});
+      const o=opdr.find(x=>x.n===+t.dataset.n);
+      t.value=o.tekst||'';groei(t);
+      t.addEventListener('input',()=>{o.tekst=t.value;groei(t);});
     });
+    lijst.querySelectorAll('.ann-erbij').forEach(b=>
+      b.addEventListener('click',()=>startBij(+b.dataset.n)));
     lijst.querySelectorAll('.ann-weg').forEach(b=>b.addEventListener('click',()=>{
-      punten.splice(+b.dataset.i,1);verf();toonLijst();
-    }));
-    lijst.querySelectorAll('.ann-nr[data-ga]').forEach(b=>b.addEventListener('click',()=>{
-      blad.classList.remove('op');
-      try{go(b.dataset.ga);}catch(e){}
-      setTimeout(verf,60);
+      const n=+b.dataset.n;
+      marks=marks.filter(m=>m.grp!==n); opdr=opdr.filter(o=>o.n!==n);
+      verf();toonLijst();
     }));
   }
+  function esc2(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
 
   /* ---- de opdracht ---- */
-  blad.querySelector('.pak').addEventListener('click',()=>{
-    const pins=punten.filter(p=>p.soort==='pin');
-    const paginas=[...new Set(punten.map(p=>p.pag))];
-    let s='Opdracht voor Lets Brew — '+pins.length+' punt'+(pins.length===1?'':'en')+'\n';
-    paginas.forEach(pag=>{
-      const lussen=punten.filter(p=>p.pag===pag&&p.soort==='lus').length;
-      s+='\n\u2500\u2500 '+pag+' \u2500\u2500\n';
-      punten.forEach(p=>{
-        if(p.pag!==pag||p.soort!=='pin')return;
-        s+=(pins.indexOf(p)+1)+'. '+(p.anker?'bij \u00ab'+p.anker+'\u00bb\n   ':'')+
-           ((p.tekst||'').trim()||'(nog geen uitleg)')+'\n';
+  blad.querySelector('.maak').addEventListener('click',()=>{
+    let s='Opdracht voor Lets Brew — '+opdr.length+' punt'+(opdr.length===1?'':'en')+'\n';
+    const perPag={};
+    opdr.forEach(o=>{
+      const mijn=marks.filter(m=>m.grp===o.n);
+      const pag=(mijn[0]&&mijn[0].pag)||'onbekend';
+      (perPag[pag]=perPag[pag]||[]).push(o);
+    });
+    Object.keys(perPag).forEach(pag=>{
+      s+='\n── '+pag+' ──\n';
+      perPag[pag].forEach(o=>{
+        const mijn=marks.filter(m=>m.grp===o.n);
+        s+=o.n+'. '+mijn.map(m=>plekTekst(m)+
+             (m.pag!==pag?(' [op '+m.pag+']'):'')).join('\n   + ')+'\n';
+        s+='   '+((o.tekst||'').trim()||'(nog geen uitleg)')+'\n';
       });
-      if(lussen)s+='('+lussen+' omcirkeld op deze pagina)\n';
     });
     lijst.innerHTML='<p class="ann-leeg" style="margin-bottom:9px">Kopieer dit en plak het in de chat:</p>'+
       '<textarea class="ann-uit" readonly></textarea>';
-    const ta=lijst.querySelector('.ann-uit');ta.value=s;
+    lijst.querySelector('.ann-uit').value=s;
     const voet=blad.querySelector('.ann-voet');
-    voet.innerHTML='<button class="kop">kopieer</button><button class="zacht terug">terug naar de lijst</button>';
-    voet.querySelector('.kop').addEventListener('click',async()=>{
-      try{await navigator.clipboard.writeText(s);voet.querySelector('.kop').textContent='gekopieerd ✓';}
-      catch(e){ta.removeAttribute('readonly');ta.select();
-        try{document.execCommand('copy');voet.querySelector('.kop').textContent='gekopieerd ✓';}
-        catch(e2){voet.querySelector('.kop').textContent='selecteer en kopieer met de hand';}
+    voet.innerHTML='<button class="kopie">kopieer</button><button class="zacht terug">terug naar de lijst</button>';
+    voet.querySelector('.kopie').addEventListener('click',async()=>{
+      const k=voet.querySelector('.kopie');
+      try{await navigator.clipboard.writeText(s);k.textContent='gekopieerd ✓';}
+      catch(e){const ta=lijst.querySelector('.ann-uit');
+        ta.removeAttribute('readonly');ta.select();
+        try{document.execCommand('copy');k.textContent='gekopieerd ✓';}
+        catch(e2){k.textContent='selecteer en kopieer met de hand';}
         ta.setAttribute('readonly','');}
     });
     voet.querySelector('.terug').addEventListener('click',()=>{
-      voet.innerHTML='<button class="pak">maak de opdracht</button><button class="zacht wis">wis alles</button>';
+      voet.innerHTML='<button class="maak">maak de opdracht</button>'+
+        '<button class="zacht wis">wis alles</button>';
       location.reload();
     });
   });
 
-  /* ---- de app wisselt van pagina: dan andere punten tonen ---- */
-  setInterval(()=>{
-    const p=huidigePag();
-    if(p!==volgPag){volgPag=p;verf();}
-  },220);
+  /* ---- haakje voor de testronde; zie references/onderhoud.md ---- */
+  window.__ann={
+    marks:()=>marks, opdr:()=>opdr,
+    kies:g=>{gereed=g;bar.querySelectorAll('.ann-ger button').forEach(x=>
+      x.setAttribute('aria-pressed',x.dataset.g===g?'true':'false'));},
+  };
+
+  /* ---- de app wisselt van pagina: dan andere markeringen tonen ---- */
+  setInterval(()=>{const p=huidigePag();if(p!==volgPag){volgPag=p;verf();}},220);
   verf();
 })();
 </script>

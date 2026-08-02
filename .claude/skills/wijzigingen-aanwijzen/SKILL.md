@@ -52,6 +52,30 @@ Twee taken, en je kiest er precies één per keer:
      invoert of weggooit raakt zijn echte bonen en brews niet
    - **AI-knoppen werken hier niet** (een artifact mag niet naar buiten praten)
 
+## Wat de gebruiker in de laag kan
+
+Noem dit alleen als hij ernaar vraagt of het duidelijk nog niet weet — niet
+elke keer als een lijstje.
+
+| gereedschap | doen | levert op |
+|---|---|---|
+| **aanwijzen** | tikken | genummerd punt: `bij «label»` |
+| **pijl** | slepen | `van «label» naar «label»` |
+| **dubbele pijl** | slepen | `verbindt «label» ↔ «label»` |
+| **omcirkel** | omheen slepen | `omcirkeld bij «label»` |
+
+Twee dingen die de opdracht een stuk bruikbaarder maken:
+
+- **Eén punt kan meerdere plekken hebben.** In het overzicht zit onder elk punt
+  *+ nog een plek*; alles wat hij daarna tekent krijgt hetzelfde nummer en
+  dezelfde kleur, ook op een andere pagina. Zo wordt "punt 4 hoort bij punt 5"
+  gewoon één punt met twee plekken — hij hoeft geen "zie punt 6" meer te
+  schrijven.
+- **Lang indrukken op een markering en dan schuiven** verplaatst hem, voor als
+  hij net naast het goede element zat.
+
+Elk punt heeft een eigen kleur; hetzelfde nummer heeft overal dezelfde kleur.
+
 ---
 
 # Deel B · een geplakte opdracht afwerken
@@ -59,23 +83,44 @@ Twee taken, en je kiest er precies één per keer:
 De opdracht ziet er zo uit:
 
 ```
-Opdracht voor Lets Brew — 3 punten
+Opdracht voor Lets Brew — 2 punten
 
 ── brews ──
 1. bij «＋ new brew»
    sorteerbalk standaard verbergen
+
+── form ──
+2. verbindt «Hoffmann V60 · 18 g → 301 g» ↔ «gear»
+   + bij «brewer»
+   laat deze informatie samenwerken
 ```
 
 De paginanaam is de `currentPage` van de app, dus `brews` betekent letterlijk
 `page-brews`. De tekst tussen « » is het label van het element waarop de
 gebruiker wees — zoek daarop in `index.html` en je zit meteen goed.
 
+Zo lees je de plekregels:
+
+| regel | wat hij aanwees |
+|---|---|
+| `bij «X»` | dit element |
+| `van «X» naar «Y»` | een pijl: van X naar Y toe |
+| `verbindt «X» ↔ «Y»` | deze twee horen bij elkaar |
+| `omcirkeld bij «X»` | dit gebied |
+
+Een punt kan **meer dan één plek** hebben; die staan eronder met `+` ervoor, en
+`[op <pagina>]` erachter als die plek op een andere pagina staat. Alle plekken
+van één nummer horen bij **één** stuk uitleg en dus bij **één** taak — splits
+ze niet.
+
 Werk hem zo af, in deze volgorde:
 
 1. **Zet elk punt als aparte taak** met `TaskCreate`, in dezelfde volgorde, met
    de paginanaam erin. Bijvoorbeeld: `brews · sorteerbalk standaard verbergen`.
-   Verwijst een punt naar een ander ("zie punt 6"), maak er dan **één** taak van
-   met beide nummers erin, en noteer dat in de taaknaam.
+   Eén nummer is altijd één taak, ook als er drie plekregels onder staan.
+   Verwijst een punt in de tekst tóch naar een ander ("zie punt 6") — dat kan
+   uit oudere opdrachten komen — maak er dan **één** taak van met beide nummers
+   erin.
 
 2. **Werk ze één voor één af.** Zet de taak op `in_progress` voor je begint en
    op `completed` als hij klaar is. Nooit twee tegelijk op `in_progress`.
@@ -93,7 +138,8 @@ Werk hem zo af, in deze volgorde:
 5. **Meld per punt kort wat je deed**, met het nummer erbij, zodat de gebruiker
    zijn eigen lijst kan aflopen. Noem apart wat je hebt overgeslagen en waarom.
 
-Een omcirkeling zonder tekst is alleen een aanwijzing waar te kijken. Vraag
+Staat er `(nog geen uitleg)` onder een punt, dan heeft hij wel iets aangewezen
+maar niets ingetypt. Dat is alleen een aanwijzing wáár je moet kijken. Vraag
 ernaar; ga er niet zelf iets bij verzinnen.
 
 ---
@@ -113,7 +159,7 @@ gepubliceerd op de bestaande URL, met de link en de twee waarschuwingen (eigen
 opslag, geen AI).
 
 **Input:** een geplakte tekst die begint met `Opdracht voor Lets Brew — 7 punten`
-**Output:** zeven taken aangemaakt (of minder als punten naar elkaar verwijzen),
-één voor één afgewerkt, één service-worker-bump, één commit, en een antwoord dat
-per nummer zegt wat er gebeurd is — plus een vraag over alleen de punten die
-onduidelijk waren.
+**Output:** zeven taken aangemaakt — één per nummer, ook bij punten met meerdere
+plekregels — één voor één afgewerkt, één service-worker-bump, één commit, en een
+antwoord dat per nummer zegt wat er gebeurd is — plus een vraag over alleen de
+punten die onduidelijk waren.
