@@ -212,6 +212,9 @@
   #taste-wheel path.sel{fill:var(--accent-soft);}
   #taste-wheel text{font-family:'Patrick Hand',cursive;font-size:9.5px;fill:var(--ink);pointer-events:none;}
   #taste-wheel path.sel+text{fill:var(--cream);}
+  /* het hart van het grote wiel: de weg terug naar de families */
+  #taste-wheel .wheel-hart{fill:var(--card);stroke:var(--line);stroke-width:1.5;cursor:pointer;filter:url(#wobble-rough);}
+  #taste-wheel .wheel-hart-t{fill:var(--ink-soft);font-size:11px;pointer-events:none;}
   /* versheidsmeter */
   .fgauge{width:100%;max-width:240px;display:block;margin:10px auto 0;}
   .fgauge .zone{stroke-width:9;fill:none;stroke-linecap:round;filter:url(#wobble-rough);}
@@ -2988,7 +2991,7 @@ function openForm(methodId){
   ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-bloom-g','f-bloom-s','f-draw','f-brewer'].forEach(i=>setVal(i,''));
   formBed=null;formCup=null;formMolen=null;formOud={};
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
-  formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};
+  formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};wheelOpen=null;
   if(featOn('smartdefaults')){
     const last=state.brews.filter(x=>x.method===formMethod).sort((a,b)=>b.ts-a.ts)[0];
     if(last){setVal('f-dose',last.dose||'');setVal('f-yield',last.yield||'');setVal('f-ratio',last.ratio||'');
@@ -3014,7 +3017,7 @@ function openEdit(b){
   formBed=b.bed||null;formCup=b.cup||null;
   setVal('f-score',b.score||8);
   document.getElementById('score-big').textContent=(+(b.score||8)).toFixed(1);
-  formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];
+  formBean=b.beanId||null;formTags=Array.isArray(b.tags)?[...b.tags]:[];wheelOpen=null;
   formCustom=Array.isArray(b.custom)?JSON.parse(JSON.stringify(b.custom)):[];
   pendingTarget=b.target||null;
   formPrep=b.prep?JSON.parse(JSON.stringify(b.prep)):{};
@@ -6634,45 +6637,98 @@ function savePushUrl(){
   toast(v?'✓ push server saved':'push server cleared');
 }
 
-/* ---------------- taste wheel ---------------- */
+/* ---------------- taste wheel ----------------
+   Acht smaakfamilies in een ring. Staat het grote wiel aan, dan is elke familie
+   een deurtje: je tikt hem open en de ring toont wat eronder zit -- de familie
+   zelf voorop, zodat "gewoon berry" een keuze blijft. Eén ring tegelijk, want
+   twee ringen op een telefoon lees je niet meer.                            */
 const WHEEL_NOTES=['berry','citrus','floral','honey','caramel','choc','nutty','spice'];
-let wheelBuilt=false;
-function buildTasteWheel(){
-  const svg=document.getElementById('taste-wheel');if(!svg||wheelBuilt)return;wheelBuilt=true;
-  const cx=100,cy=100,r1=40,r2=94;let out='';
-  WHEEL_NOTES.forEach((n,i)=>{
-    const a0=(i/8)*Math.PI*2-Math.PI/2,a1=((i+1)/8)*Math.PI*2-Math.PI/2,am=(a0+a1)/2;
+const WHEEL_SUB={
+  berry:  ['blueberry','raspberry','strawberry','currant','cherry'],
+  citrus: ['lemon','orange','grapefruit','lime','bergamot'],
+  floral: ['jasmine','rose','chamomile','black tea','hibiscus'],
+  honey:  ['brown sugar','maple','malt','syrup'],
+  caramel:['toffee','vanilla','praline','cane sugar','burnt sugar'],
+  choc:   ['milk choc','dark choc','cocoa','fudge','roasted'],
+  nutty:  ['almond','hazelnut','peanut','walnut','biscuit'],
+  spice:  ['cinnamon','clove','cardamom','pepper','liquorice'],
+};
+// de familie zelf staat vooraan: "gewoon berry" moet een keuze blijven
+function wheelSubs(fam){return [fam].concat((WHEEL_SUB[fam]||[]).filter(x=>x!==fam));}
+// hoort deze smaak bij die familie? (de familie zelf telt mee)
+function wheelHoortBij(fam,tag){
+  const t=(''+tag).toLowerCase();
+  return t===fam||(WHEEL_SUB[fam]||[]).includes(t);
+}
+let wheelOpen=null;   // welke familie staat open in het grote wiel
+/* Één ring tekenen. namen = de segmenten, aan = welke gekleurd zijn,
+   klik = de functienaam die een segment aanroept.                          */
+function wheelRing(namen,aan,klik,binnen){
+  const cx=100,cy=100,r1=binnen?46:40,r2=94,N=namen.length;
+  const breedte=r2-r1-6;         // ruimte voor tekst binnen de ring
+  let out='';
+  namen.forEach((n,i)=>{
+    const a0=(i/N)*Math.PI*2-Math.PI/2,a1=((i+1)/N)*Math.PI*2-Math.PI/2,am=(a0+a1)/2;
     const P=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
     const[x0,y0]=P(r2,a0),[x1,y1]=P(r2,a1),[x2,y2]=P(r1,a1),[x3,y3]=P(r1,a0);
-    out+=`<path data-n="${n}" onclick="wheelTap('${n}')" d="M${x0} ${y0} A${r2} ${r2} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r1} ${r1} 0 0 0 ${x3} ${y3} Z"/>`;
+    const kl=klik?` onclick="${klik}('${n.replace(/'/g,"\\'")}')"`:'';
+    out+=`<path data-n="${esc(n)}" class="${aan(n)?'sel':''}"${kl} d="M${x0} ${y0} A${r2} ${r2} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r1} ${r1} 0 0 0 ${x3} ${y3} Z"/>`;
+    // "brown sugar" op twee regels, en een lang woord krimpt tot het past --
+    // anders steekt "blackcurrant" dwars door zijn eigen taartpunt heen
+    const woorden=n.split(' ');
+    const regels=(woorden.length===2&&n.length>8)?woorden:[n];
+    const langst=Math.max(...regels.map(r=>r.length));
+    const fs=Math.max(6.4,Math.min(N>6?9:10,breedte/(0.5*langst)));
     const[tx,ty]=P((r1+r2)/2,am);
-    out+=`<text x="${tx}" y="${ty+3}" text-anchor="middle">${n}</text>`;
+    const y0t=ty+3-(regels.length-1)*fs*0.5;
+    out+=`<text x="${tx}" y="${y0t}" text-anchor="middle" style="font-size:${fs.toFixed(1)}px">`+
+      regels.map((r,j)=>`<tspan x="${tx}" dy="${j?fs:0}">${esc(r)}</tspan>`).join('')+`</text>`;
   });
-  out+=`<circle cx="${cx}" cy="${cy}" r="${r1-6}" fill="none" stroke="var(--line)" stroke-width="1.5" filter="url(#wobble-rough)"/>`;
-  svg.innerHTML=out;
+  return out;
 }
 function renderTasteWheel(){
   const wrap=document.getElementById('wheel-wrap');if(!wrap)return;
   wrap.style.display=featOn('wheel')?'block':'none';
   if(!featOn('wheel'))return;
-  buildTasteWheel();
-  document.querySelectorAll('#taste-wheel path[data-n]').forEach(p=>p.classList.toggle('sel',formTags.includes(p.dataset.n)));
+  const svg=document.getElementById('taste-wheel');if(!svg)return;
+  const groot=featOn('wheelbig');
+  if(!groot)wheelOpen=null;
+  let out;
+  if(groot&&wheelOpen){
+    out=wheelRing(wheelSubs(wheelOpen),n=>formTags.includes(n),'wheelTap',true);
+    // het hart is de weg terug naar de families
+    out+=`<circle class="wheel-hart" cx="100" cy="100" r="40" onclick="wheelDicht()"/>`;
+    out+=`<text class="wheel-hart-t" x="100" y="97" text-anchor="middle">${esc(wheelOpen)}</text>`;
+    out+=`<text class="wheel-hart-t" x="100" y="110" text-anchor="middle" style="font-size:8.5px">&#8592; terug</text>`;
+  }else{
+    // een familie kleurt zodra er iets uit die familie gekozen is
+    const aan=n=>formTags.some(t=>wheelHoortBij(n,t));
+    out=wheelRing(WHEEL_NOTES,aan,groot?'wheelOpenen':'wheelTap',false);
+    out+=`<circle cx="100" cy="100" r="34" fill="none" stroke="var(--line)" stroke-width="1.5" filter="url(#wobble-rough)"/>`;
+    if(groot)out+=`<text class="wheel-hart-t" x="100" y="103" text-anchor="middle" style="font-size:8.5px">tik een smaak</text>`;
+  }
+  svg.innerHTML=out;
 }
+function wheelOpenen(fam){wheelOpen=fam;renderTasteWheel();}
+function wheelDicht(){wheelOpen=null;renderTasteWheel();}
 function wheelTap(n){
   if(formTags.includes(n))formTags=formTags.filter(x=>x!==n);else formTags.push(n);
   renderFormTags();
 }
-/* smaakwiel als plaatje: dezelfde acht noten, alleen tonen wat gekozen is */
+/* Smaakwiel als plaatje: altijd de acht families, ook als je een subsmaak koos
+   -- "blueberry" kleurt gewoon het vak berry. De subsmaak zelf staat er als
+   tekstlabel onder, bij de andere smaaknotities.                           */
 function tasteWheelStatic(tags,label){
   if(!featOn('wheel'))return '';
   const on=asArr(tags).map(t=>(''+t).toLowerCase());
-  if(!on.some(t=>WHEEL_NOTES.includes(t)))return '';
+  const geraakt=nt=>on.some(t=>wheelHoortBij(nt,t));
+  if(!WHEEL_NOTES.some(geraakt))return '';
   const cx=100,cy=100,r1=40,r2=94;let out='';
   WHEEL_NOTES.forEach((nt,i)=>{
     const a0=(i/8)*Math.PI*2-Math.PI/2,a1=((i+1)/8)*Math.PI*2-Math.PI/2,am=(a0+a1)/2;
     const P=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
     const[x0,y0]=P(r2,a0),[x1,y1]=P(r2,a1),[x2,y2]=P(r1,a1),[x3,y3]=P(r1,a0);
-    out+=`<path class="${on.includes(nt)?'sel':''}" d="M${x0} ${y0} A${r2} ${r2} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r1} ${r1} 0 0 0 ${x3} ${y3} Z"/>`;
+    out+=`<path class="${geraakt(nt)?'sel':''}" d="M${x0} ${y0} A${r2} ${r2} 0 0 1 ${x1} ${y1} L${x2} ${y2} A${r1} ${r1} 0 0 0 ${x3} ${y3} Z"/>`;
     const[tx,ty]=P((r1+r2)/2,am);
     out+=`<text x="${tx}" y="${ty+3}" text-anchor="middle">${nt}</text>`;
   });
@@ -6730,6 +6786,7 @@ const FEATURES=[
   {id:'drawdown', n:'drawdown & bed', d:'log how long it drained and what the bed looked like', def:true, cat:'app'},
   {id:'filtercompass', n:'filter compass', d:'what you tasted, plotted — with one next change', def:true, cat:'app'},
   {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true, cat:'app'},
+  {id:'wheelbig', n:'big flavour wheel', d:'tap a family and the wheel opens up — berry becomes blueberry, raspberry, cherry', def:false, cat:'app'},
   {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true, cat:'app'},
   {id:'smartdefaults', n:'smart defaults', d:'last dose, grind & temp prefilled — never retype', def:true, cat:'app'},
   {id:'brewnow', n:'brew now button', d:'one tap on home: your usual, prefilled — confirm & go', def:true, cat:'app'},
