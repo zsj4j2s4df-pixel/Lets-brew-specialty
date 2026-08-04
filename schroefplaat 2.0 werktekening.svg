@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 800" width="750" height="800" font-family="Helvetica,Arial,sans-serif">
+<rect x="0" y="0" width="750" height="800" fill="#ffffff"/>
+<rect x="12" y="12" width="726" height="776" fill="none" stroke="#111" stroke-width="1.2"/>
+<rect x="150.00" y="120.00" width="450.00" height="450.00" rx="9.00" ry="9.00" fill="none" stroke="#111" stroke-width="1.8"/>
+<circle cx="195.00" cy="525.00" r="7.50" fill="none" stroke="#111" stroke-width="1.3"/>
+<line x1="181.50" y1="525.00" x2="208.50" y2="525.00" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="195.00" y1="511.50" x2="195.00" y2="538.50" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<circle cx="555.00" cy="525.00" r="7.50" fill="none" stroke="#111" stroke-width="1.3"/>
+<line x1="541.50" y1="525.00" x2="568.50" y2="525.00" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="555.00" y1="511.50" x2="555.00" y2="538.50" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<circle cx="195.00" cy="165.00" r="7.50" fill="none" stroke="#111" stroke-width="1.3"/>
+<line x1="181.50" y1="165.00" x2="208.50" y2="165.00" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="195.00" y1="151.50" x2="195.00" y2="178.50" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<circle cx="555.00" cy="165.00" r="7.50" fill="none" stroke="#111" stroke-width="1.3"/>
+<line x1="541.50" y1="165.00" x2="568.50" y2="165.00" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="555.00" y1="151.50" x2="555.00" y2="178.50" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<rect x="217.50" y="326.25" width="37.50" height="37.50" fill="none" stroke="#111" stroke-width="1.3"/>
+<line x1="211.50" y1="345.00" x2="261.00" y2="345.00" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="236.25" y1="320.25" x2="236.25" y2="369.75" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<rect x="495.00" y="326.25" width="37.50" height="37.50" fill="none" stroke="#111" stroke-width="1.3"/>
+<line x1="489.00" y1="345.00" x2="538.50" y2="345.00" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="513.75" y1="320.25" x2="513.75" y2="369.75" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+<line x1="150.00" y1="525.00" x2="150.00" y2="618.00" stroke="#333" stroke-width="0.5"/>
+<line x1="195.00" y1="525.00" x2="195.00" y2="618.00" stroke="#333" stroke-width="0.5"/>
+<line x1="150.00" y1="612.00" x2="195.00" y2="612.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="150.00,612.00 142.00,609.40 142.00,614.60" fill="#111"/>
+<polygon points="195.00,612.00 203.00,614.60 203.00,609.40" fill="#111"/>
+<text x="172.50" y="607.00" font-size="12.5" fill="#111" text-anchor="middle" font-weight="normal">15</text>
+<line x1="195.00" y1="525.00" x2="195.00" y2="618.00" stroke="#333" stroke-width="0.5"/>
+<line x1="555.00" y1="525.00" x2="555.00" y2="618.00" stroke="#333" stroke-width="0.5"/>
+<line x1="195.00" y1="612.00" x2="555.00" y2="612.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="195.00,612.00 187.00,609.40 187.00,614.60" fill="#111"/>
+<polygon points="555.00,612.00 563.00,614.60 563.00,609.40" fill="#111"/>
+<text x="375.00" y="607.00" font-size="12.5" fill="#111" text-anchor="middle" font-weight="normal">120</text>
+<line x1="255.00" y1="345.00" x2="255.00" y2="652.00" stroke="#333" stroke-width="0.5"/>
+<line x1="495.00" y1="345.00" x2="495.00" y2="652.00" stroke="#333" stroke-width="0.5"/>
+<line x1="255.00" y1="646.00" x2="495.00" y2="646.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="255.00,646.00 247.00,643.40 247.00,648.60" fill="#111"/>
+<polygon points="495.00,646.00 503.00,648.60 503.00,643.40" fill="#111"/>
+<text x="375.00" y="641.00" font-size="12.5" fill="#111" text-anchor="middle" font-weight="normal">80</text>
+<line x1="150.00" y1="570.00" x2="150.00" y2="686.00" stroke="#333" stroke-width="0.5"/>
+<line x1="600.00" y1="570.00" x2="600.00" y2="686.00" stroke="#333" stroke-width="0.5"/>
+<line x1="150.00" y1="680.00" x2="600.00" y2="680.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="150.00,680.00 142.00,677.40 142.00,682.60" fill="#111"/>
+<polygon points="600.00,680.00 608.00,682.60 608.00,677.40" fill="#111"/>
+<text x="375.00" y="675.00" font-size="12.5" fill="#111" text-anchor="middle" font-weight="normal">150</text>
+<line x1="195.00" y1="570.00" x2="98.00" y2="570.00" stroke="#333" stroke-width="0.5"/>
+<line x1="195.00" y1="525.00" x2="98.00" y2="525.00" stroke="#333" stroke-width="0.5"/>
+<line x1="104.00" y1="570.00" x2="104.00" y2="525.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="104.00,570.00 106.60,562.00 101.40,562.00" fill="#111"/>
+<polygon points="104.00,525.00 101.40,533.00 106.60,533.00" fill="#111"/>
+<text x="99.00" y="547.50" font-size="12.5" fill="#111" text-anchor="middle" transform="rotate(-90 99.00 547.50)">15</text>
+<line x1="195.00" y1="525.00" x2="98.00" y2="525.00" stroke="#333" stroke-width="0.5"/>
+<line x1="195.00" y1="165.00" x2="98.00" y2="165.00" stroke="#333" stroke-width="0.5"/>
+<line x1="104.00" y1="525.00" x2="104.00" y2="165.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="104.00,525.00 106.60,517.00 101.40,517.00" fill="#111"/>
+<polygon points="104.00,165.00 101.40,173.00 106.60,173.00" fill="#111"/>
+<text x="99.00" y="345.00" font-size="12.5" fill="#111" text-anchor="middle" transform="rotate(-90 99.00 345.00)">120</text>
+<line x1="236.25" y1="570.00" x2="58.00" y2="570.00" stroke="#333" stroke-width="0.5"/>
+<line x1="236.25" y1="345.00" x2="58.00" y2="345.00" stroke="#333" stroke-width="0.5"/>
+<line x1="64.00" y1="570.00" x2="64.00" y2="345.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="64.00,570.00 66.60,562.00 61.40,562.00" fill="#111"/>
+<polygon points="64.00,345.00 61.40,353.00 66.60,353.00" fill="#111"/>
+<text x="59.00" y="457.50" font-size="12.5" fill="#111" text-anchor="middle" transform="rotate(-90 59.00 457.50)">75</text>
+<line x1="150.00" y1="570.00" x2="18.00" y2="570.00" stroke="#333" stroke-width="0.5"/>
+<line x1="150.00" y1="120.00" x2="18.00" y2="120.00" stroke="#333" stroke-width="0.5"/>
+<line x1="24.00" y1="570.00" x2="24.00" y2="120.00" stroke="#333" stroke-width="0.7"/>
+<polygon points="24.00,570.00 26.60,562.00 21.40,562.00" fill="#111"/>
+<polygon points="24.00,120.00 21.40,128.00 26.60,128.00" fill="#111"/>
+<text x="19.00" y="345.00" font-size="12.5" fill="#111" text-anchor="middle" transform="rotate(-90 19.00 345.00)">150</text>
+<line x1="555.00" y1="165.00" x2="581.00" y2="143.00" stroke="#111" stroke-width="0.6"/>
+<line x1="581.00" y1="143.00" x2="607.00" y2="143.00" stroke="#111" stroke-width="0.6"/>
+<text x="611.00" y="139.00" font-size="12.5" fill="#111" text-anchor="start" font-weight="normal">4× Ø5</text>
+<line x1="532.50" y1="326.25" x2="558.50" y2="308.25" stroke="#111" stroke-width="0.6"/>
+<line x1="558.50" y1="308.25" x2="584.50" y2="308.25" stroke="#111" stroke-width="0.6"/>
+<text x="588.50" y="304.25" font-size="12.5" fill="#111" text-anchor="start" font-weight="normal">12,5 × 12,5</text>
+<line x1="597.00" y1="124.20" x2="617.00" y2="106.20" stroke="#111" stroke-width="0.6"/>
+<line x1="617.00" y1="106.20" x2="643.00" y2="106.20" stroke="#111" stroke-width="0.6"/>
+<text x="647.00" y="102.20" font-size="12.5" fill="#111" text-anchor="start" font-weight="normal">R3</text>
+<g stroke="#111" stroke-width="1" fill="none">
+<circle cx="70" cy="730.0" r="15"/>
+<circle cx="70" cy="730.0" r="7.5"/>
+<polygon points="96,715.0 130,721.0 130,739.0 96,745.0" />
+<line x1="48" y1="730.0" x2="136" y2="730.0" stroke-width="0.5" stroke-dasharray="6 3 1.5 3"/>
+</g>
+<text x="52.00" y="764.00" font-size="11" fill="#111" text-anchor="start" font-weight="normal">Europese projectie (1e hoek)</text>
+<rect x="438.0" y="718.0" width="300" height="70" fill="none" stroke="#111" stroke-width="1"/>
+<line x1="438.0" y1="758.0" x2="738.0" y2="758.0" stroke="#111" stroke-width="0.8"/>
+<line x1="648.0" y1="718.0" x2="648.0" y2="788.0" stroke="#111" stroke-width="0.8"/>
+<text x="448.00" y="744.00" font-size="15" fill="#111" text-anchor="start" font-weight="bold">Schroefplaat onderstel 2.0</text>
+<text x="448.00" y="775.00" font-size="10.5" fill="#111" text-anchor="start" font-weight="normal">Buitenmaat 150 × 150</text>
+<text x="693.00" y="742.00" font-size="9.5" fill="#111" text-anchor="middle" font-weight="normal">Maten in mm</text>
+<text x="693.00" y="757.00" font-size="9.5" fill="#111" text-anchor="middle" font-weight="normal">Schaal 1:1</text>
+<text x="693.00" y="775.00" font-size="9" fill="#111" text-anchor="middle" font-weight="normal">Alles doorsnede</text>
+<text x="24.00" y="40.00" font-size="11.5" fill="#111" text-anchor="start" font-weight="normal">SCHROEFPLAAT ONDERSTEL 2.0</text>
+<text x="24.00" y="57.00" font-size="11.5" fill="#111" text-anchor="start" font-weight="normal">4× Ø5 doorlopend</text>
+<text x="24.00" y="74.00" font-size="11.5" fill="#111" text-anchor="start" font-weight="normal">2× vierkant 12,5 doorlopend, tussenmaat 80</text>
+<text x="24.00" y="91.00" font-size="11.5" fill="#111" text-anchor="start" font-weight="normal">Vierkanten gecentreerd op de middellijnen</text>
+<text x="24.00" y="108.00" font-size="11.5" fill="#111" text-anchor="start" font-weight="normal">Buitenhoeken R3</text>
+</svg>
