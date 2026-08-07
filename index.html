@@ -1004,6 +1004,16 @@
       <div id="dialin-hint" class="dialin-hint" style="display:none"></div>
 
       <div id="pc-stack" style="display:none">
+        <!-- de boon staat vooraan: daaruit volgt de rest van de opzet -->
+        <div class="pcard sketch soft" id="pcard-bean">
+          <button type="button" class="pc-head" onclick="cardToggle('bean')">
+            <span class="pc-n hand">bean</span><span class="pc-sum" id="sum-bean"></span>
+            <span class="pc-arr">&rsaquo;</span></button>
+          <div class="pc-body" id="pcb-bean">
+            <div class="pc-bloom" id="pc-bloom"></div>
+          <div class="start-hint" id="pc-start"></div>
+          </div>
+        </div>
         <div class="pcard sketch soft" id="pcard-recipe">
           <button type="button" class="pc-head" onclick="cardToggle('recipe')">
             <span class="pc-n hand">recipe</span><span class="pc-sum" id="sum-recipe"></span>
@@ -1015,15 +1025,6 @@
             <div class="pc-links" id="pc-links"></div>
             <div id="pc-levers"></div>
             <div id="pc-schema"></div>
-          </div>
-        </div>
-        <div class="pcard sketch soft" id="pcard-bean">
-          <button type="button" class="pc-head" onclick="cardToggle('bean')">
-            <span class="pc-n hand">bean</span><span class="pc-sum" id="sum-bean"></span>
-            <span class="pc-arr">&rsaquo;</span></button>
-          <div class="pc-body" id="pcb-bean">
-            <div class="pc-bloom" id="pc-bloom"></div>
-          <div class="start-hint" id="pc-start"></div>
           </div>
         </div>
         <div class="pcard sketch soft" id="pcard-gear">
@@ -1055,7 +1056,7 @@
       </div>
 
       <div class="field-row" id="fb-doserow">
-        <div class="field"><label>dose (g)</label><input id="f-dose" type="number" inputmode="decimal" step="0.1" oninput="calc('dose');pourRecalc()"></div>
+        <div class="field"><label>dose (g)</label><input id="f-dose" type="number" inputmode="decimal" step="0.1" oninput="calc('dose');vulBloomAuto();pourRecalc()"></div>
         <div class="field"><label id="f-yield-label">yield (g)</label><input id="f-yield" type="number" inputmode="decimal" step="0.1" oninput="calc('yield')"></div>
       </div>
       <div class="ratio-row" id="fb-ratio">
@@ -1065,8 +1066,8 @@
       </div>
 
       <div class="field-row" id="bloom-field" style="display:none">
-        <div class="field"><label>bloom (g)</label><input id="f-bloom-g" type="number" inputmode="decimal" step="1" placeholder="e.g. 40"></div>
-        <div class="field"><label>bloom (s)</label><input id="f-bloom-s" type="number" inputmode="numeric" placeholder="e.g. 30"></div>
+        <div class="field"><label>bloom (g)</label><input id="f-bloom-g" type="number" inputmode="decimal" step="1" placeholder="e.g. 40" oninput="bloomHandmatig('g')"></div>
+        <div class="field"><label>bloom (s)</label><input id="f-bloom-s" type="number" inputmode="numeric" placeholder="e.g. 30" oninput="bloomHandmatig('s')"></div>
       </div>
 
       <div class="field-row" id="fb-timerow">
@@ -1086,7 +1087,7 @@
         <div class="cup-pick" id="f-cup"></div>
         <div class="fx-note">one tap — the compass turns it into a single next step</div></div>
 
-      <div class="field" id="filter-gear" style="display:none"><label>brewer &amp; grinder</label>
+      <div class="field" id="filter-gear" style="display:none"><label id="f-gear-lbl">brewer &amp; grinder</label>
         <input id="f-brewer" placeholder="brewer, e.g. Hario V60 02">
         <div class="link-pick" id="f-gearchips"></div>
         <div class="fx-note" style="margin-top:10px">which grinder did you dial?</div>
@@ -2837,6 +2838,7 @@ let editingId=null,formMethod=null,formBean=null,formTags=[],formCustom=[],pendi
 let formBed=null;   // vlak / krater / muur, zoals het bed erbij lag
 let formCup=null;   // hoe de kop smaakte, voor het kompas
 let formMolen=null; // de molen waarop je deze maalstand draaide
+let molenZelf=false;// zelf gekozen? dan blijft de app eraf
 let formOud={};     // velden van een oudere brew die geen invoerveld meer hebben
 function setVal(id,v){const el=document.getElementById(id);if(el)el.value=(v==null?'':v);}
 // laat een tekstvak meegroeien met de inhoud (geen klein scroll-vakje meer)
@@ -2989,7 +2991,7 @@ function openForm(methodId){
   editingId=null;const valid=methodId&&state.methods.find(m=>m.id===methodId&&m.on);formMethod=valid?methodId:(state.methods.filter(m=>m.on)[0]?.id||'espresso');
   document.getElementById('form-title').textContent='new brew';
   ['f-title','f-dose','f-yield','f-ratio','f-time','f-temp','f-grind','f-notes','f-tagnew','f-bloom-g','f-bloom-s','f-draw','f-brewer'].forEach(i=>setVal(i,''));
-  formBed=null;formCup=null;formMolen=null;formOud={};
+  formBed=null;formCup=null;formMolen=null;molenZelf=false;bloomZelf={g:false,s:false};formOud={};
   setVal('f-score',8);document.getElementById('score-big').textContent='8.0';
   formBean=null;formTags=[];formCustom=[];pendingTarget=null;formPrep={};wheelOpen=null;
   if(featOn('smartdefaults')){
@@ -3011,7 +3013,7 @@ function openEdit(b){
   setVal('f-grind',b.grind||'');
   setVal('f-bloom-g',(b.bloom&&b.bloom.g)||'');setVal('f-bloom-s',(b.bloom&&b.bloom.s)||'');
   setVal('f-draw',b.draw||'');setVal('f-brewer',b.brewer||'');
-  formMolen=b.grinder||null;
+  formMolen=b.grinder||null;molenZelf=!!b.grinder;bloomZelf={g:!!(b.bloom&&b.bloom.g),s:!!(b.bloom&&b.bloom.s)};
   // papier en water hebben geen veld meer; van oudere brews gooien we ze niet weg
   formOud={paper:b.paper||'',water:b.water||''};
   formBed=b.bed||null;formCup=b.cup||null;
@@ -3059,11 +3061,18 @@ function applyFamilyToForm(){
   // bij AeroPress pers je het weg, dus is er geen bed dat "droogloopt"
   const fx=document.getElementById('filter-extra');
   if(fx)fx.style.display=(fam==='filter'&&featOn('drawdown')&&formMethod!=='aeropress')?'block':'none';
+  // brewer en molen horen bij élke brew: een espressomachine met zijn molen
+  // net zo goed als een v60 met de zijne
   const fg=document.getElementById('filter-gear');
-  if(fg)fg.style.display=(fam==='filter')?'block':'none';
+  if(fg)fg.style.display='block';
+  const gl=document.getElementById('f-gear-lbl');
+  if(gl)gl.textContent=(fam==='espresso')?'machine & grinder':'brewer & grinder';
+  const brv=document.getElementById('f-brewer');
+  if(brv)brv.placeholder=(fam==='espresso')?'machine, e.g. Rocket Appartamento':'brewer, e.g. Hario V60 02';
   const ft=document.getElementById('filter-taste');
   if(ft)ft.style.display=(fam==='filter'&&featOn('filtercompass'))?'block':'none';
-  if(fam==='filter'){renderBedPick();renderGearChips();renderFormMolens();renderCupPick();}
+  if(fam==='filter'){renderBedPick();renderCupPick();}
+  renderGearChips();renderFormMolens();vulGearAuto();vulBloomAuto();
   pourInit();
 }
 /* ---------------- de waterkaart ----------------
@@ -3231,7 +3240,7 @@ function renderFormMolens(){
   const el=document.getElementById('f-molens');if(!el)return;
   const lijst=molensVoor(formMethod), note=document.getElementById('f-molen-note');
   if(formMolen&&!lijst.some(g=>g.name===formMolen))formMolen=null;
-  if(!formMolen&&lijst.length===1)formMolen=lijst[0].name;
+  if(!formMolen&&!molenZelf&&lijst.length===1)formMolen=lijst[0].name;
   el.innerHTML=lijst.map(g=>
     `<button type="button" class="lp ${g.name===formMolen?'sel':''}" onclick="pickFormMolen('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
   if(note)note.textContent=lijst.length?'':
@@ -3239,8 +3248,55 @@ function renderFormMolens(){
   renderGrindNote();
 }
 function pickFormMolen(naam){
-  formMolen=(formMolen===naam)?null:naam;
+  formMolen=(formMolen===naam)?null:naam;molenZelf=true;
   renderFormMolens();cardSummaries();
+}
+/* ---- de opzet die je al kent ----
+   Je kiest een boon en een methode; daarmee ligt de rest grotendeels vast.
+   Welke brewer? Die staat er al: v60 is de v60. Welke molen? De enige die
+   je aan deze methode hebt gehangen, of die van je vorige brew ermee.
+   Alleen lege velden worden gevuld, en zodra je zelf iets kiest houdt de app
+   zijn mond -- automatisch invullen mag nooit je eigen keuze overschrijven. */
+function laatsteBrewVoor(mid){
+  return state.brews.filter(x=>x.method===mid).sort((a,b)=>b.ts-a.ts)[0]||null;
+}
+function vulGearAuto(){
+  const mid=formMethod, m=methodById(mid);
+  const laatste=laatsteBrewVoor(mid);
+  const br=document.getElementById('f-brewer');
+  if(br&&!br.value.trim()){
+    const brewers=gearVoor(mid).filter(g=>g.kind==='brewer');
+    const eerder=laatste&&laatste.brewer;
+    // bij filter is de methode het apparaat: een v60 brouw je in een v60. Bij
+    // espresso niet -- "espresso" is geen machine, dus daar blijft het leeg
+    const uitMethode=(methodFamily(mid)==='filter'&&m&&m.name)||'';
+    br.value=(eerder&&(!brewers.length||brewers.some(g=>g.name===eerder))?eerder:'')
+      ||(brewers.length===1?brewers[0].name:'')
+      ||uitMethode;
+  }
+  if(!formMolen&&!molenZelf){
+    const molens=molensVoor(mid);
+    const eerder=laatste&&laatste.grinder;
+    if(eerder&&molens.some(g=>g.name===eerder))formMolen=eerder;
+    else if(molens.length===1)formMolen=molens[0].name;
+  }
+  renderFormMolens();
+}
+/* De versheid van de boon zegt hoeveel gas erin zit, en dus hoe groot en hoe
+   lang je bloom moet zijn. Die stond al als tekst in de bean-kaart; nu staat
+   hij ook gewoon in de velden, zodat je hem niet hoeft over te typen.      */
+let bloomZelf={g:false,s:false};
+function bloomHandmatig(veld){bloomZelf[veld]=true;}
+function vulBloomAuto(){
+  if(methodFamily(formMethod)!=='filter')return;
+  const bean=beanById(formBean);
+  const f=bean?beanFreshness(bean):null;
+  const h=f?freshBloomHint(f.days):null;
+  if(!h)return;
+  const dose=parseFloat(document.getElementById('f-dose').value)||0;
+  const g=document.getElementById('f-bloom-g'), s=document.getElementById('f-bloom-s');
+  if(g&&dose&&!bloomZelf.g)g.value=Math.round(dose*h.mult);
+  if(s&&!bloomZelf.s)s.value=h.sec;
 }
 // het bereik van de gekozen molen, pal onder het maalstandveld
 function renderGrindNote(){
@@ -3667,7 +3723,10 @@ function pourInit(){
   pc={mid:formMethod,rid:(lijst.find(r=>r.id===bewaard)||lijst[0]||{}).id||null,steps:[],
       hendels:{zoet:0.5,sterk:0.5},run:false,t0:0,el:0,timer:null,idx:0,shift:0,
       marks:[],total:null,draw:null,live:-1};
-  pcOpen={recipe:!pc.rid,bean:false,gear:false,pour:!!pc.rid,log:false};
+  // de eerste kaart die nog iets van je wil staat open: geen boon? boon.
+  // geen recept? recept. Verder ben je klaar om te gieten.
+  const eerst=!formBean?'bean':(!pc.rid?'recipe':'pour');
+  pcOpen={bean:eerst==='bean',recipe:eerst==='recipe',gear:false,pour:eerst==='pour',log:false};
   if(pc.rid)pourVulUitRecept(pc.rid,pc.rid===recVers);
   recVers=null;
   pourBuild();renderCards();
@@ -4217,9 +4276,12 @@ function renderFormBeans(){
   el.innerHTML=html;
 }
 function pickBean(id){formBean=id;renderFormBeans();cardSummaries();
-  // auto-vul bean-naam als beans-veld leeg/zelfde; en stel methode voor
+  // de boon is het beginpunt: hij kiest de methode, en daarmee liggen de
+  // brewer, de molen en de bloom die bij zijn versheid past ook al vast
   const b=beanById(id);
-  if(b&&b.method&&state.methods.find(m=>m.id===b.method&&m.on)){formMethod=b.method;renderFormMethods();}
+  if(b&&b.method&&state.methods.find(m=>m.id===b.method&&m.on)){
+    formMethod=b.method;renderFormMethods();   // roept applyFamilyToForm en dus het invullen aan
+  }else{vulGearAuto();vulBloomAuto();}
   renderDialInHint();pourBloom();
 }
 function renderFormTags(){
