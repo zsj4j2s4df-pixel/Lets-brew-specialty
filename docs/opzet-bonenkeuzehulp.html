@@ -1,0 +1,363 @@
+<style>
+/* extra bouwsteentjes die alleen deze opzet nodig heeft */
+.stap-bal{display:flex;gap:5px;margin:10px 0 14px;}
+.stap-bal i{flex:1;height:5px;border-radius:3px;background:var(--line);opacity:.5;}
+.stap-bal i.op{background:var(--accent-soft);opacity:1;}
+.vraag{font-family:'Caveat',cursive;font-size:27px;line-height:1.1;margin:2px 0 3px;}
+.keuze{display:block;width:100%;text-align:left;background:var(--card);
+  border:2px solid var(--line);border-radius:18px;padding:10px 13px;margin-bottom:9px;
+  filter:url(#wobble);}
+.keuze.sel{border-color:var(--ink);background:var(--card-2);}
+.keuze b{font-size:17px;}
+.keuze span{display:block;color:var(--ink-soft);font-size:14px;line-height:1.3;}
+.rij-aan{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  border-bottom:1.5px dashed var(--line);padding:8px 2px;font-size:15px;}
+.rij-aan .w{color:var(--ink-soft);}
+.rij-aan .p{color:var(--ink-soft);font-size:13px;border-bottom:1.5px solid var(--line);}
+.uit{padding:11px 13px;margin-bottom:11px;}
+.uit .merk{font-size:12.5px;color:var(--ink-soft);letter-spacing:.6px;text-transform:uppercase;}
+.uit .naam{font-family:'Caveat',cursive;font-size:24px;line-height:1.05;margin:1px 0 3px;}
+.uit .not{font-size:14.5px;color:var(--ink-soft);line-height:1.3;}
+.waarom{font-size:14px;line-height:1.35;border-left:3px solid var(--accent-soft);
+  padding-left:9px;margin-top:8px;}
+.zoekbalk{display:flex;align-items:center;gap:7px;background:var(--card-2);
+  border:2px solid var(--line);border-radius:16px;padding:8px 11px;font-size:14px;
+  color:var(--ink-soft);filter:url(#wobble);}
+.brander{display:flex;justify-content:space-between;font-size:14.5px;padding:6px 2px;
+  border-bottom:1.5px dashed var(--line);}
+.brander em{color:var(--ink-soft);font-style:normal;font-size:13px;}
+.tw{width:170px;display:block;margin:4px auto 2px;}
+.tw path{stroke:var(--ink);stroke-width:1.6;fill:var(--card-2);filter:url(#wobble-rough);}
+.tw path.sel{fill:var(--accent-soft);}
+.tw text{font-family:'Patrick Hand',cursive;font-size:9.5px;fill:var(--ink);}
+.tw path.sel+text{fill:var(--cream);}
+</style>
+
+<div class="mk-kop">
+  <h1>Welke zak koop ik nu?</h1>
+  <div class="mk-onder">Een opzet voor een keuzehulp onder <b>learn</b> — stap voor stap
+    naar drie bonen die bij je passen, en waar je ze haalt.</div>
+  <div class="mk-let">Dit is een <b>schets</b>, geen werkende functie. Er is niets aan de
+    app veranderd: <b>index.html</b> staat nog precies zoals hij stond. Kijk het door,
+    wijs aan wat anders moet, en zeg het wanneer het gebouwd mag worden.</div>
+</div>
+
+<div class="mk-sect">
+  <h2>Het idee in één regel</h2>
+  <p>Je loopt door een handjevol vragen en komt uit op drie bonen: één die je zeker
+    lekker vindt, één ernaast, en één die je niet had verwacht. Bij elke boon staat
+    waaróm hij er staat, en een zoekregel om hem bij een specialty brander te vinden.</p>
+</div>
+
+<div class="mk-rij">
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="title">learn</div>
+        <div class="subtitle">koffie leren, op je eigen tempo</div>
+        <div class="sketch soft card">
+          <div class="hand" style="font-size:23px">barista basics</div>
+          <div class="zacht">de vier knoppen die alles bepalen</div>
+        </div>
+        <div class="sketch card" style="background:var(--v60)">
+          <div class="hand" style="font-size:23px">welke zak koop ik nu?</div>
+          <div class="zacht">vijf vragen → drie bonen die bij jou passen,
+            en waar ze te koop zijn</div>
+          <div style="margin-top:9px" class="chips">
+            <span class="chip">nieuw</span><span class="chip">± 1 minuut</span>
+          </div>
+        </div>
+        <div class="sketch soft card">
+          <div class="hand" style="font-size:23px">filter, van begin tot eind</div>
+          <div class="zacht">het bed, de doorloop, en wat je eraan draait</div>
+        </div>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>waar hij komt te staan</b> — een kaart tussen de lessen, in de
+      tint van je filtermethode</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="stap-bal"><i class="op"></i><i></i><i></i><i></i><i></i></div>
+        <div class="zacht">stap 1 van 5</div>
+        <div class="vraag">Waar ga je hem in zetten?</div>
+        <div class="zacht" style="margin-bottom:11px">Ik heb aangevinkt wat je het
+          meest gebruikt. Klopt dat niet, tik het om.</div>
+        <div class="chips" style="margin-bottom:14px">
+          <span class="chip sel">v60</span><span class="chip sel">aeropress</span>
+          <span class="chip">espresso</span><span class="chip">chemex</span>
+        </div>
+        <div class="sketch soft card">
+          <div class="zacht">Waarom dit ertoe doet: een boon die op je v60 zingt
+            kan op espresso zuur en dun uitvallen. Filter en espresso vragen
+            allebei iets anders van de brander.</div>
+        </div>
+        <button class="knop">verder</button>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>stap 1 · methode</b> — al ingevuld uit je eigen methodes; je
+      corrigeert alleen</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="stap-bal"><i class="op"></i><i class="op"></i><i></i><i></i><i></i></div>
+        <div class="zacht">stap 2 van 5</div>
+        <div class="vraag">Hoe ver van huis?</div>
+        <div class="zacht" style="margin-bottom:11px">Dit is de enige vraag die echt
+          telt. Hij bepaalt hoe de rest wordt ingevuld.</div>
+        <button class="keuze"><b>hetzelfde als anders</b>
+          <span>je weet wat je krijgt en dat is precies goed</span></button>
+        <button class="keuze sel"><b>een stap opzij</b>
+          <span>herkenbaar, maar met iets erin dat je nog niet kende</span></button>
+        <button class="keuze"><b>verras me</b>
+          <span>ik wil weten wat ik nog mis</span></button>
+        <button class="knop">verder</button>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>stap 2 · de afstandsknop</b> — mijn toevoeging; hieronder leg ik
+      uit waarom</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="stap-bal"><i class="op"></i><i class="op"></i><i class="op"></i><i></i><i></i></div>
+        <div class="zacht">stap 3 van 5</div>
+        <div class="vraag">Waar moet hij naar smaken?</div>
+        <div class="zacht" style="margin-bottom:2px">Tik één tot drie richtingen aan.
+          Ik heb alvast gekleurd waar jouw hoogste cijfers staan.</div>
+        <svg class="tw" viewBox="0 0 200 200" id="tw"></svg>
+        <div class="chips" style="justify-content:center;margin-bottom:10px">
+          <span class="chip sel">citrus</span><span class="chip sel">floral</span>
+        </div>
+        <div class="zacht" style="margin-bottom:11px">Je scoorde dit jaar het hoogst
+          op citrus (8,6) en floral (8,4) — allebei op de v60.</div>
+        <button class="knop">verder</button>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>stap 3 · smaak</b> — hetzelfde wiel dat al in de app zit, nu met
+      je eigen cijfers eronder</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="stap-bal"><i class="op"></i><i class="op"></i><i class="op"></i><i class="op"></i><i></i></div>
+        <div class="zacht">stap 4 van 5</div>
+        <div class="vraag">De rest heb ik ingevuld</div>
+        <div class="zacht" style="margin-bottom:9px">Op basis van je antwoorden.
+          Tik een regel om hem te veranderen — of laat staan.</div>
+        <div class="rij-aan"><span class="w">branding</span>
+          <span><b>light</b> <span class="p">pas aan</span></span></div>
+        <div class="rij-aan"><span class="w">proces</span>
+          <span><b>washed</b> <span class="p">pas aan</span></span></div>
+        <div class="rij-aan"><span class="w">herkomst</span>
+          <span><b>Afrika</b> <span class="p">pas aan</span></span></div>
+        <div class="rij-aan"><span class="w">variëteit</span>
+          <span><b>maakt niet uit</b> <span class="p">pas aan</span></span></div>
+        <div class="sketch soft card" style="margin-top:13px">
+          <div class="zacht">Light + washed uit Afrika geeft de helderste citrus en
+            bloemen. Dat is waar je zelf al het hoogst scoort.</div>
+        </div>
+        <button class="knop">laat me drie bonen zien</button>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>stap 4 · branding, proces, herkomst</b> — vier vragen worden één
+      lijstje dat al klopt</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="title" style="font-size:29px">drie voor jou</div>
+        <div class="subtitle" style="font-size:15px">v60 · citrus &amp; floral · light</div>
+        <div class="sketch soft uit">
+          <div class="merk">vertrouwd</div>
+          <div class="naam">Ethiopia · Yirgacheffe</div>
+          <div class="not">washed, light · jasmijn, bergamot, zwarte thee</div>
+        </div>
+        <div class="sketch uit">
+          <div class="merk">een stap opzij</div>
+          <div class="naam">Kenya · Nyeri</div>
+          <div class="not">washed, light · zwarte bes, grapefruit, tomaat-zoet</div>
+          <div class="waarom">Zelfde helderheid, maar het zuur trekt naar zwarte bes
+            in plaats van citroen. Dit is de stap die je nog niet gezet hebt.</div>
+        </div>
+        <div class="sketch soft uit">
+          <div class="merk">verras me</div>
+          <div class="naam">Ethiopia · Guji natural</div>
+          <div class="not">natural, light · blauwe bes, aardbei, cacaonib</div>
+        </div>
+        <div class="zacht" style="text-align:center">tik er een aan voor het waarom</div>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>de uitkomst</b> — niet drie keer hetzelfde, maar drie afstanden:
+      dichtbij, ernaast, en eroverheen</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="zacht" style="margin-top:6px">‹ terug naar de drie</div>
+        <div class="sketch card" style="margin-top:8px">
+          <div class="merk" style="font-size:12.5px;color:var(--ink-soft)">EEN STAP OPZIJ</div>
+          <div class="naam" style="font-family:'Caveat',cursive;font-size:26px">Kenya · Nyeri</div>
+          <div class="not" style="font-size:14.5px;color:var(--ink-soft)">washed, light ·
+            zwarte bes, grapefruit, tomaat-zoet</div>
+          <div class="waarom">Je zet vooral v60 en scoort hoog op citrus. Kenia geeft
+            datzelfde heldere zuur, maar dieper en met meer body — de logische
+            volgende zak.</div>
+        </div>
+        <div class="eyebrow">waar haal je hem</div>
+        <div class="zoekbalk">🔍 Kenya Nyeri washed filter · specialty</div>
+        <div style="margin-top:9px">
+          <div class="brander"><span>Friedhats</span><em>Amsterdam</em></div>
+          <div class="brander"><span>Manhattan</span><em>Rotterdam</em></div>
+        </div>
+        <div class="zacht" style="margin:8px 0 10px">De app kijkt niet in hun voorraad.</div>
+        <button class="knop">zet op mijn lijstje</button>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
+        <span class="on">learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>één boon open</b> — het waarom, een zoekregel, en je eigen
+      branders</figcaption>
+  </figure>
+
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="title">beans</div>
+        <div class="subtitle">wat er op de plank staat</div>
+        <div class="eyebrow"><span>op mijn lijstje</span><span class="zacht">1</span></div>
+        <div class="sketch card" style="border-style:dashed">
+          <div class="hand" style="font-size:22px">Kenya · Nyeri</div>
+          <div class="zacht">washed, light · zwarte bes, grapefruit<br>
+            nog niet gekocht — uit de keuzehulp, vandaag</div>
+          <div class="chips" style="margin-top:9px">
+            <span class="chip">gekocht ✓</span><span class="chip">van het lijstje af</span>
+          </div>
+        </div>
+        <div class="eyebrow"><span>op de plank</span><span class="zacht">2</span></div>
+        <div class="sketch soft card">
+          <div class="hand" style="font-size:22px">Ethiopia Guji</div>
+          <div class="zacht">2 dagen · nog aan het rusten</div>
+        </div>
+        <div class="sketch soft card">
+          <div class="hand" style="font-size:22px">Classic Red</div>
+          <div class="zacht">21 dagen · vers</div>
+        </div>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span class="on">beans</span>
+        <span>learn</span><span>profile</span></div>
+    </div>
+    <figcaption><b>de lus is rond</b> — de boon staat als wens op je plank; koop je
+      hem, dan is alles al ingevuld</figcaption>
+  </figure>
+</div>
+
+<div class="mk-sect">
+  <h2>Wat ik anders doe dan je schetste</h2>
+  <p><b>1 · De top 3 is geen ranglijst, maar drie afstanden.</b> Je vroeg om een top 3.
+    Als je die op één smaakprofiel uitrekent, krijg je drie keer bijna dezelfde boon en
+    kies je de bovenste. Daarom is elke plek een andere <em>afstand</em>: vertrouwd,
+    een stap opzij, verras me. Zo staat er altijd iets bij dat je nog niet kende,
+    zonder dat je gedwongen wordt te gokken. Dat is meteen stap 2 geworden: de knop
+    zet niet een filter aan, maar bepaalt hoe ver die drie uit elkaar liggen.</p>
+
+  <p><b>2 · Vier van je zes vragen worden één lijstje.</b> Branding, proces, variëteit
+    en herkomst achter elkaar vragen maakt er een examen van — zeker variëteit; bijna
+    niemand weet of hij SL28 of Bourbon wil. In plaats daarvan vult de app ze in op
+    basis van je smaakkeuze en de afstandsknop, en tik je alleen om wat je wél belangrijk
+    vindt. Dat is dezelfde beweging die we net in het brewformulier hebben gemaakt:
+    invullen en laten corrigeren, niet vragen.</p>
+
+  <p><b>3 · De app weet stap 1 en 3 al.</b> Je methodes staan in de app, en je hoogste
+    cijfers per smaak ook. Die twee stappen beginnen dus voor-ingevuld, met je eigen
+    cijfers eronder als onderbouwing. Dat is het verschil tussen een vragenlijst en een
+    app die je kent.</p>
+
+  <p><b>4 · Hetzelfde smaakwiel als in de app.</b> We hebben net het grote wiel gebouwd
+    met acht families en veertig smaken. Dat is precies de woordenlijst voor stap 3 —
+    geen tweede vocabulaire om bij te houden, en wat je hier aantikt is hetzelfde als
+    wat je bij een brew aantikt.</p>
+
+  <p><b>5 · De uitkomst gaat op je plank.</b> Kies je een boon, dan komt hij als wens op
+    je bonenplank te staan, met de verwachte smaaknotities er al bij. Koop je hem echt,
+    dan vul je alleen de branddatum in en de rest staat er. Zonder dit blijft de
+    keuzehulp een losse folder; mét dit hangt hij aan de app vast.</p>
+</div>
+
+<div class="mk-sect">
+  <h2>Wat er niet in kan</h2>
+  <ul>
+    <li><b>Geen live voorraad of prijzen.</b> Geen enkele brander biedt daar iets voor
+      aan waar we bij kunnen. De app maakt een goede zoekregel en houdt jouw eigen
+      branderlijst bij; het laatste klikje doe je zelf. In de app kan de AI-knop wél
+      een echte zoekopdracht doen — in dit artifact niet, want een artifact mag niet
+      naar buiten praten.</li>
+    <li><b>Geen boon-database.</b> De uitkomst is een <em>profiel</em> (land, streek,
+      proces, branding, verwachte smaak), geen bestaand product met een etiket. Dat is
+      ook eerlijker: welke Yirgacheffe er deze maand ligt, wisselt per brander.</li>
+    <li><b>De branderlijst onderhoud je zelf</b>, net als je gear. Drie voorbeelden in
+      de schets; in het echt vul je aan wie er bij jou in de buurt zit.</li>
+  </ul>
+</div>
+
+<div class="mk-sect">
+  <h2>Wat het in de app kost</h2>
+  <ul>
+    <li>één featurevlag (<code>beanpick</code>), standaard uit</li>
+    <li>één nieuwe pagina met vijf stappen, plus een resultaatscherm</li>
+    <li>een kleine kennistabel: land × proces × branding → verwachte smaken. Die
+      schrijven we één keer op, net als de receptenboeken die er al staan</li>
+    <li>twee dingen in <code>state</code>: je branderlijst en je wenslijstje</li>
+    <li>de bonenplank krijgt een blokje "op mijn lijstje" erboven</li>
+  </ul>
+  <p>Verder niets: het smaakwiel, de scores en je methodes zijn er al.</p>
+</div>
+
+<script>
+/* het smaakwiel uit de app, hier alleen om te laten zien hoe stap 3 eruitziet */
+(function(){
+  const el=document.getElementById('tw');if(!el)return;
+  const N=['berry','citrus','floral','honey','caramel','choc','nutty','spice'];
+  const aan=['citrus','floral'];
+  const cx=100,cy=100,r1=40,r2=94;let out='';
+  N.forEach((n,i)=>{
+    const a0=(i/8)*Math.PI*2-Math.PI/2,a1=((i+1)/8)*Math.PI*2-Math.PI/2,am=(a0+a1)/2;
+    const P=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+    const[x0,y0]=P(r2,a0),[x1,y1]=P(r2,a1),[x2,y2]=P(r1,a1),[x3,y3]=P(r1,a0);
+    out+='<path class="'+(aan.includes(n)?'sel':'')+'" d="M'+x0+' '+y0+' A'+r2+' '+r2+
+      ' 0 0 1 '+x1+' '+y1+' L'+x2+' '+y2+' A'+r1+' '+r1+' 0 0 0 '+x3+' '+y3+' Z"/>';
+    const[tx,ty]=P((r1+r2)/2,am);
+    out+='<text x="'+tx+'" y="'+(ty+3)+'" text-anchor="middle">'+n+'</text>';
+  });
+  out+='<circle cx="100" cy="100" r="34" fill="none" stroke="var(--line)" stroke-width="1.5"/>';
+  el.innerHTML=out;
+})();
+</script>
