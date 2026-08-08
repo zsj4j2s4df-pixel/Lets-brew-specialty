@@ -1,455 +1,634 @@
 <style>
-/* extra bouwsteentjes die alleen deze opzet nodig heeft */
-.stap-bal{display:flex;gap:5px;margin:9px 0 12px;}
-.stap-bal i{flex:1;height:5px;border-radius:3px;background:var(--line);opacity:.5;}
-.stap-bal i.op{background:var(--accent-soft);opacity:1;}
-.vraag{font-family:'Caveat',cursive;font-size:26px;line-height:1.1;margin:2px 0 3px;}
-.keten{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:13.5px;
-  color:var(--ink-soft);margin-bottom:9px;}
-.keten b{color:var(--ink);}
-.keuze{display:block;width:100%;text-align:left;background:var(--card);
-  border:2px solid var(--line);border-radius:18px;padding:8px 12px;margin-bottom:7px;
-  filter:url(#wobble);}
-.keuze.sel{border-color:var(--ink);background:var(--card-2);}
-.keuze b{font-size:16.5px;}
-.keuze span{display:block;color:var(--ink-soft);font-size:13.5px;line-height:1.3;}
-.keuze .mond{display:block;color:var(--ink);font-size:13.5px;margin-top:3px;}
-.rij-aan{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
-  border-bottom:1.5px dashed var(--line);padding:7px 2px;font-size:15px;}
-.rij-aan .w{color:var(--ink-soft);}
-.uit{padding:10px 13px;margin-bottom:10px;}
-.uit .merk{font-size:12px;color:var(--ink-soft);letter-spacing:.6px;text-transform:uppercase;}
-.uit .naam{font-family:'Caveat',cursive;font-size:23px;line-height:1.05;margin:1px 0 2px;}
-.uit .not{font-size:14px;color:var(--ink-soft);line-height:1.3;}
-.waarom{font-size:13.5px;line-height:1.35;border-left:3px solid var(--accent-soft);
-  padding-left:9px;margin-top:7px;}
-.zoekbalk{display:flex;align-items:center;gap:7px;background:var(--card-2);
-  border:2px solid var(--line);border-radius:16px;padding:8px 11px;font-size:14px;
-  color:var(--ink-soft);filter:url(#wobble);}
-.zak{border:2px dashed var(--line);border-radius:16px;padding:9px 12px;font-size:14px;
-  line-height:1.45;}
-.zak em{font-style:normal;color:var(--ink-soft);}
+/* Werkend prototype: één telefoon die het hele scherm vult. */
+body{padding:0;background:var(--desk);display:flex;justify-content:center;
+  height:100vh;height:100dvh;overflow:hidden;}
+.mk-wrap{max-width:430px;width:100%;margin:0;}
+.phone{width:100%;max-width:430px;height:100vh;height:100dvh;background:var(--paper);
+  border:none;border-radius:0;display:flex;flex-direction:column;overflow:hidden;filter:none;}
+.screen{flex:1;min-height:0;overflow-y:auto;padding:0 20px 24px;-webkit-overflow-scrolling:touch;}
+.screen::-webkit-scrollbar{display:none;}
 
-/* ---- de getekende kaart ---- */
-.kaart{width:100%;display:block;}
-.kaart .land{fill:var(--card-2);stroke:var(--ink);stroke-width:1.8;filter:url(#wobble-rough);}
-.kaart .lijn{stroke:var(--line);stroke-width:1.2;fill:none;stroke-dasharray:5 5;}
-.kaart .lijn.eq{stroke-width:1.8;stroke-dasharray:none;opacity:.75;}
-.kaart .band{fill:var(--v60);opacity:.5;}
-.kaart .stip{fill:var(--paper);stroke:var(--ink);stroke-width:1.8;}
-.kaart .stip.had{fill:var(--accent-soft);stroke:var(--accent-soft);}
-.kaart .stip.sel{fill:var(--ink);stroke:var(--ink);}
-.kaart .lbl{font-family:'Patrick Hand',cursive;font-size:9.5px;fill:var(--ink-soft);}
-.kaart .lbl.sel{fill:var(--ink);font-size:11.5px;}
-.kaart .bandtxt{font-family:'Caveat',cursive;font-size:10px;fill:var(--ink-soft);opacity:.8;}
-.legenda{display:flex;gap:12px;justify-content:center;font-size:12.5px;
-  color:var(--ink-soft);margin-top:2px;}
-.legenda span{display:flex;align-items:center;gap:4px;}
-.legenda i{width:9px;height:9px;border-radius:50%;border:1.6px solid var(--ink);display:inline-block;}
-.legenda i.had{background:var(--accent-soft);border-color:var(--accent-soft);}
+.kop-rij{display:flex;align-items:baseline;gap:9px;margin:4px 0 2px;}
+.kop-rij .t{font-family:'Caveat',cursive;font-size:31px;line-height:1;flex:1;}
+.terug{background:none;border:none;color:var(--ink-soft);font:inherit;font-size:15px;
+  padding:4px 0;cursor:pointer;}
+.kruimel{font-size:13.5px;color:var(--ink-soft);margin-bottom:8px;}
+.kruimel b{color:var(--ink);}
+.kruimel button{background:none;border:none;font:inherit;color:var(--ink-soft);
+  text-decoration:underline;cursor:pointer;padding:0;}
+
+/* ---- de kaart ---- */
+.kaart-doos{position:relative;background:var(--card-2);border:2px solid var(--ink);
+  border-radius:20px;overflow:hidden;filter:url(#wobble);margin-bottom:10px;}
+.kaart{width:100%;height:250px;display:block;touch-action:manipulation;}
+.kaart .zee{fill:var(--card-2);}
+.kaart .band{fill:var(--v60);opacity:.45;}
+.kaart .lijn{stroke:var(--line);stroke-width:.5;fill:none;stroke-dasharray:3 3;
+  vector-effect:non-scaling-stroke;}
+.kaart .lijn.eq{stroke-dasharray:none;opacity:.7;}
+.kaart .achter{fill:var(--desk);stroke:var(--line);stroke-width:1;opacity:.5;
+  stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none;}
+.kaart .land{fill:var(--card);stroke:var(--ink);stroke-width:1.4;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;cursor:pointer;transition:fill-opacity .2s;}
+.kaart .land.uit{fill:var(--desk);stroke:var(--line);opacity:.6;cursor:default;}
+.kaart .land.had{fill:var(--accent-soft);fill-opacity:.45;}
+.kaart .land.sel{fill:var(--v60);fill-opacity:1;stroke:var(--ink);stroke-width:2.6;}
+.kaart .lbl{font-family:'Patrick Hand',cursive;fill:var(--ink-soft);
+  pointer-events:none;text-anchor:middle;paint-order:stroke;stroke:var(--paper);
+  stroke-linejoin:round;}
+.kaart .lbl.groot{font-family:'Caveat',cursive;fill:var(--ink);}
+.kaart .lbl.wit{fill:var(--cream);}
+.kaart .stip{fill:var(--paper);stroke:var(--ink);stroke-width:1.6;
+  vector-effect:non-scaling-stroke;cursor:pointer;}
+.kaart .stip.sel{fill:var(--accent-soft);stroke:var(--ink);}
+.kaart .nr{font-family:'Patrick Hand',cursive;fill:var(--ink);text-anchor:middle;
+  cursor:pointer;}
+.kaart .nr.aan{fill:var(--cream);}
+.kaart-tip{position:absolute;left:0;right:0;bottom:0;padding:6px 12px;font-size:13px;
+  color:var(--ink-soft);background:linear-gradient(transparent,var(--card-2) 55%);
+  text-align:center;pointer-events:none;}
+
+/* ---- informatiekaarten ---- */
+.blok{background:var(--card);border:2px solid var(--line);border-radius:20px;
+  padding:12px 15px;margin-bottom:11px;filter:url(#wobble);}
+.blok.vol{border-color:var(--ink);}
+.blok h3{font-family:'Caveat',cursive;font-size:25px;font-weight:700;line-height:1.05;
+  margin-bottom:3px;}
+.blok .onder{color:var(--ink-soft);font-size:14px;margin-bottom:7px;}
+.blok p{font-size:15.5px;line-height:1.45;margin-bottom:8px;}
+.blok p:last-child{margin-bottom:0;}
+.etiket{font-size:12.5px;letter-spacing:.7px;text-transform:uppercase;
+  color:var(--ink-soft);margin:11px 0 5px;}
+.smaakrij{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:2px;}
+.smaak{background:var(--card-2);border:1.5px solid var(--line);border-radius:13px;
+  padding:3px 10px;font-size:14px;}
+.proc{border-top:1.5px dashed var(--line);padding:8px 0 2px;}
+.proc:first-of-type{border-top:none;}
+.proc .n{font-size:16px;}
+.proc .n em{font-style:normal;color:var(--ink-soft);font-size:13.5px;margin-left:5px;}
+.proc .u{color:var(--ink-soft);font-size:14.5px;line-height:1.4;}
+.proc .u b{color:var(--ink);font-weight:400;}
+.kies{display:block;width:100%;text-align:left;background:var(--card);
+  border:2px solid var(--line);border-radius:18px;padding:9px 13px;margin-bottom:8px;
+  font:inherit;color:var(--ink);cursor:pointer;filter:url(#wobble);}
+.kies:last-child{margin-bottom:0;}
+.kies.sel{background:var(--card-2);border-color:var(--ink);}
+.kies .k1{font-size:16.5px;}
+.kies .bol{display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;border:1.6px solid var(--ink);
+  font-size:13.5px;margin-right:8px;vertical-align:-4px;}
+.kies.sel .bol{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--cream);}
+.kies .k1 em{font-style:normal;color:var(--ink-soft);font-size:13.5px;margin-left:6px;}
+.kies .k2{display:block;color:var(--ink-soft);font-size:14px;line-height:1.35;margin-top:2px;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{background:var(--card);border:2px solid var(--line);border-radius:15px;
+  padding:5px 12px;font-size:15px;cursor:pointer;filter:url(#wobble);}
+.chip.sel{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--cream);}
+.knop{display:block;width:100%;text-align:center;background:var(--accent-soft);
+  color:var(--cream);border:2px solid var(--accent-soft);border-radius:20px;
+  padding:12px;font:inherit;font-size:17px;cursor:pointer;filter:url(#wobble);
+  margin-top:4px;}
+.zak{border:2px dashed var(--line);border-radius:16px;padding:10px 13px;font-size:15px;
+  line-height:1.6;}
+.zak em{font-style:normal;color:var(--ink-soft);display:inline-block;min-width:78px;}
+.zoekbalk{display:flex;gap:7px;background:var(--card-2);border:2px solid var(--line);
+  border-radius:16px;padding:9px 12px;font-size:14.5px;color:var(--ink-soft);margin-top:9px;}
+.zacht{color:var(--ink-soft);font-size:14px;line-height:1.4;}
+.legenda{display:flex;gap:14px;justify-content:center;font-size:12.5px;
+  color:var(--ink-soft);margin:-4px 0 10px;}
+.legenda span{display:flex;align-items:center;gap:5px;}
+.legenda i{width:11px;height:11px;border-radius:3px;border:1.5px solid var(--ink);
+  display:inline-block;background:var(--card);}
+.legenda i.had{background:#c3ad91;}
+.uitleg-let{background:var(--card-2);border-radius:14px;padding:9px 12px;
+  font-size:14px;line-height:1.45;color:var(--ink-soft);margin-bottom:11px;}
+.uitleg-let b{color:var(--ink);font-weight:400;}
 </style>
 
-<div class="mk-kop">
-  <h1>Van het land tot in je kop</h1>
-  <div class="mk-onder">Een opzet voor een keuzehulp onder <b>learn</b>. Je loopt de weg
-    die de boon zelf ook aflegt — land, boer, brander, zetmethode, jij — en komt uit bij
-    de zak die je moet kopen.</div>
-  <div class="mk-let">Dit is een <b>schets</b>, geen werkende functie. Er is niets aan de
-    app veranderd: <b>index.html</b> staat nog precies zoals hij stond.</div>
+<div class="mk-wrap">
+<div class="phone">
+  <div class="statusbar">9:41</div>
+  <div class="screen" id="scherm"></div>
 </div>
-
-<div class="mk-sect">
-  <h2>De keten is de rode draad</h2>
-  <p><b>koffieland → boon → koffieboer → brander → zetmethode → thuisbarista.</b>
-    Elke stap is één schakel, en elke schakel legt uit wat híj met je kopje doet. Zo
-    kies je niet alleen een zak — je snapt achteraf ook waaróm die zak smaakt zoals hij
-    smaakt. Dat is precies waarom hij onder <em>learn</em> hoort en niet onder brews.</p>
-  <p>Bovenaan elk scherm loopt de keten mee, zodat je altijd ziet waar je bent en wat je
-    al gekozen hebt.</p>
-</div>
-
-<div class="mk-rij">
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="title">learn</div>
-        <div class="subtitle">koffie leren, op je eigen tempo</div>
-        <div class="sketch soft card">
-          <div class="hand" style="font-size:23px">barista basics</div>
-          <div class="zacht">de vier knoppen die alles bepalen</div>
-        </div>
-        <div class="sketch card" style="background:var(--v60)">
-          <div class="hand" style="font-size:23px">van het land tot in je kop</div>
-          <div class="zacht">kies een koffieland op de kaart en loop de keten af —
-            je eindigt bij de zak die je zoekt</div>
-          <div style="margin-top:8px" class="chips">
-            <span class="chip">nieuw</span><span class="chip">7 landen bezocht</span>
-          </div>
-        </div>
-        <div class="sketch soft card">
-          <div class="hand" style="font-size:23px">filter, van begin tot eind</div>
-          <div class="zacht">het bed, de doorloop, en wat je eraan draait</div>
-        </div>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>waar hij komt te staan</b> — en hij houdt bij hoeveel landen je
-      al gehad hebt</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="stap-bal"><i class="op"></i><i></i><i></i><i></i><i></i></div>
-        <div class="keten"><b>land</b> › boer › brander › methode › jij</div>
-        <div class="vraag">Waar komt hij vandaan?</div>
-        <div class="zacht" style="margin-bottom:3px">Alles wat groeit tussen de keerkringen.
-          Tik een land aan.</div>
-        <div id="kaart-leeg"></div>
-        <div class="legenda">
-          <span><i></i> nog niet gehad</span>
-          <span><i class="had"></i> al eens gezet</span>
-        </div>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>stap 1 · de kaart</b> — de koffiegordel, met de landen die je al
-      gezet hebt ingekleurd</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="stap-bal"><i class="op"></i><i></i><i></i><i></i><i></i></div>
-        <div class="keten"><b>land</b> › boer › brander › methode › jij</div>
-        <div id="kaart-sel" style="margin-top:2px"></div>
-        <div class="sketch card" style="padding:10px 13px;margin-top:4px">
-          <div class="hand" style="font-size:22px">Kenia</div>
-          <div class="zacht" style="line-height:1.35">Hooglanden rond de Mount Kenya,
-            vulkanische grond, 1700–2000 m. Bekend om zijn <b>zuur</b>: zwarte bes,
-            grapefruit, een tomaatachtige zoetheid. Vaak SL28 en SL34.</div>
-          <div class="zacht" style="margin-top:7px;border-top:1.5px dashed var(--line);
-            padding-top:6px">Nog niet gehad. Je hebt wel 4 Ethiopische zakken gezet —
-            dit ligt daar het dichtst bij.</div>
-        </div>
-        <button class="knop">naar de boer ›</button>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>stap 1 · land aangetikt</b> — wat er groeit, hoe het smaakt, en of
-      je er al geweest bent</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="stap-bal"><i class="op"></i><i class="op"></i><i></i><i></i><i></i></div>
-        <div class="keten">Kenia › <b>boer</b> › brander › methode › jij</div>
-        <div class="vraag">Wat doet de boer ermee?</div>
-        <div class="zacht" style="margin-bottom:8px">In Kenia wordt vrijwel alles
-          gewassen — er is water, en de coöperaties zijn erop gebouwd.</div>
-        <button class="keuze sel"><b>washed</b>
-          <span>vrucht eraf vóór het drogen · 95 % van Kenia</span>
-          <span class="mond">helder en rechtlijnig zuur · dun, theeachtig mondgevoel</span></button>
-        <button class="keuze"><b>natural</b>
-          <span>hele kers drogen · zeldzaam hier, wel in opkomst</span>
-          <span class="mond">dikker fruit, minder scherp · siroopachtig in de mond</span></button>
-        <button class="keuze"><b>honey</b>
-          <span>vruchtvlees deels eraan · nauwelijks in Kenia</span>
-          <span class="mond">tussenin: zoeter · romiger</span></button>
-        <button class="knop">naar de brander ›</button>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>stap 2 · het proces</b> — alleen wat in dát land gebeurt, met wat het
-      met smaak én mondgevoel doet</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="stap-bal"><i class="op"></i><i class="op"></i><i class="op"></i><i></i><i></i></div>
-        <div class="keten">Kenia › washed › <b>brander</b> › methode › jij</div>
-        <div class="vraag">Hoe brandt hij hem?</div>
-        <div class="zacht" style="margin-bottom:8px">De brander bepaalt hoeveel van het
-          land er overblijft.</div>
-        <div class="chips" style="margin-bottom:11px">
-          <span class="chip sel">light</span><span class="chip">medium</span>
-          <span class="chip">dark</span>
-        </div>
-        <div class="sketch soft card" style="padding:10px 13px">
-          <div class="zacht">Light houdt het zuur en de herkomst overeind — bij Kenia is
-            dat precies waar je voor betaalt. Dark maakt er chocola en noot van; dan had
-            je net zo goed een Braziliaan kunnen kopen.</div>
-        </div>
-        <div class="eyebrow" style="margin:11px 2px 6px">welke woorden op de zak?</div>
-        <div class="zacht" style="margin-bottom:5px">Dezelfde families die je bij een brew
-          aantikt — en die de brander op zijn etiket zet.</div>
-        <div class="chips">
-          <span class="chip sel">berry</span><span class="chip sel">citrus</span>
-          <span class="chip">floral</span><span class="chip">choc</span>
-          <span class="chip">nutty</span><span class="chip">spice</span>
-        </div>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>stap 3 · de brander</b> — branding plus de smaakfamilies die op de
-      zak komen te staan</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="stap-bal"><i class="op"></i><i class="op"></i><i class="op"></i><i class="op"></i><i></i></div>
-        <div class="keten">Kenia › washed › light › <b>methode</b> › jij</div>
-        <div class="vraag">Waar ga je hem in zetten?</div>
-        <div class="zacht" style="margin-bottom:10px">Ik heb aangevinkt wat je het meest
-          gebruikt.</div>
-        <div class="chips" style="margin-bottom:12px">
-          <span class="chip sel">v60</span><span class="chip">aeropress</span>
-          <span class="chip">espresso</span><span class="chip">chemex</span>
-        </div>
-        <div class="sketch soft card" style="padding:10px 13px">
-          <div class="zacht">Een light gebrande Keniaan op v60 is waar hij voor gemaakt
-            is. Op espresso wordt datzelfde zuur scherp — kan prachtig zijn, maar het
-            afstellen is lastiger en je hebt een fijnere maalstand nodig dan je gewend
-            bent op je Comandante.</div>
-        </div>
-        <button class="knop" style="margin-top:11px">laat me de zak zien ›</button>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>stap 4 · de zetmethode</b> — met een waarschuwing die uit jouw eigen
-      gear komt</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="stap-bal"><i class="op"></i><i class="op"></i><i class="op"></i><i class="op"></i><i class="op"></i></div>
-        <div class="keten">Kenia › washed › light › v60 › <b>jij</b></div>
-        <div class="title" style="font-size:26px">drie streken</div>
-        <div class="subtitle" style="font-size:14px">binnen Kenia, van bekend naar
-          onbekend</div>
-        <div class="sketch soft uit">
-          <div class="merk">de klassieker</div>
-          <div class="naam">Nyeri</div>
-          <div class="not">zwarte bes, grapefruit · stevig zuur, veel body</div>
-        </div>
-        <div class="sketch uit">
-          <div class="merk">de andere kant van het land</div>
-          <div class="naam">Kirinyaga</div>
-          <div class="not">tomaat-zoet, rode appel · ronder, minder scherp</div>
-          <div class="waarom">Zelfde hooglanden, maar zachter zuur. Als Nyeri je te
-            fel is, is dit je zak.</div>
-        </div>
-        <div class="sketch soft uit">
-          <div class="merk">de verrassing</div>
-          <div class="naam">Embu · natural</div>
-          <div class="not">aardbei, rum · dik en siroopachtig</div>
-        </div>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>stap 5 · de uitkomst</b> — drie streken uit hetzelfde land, van
-      bekend naar onbekend</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="zacht" style="margin-top:5px">‹ terug naar de drie</div>
-        <div class="sketch card" style="margin-top:7px;padding:11px 13px">
-          <div class="hand" style="font-size:23px">Kenia · Kirinyaga</div>
-          <div class="zacht">washed, light · tomaat-zoet, rode appel</div>
-        </div>
-        <div class="eyebrow" style="margin:4px 2px 6px">waar je op let bij de zak</div>
-        <div class="zak">
-          <em>land</em> Kenia &nbsp;·&nbsp; <em>streek</em> Kirinyaga<br>
-          <em>proces</em> washed &nbsp;·&nbsp; <em>variëteit</em> SL28 / SL34 / Ruiru<br>
-          <em>branding</em> licht — geen olie op de bonen<br>
-          <em>gebrand</em> korter dan 3 weken geleden
-        </div>
-        <div class="eyebrow" style="margin:11px 2px 6px">waar haal je hem</div>
-        <div class="zoekbalk">🔍 Kenya Kirinyaga washed filter · specialty</div>
-        <div class="zacht" style="margin:7px 0 10px">Jouw branderlijst staat onder
-          profile. De app kijkt niet in hun voorraad.</div>
-        <button class="knop">zet op mijn lijstje</button>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span>beans</span>
-        <span class="on">learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>de zak</b> — wat er op het etiket moet staan, en een zoekregel
-      ernaartoe</figcaption>
-  </figure>
-
-  <figure class="mk-fig">
-    <div class="phone">
-      <div class="statusbar">9:41</div>
-      <div class="screen">
-        <div class="title">beans</div>
-        <div class="subtitle">wat er op de plank staat</div>
-        <div class="eyebrow"><span>op mijn lijstje</span><span class="zacht">1</span></div>
-        <div class="sketch card" style="border-style:dashed">
-          <div class="hand" style="font-size:22px">Kenia · Kirinyaga</div>
-          <div class="zacht">washed, light · tomaat-zoet, rode appel<br>
-            nog niet gekocht — uit de keuzehulp, vandaag</div>
-          <div class="chips" style="margin-top:8px">
-            <span class="chip">gekocht ✓</span><span class="chip">van het lijstje af</span>
-          </div>
-        </div>
-        <div class="eyebrow"><span>op de plank</span><span class="zacht">2</span></div>
-        <div class="sketch soft card">
-          <div class="hand" style="font-size:22px">Ethiopia Guji</div>
-          <div class="zacht">2 dagen · nog aan het rusten</div>
-        </div>
-        <div class="sketch soft card">
-          <div class="hand" style="font-size:22px">Classic Red</div>
-          <div class="zacht">21 dagen · vers</div>
-        </div>
-      </div>
-      <div class="nav"><span>home</span><span>brews</span><span class="on">beans</span>
-        <span>learn</span><span>profile</span></div>
-    </div>
-    <figcaption><b>de lus is rond</b> — en zodra je hem zet, kleurt Kenia op de
-      kaart in</figcaption>
-  </figure>
-</div>
-
-<div class="mk-sect">
-  <h2>Wat ik eraan toevoeg</h2>
-  <p><b>1 · De kaart is je paspoort.</b> Dit is de toevoeging waar ik het meest in
-    geloof. De app weet van elke brew welke boon erin zat en dus uit welk land hij kwam.
-    Kleur die landen in op de kaart, en de keuzehulp wordt iets waar je uit jezelf naar
-    teruggaat: je ziet in één oogopslag waar je nog nooit geweest bent. Koop je die
-    Keniaan en zet je hem, dan kleurt Kenia in. Dat is een spelletje dat zichzelf speelt,
-    en het kost bijna niets — de gegevens staan er al.</p>
-
-  <p><b>2 · Elke stap zegt wat hij met je kopje doet.</b> Niet alleen "washed / natural /
-    honey", maar er meteen onder wat dat met de <em>smaak</em> én het <em>mondgevoel</em>
-    doet — jouw punt, en het is precies het stuk dat nergens anders in de app staat. En
-    alleen de processen die in dát land ook echt gebruikt worden, met erbij hoe gangbaar
-    ze zijn. Kenia natural aanbieden alsof het net zo makkelijk te vinden is als washed
-    zou onzin zijn.</p>
-
-  <p><b>3 · De uitkomst zijn drie streken, geen drie landen.</b> Je hebt het land al
-    gekozen, dus zoomt de laatste stap verder in: Nyeri, Kirinyaga, Embu. Van de
-    klassieker naar de verrassing. Zo leer je dat "Kenia" geen smaak is maar een
-    verzameling streken — en dat is nou juist wat een thuisbarista van dit soort
-    schermen zou moeten opsteken.</p>
-
-  <p><b>4 · Het eindscherm is een boodschappenlijstje.</b> Geen productnaam, maar wat er
-    op het etiket moet staan: land, streek, proces, variëteit, branding, en hoe vers.
-    Daarmee kun je in een winkel of webshop zelf beoordelen of je de goede zak in handen
-    hebt. Dat is bruikbaarder dan een merknaam die volgende maand alweer uitverkocht is.</p>
-
-  <p><b>5 · De waarschuwing komt uit jouw gear.</b> Bij de zetmethode kan de app zeggen
-    dat een light gebrande Keniaan op espresso een fijnere maalstand vraagt dan je gewend
-    bent — en daar je eigen molen bij noemen, inclusief bereik. Dat weet de app sinds
-    kort.</p>
-</div>
-
-<div class="mk-sect">
-  <h2>Wat er niet in kan</h2>
-  <ul>
-    <li><b>Geen live voorraad of prijzen.</b> De app maakt een zoekregel en houdt jouw
-      branderlijst bij; het laatste klikje doe je zelf. In de app kan de AI-knop wél echt
-      zoeken — in dit artifact niet, want een artifact mag niet naar buiten praten.</li>
-    <li><b>De kaart is een tekening, geen atlas.</b> Bewust: hij hoort in de huisstijl,
-      niet in een cartografisch programma. Landen staan op hun plek in de koffiegordel,
-      niet op hun exacte grenzen.</li>
-    <li><b>Geen boon-database.</b> De uitkomst is een profiel — land, streek, proces,
-      branding, verwachte smaak — geen bestaand product.</li>
-  </ul>
-</div>
-
-<div class="mk-sect">
-  <h2>Wat het in de app kost</h2>
-  <ul>
-    <li>één featurevlag (<code>beanpick</code>), standaard uit</li>
-    <li>de getekende kaart als SVG, met een handvol landen als aantikbare stippen</li>
-    <li>een kennistabel per land: streken, gangbare processen, variëteiten, kenmerkende
-      smaak. Die schrijven we één keer op, net als de receptenboeken die er al staan</li>
-    <li>twee dingen in <code>state</code>: je branderlijst en je wenslijstje</li>
-    <li>de bonenplank krijgt een blokje "op mijn lijstje"</li>
-  </ul>
-  <p>Het inkleuren van bezochte landen komt uit de brews die er al zijn. Het smaakwiel,
-    je methodes en je gear ook.</p>
 </div>
 
 <script>
-/* De koffiegordel, met de hand getekend. Geen atlas: de continenten zijn ruwe
-   vormen, de landen staan op hun plek tussen de keerkringen. Eén functie voor
-   allebei de kaartschermen, zodat ze niet uit elkaar kunnen lopen.          */
+/* =====================================================================
+   Van het land tot in je kop — werkend prototype
+
+   Drie niveaus diep: werelddeel → land → streek. De kaart is één tekening
+   waarvan het kijkvenster inzoomt, zodat je ziet waar je heen gaat in
+   plaats van naar een nieuw plaatje te springen.
+
+   De landvormen zijn ruwe omtrekken op echte lengte- en breedtegraden.
+   Geen atlas, wel herkenbaar. De hoogte is 1,9 keer uitgerekt: anders
+   wordt de koffiegordel een streepje op een telefoon.
+   ===================================================================== */
 (function(){
-  // y=110 is de evenaar, 40 eenheden per 23,5 graad. Het doek is expres klein
-  // gehouden (300 breed): op een telefoon wordt het bijna 1:1 afgebeeld, en
-  // dan blijven de landnamen leesbaar. De werelddelen staan met opzet iets
-  // uit elkaar -- dit is een tekening, geen atlas, en losse vormen lezen beter.
-  const LANDEN=[
-    {n:'Guatemala', x:40, y:72,  had:1, la:'boven'},
-    {n:'Colombia',  x:72, y:112, had:1},
-    {n:'Peru',      x:68, y:142, had:0, la:'end'},
-    {n:'Brazilië',  x:92, y:134, had:1, la:'onder'},
-    {n:'Ethiopië',  x:176,y:90,  had:1, la:'boven'},
-    {n:'Kenia',     x:166,y:110, had:0, sel:1},
-    {n:'Rwanda',    x:152,y:118, had:1, la:'end'},
-    {n:'India',     x:228,y:72,  had:0, la:'onder'},
-    {n:'Indonesië', x:256,y:112, had:1, la:'onder'},
-  ];
-  const VORMEN=[
-    // Midden-Amerika: alleen het stuk waar koffie groeit
-    'M14 50 q22 -2 34 12 q12 12 16 20 q4 8 -6 8 q-10 0 -18 -10 q-10 -12 -22 -18 q-10 -4 -4 -12 Z',
-    // Zuid-Amerika: breed vanboven, taps naar onderen
-    'M48 100 q26 -8 52 4 q10 6 6 20 q-6 20 -14 34 q-8 14 -12 30 q-4 14 -12 12 q-8 -2 -8 -18 q0 -20 -8 -36 q-8 -18 -8 -32 q0 -12 4 -14 Z',
-    // Afrika, met de Hoorn eruit
-    'M126 44 q34 -10 68 0 q10 6 0 18 q-6 10 -14 14 l24 6 l-22 10 q-6 22 -14 40 q-6 16 -9 26 q-4 12 -12 8 q-8 -6 -8 -22 q-2 -22 -10 -38 q-10 -22 -8 -40 q0 -18 5 -22 Z',
-    // India
-    'M216 48 q22 -4 30 6 q6 8 -2 20 q-8 14 -14 22 q-6 8 -12 -2 q-6 -12 -6 -26 q0 -16 4 -20 Z',
-    // Zuidoost-Azië
-    'M250 60 q16 -4 24 6 q4 8 -6 12 q-12 4 -18 -2 q-8 -8 0 -16 Z',
-    // Indonesië
-    'M234 106 q30 -6 48 4 q10 6 -4 12 q-22 8 -40 0 q-12 -6 -4 -16 Z',
-  ];
-  function teken(gekozen){
-    let s='<svg class="kaart" viewBox="0 0 300 195">';
-    s+='<rect class="band" x="0" y="70" width="300" height="80"/>';
-    s+='<line class="lijn" x1="0" y1="70" x2="300" y2="70"/>';
-    s+='<line class="lijn eq" x1="0" y1="110" x2="300" y2="110"/>';
-    s+='<line class="lijn" x1="0" y1="150" x2="300" y2="150"/>';
-    s+='<text class="bandtxt" x="3" y="106">evenaar</text>';
-    s+='<text class="bandtxt" x="150" y="188" text-anchor="middle">de koffiegordel</text>';
-    VORMEN.forEach(d=>{s+='<path class="land" d="'+d+'"/>';});
-    LANDEN.forEach(l=>{
-      const aan=gekozen&&l.sel;
-      const kl='stip'+(aan?' sel':(l.had?' had':''));
-      s+='<circle class="'+kl+'" cx="'+l.x+'" cy="'+l.y+'" r="'+(aan?5.4:4)+'"/>';
-      let x=l.x+7, y=l.y+3.5, anker='start';
-      if(l.la==='end'){x=l.x-7;anker='end';}
-      if(l.la==='onder'){x=l.x;y=l.y+14;anker='middle';}
-      if(l.la==='boven'){x=l.x;y=l.y-8;anker='middle';}
-      s+='<text class="lbl'+(aan?' sel':'')+'" x="'+x+'" y="'+y+
-        '" text-anchor="'+anker+'">'+l.n+'</text>';
-    });
-    s+='</svg>';
-    return s;
+const REK=1.9;
+const X=lon=>lon, Y=lat=>-lat*REK;
+
+/* ---- de landen, als lijstjes van [lengtegraad, breedtegraad] ---- */
+const LANDEN=[
+ {id:'mexico',deel:'amerika',naam:'Mexico',pts:[[-117,32],[-109,31],[-97,26],[-97,18],[-91,18.5],[-88,21],[-87,17],[-94,16],[-96,15.5],[-104,19],[-106,23],[-112,29]]},
+ {id:'guatemala',deel:'amerika',naam:'Guatemala',pts:[[-92.2,17.8],[-89,17.8],[-88.2,15.9],[-89.2,14],[-92.2,14.5]]},
+ {id:'honduras',deel:'amerika',naam:'Honduras',pts:[[-89.3,16],[-83.2,15],[-83.4,13],[-87.8,13.2],[-89.2,14.4]]},
+ {id:'nicaragua',deel:'amerika',naam:'Nicaragua',pts:[[-87.7,13.2],[-83.1,15],[-83.5,11],[-85.7,11],[-87.7,12.9]]},
+ {id:'costarica',deel:'amerika',naam:'Costa Rica',pts:[[-85.9,11],[-82.6,9.6],[-82.9,8.1],[-85.6,9.8]]},
+ {id:'panama',deel:'amerika',naam:'Panama',pts:[[-82.9,8.2],[-79,9.6],[-77.3,8.7],[-78.5,7.3],[-82.9,7.3]]},
+ {id:'colombia',deel:'amerika',naam:'Colombia',pts:[[-77.4,8.5],[-71.5,12],[-67,6],[-67.3,1.2],[-69.5,-4],[-74,-2],[-78,0.5],[-79,2]]},
+ {id:'ecuador',deel:'amerika',naam:'Ecuador',pts:[[-80.9,1.4],[-75.2,0.5],[-75.2,-4.5],[-80.5,-3.4]]},
+ {id:'peru',deel:'amerika',naam:'Peru',pts:[[-81.3,-4.2],[-75,-4],[-70,-9.5],[-69,-13],[-68.9,-17],[-71.4,-17.7],[-76,-14],[-79,-8]]},
+ {id:'bolivia',deel:'amerika',naam:'Bolivia',pts:[[-69.5,-10.5],[-65.3,-9.7],[-58.2,-19.9],[-62.3,-22],[-67.2,-22],[-69.6,-18]]},
+ {id:'brazilie',deel:'amerika',naam:'Brazilië',pts:[[-73.9,-7.3],[-69.5,-1],[-64,1.9],[-60,4.5],[-51,4.2],[-49.9,-1],[-44,-2.5],[-38,-5],[-35,-9],[-39,-17],[-40,-21],[-48,-25],[-53,-33],[-57,-30],[-57.6,-25],[-54.6,-24],[-58,-20],[-58,-16],[-60,-15],[-65,-11],[-70,-11]]},
+ {id:'ethiopie',deel:'afrika',naam:'Ethiopië',pts:[[34,8],[33,10],[36,14.5],[39,14.9],[43,12],[48,8],[44.5,4.9],[41,3.9],[36,4.5],[35,7]]},
+ {id:'kenia',deel:'afrika',naam:'Kenia',pts:[[33.9,-1],[35,4.6],[41,3.9],[41.9,-1],[40.1,-2.5],[39,-4.7],[37.6,-3]]},
+ {id:'tanzania',deel:'afrika',naam:'Tanzania',pts:[[29.6,-4.5],[30.8,-1],[34,-1],[37.6,-3],[39.5,-6.8],[40.4,-10.4],[37.5,-11.7],[33,-9.5],[30.7,-8.2],[29.4,-6.5]]},
+ {id:'oeganda',deel:'afrika',naam:'Oeganda',pts:[[29.6,-1],[34,-1],[34.4,3.5],[31,3.8],[29.7,1.4]]},
+ {id:'rwanda',deel:'afrika',naam:'Rwanda',pts:[[28.9,-1.1],[30.5,-1.1],[30.8,-2.4],[29,-2.8]]},
+ {id:'burundi',deel:'afrika',naam:'Burundi',pts:[[29,-2.8],[30.8,-2.4],[30.6,-4.4],[29.2,-4.4]]},
+ {id:'congo',deel:'afrika',naam:'DR Congo',pts:[[13,-5],[17,-8],[22,-11],[27,-11.5],[28.4,-13],[28.7,-4.6],[28.9,1.2],[27,5],[18,5],[16,-2]]},
+ {id:'jemen',deel:'afrika',naam:'Jemen',pts:[[43,12.7],[52.2,15.5],[52.2,17.8],[45,17.5],[43,13.5]]},
+ {id:'india',deel:'azie',naam:'India',pts:[[68.5,23.5],[72.8,19],[73.5,15],[77,8.1],[80.3,13],[84,18],[89,22],[88,26],[80,28],[74,31],[70,27]]},
+ {id:'vietnam',deel:'azie',naam:'Vietnam',pts:[[102.2,22.3],[105.8,23.3],[108,21],[109.5,15],[109.3,11],[106.5,9.5],[104.9,10.5],[107,16],[105,20]]},
+ {id:'sumatra',deel:'azie',naam:'Sumatra',pts:[[95.2,5.5],[97.5,5.2],[106,-5.5],[105,-6.2],[100.5,-2.5],[95.9,2.5]]},
+ {id:'java',deel:'azie',naam:'Java',pts:[[105.5,-5.9],[114.5,-8],[114.4,-8.8],[106,-7.4]]},
+ {id:'sulawesi',deel:'azie',naam:'Sulawesi',pts:[[119,1.5],[120.5,1],[121,-2],[124.5,-1.8],[125,-5.5],[120.5,-5.6],[119.5,-3],[118.8,-1]]},
+ {id:'papoea',deel:'azie',naam:'Papoea-Nieuw-Guinea',pts:[[141,-2.7],[147,-6],[150,-10.5],[143,-9],[141,-6]]},
+];
+const KAART_LAND=Object.fromEntries(LANDEN.map(l=>[l.id,l]));
+/* Groot eerst, klein daarna: anders verdwijnen Rwanda en Burundi onder de
+   buurman die om ze heen ligt. */
+const TEKENVOLGORDE=LANDEN.slice().sort((a,b)=>vlak(b)-vlak(a));
+function vlak(l){
+  const xs=l.pts.map(p=>p[0]), ys=l.pts.map(p=>p[1]);
+  return (Math.max(...xs)-Math.min(...xs))*(Math.max(...ys)-Math.min(...ys));
+}
+
+/* De rest van de wereld, ruw en lichtgrijs. Puur om de kaart herkenbaar te
+   maken: zonder Noord-Amerika en Eurazië eromheen zweven de koffielanden
+   los in het niets en zie je niet waar je bent. */
+const ACHTER=[
+ [[-168,66],[-140,70],[-95,70],[-80,62],[-64,47],[-70,42],[-75,35],[-81,25],[-97,26],[-104,19],[-106,23],[-117,32],[-125,40],[-125,49],[-135,58],[-160,60]],
+ [[-17,15],[0,16],[15,32],[32,31],[35,23],[43,12],[51,12],[42,-2],[40,-16],[35,-24],[25,-34],[18,-34],[12,-18],[9,4],[-8,4]],
+ [[-10,36],[3,52],[12,55],[30,60],[60,70],[100,75],[140,70],[135,55],[125,45],[122,31],[110,20],[100,10],[95,16],[92,22],[80,30],[70,35],[60,25],[52,30],[45,40],[36,36],[20,38],[10,37]],
+ [[113,-22],[122,-18],[130,-12],[142,-11],[147,-20],[153,-28],[150,-38],[140,-38],[130,-32],[115,-34]],
+];
+
+/* ---- de drie werelddelen ---- */
+const DELEN={
+ amerika:{naam:'Midden- & Zuid-Amerika',kort:'Amerika',
+  bekend:'De vertrouwde kant van de kaart. Nootachtig, chocolade, karamel, en een zuur dat zacht blijft — dit is waar de meeste mensen koffie leren drinken.',
+  waarom:'Bijna alles wordt hier <b>washed</b> verwerkt: er is water genoeg, en de vruchtlaag gaat er meteen af. Dat geeft een schone, voorspelbare kop waarin je de streek proeft en niet het proces.',
+  proc:'washed overheerst · honey vooral in Costa Rica en El Salvador · natural in opkomst in Brazilië',
+  hoogte:'900–2200 m'},
+ afrika:{naam:'Oost-Afrika & het Arabisch schiereiland',kort:'Afrika',
+  bekend:'Hier komt koffie vandaan, en dat proef je. Bloemen, thee, citrus, rode bessen — een levendig zuur dat je op filter meteen herkent.',
+  waarom:'Veel kleine boeren leveren aan een gezamenlijke wasstation, en die stations bepalen het proces. Ethiopië en Kenia zijn daardoor bekend om hun strakke <b>washed</b> lots, terwijl <b>natural</b> juist het fruit naar voren haalt.',
+  proc:'washed en natural naast elkaar · honey zeldzaam · Jemen bijna altijd natural',
+  hoogte:'1400–2300 m'},
+ azie:{naam:'Zuidoost-Azië & Oceanië',kort:'Azië',
+  bekend:'De aardse kant. Kruiden, tabak, cederhout, donkere chocolade — weinig zuur, veel <b>body</b>. Een kop die vult in plaats van prikkelt.',
+  waarom:'Het klimaat is te vochtig om koffie in één keer droog te krijgen. Daarom bedachten ze hier <b>wet hulling</b> (giling basah): de bonen gaan half droog uit hun vlies. Dat geeft die typische aardse, zware smaak die je nergens anders vindt.',
+  proc:'wet hulling in Indonesië · washed in India en Papoea · natural veel in Vietnam',
+  hoogte:'800–1800 m'},
+};
+
+/* ---- de landen, met wat je erover moet weten ---- */
+const INFO={
+ guatemala:{hoogte:'1300–2000 m',bekend:'Acht heel verschillende streken op een klein oppervlak. Van rokerig en vol tot bloemig en helder — Guatemala is eigenlijk acht landen in één.',
+  smaak:['cacao','sinaasappel','karamel','rook'],proc:['washed','honey'],
+  streken:[
+   {n:'Antigua',ll:[-90.73,14.56],t:'Tussen drie vulkanen, in een dal dat de warmte vasthoudt. Vol en rond, met cacao en een lichte rokerigheid.',s:['cacao','toffee','rook']},
+   {n:'Huehuetenango',ll:[-91.5,15.32],t:'Het hoogste van Guatemala, tegen Mexico aan. Droge wind uit Tehuantepec houdt de vorst weg, waardoor ze hier hoger kunnen planten dan waar dan ook. Fel en fruitig.',s:['sinaasappel','rode appel','honing']},
+   {n:'Atitlán',ll:[-91.2,14.7],t:'Aan het meer, op vulkanische grond die veel voedsel vasthoudt. Voller en zoeter, met een duidelijke bloemige neus.',s:['bloemig','citrus','chocolade']},
+   {n:'Cobán',ll:[-90.37,15.47],t:'Nat en bewolkt bijna het hele jaar. Drogen duurt lang, wat een zachtere zuurgraad geeft en een fruitig karakter.',s:['pruim','specerij','cacao']}]},
+ colombia:{hoogte:'1200–2000 m',bekend:'Twee oogsten per jaar, dus vrijwel altijd verse koffie te krijgen. Evenwichtig: genoeg zuur om levendig te zijn, genoeg zoet om makkelijk weg te drinken.',
+  smaak:['karamel','rode appel','citrus','noot'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Huila',ll:[-75.5,2.5],t:'De bekendste, en niet voor niets. Hoog, zuidelijk, met een fruitig zuur dat naar rode appel en tropisch fruit trekt.',s:['rode appel','karamel','tropisch fruit']},
+   {n:'Nariño',ll:[-77.3,1.2],t:'Vlak bij de evenaar maar heel hoog, dus koude nachten. De boon rijpt langzaam en wordt daardoor zoeter en complexer.',s:['limoen','bruine suiker','bloemig']},
+   {n:'Tolima',ll:[-75.2,4],t:'Lang moeilijk bereikbaar, nu een van de spannendste streken. Zoet en zacht, met een romige body.',s:['honing','sinaasappel','cacao']},
+   {n:'Antioquia',ll:[-75.6,6.6],t:'Rond Medellín, het hart van de oude koffiestreek. Klassiek en nootachtig — dit is de smaak die veel mensen "Colombiaans" noemen.',s:['noot','chocolade','karamel']}]},
+ brazilie:{hoogte:'800–1350 m',bekend:'Het grootste koffieland ter wereld, en de ruggengraat van bijna elke espressoblend. Laag zuur, veel zoet, veel body.',
+  smaak:['pinda','chocolade','karamel'],proc:['natural','pulped natural','washed'],
+  streken:[
+   {n:'Cerrado Mineiro',ll:[-46.5,-18.5],t:'Vlak en droog, met een scherp gescheiden regen- en droogseizoen. Daardoor rijpt alles tegelijk en kan er machinaal geplukt worden. Heel constant.',s:['chocolade','noot','karamel']},
+   {n:'Sul de Minas',ll:[-45.5,-21.5],t:'Heuvelachtig en iets koeler. Zoeter en ronder dan Cerrado, met meer fruit erin.',s:['karamel','sinaasappel','hazelnoot']},
+   {n:'Mogiana',ll:[-47,-21],t:'Rode, ijzerrijke grond langs de rivier. Geeft een volle kop met een zachte zuurgraad — geliefd als basis voor espresso.',s:['cacao','rode vruchten','noot']},
+   {n:'Bahia',ll:[-41,-13],t:'De nieuwkomer, met irrigatie en veel techniek. Schoner en helderder dan je van Brazilië verwacht.',s:['citrus','honing','amandel']}]},
+ ethiopie:{hoogte:'1500–2200 m',bekend:'De geboortegrond van arabica. Duizenden wilde variëteiten die nergens anders groeien — daarom smaakt Ethiopische koffie naar dingen die je bij andere landen niet tegenkomt.',
+  smaak:['jasmijn','bergamot','blauwe bes','zwarte thee'],proc:['washed','natural'],
+  streken:[
+   {n:'Yirgacheffe',ll:[38.2,6.16],t:'De klassieker onder de lichte filterkoffies. Washed is hier jasmijn, citroen en thee; natural gaat richting blauwe bes.',s:['jasmijn','citroen','zwarte thee']},
+   {n:'Guji',ll:[38.8,5.6],t:'Naast Sidamo, pas de laatste jaren apart verkocht. Vaak natural, en dan uitgesproken fruitig — aardbei, perzik, soms bijna wijnachtig.',s:['aardbei','perzik','cacaonib']},
+   {n:'Sidamo',ll:[38.5,6.7],t:'Groot gebied met veel kleine boeren. Zoet en gebalanceerd, met bloemen en citrus. Een goed startpunt als Ethiopië nieuw voor je is.',s:['bloemig','citroen','honing']},
+   {n:'Harrar',ll:[42.1,9.3],t:'Droog oosten, waar altijd natural verwerkt wordt omdat er weinig water is. Zwaar fruit, bijna bosbes en rode wijn.',s:['bosbes','rode wijn','specerij']},
+   {n:'Jimma',ll:[36.8,7.7],t:'Westelijk en groen, met veel bos. Vroeger vooral bulk, nu ook mooie lots met een zachte, kruidige zoetheid.',s:['kruidig','honing','citrus']}]},
+ kenia:{hoogte:'1400–2100 m',bekend:'Het scherpste zuur op de kaart. Vulkanische grond en een veilingsysteem dat kwaliteit beloont — daardoor is de lat hier hoog.',
+  smaak:['zwarte bes','grapefruit','tomaat','bruine suiker'],proc:['washed'],
+  streken:[
+   {n:'Nyeri',ll:[36.95,-0.42],t:'Aan de voet van Mount Kenya, op diepe rode grond. Het meest uitgesproken: zwarte bes, stevig zuur en veel body.',s:['zwarte bes','grapefruit','bruine suiker']},
+   {n:'Kirinyaga',ll:[37.3,-0.5],t:'Dezelfde hooglanden, maar ronder en zoeter. Als Nyeri je te fel is, begin je hier.',s:['tomaat-zoet','rode appel','karamel']},
+   {n:'Kiambu',ll:[36.8,-1.1],t:'Dicht bij Nairobi, met grotere landgoederen. Zachter en klassieker van smaak.',s:['pruim','cacao','citrus']},
+   {n:'Embu',ll:[37.45,-0.53],t:'Kleiner en minder bekend. Steeds vaker experimenteert men hier met natural — ongewoon voor Kenia, en verrassend goed.',s:['aardbei','rum','bruine suiker']}]},
+ sumatra:{hoogte:'1100–1600 m',bekend:'Aards, zwaar en laag in zuur. Dat komt niet van de boon maar van het proces: wet hulling geeft Sumatra zijn eigen handtekening.',
+  smaak:['cederhout','tabak','donkere chocolade','specerij'],proc:['wet hulling','washed'],
+  streken:[
+   {n:'Gayo (Aceh)',ll:[96.8,4.6],t:'Het noordelijkste puntje, rond het Tawarmeer. Iets schoner dan de rest van Sumatra, met kruiden en donker fruit.',s:['specerij','pruim','cacao']},
+   {n:'Lintong',ll:[98.9,2.3],t:'Bij het Tobameer. De klassieke Sumatra: dik, aards, cederhout en tabak. Weinig zuur, veel body.',s:['cederhout','tabak','aarde']}]},
+ sulawesi:{hoogte:'1400–1900 m',bekend:'Schoner en helderder dan Sumatra, terwijl het dezelfde eilandenrij is. Een goede eerste stap in Indonesische koffie.',
+  smaak:['specerij','donkere chocolade','noot'],proc:['wet hulling','washed'],
+  streken:[
+   {n:'Toraja',ll:[119.9,-3],t:'Hoog in de bergen van het binnenland. Vol en zacht, met kaneel en donkere chocolade, en net iets meer zuur dan Sumatra.',s:['kaneel','chocolade','walnoot']}]},
+ costarica:{hoogte:'1000–1900 m',bekend:'Het enige land dat bij wet alleen arabica toestaat. Veel boeren verwerken hun eigen oogst op een kleine micromill, en experimenteren daardoor volop met honey.',
+  smaak:['honing','sinaasappel','amandel','rode appel'],proc:['washed','honey'],
+  streken:[
+   {n:'Tarrazú',ll:[-84,9.65],t:'De bekendste streek, hoog en koel. Helder zuur met een duidelijke zoetheid — netjes en betrouwbaar.',s:['sinaasappel','honing','amandel']},
+   {n:'West Valley',ll:[-84.4,10.05],t:'Waar de meeste micromills staan, en waar honey het verst is doorgevoerd. Vaak zoeter en ronder dan Tarrazú.',s:['rode appel','karamel','abrikoos']},
+   {n:'Brunca',ll:[-83,8.8],t:'Zuidelijk en lager, tegen Panama aan. Zachter zuur, meer chocolade — een makkelijke kop.',s:['cacao','noot','honing']}]},
+ honduras:{hoogte:'1100–1700 m',bekend:'Lang alleen bekend als bulkland, inmiddels een van de spannendste van Midden-Amerika. Goede prijs-kwaliteit, en steeds meer boeren die hun eigen lot apart houden.',
+  smaak:['karamel','citrus','cacao','gedroogd fruit'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Marcala',ll:[-88,14.15],t:'Hoog en droog, met een beschermde herkomstnaam. Zoet en helder, met citrus en karamel.',s:['citrus','karamel','honing']},
+   {n:'Santa Bárbara',ll:[-88.24,14.92],t:'De streek waar de wedstrijdkoffies vandaan komen. Uitgesproken fruitig — perzik, abrikoos, soms tropisch.',s:['perzik','abrikoos','bloemig']},
+   {n:'Copán',ll:[-89.15,14.85],t:'Tegen Guatemala aan, op vulkanische grond. Voller en chocoladiger, met een zachte zuurgraad.',s:['cacao','pruim','noot']}]},
+ tanzania:{hoogte:'1400–2000 m',bekend:'Twee gezichten: het noorden bij de Kilimanjaro lijkt op Kenia, het zuiden is zachter en zoeter. Ook het land van de peaberry — één ronde boon in plaats van twee platte.',
+  smaak:['zwarte bes','citroen','cacao','gedroogde vijg'],proc:['washed','natural'],
+  streken:[
+   {n:'Kilimanjaro',ll:[37.35,-3.07],t:'Op de hellingen van de berg, op vulkanische grond. Fel en helder, het dichtst bij het Keniaanse profiel.',s:['zwarte bes','citroen','bruine suiker']},
+   {n:'Mbeya',ll:[33,-8.9],t:'Het zuidelijke hoogland. Zachter en zoeter, met steenfruit en cacao — een toegankelijke kop.',s:['perzik','cacao','honing']},
+   {n:'Kigoma',ll:[30,-4.9],t:'Bij het Tanganyikameer, afgelegen en klein. Kruidig en vol, met gedroogd fruit.',s:['vijg','specerij','chocolade']}]},
+ rwanda:{hoogte:'1500–2000 m',bekend:'Het land van de duizend heuvels, en van de wasstations: kleine boeren brengen hun kersen naar een gezamenlijk station, en dáár wordt de kwaliteit gemaakt.',
+  smaak:['rode bes','bloemig','sinaasappel','zwarte thee'],proc:['washed','natural'],
+  streken:[
+   {n:'Nyamasheke',ll:[29.15,-2.35],t:'Aan het Kivumeer, waar het water de temperatuur dempt. Bloemig en delicaat, met rode bessen.',s:['rode bes','bloemig','zwarte thee']},
+   {n:'Huye',ll:[29.74,-2.6],t:'In het zuiden, op grote hoogte. Steviger en zoeter, met sinaasappel en karamel.',s:['sinaasappel','karamel','pruim']},
+   {n:'Rulindo',ll:[30,-1.75],t:'Noordelijk en heuvelachtig. Schoon en helder, met een lange zoete afdronk.',s:['citroen','honing','bloemig']}]},
+ india:{hoogte:'900–1600 m',bekend:'Koffie die in de schaduw van peper- en kardemomstruiken groeit — en dat proef je. Weinig zuur, veel kruiden en body. Ook de thuisbasis van monsooned malabar, waar de bonen expres vochtig worden van de moesson.',
+  smaak:['zwarte peper','cacao','kardemom','noot'],proc:['washed','natural'],
+  streken:[
+   {n:'Chikmagalur',ll:[75.77,13.32],t:'Waar de Indiase koffie begon. Vol en kruidig, met cacao en een zachte zuurgraad.',s:['cacao','specerij','noot']},
+   {n:'Coorg (Kodagu)',ll:[75.8,12.4],t:'De grootste streek, tussen peper en sinaasappelbomen. Zwaar en zoet, met een lange afdronk.',s:['zwarte peper','karamel','sinaasappel']},
+   {n:'Araku',ll:[82.87,18.33],t:'Ver naar het noordoosten, een jong project met kleine boeren. Verrassend helder en bloemig voor India.',s:['bloemig','honing','citrus']}]},
+};
+
+/* welke landen heb je al eens gezet? in de echte app komt dit uit je brews */
+const GEHAD=['colombia','brazilie','ethiopie','guatemala','sumatra'];
+
+/* ---- processen: wat doen ze met smaak en mondgevoel ---- */
+const PROCES={
+ 'washed':{u:'De vruchtlaag gaat er meteen af, vóór het drogen.',
+   sm:'helder en rechtlijnig — je proeft de streek, niet het proces',
+   mo:'lichter en schoner, vaak wat theeachtig'},
+ 'natural':{u:'De hele kers droogt om de boon heen.',
+   sm:'veel meer fruit, zoeter, soms bijna wijnachtig',
+   mo:'dikker en siroopachtig'},
+ 'honey':{u:'Het vruchtvlees blijft deels zitten tijdens het drogen.',
+   sm:'tussen washed en natural in: zoeter, maar nog steeds helder',
+   mo:'romiger, met een ronde afdronk'},
+ 'pulped natural':{u:'Braziliaanse variant van honey: schil eraf, plakkerig laagje eromheen.',
+   sm:'zoet en nootachtig, weinig zuur',
+   mo:'vol en zacht'},
+ 'wet hulling':{u:'Indonesisch (giling basah): het vlies gaat er half droog al af.',
+   sm:'aards, kruidig, cederhout — heel weinig zuur',
+   mo:'zwaar en dik, blijft lang hangen'},
+};
+
+/* ---- brandingen ---- */
+const BRAND={
+ light:{n:'light',t:'Houdt het zuur en het karakter van de streek overeind. Voor filter de gebruikelijke keuze.'},
+ medium:{n:'medium',t:'Meer zoet en karamel, minder scherpte. Werkt op filter en espresso allebei.'},
+ dark:{n:'dark',t:'Chocolade, noot en rook nemen het over. Van de herkomst blijft weinig over.'},
+};
+
+/* ---- waar we zijn ---- */
+let niv='wereld', deel=null, land=null, streek=null;
+let kProc=null, kBrand=null, kMeth=null;
+const METHODES=['v60','aeropress','chemex','espresso'];
+
+/* ---- de kaart tekenen ---- */
+function pad(l){return 'M'+l.pts.map(p=>X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('L')+'Z';}
+function doos(lijst,marge){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  lijst.forEach(l=>l.pts.forEach(p=>{
+    const x=X(p[0]),y=Y(p[1]);
+    if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+  }));
+  const m=marge||0;
+  return [x0-m,y0-m,(x1-x0)+m*2,(y1-y0)+m*2];
+}
+/* Het kijkvenster oprekken tot het dezelfde verhouding heeft als het kader,
+   anders staat er links en rechts (of boven en onder) een brede lege rand. */
+const VERH=1.4;
+function opVerhouding(b){
+  let [x,y,w,h]=b;
+  if(w/h<VERH){const nw=h*VERH;x-=(nw-w)/2;w=nw;}
+  else{const nh=w/VERH;y-=(nh-h)/2;h=nh;}
+  return [x,y,w,h];
+}
+const VIEWS={
+ wereld:opVerhouding(doos(LANDEN,8)),
+ amerika:opVerhouding(doos(LANDEN.filter(l=>l.deel==='amerika'),5)),
+ afrika:opVerhouding(doos(LANDEN.filter(l=>l.deel==='afrika'),5)),
+ azie:opVerhouding(doos(LANDEN.filter(l=>l.deel==='azie'),5)),
+};
+/* Op landniveau zoomen we niet op het hele land maar op het teeltgebied.
+   De streken van Kenia liggen binnen één graad van elkaar; op de schaal van
+   het hele land vallen hun namen boven op elkaar. */
+function landView(id){
+  const st=(INFO[id]&&INFO[id].streken)||[];
+  if(!st.length)return opVerhouding(doos([KAART_LAND[id]],4));
+  const xs=st.map(a=>X(a.ll[0])), ys=st.map(a=>Y(a.ll[1]));
+  const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  const m=Math.max((x1-x0)*0.45,(y1-y0)*0.45,2.6);
+  return opVerhouding([x0-m,y0-m,(x1-x0)+m*2,(y1-y0)+m*2]);
+}
+
+let huidigeView=VIEWS.wereld.slice(), tweenId=null;
+/* Het kijkvenster schuift en zoomt in plaats van te springen, zodat je ziet
+   waar je naartoe gaat. De <svg> wordt tussendoor opnieuw opgebouwd, dus we
+   zoeken hem elk beeldje opnieuw op -- vasthouden aan de oude gaat mis. */
+function pasVenster(){
+  const svg=document.querySelector('.kaart'); if(!svg)return;
+  svg.setAttribute('viewBox',huidigeView.map(n=>n.toFixed(2)).join(' '));
+  pasMaten(svg);
+}
+/* Tekst en stippen staan in kaart-eenheden, maar moeten op het scherm altijd
+   even groot zijn. Hoeveel schermpixels één eenheid is hangt van de zoom af,
+   dus rekenen we dat hier na elke stap terug.                              */
+function pasMaten(svg){
+  const r=svg.getBoundingClientRect();
+  if(!r.width)return;
+  const v=huidigeView, s=Math.min(r.width/v[2], r.height/v[3]);
+  if(!(s>0))return;
+  svg.querySelectorAll('.lbl').forEach(t=>{
+    t.style.fontSize=((t.classList.contains('groot')?15.5:11.5)/s)+'px';
+    t.style.strokeWidth=(2.8/s)+'px';   // randje papier eromheen, anders valt
+  });                                   // een naam weg tegen de landsgrens
+  svg.querySelectorAll('.stip').forEach(c=>c.setAttribute('r',(9/s).toFixed(2)));
+  svg.querySelectorAll('.nr').forEach(t=>{
+    t.style.fontSize=(11/s)+'px';
+    t.setAttribute('dy',(3.8/s));
+  });
+  spreidStippen(svg,s);
+}
+/* Twee streken kunnen vijftien kilometer uit elkaar liggen. Op een telefoon
+   vallen hun stippen dan over elkaar en kun je de achterste niet aantikken.
+   Daarom duwen we ze net zo ver uit elkaar dat je ze allebei raakt -- een
+   paar kilometer scheef, en dat mag: dit is een tekening, geen atlas. */
+function spreidStippen(svg,s){
+  const st=[...svg.querySelectorAll('.stip')];
+  if(st.length<2)return;
+  const min=27/s;
+  const pos=st.map(c=>({x:+c.dataset.x0,y:+c.dataset.y0}));
+  for(let ronde=0;ronde<40;ronde++){
+    let bewogen=false;
+    for(let i=0;i<pos.length;i++)for(let j=i+1;j<pos.length;j++){
+      let dx=pos[j].x-pos[i].x, dy=pos[j].y-pos[i].y, d=Math.hypot(dx,dy);
+      if(d<1e-6){dx=min/2;dy=0;d=min/2;}
+      if(d<min){
+        const duw=(min-d)/(2*d);
+        pos[i].x-=dx*duw; pos[i].y-=dy*duw;
+        pos[j].x+=dx*duw; pos[j].y+=dy*duw;
+        bewogen=true;
+      }
+    }
+    if(!bewogen)break;
   }
-  const a=document.getElementById('kaart-leeg'); if(a)a.innerHTML=teken(false);
-  const b=document.getElementById('kaart-sel');  if(b)b.innerHTML=teken(true);
+  st.forEach((c,i)=>{c.setAttribute('cx',pos[i].x);c.setAttribute('cy',pos[i].y);});
+  svg.querySelectorAll('.nr').forEach(t=>{
+    const p=pos[+t.dataset.i]; if(!p)return;
+    t.setAttribute('x',p.x); t.setAttribute('y',p.y);
+  });
+  const naam=svg.querySelector('.lbl.groot[data-i]');
+  if(naam){
+    const p=pos[+naam.dataset.i];
+    if(p){naam.setAttribute('x',p.x); naam.setAttribute('y',p.y-(15/s));}
+  }
+}
+function zetView(doelw){
+  if(tweenId)cancelAnimationFrame(tweenId);
+  const van=huidigeView.slice(), naar=doelw.slice();
+  const t0=performance.now(), duur=520;
+  (function stap(nu){
+    const f=Math.min(1,(nu-t0)/duur);
+    const e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;      // rustig op gang, rustig uit
+    huidigeView=van.map((v,i)=>v+(naar[i]-v)*e);
+    pasVenster();
+    if(f<1)tweenId=requestAnimationFrame(stap); else tweenId=null;
+  })(t0);
+}
+
+function kaartHTML(){
+  const v=huidigeView;
+  let s='<svg class="kaart" viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
+  s+='<rect class="zee" x="-200" y="-200" width="500" height="400"/>';
+  s+='<rect class="band" x="-200" y="'+Y(23.5)+'" width="500" height="'+(Y(-23.5)-Y(23.5))+'"/>';
+  s+='<line class="lijn" x1="-200" y1="'+Y(23.5)+'" x2="300" y2="'+Y(23.5)+'"/>';
+  s+='<line class="lijn eq" x1="-200" y1="0" x2="300" y2="0"/>';
+  s+='<line class="lijn" x1="-200" y1="'+Y(-23.5)+'" x2="300" y2="'+Y(-23.5)+'"/>';
+  ACHTER.forEach(pl=>{
+    s+='<path class="achter" d="M'+pl.map(p=>X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('L')+'Z"/>';
+  });
+  TEKENVOLGORDE.forEach(l=>{
+    let kl='land';
+    if(niv==='wereld'){ if(GEHAD.includes(l.id))kl+=' had'; }
+    else if(l.deel!==deel)kl+=' uit';
+    else if(l.id===land)kl+=' sel';
+    else if(GEHAD.includes(l.id))kl+=' had';
+    const klik=(niv==='wereld')?("kies('deel','"+l.deel+"')")
+              :(l.deel===deel&&INFO[l.id]?("kies('land','"+l.id+"')"):'');
+    s+='<path class="'+kl+'" d="'+pad(l)+'"'+(klik?(' onclick="'+klik+'"'):'')+'></path>';
+  });
+  // opschriften: op wereldniveau de werelddelen, daarbinnen de landnamen
+  if(niv==='wereld'){
+    [['amerika',-62,27],['afrika',22,27],['azie',112,27]].forEach(([d,lo,la])=>{
+      s+='<text class="lbl groot" x="'+X(lo)+'" y="'+Y(la)+'">'+DELEN[d].kort+'</text>';
+    });
+  }else if(niv==='deel'){
+    LANDEN.filter(l=>l.deel===deel).forEach(l=>{
+      const c=middel(l), o=LABELPLEK[l.id]||[0,0];
+      s+='<text class="lbl" x="'+(+c[0]+o[0])+'" y="'+(+c[1]+o[1])+'">'+l.naam+'</text>';
+    });
+  }else{
+    const inf=INFO[land];
+    // om en om boven en onder de stip, zodat namen die dicht bij elkaar
+    // liggen elkaar niet overschrijven
+    /* Streken liggen soms binnen een halve graad van elkaar -- vier namen
+       naast elkaar wordt dan onleesbaar. Daarom krijgen de stippen een
+       nummer dat terugkomt in de lijst eronder, en zie je alleen de naam
+       van de streek die je hebt aangetikt. */
+    (inf.streken||[]).forEach((st,i)=>{
+      const x=X(st.ll[0]), y=Y(st.ll[1]), aan=streek===i;
+      s+='<circle class="stip'+(aan?' sel':'')+'" cx="'+x+'" cy="'+y+
+        '" r="1" data-x0="'+x+'" data-y0="'+y+'" onclick="kies(\'streek\','+i+')"></circle>';
+      s+='<text class="nr'+(aan?' aan':'')+'" x="'+x+'" y="'+y+'" data-i="'+i+
+        '" onclick="kies(\'streek\','+i+')">'+(i+1)+'</text>';
+      if(aan)s+='<text class="lbl groot" x="'+x+'" y="'+y+'" data-i="'+i+
+        '" data-r="-1">'+st.n+'</text>';
+    });
+  }
+  s+='</svg>';
+  return s;
+}
+/* Een paar landen zijn zo klein dat hun naam over de buren valt. Die duwen
+   we een stukje weg; de maat is in kaart-eenheden, dus hij schaalt mee. */
+const LABELPLEK={rwanda:[-4.5,-2.5],burundi:[-4.5,3],oeganda:[0,-3.5],congo:[-4,3],
+  tanzania:[1.5,2.5],kenia:[2,0],costarica:[-3,4],panama:[5,3.5],honduras:[1,-3],
+  nicaragua:[3,1],java:[0,4.5],sulawesi:[6,0.5],ecuador:[-4,0]};
+function middel(l){
+  let sx=0,sy=0;
+  l.pts.forEach(p=>{sx+=X(p[0]);sy+=Y(p[1]);});
+  return [(sx/l.pts.length).toFixed(1),(sy/l.pts.length).toFixed(1)];
+}
+
+/* ---- de tekst onder de kaart ---- */
+function procBlok(namen){
+  return namen.map(n=>{
+    const p=PROCES[n]; if(!p)return '';
+    return '<div class="proc"><div class="n">'+n+'</div>'+
+      '<div class="u">'+p.u+'<br><b>smaak</b> '+p.sm+' · <b>mondgevoel</b> '+p.mo+'</div></div>';
+  }).join('');
+}
+function smaakRij(a){return '<div class="smaakrij">'+a.map(s=>'<span class="smaak">'+s+'</span>').join('')+'</div>';}
+
+function schermWereld(){
+  return '<div class="kop-rij"><div class="t">Waar komt hij vandaan?</div></div>'+
+    '<div class="uitleg-let">Koffie groeit alleen in de band rond de evenaar: warm genoeg, '+
+    'en nooit vorst. Elk stuk van die gordel smaakt anders. Kies waar je nieuwsgierig '+
+    'naar bent, zoom door naar een land en een streek, en je eindigt met een lijstje '+
+    'waarmee je de goede zak herkent.</div>'+
+    '<div class="kaart-doos">'+kaartHTML()+
+    '<div class="kaart-tip">tik op een werelddeel om in te zoomen</div></div>'+
+    '<div class="legenda"><span><i></i> nog niet gehad</span>'+
+    '<span><i class="had"></i> al eens gezet</span></div>'+
+    Object.keys(DELEN).map(d=>{
+      const D=DELEN[d];
+      return '<button class="kies" onclick="kies(\'deel\',\''+d+'\')">'+
+        '<span class="k1">'+D.naam+'</span>'+
+        '<span class="k2">'+D.bekend+'</span></button>';
+    }).join('');
+}
+function schermDeel(){
+  const D=DELEN[deel];
+  const landen=LANDEN.filter(l=>l.deel===deel&&INFO[l.id]);
+  return '<div class="kop-rij"><div class="t">'+D.naam+'</div>'+
+    '<button class="terug" onclick="terug()">‹ wereld</button></div>'+
+    '<div class="kruimel"><b>'+D.kort+'</b></div>'+
+    '<div class="kaart-doos">'+kaartHTML()+
+    '<div class="kaart-tip">tik op een land</div></div>'+
+    '<div class="blok vol"><h3>waar dit deel bekend om staat</h3>'+
+    '<p>'+D.bekend+'</p><p>'+D.waarom+'</p>'+
+    '<div class="etiket">wat je hier tegenkomt</div>'+
+    '<p class="zacht">'+D.proc+'<br>hoogte meestal '+D.hoogte+'</p></div>'+
+    '<div class="etiket">landen met een eigen verhaal</div>'+
+    landen.map(l=>{
+      const inf=INFO[l.id];
+      return '<button class="kies" onclick="kies(\'land\',\''+l.id+'\')">'+
+        '<span class="k1">'+l.naam+'<em>'+inf.hoogte+'</em></span>'+
+        '<span class="k2">'+inf.smaak.slice(0,3).join(' · ')+'</span></button>';
+    }).join('')+
+    '<div class="zacht" style="margin-top:9px">De lichtere landen op de kaart telen ook koffie. '+
+    'Die krijgen hun eigen verhaal zodra we ze uitschrijven.</div>';
+}
+function schermLand(){
+  const L=KAART_LAND[land], inf=INFO[land], D=DELEN[deel];
+  return '<div class="kop-rij"><div class="t">'+L.naam+'</div>'+
+    '<button class="terug" onclick="terug()">‹ '+D.kort+'</button></div>'+
+    '<div class="kruimel"><button onclick="kies(\'deel\',\''+deel+'\')">'+D.kort+'</button> › <b>'+L.naam+'</b></div>'+
+    '<div class="kaart-doos">'+kaartHTML()+
+    '<div class="kaart-tip">tik op een genummerde stip, of kies hieronder</div></div>'+
+    '<div class="blok vol"><h3>waar dit land bekend om staat</h3>'+
+    '<p>'+inf.bekend+'</p>'+
+    '<div class="etiket">de smaken die de brander op de zak zet</div>'+smaakRij(inf.smaak)+
+    '<div class="etiket">hoogte</div><p class="zacht">'+inf.hoogte+'</p></div>'+
+    '<div class="blok"><h3>wat de boer ermee doet</h3>'+
+    '<div class="onder">Alleen de processen die hier ook echt gebruikt worden — en wat ze met je kop doen.</div>'+
+    procBlok(inf.proc)+'</div>'+
+    '<div class="etiket">de streken</div>'+
+    (inf.streken||[]).map((st,i)=>
+      '<button class="kies'+(streek===i?' sel':'')+'" onclick="kies(\'streek\','+i+')">'+
+      '<span class="k1"><span class="bol">'+(i+1)+'</span>'+st.n+'</span>'+
+      '<span class="k2">'+st.s.join(' · ')+'</span></button>').join('')+
+    (streek!=null?streekBlok():'');
+}
+function streekBlok(){
+  const inf=INFO[land], st=inf.streken[streek], L=KAART_LAND[land];
+  const proc=kProc||inf.proc[0], br=kBrand||'light', me=kMeth||'v60';
+  return '<div class="blok vol" style="margin-top:12px"><h3>'+st.n+'</h3>'+
+    '<p>'+st.t+'</p>'+smaakRij(st.s)+'</div>'+
+    '<div class="blok"><h3>hoe wil je hem hebben?</h3>'+
+    '<div class="etiket">proces</div><div class="chips">'+
+    inf.proc.map(p=>'<button class="chip'+(p===proc?' sel':'')+'" onclick="zet(\'proc\',\''+p+'\')">'+p+'</button>').join('')+
+    '</div><p class="zacht" style="margin-top:7px">'+PROCES[proc].u+' Dat geeft een smaak die '+
+    PROCES[proc].sm+', en een mondgevoel dat '+PROCES[proc].mo+' is.</p>'+
+    '<div class="etiket">branding</div><div class="chips">'+
+    Object.keys(BRAND).map(b=>'<button class="chip'+(b===br?' sel':'')+'" onclick="zet(\'brand\',\''+b+'\')">'+b+'</button>').join('')+
+    '</div><p class="zacht" style="margin-top:7px">'+BRAND[br].t+'</p>'+
+    '<div class="etiket">waar zet je hem</div><div class="chips">'+
+    METHODES.map(m=>'<button class="chip'+(m===me?' sel':'')+'" onclick="zet(\'meth\',\''+m+'\')">'+m+'</button>').join('')+
+    '</div><p class="zacht" style="margin-top:7px">'+methodeTip(me,br)+'</p></div>'+
+    '<div class="blok vol"><h3>waar je op let bij de zak</h3>'+
+    '<div class="zak">'+
+    '<em>land</em> '+L.naam+'<br>'+
+    '<em>streek</em> '+st.n+'<br>'+
+    '<em>proces</em> '+proc+'<br>'+
+    '<em>branding</em> '+br+'<br>'+
+    '<em>smaak</em> '+st.s.join(', ')+'<br>'+
+    '<em>gebrand</em> korter dan 3 weken geleden</div>'+
+    '<div class="zoekbalk">🔍 '+L.naam+' '+st.n+' '+proc+' '+(br==='light'?'filter':me)+' specialty</div>'+
+    '<p class="zacht" style="margin-top:8px">In de app wordt dit een echte zoekopdracht langs de '+
+    'branders die jij zelf hebt opgeslagen. Wat er vandaag op hun plank ligt weet de app niet — '+
+    'dat laatste klikje blijft van jou.</p>'+
+    '<button class="knop" onclick="opLijst()">zet op mijn lijstje</button></div>';
+}
+function methodeTip(m,br){
+  if(m==='espresso')return br==='light'
+    ? 'Een light gebrande boon op espresso vraagt fijner malen dan je gewend bent, en het zuur wordt scherper. Mooi als het lukt, maar reken op een paar shots afstellen.'
+    : 'Op espresso komt hier vooral het zoete en de body naar voren. Makkelijk af te stellen.';
+  if(m==='aeropress')return 'De AeroPress vergeeft veel: kortere contacttijd, dus zuur blijft zacht. Een fijne manier om een nieuwe boon te leren kennen.';
+  if(m==='chemex')return 'Het dikke filter houdt olie tegen. Dat geeft een heldere, bijna theeachtige kop — mooi bij bloemige koffie.';
+  return 'De v60 laat het meest van de herkomst horen. Voor een boon waar je nieuwsgierig naar bent is dit de eerlijkste keuze.';
+}
+
+/* ---- klikken ---- */
+window.kies=function(wat,waarde){
+  if(wat==='deel'){deel=waarde;land=null;streek=null;niv='deel';zetView(VIEWS[deel]);}
+  else if(wat==='land'){
+    if(!INFO[waarde])return;
+    land=waarde;streek=null;kProc=null;niv='land';zetView(landView(land));
+  }else if(wat==='streek'){
+    streek=(streek===waarde)?null:waarde;
+  }
+  teken(wat==='streek');
+};
+window.terug=function(){
+  if(niv==='land'){niv='deel';land=null;streek=null;zetView(VIEWS[deel]);}
+  else if(niv==='deel'){niv='wereld';deel=null;zetView(VIEWS.wereld);}
+  teken();
+};
+window.zet=function(k,v){
+  if(k==='proc')kProc=v; else if(k==='brand')kBrand=v; else kMeth=v;
+  teken(true);
+};
+window.opLijst=function(){
+  const st=INFO[land].streken[streek];
+  const b=document.querySelector('.knop');
+  b.textContent='✓ staat op je lijstje';
+  b.style.background='var(--card-2)';b.style.color='var(--ink)';
+  b.style.borderColor='var(--line)';
+};
+
+/* ---- tekenen ---- */
+function teken(behoudScroll){
+  const el=document.getElementById('scherm');
+  const y=behoudScroll?el.scrollTop:0;
+  el.innerHTML=(niv==='wereld')?schermWereld():(niv==='deel'?schermDeel():schermLand());
+  el.scrollTop=y;
+  pasVenster();
+}
+window.addEventListener('resize',()=>{const s=document.querySelector('.kaart');if(s)pasMaten(s);});
+teken();
 })();
 </script>
