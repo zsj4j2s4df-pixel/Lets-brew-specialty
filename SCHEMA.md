@@ -102,6 +102,7 @@ string of een 0 die iets anders betekent.
 |---|---|---|
 | `id` `name` | string | |
 | `roaster` `origin` `process` `variety` | string \| null | van de zak |
+| `region` | object \| null | de plek op de kaart die je zelf aanwees: `{land, i}` — `land` is een land-id uit de keuzehulp, `i` de index van de streek, of `null` als alleen het land bekend is |
 | `altitudeM` | number \| null | teeltHoogte in meters, uit een bereik het midden |
 | `roastLevel` | `light` \| `medium-light` \| `medium` \| `medium-dark` \| `dark` \| null | |
 | `roastDate` | `YYYY-MM-DD` \| null | |
