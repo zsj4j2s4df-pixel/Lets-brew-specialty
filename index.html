@@ -273,6 +273,18 @@
     border:2px solid var(--line);border-radius:18px;padding:10px 13px;margin-bottom:8px;
     font:inherit;cursor:pointer;filter:url(#wobble);}
   .bp-kies.sel{background:var(--card-2);border-color:var(--ink);}
+  /* een streek klapt open ín zijn eigen vak: de kop en alles wat eronder
+     hoort worden samen één kaart, in plaats van een blok verderop */
+  .bp-streek{margin-bottom:8px;}
+  .bp-streek .bp-kies{margin-bottom:0;}
+  .bp-streek.op{border:2px solid var(--ink);border-radius:20px;background:var(--card);
+    filter:url(#wobble);overflow:hidden;}
+  .bp-streek.op .bp-kies{border:none;background:none;filter:none;padding-bottom:4px;}
+  .bp-open{padding:0 14px 13px;}
+  .bp-open h4{font-family:'Caveat',cursive;font-size:22px;font-weight:700;
+    margin:13px 0 4px;line-height:1.05;}
+  .bp-open p{font-size:15.5px;line-height:1.45;margin-bottom:8px;}
+  .bp-open .bp-deel{border-top:1.5px dashed var(--line);margin-top:13px;padding-top:3px;}
   .bp-kies .k1{font-size:17px;display:flex;align-items:center;gap:8px;}
   .bp-kies .k1 em{font-style:normal;color:var(--ink-soft);font-size:14px;margin-left:auto;}
   .bp-kies .k2{display:block;color:var(--ink-soft);font-size:14.5px;line-height:1.35;margin-top:3px;}
@@ -7548,6 +7560,7 @@ function bpLandScherm(){
     '</button> › <b>'+esc(L.naam)+'</b></div>'+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een genummerde stip, of kies hieronder</div></div>'+
+    '<div class="bp-blok"><h3>het droogproces van de boer</h3>'+bpProcBlok(inf.proc)+'</div>'+
     '<div class="bp-blok vol"><h3>waar dit land bekend om staat</h3>'+
     '<p>'+inf.bekend+'</p>'+
     '<div class="bp-et">de smaken die de brander op de zak zet</div>'+bpSmaken(inf.smaak)+
@@ -7555,23 +7568,28 @@ function bpLandScherm(){
     '<div class="bp-et">hoogte</div><p class="bp-zacht">'+esc(inf.hoogte)+
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p></div>'+
-    '<div class="bp-blok"><h3>wat de boer ermee doet</h3>'+bpProcBlok(inf.proc)+'</div>'+
     '<div class="bp-et">de streken</div>'+
     (function(){const g=bpGehadStreken(bpLandId);
-      return (inf.streken||[]).map((st,i)=>
-      '<button class="bp-kies'+(bpStreek===i?' sel':'')+'" onclick="bpKies(\'streek\','+i+')">'+
-      '<span class="k1"><span class="bp-bol">'+(i+1)+'</span>'+esc(st.n)+(g.has(i)?' ✓':'')+'</span>'+
-      '<span class="k2">'+esc(st.s.join(' · '))+'</span></button>').join('');})()+
-    (bpStreek!=null?bpStreekBlok():'');
+      return (inf.streken||[]).map((st,i)=>{
+        const op=bpStreek===i;
+        return '<div class="bp-streek'+(op?' op':'')+'">'+
+          '<button class="bp-kies'+(op?' sel':'')+'" onclick="bpKies(\'streek\','+i+')">'+
+          '<span class="k1"><span class="bp-bol">'+(i+1)+'</span>'+esc(st.n)+(g.has(i)?' ✓':'')+'</span>'+
+          '<span class="k2">'+esc(st.s.join(' · '))+'</span></button>'+
+          (op?bpStreekBlok():'')+'</div>';
+      }).join('');})();
 }
+/* Wat er onder een aangetikte streek uitklapt. Bewust zonder eigen kaders:
+   het zit al ín de streekkaart, en een kaart in een kaart leest niet. */
 function bpStreekBlok(){
   const inf=BP_INFO[bpLandId], st=inf.streken[bpStreek], L=BP_LAND[bpLandId];
   const proc=(bpProc&&inf.proc.includes(bpProc))?bpProc:inf.proc[0];
   const br=bpBrand||'light', me=bpMeth||bpEersteMethode();
-  return '<div class="bp-blok vol" style="margin-top:12px"><h3>'+esc(st.n)+'</h3>'+
+  return '<div class="bp-open">'+
     '<p>'+esc(st.t)+'</p>'+bpSmaken(st.s)+
-    '<div class="bp-et">variëteit</div><p class="bp-zacht">'+esc(st.v||inf.var)+'</p></div>'+
-    '<div class="bp-blok"><h3>hoe wil je hem hebben?</h3>'+
+    '<div class="bp-et">variëteit</div><p class="bp-zacht">'+esc(st.v||inf.var)+'</p>'+
+
+    '<div class="bp-deel"><h4>hoe wil je hem hebben?</h4>'+
     '<div class="bp-et">proces</div><div class="bp-chips">'+
     inf.proc.map(p=>'<button class="bp-chip'+(p===proc?' sel':'')+'" onclick="bpZet(\'proc\',\''+p+'\')">'+esc(p)+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+esc(BP_PROCES[proc].u)+' Dat geeft een smaak die '+
@@ -7582,7 +7600,8 @@ function bpStreekBlok(){
     '<div class="bp-et">waar zet je hem</div><div class="bp-chips">'+
     bpMethodes().map(m=>'<button class="bp-chip'+(m.id===me?' sel':'')+'" onclick="bpZet(\'meth\',\''+m.id+'\')">'+esc(m.name)+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+bpMethodeTip(me,br)+'</p></div>'+
-    '<div class="bp-blok vol"><h3>waar je op let bij de zak</h3>'+
+
+    '<div class="bp-deel"><h4>waar je op let bij de zak</h4>'+
     '<div class="bp-zak">'+
     '<em>land</em> '+esc(L.naam)+'<br>'+
     '<em>streek</em> '+esc(st.n)+'<br>'+
@@ -7595,10 +7614,10 @@ function bpStreekBlok(){
     '<div class="bp-knoppen">'+
     '<button class="bp-knop leeg" onclick="bpKopieer()">kopieer</button>'+
     '<button class="bp-knop leeg" onclick="bpZoekOpen()">zoek online</button></div>'+
-    '<p class="bp-zacht" style="margin-top:9px">Wat er vandaag bij een brander op de plank ligt '+
-    'weet de app niet — dat laatste klikje blijft van jou.</p>'+
+    '<p class="bp-zacht" style="margin-top:9px">Wat er vandaag bij een brander op de plank '+
+    'ligt weet de app niet — dat laatste klikje blijft van jou.</p>'+
     '<div class="bp-knoppen"><button class="bp-knop" onclick="bpOpLijst()">zet op mijn lijstje</button></div>'+
-    '</div>';
+    '</div></div>';
 }
 function bpMethodes(){
   const aan=(state.methods||[]).filter(m=>m.on);
