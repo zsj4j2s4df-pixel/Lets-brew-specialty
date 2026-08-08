@@ -65,18 +65,48 @@ dat je er iets aan toevoegt. Zeg altijd deze drie dingen:
 Vraag jezelf bij elke stap: kan de app dit zelf al invullen? Zo ja, vul het in
 en laat de gebruiker corrigeren. Invullen is beter dan vragen.
 
-### 3. Teken het als mockup
+### 3. Teken het — als schets of als werkend prototype
 
-Lees `references/mockup.md` en bouw het bestand. Kort samengevat:
+Kies eerst welke van de twee je maakt. Ze gebruiken dezelfde bouwer, maar het
+zijn verschillende dingen:
+
+| | **schets** | **werkend prototype** |
+|---|---|---|
+| wat het is | losse telefoonschermen naast elkaar | één app die je echt kunt gebruiken |
+| wanneer | het idee staat nog niet vast | het idee is duidelijk, de details niet |
+| knoppen | doen niets | doen echt iets |
+| lezen op | een groot scherm, alles in één blik | een telefoon, zoals de app zelf |
+
+**Twijfel je? Maak een schets.** Die is sneller, en je ziet in één blik of de
+volgorde klopt. Een prototype maak je als de gebruiker erdoorheen moet kunnen
+lopen, of als het gedrag (zoomen, slepen, rekenen) juist het punt is.
+
+Bouw allebei met dezelfde bouwer:
 
 ```sh
 python3 .claude/skills/nieuwe-feature/scripts/bouw-mockup.py <jouw-body.html> /tmp/mockup.html
 ```
 
-De bouwer zet de huisstijl, de lettertypes en de potloodfilters eromheen, zodat
-je alleen de schermen zelf hoeft te schrijven. Publiceer `/tmp/mockup.html` met
-de `Artifact`-tool. Elke nieuwe functie krijgt een **eigen** artifact-URL —
-overschrijf de nakijkversie of de handleiding nooit.
+Die zet de huisstijl, de lettertypes en de potloodfilters eromheen. Voor een
+**schets** krijg je het telefoonkader er gratis bij. Voor een **prototype**
+overschrijf je in je eigen `<style>` bovenaan de body drie dingen, zodat de
+telefoon het hele scherm vult:
+
+```css
+body{padding:0;height:100dvh;overflow:hidden;}
+.mk-wrap{max-width:430px;width:100%;margin:0;}
+.phone{width:100%;max-width:430px;height:100dvh;border:none;border-radius:0;filter:none;}
+```
+
+Publiceer `/tmp/mockup.html` met de `Artifact`-tool. Elke nieuwe functie krijgt
+een **eigen** artifact-URL — overschrijf de nakijkversie of de handleiding
+nooit. Groeit een schets later uit tot een prototype, dan blijft dat dezelfde
+URL: het is nog steeds dezelfde functie.
+
+Eén valkuil die in beide standen bijt: een `<button>` zonder eigen `color` en
+`font` pakt de systeemkleur van de browser. Op een iPhone wordt je tekst dan
+blauw en valt hij buiten de huisstijl. Zet dus altijd
+`color:var(--ink);font:inherit` op elke knop die je zelf maakt.
 
 ### 4. Bewaar de opzet in de repo
 

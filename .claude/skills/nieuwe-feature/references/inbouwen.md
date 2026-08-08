@@ -57,3 +57,10 @@ werkbranch en meld je dat het klaarstaat.
   `el.closest('.…')`.
 - **Een tekstveld erbij terwijl er al een kaart voor is.** Kijk eerst of het
   ergens hoort waar het al staat.
+- **Een `<button>` zonder eigen `color` en `font`.** Die pakt de systeemkleur
+  van de browser; op een iPhone wordt de tekst dan blauw. Elke knop die je zelf
+  maakt krijgt `color:var(--ink);font:inherit`.
+- **Tekst in een SVG die meeschaalt met de zoom.** Lettergroottes staan daar in
+  kaart-eenheden, niet in schermpixels. Zoom je in, dan krimpt of groeit je
+  tekst mee tot hij onleesbaar is. Reken de maat na elke zoomstap terug uit de
+  verhouding tussen het kijkvenster en het kader.

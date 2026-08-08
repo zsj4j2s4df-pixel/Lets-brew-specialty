@@ -81,8 +81,9 @@ body{padding:0;background:var(--desk);display:flex;justify-content:center;
 .kies .k1 em{font-style:normal;color:var(--ink-soft);font-size:13.5px;margin-left:6px;}
 .kies .k2{display:block;color:var(--ink-soft);font-size:14px;line-height:1.35;margin-top:2px;}
 .chips{display:flex;flex-wrap:wrap;gap:7px;}
-.chip{background:var(--card);border:2px solid var(--line);border-radius:15px;
-  padding:5px 12px;font-size:15px;cursor:pointer;filter:url(#wobble);}
+.chip{background:var(--card);color:var(--ink);border:2px solid var(--line);
+  border-radius:15px;padding:5px 12px;font:inherit;font-size:15px;cursor:pointer;
+  filter:url(#wobble);}
 .chip.sel{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--cream);}
 .knop{display:block;width:100%;text-align:center;background:var(--accent-soft);
   color:var(--cream);border:2px solid var(--accent-soft);border-radius:20px;
@@ -544,7 +545,6 @@ function schermLand(){
     '<div class="etiket">de smaken die de brander op de zak zet</div>'+smaakRij(inf.smaak)+
     '<div class="etiket">hoogte</div><p class="zacht">'+inf.hoogte+'</p></div>'+
     '<div class="blok"><h3>wat de boer ermee doet</h3>'+
-    '<div class="onder">Alleen de processen die hier ook echt gebruikt worden — en wat ze met je kop doen.</div>'+
     procBlok(inf.proc)+'</div>'+
     '<div class="etiket">de streken</div>'+
     (inf.streken||[]).map((st,i)=>

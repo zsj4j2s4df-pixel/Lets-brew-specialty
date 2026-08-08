@@ -152,6 +152,17 @@ twaalf.
   "attempts":[{"at":"…","grind":"4.2","time":"0:28","timeSec":28,"yield":36,"dose":18}] }
 ```
 
+### wishlist
+
+Bonen die je via de keuzehulp koos maar nog niet gekocht hebt. Ze staan boven
+je bonenplank, en "gekocht" opent het bonenformulier met alles al ingevuld.
+
+```json
+{ "id":"…", "land":"Kenia", "streek":"Kirinyaga", "proces":"washed",
+  "variety":"SL28, SL34, Ruiru 11", "brand":"light",
+  "smaak":["tomaat-zoet","rode appel"], "zoek":"…", "at":1234567890 }
+```
+
 ### gear
 
 `{id, name, category, kind, grindMin, grindMax}` — `category` is de methodefamilie
