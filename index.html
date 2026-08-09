@@ -252,6 +252,7 @@
   .bp-legenda i{width:11px;height:11px;border-radius:3px;border:1.5px solid var(--ink);
     display:inline-block;background:var(--card);}
   .bp-legenda i.had{background:#c3ad91;}
+  .bp-legenda i.wenskleur{background:none;border-style:dashed;}
   .bp-blok{background:var(--card);border:2px solid var(--line);border-radius:20px;
     padding:12px 15px;margin-bottom:11px;filter:url(#wobble);}
   .bp-blok.vol{border-color:var(--ink);}
@@ -312,6 +313,27 @@
     line-height:1.45;color:var(--ink-soft);margin-bottom:12px;}
   .bp-let b{color:var(--ink);font-weight:400;}
   .wens-card{border-style:dashed!important;}
+  .wens-sect{padding:0;}
+  .wens-kop{display:flex;align-items:baseline;gap:9px;width:100%;background:none;
+    border:none;padding:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;}
+  .wens-kop .hand{font-size:26px;}
+  .wens-kop .sd{color:var(--ink-soft);font-size:16px;flex:1;}
+  .wens-arr{color:var(--ink-soft);font-size:20px;}
+  .wens-tag{font-size:14px;color:var(--ink-soft);border:1.5px solid var(--line);
+    border-radius:10px;padding:1px 8px;vertical-align:3px;}
+  .plank-deur{margin-top:-4px;}
+  .bh-blend{font-size:14px;color:var(--ink-soft);margin-bottom:5px;}
+  .plank-kaart .wens{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 2;
+    vector-effect:non-scaling-stroke;}
+  .bp-kaart .stip.wens{fill:var(--paper);stroke-dasharray:3 2;}
+  .bp-kaart .land.wens{fill:var(--card-2);stroke-dasharray:5 3;}
+  .bp-mijn{border-top:1.5px dashed var(--line);margin-top:13px;padding-top:3px;}
+  .bp-mijnkaart{display:block;width:100%;text-align:left;background:var(--card-2);
+    border:2px solid var(--line);border-radius:16px;padding:9px 12px;margin-bottom:7px;
+    font:inherit;color:var(--ink);cursor:pointer;filter:url(#wobble);}
+  .bp-mijnkaart.wens{border-style:dashed;background:none;}
+  .bp-mijnkaart .mn{font-size:16.5px;}
+  .bp-mijnkaart .mr{display:block;color:var(--ink-soft);font-size:14px;line-height:1.35;margin-top:2px;}
   .bh-rij{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
   .bh-uit{flex:1;min-width:0;font-size:15px;}
   .bh-uit b{display:block;font-size:16px;}
@@ -1539,7 +1561,7 @@
         <div class="field"><label>origin</label><input id="b-origin" placeholder="country / region"></div>
         <div class="field"><label>process</label><input id="b-process" placeholder="washed / natural"></div>
       </div>
-      <div class="field" id="b-herkomst-veld"><div id="b-herkomst"></div></div>
+      <div class="field" id="b-herkomst-veld"><label>op de kaart</label><div id="b-herkomst"></div></div>
       <div class="field-row">
         <div class="field"><label>variety</label><input id="b-variety" placeholder="e.g. heirloom"></div>
         <div class="field"><label>altitude (m)</label><input id="b-altitude" placeholder="e.g. 1900-2100"></div>
@@ -1630,8 +1652,8 @@
 
       <div class="learn-card sketch" id="beanpick-card" style="background:var(--v60)" onclick="bpOpen()">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12.2 2.6 Q18.4 3.1 20.8 8.4 Q22.6 13.6 19.1 18.1 Q15.4 22 10.1 20.9 Q4.6 19.6 2.9 14.4 Q1.6 9.2 5.6 5.3 Q8.4 2.7 12.4 2.7"/><path d="M2.6 11.8 Q11.8 10.9 21.3 11.9" opacity="0.55"/><path d="M12.1 2.8 Q8.4 7.4 8.6 12.1 Q8.8 17.2 12.3 20.9" opacity="0.55"/><path d="M12.1 2.8 Q16 7.4 15.8 12.1 Q15.6 17.2 12.3 20.9" opacity="0.35"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">welke zak koop ik nu?</div>
-          <div class="lc-d" id="beanpick-sub">van een koffieland naar een streek — en wat er op de zak moet staan</div></div>
+        <div class="lc-body"><div class="lc-t hand">waar komt koffie vandaan?</div>
+          <div class="lc-d" id="beanpick-sub">de wereldkaart van de koffiegordel — land, streek, proces en variëteit</div></div>
         <div class="lc-arr">›</div>
       </div>
 
@@ -1696,6 +1718,30 @@
       <div id="latte-content"></div>
     </div>
   </div>
+  <!-- EEN ZAK OP JE LIJSTJE -->
+  <div id="page-wens" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen">
+      <div class="form-head"><div class="h hand" id="wens-title">nieuwe wens</div>
+        <button onclick="wensAnnuleer()">cancel</button></div>
+      <div class="subtitle">een zak die je nog wilt kopen. Alles mag leeg blijven behalve de naam.</div>
+      <div class="field"><label>naam</label><input id="w-naam" placeholder="e.g. Kirinyaga AA"></div>
+      <div class="field"><label>brander</label><input id="w-brander" placeholder="e.g. Friedhats"></div>
+      <div class="field"><label>link naar de zak</label>
+        <input id="w-url" placeholder="https://…" inputmode="url">
+        <div class="fx-note">plak de pagina van de brander, dan vind je hem zo terug</div></div>
+      <div class="field"><label>herkomst</label><div id="w-herkomst"></div></div>
+      <div class="field-row">
+        <div class="field"><label>proces</label><input id="w-proces" placeholder="washed / natural"></div>
+        <div class="field"><label>variëteit</label><input id="w-var" placeholder="SL28, SL34"></div>
+      </div>
+      <div class="field"><label>branding</label><div class="bp-chips" id="w-brand"></div></div>
+      <div class="field"><label>waarom wil je deze?</label>
+        <textarea id="w-notitie" placeholder="vrije notitie (optioneel)"></textarea></div>
+      <button class="save-btn" onclick="wensOpslaan()">bewaar op mijn lijstje</button>
+    </div>
+  </div>
+
   <!-- BONENKEUZEHULP: van het land tot in je kop -->
   <div id="page-beanpick" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
@@ -2562,7 +2608,7 @@ async function load(){
       }
     }catch(e){}
   }
-  if(s&&s.methods&&s.brews){hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();return;}
+  if(s&&s.methods&&s.brews){hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();try{bpMigreerWensen();}catch(e){}return;}
   state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[],prepItems:JSON.parse(JSON.stringify(DEFAULT_PREP))};
   save();
 }
@@ -2676,9 +2722,9 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick'];
+const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick','wens'];
 const navMap={home:'home',choosebean:'brews',form:'home',dialin:'home',recipe:'brews',detail:'home',
-  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'learn',profile:'profile'};
+  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'beans',wens:'beans',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -2722,6 +2768,7 @@ function go(p,isBack){
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLatte();
   if(p==='beanpick')bpTeken();
+  if(p==='wens'){renderWensHerkomst();renderWensBrand();}
   if(p==='profile')renderProfile();
   applyAIVisibility();
   document.querySelector('.phone').scrollTop=0;
@@ -5162,13 +5209,13 @@ function beanCardHTML(b){
     if(fresh)bits.push('<span class="fresh">'+fresh.label+'</span>');
     const vast=beanDial(b,null);
     if(vast)bits.push('dial '+esc(vast[0].grind));
-    return `<div class="bean-card sketch soft collapsed" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
+    return `<div class="bean-card sketch soft collapsed" data-bean="${b.id}" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
       <div class="brow"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▸</span></div>
       <div class="bean-meta">${bits.join(' <span class="dot">·</span> ')}</div>
     </div>`;
   }
   const methodLine=mList.length?('<br>method'+(mList.length>1?'s':'')+': '+mList.map(x=>'<span class="bean-method"><span class="bean-method-ic">'+iconHTML(x,18)+'</span>'+esc(x.name)+'</span>').join(' ')):'';
-  return `<div class="bean-card sketch soft" style="background:${tint};${inStock?'':'opacity:.7'}">
+  return `<div class="bean-card sketch soft" data-bean="${b.id}" style="background:${tint};${inStock?'':'opacity:.7'}">
     <div class="brow">
       <div class="bean-head" onclick="toggleBeanCard('${b.id}')"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▾</span></div>
       <div class="brow-btns">
@@ -5236,7 +5283,7 @@ function openBeanForm(){
   document.getElementById('scan-status').textContent='';
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null;const lp=document.getElementById('label-preview');if(lp)lp.innerHTML='';
-  beanFormMethods=[];beanFormFam=null;beanFormRoast=null;beanFormRegion=null;
+  beanFormMethods=[];beanFormFam=null;beanFormRoast=null;beanFormRegions=[];
   renderBeanFormMethods();renderBeanFam();renderBeanRoast();renderBeanHerkomst();go('beanform');applyAIVisibility();
 }
 function editBean(id){
@@ -5246,7 +5293,8 @@ function editBean(id){
   const set=(f,v)=>{const el=document.getElementById(f);if(el)el.value=v||'';};
   set('b-name',b.name);set('b-roaster',b.roaster);set('b-origin',b.origin);
   set('b-process',b.process);set('b-variety',b.variety);set('b-altitude',b.altitude);
-  beanFormRegion=b.region||null;renderBeanHerkomst();
+  beanFormRegions=bpRegios(b).filter(r=>r.zelf).map(r=>({land:r.land,i:r.i}));
+  renderBeanHerkomst();
   set('b-roastdate',b.roastdate);set('b-roasternotes',b.roasternotes);
   set('b-url',b.url);set('b-notes',b.notes);set('b-price',b.price);set('b-bagsize',b.bagsize);
   document.getElementById('scan-status').textContent='';
@@ -5310,7 +5358,8 @@ function saveBean(){
     process:document.getElementById('b-process').value.trim(),
     variety:document.getElementById('b-variety').value.trim(),
     altitude:document.getElementById('b-altitude').value.trim(),
-    region:beanFormRegion||null,
+    regions:beanFormRegions.slice(),
+    region:beanFormRegions[0]||null,
     roastdate:document.getElementById('b-roastdate').value,
     roasternotes:document.getElementById('b-roasternotes').value.trim(),
     url:document.getElementById('b-url').value.trim(),
@@ -7295,16 +7344,21 @@ function bpStreekVanBoon(b,landId){
    oogopslag waar je nog nooit geweest bent. */
 function bpGehad(){
   const uit=new Set();
-  (state.beans||[]).forEach(b=>{const r=bpRegioVanBoon(b);if(r)uit.add(r.land);});
+  (state.beans||[]).forEach(b=>bpRegios(b).forEach(r=>uit.add(r.land)));
+  return uit;
+}
+// landen waar alleen nog een wens ligt
+function bpGewenst(){
+  const uit=new Set();
+  (state.wishlist||[]).forEach(w=>bpRegios(w).forEach(r=>uit.add(r.land)));
   return uit;
 }
 // en hetzelfde een niveau dieper: welke streken van dit land had je al?
 function bpGehadStreken(landId){
   const uit=new Set();
-  (state.beans||[]).forEach(b=>{
-    const r=bpRegioVanBoon(b);
-    if(r&&r.land===landId&&r.i!=null)uit.add(r.i);
-  });
+  (state.beans||[]).forEach(b=>bpRegios(b).forEach(r=>{
+    if(r.land===landId&&r.i!=null)uit.add(r.i);
+  }));
   return uit;
 }
 function bpPaspoortRegel(){
@@ -7312,7 +7366,7 @@ function bpPaspoortRegel(){
   const n=bpGehad().size, totaal=Object.keys(BP_INFO).length;
   el.textContent=n
     ? (n+' van de '+totaal+' landen gehad — kijk waar je nog niet geweest bent')
-    : 'van een koffieland naar een streek — en wat er op de zak moet staan';
+    : 'de wereldkaart van de koffiegordel — land, streek, proces en variëteit';
 }
 
 const BP_PROCES={
@@ -7554,7 +7608,7 @@ function bpZoom(doel){
 }
 
 function bpKaartHTML(){
-  const v=bpView, gehad=bpGehad();
+  const v=bpView, gehad=bpGehad(), gewenst=bpGewenst();
   let s='<svg class="bp-kaart" viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
   s+='<rect class="zee" x="-200" y="-200" width="500" height="400"/>';
   s+='<rect class="band" x="-200" y="'+bpY(23.5)+'" width="500" height="'+(bpY(-23.5)-bpY(23.5))+'"/>';
@@ -7566,10 +7620,11 @@ function bpKaartHTML(){
   });
   BP_VOLGORDE.forEach(l=>{
     let kl='land';
-    if(bpNiv==='wereld'){ if(gehad.has(l.id))kl+=' had'; }
+    if(bpNiv==='wereld'){ if(gehad.has(l.id))kl+=' had'; else if(gewenst.has(l.id))kl+=' wens'; }
     else if(l.deel!==bpDeel)kl+=' uit';
     else if(l.id===bpLandId)kl+=' sel';
     else if(gehad.has(l.id))kl+=' had';
+    else if(gewenst.has(l.id))kl+=' wens';
     const klik=(bpNiv==='wereld')?("bpKies('deel','"+l.deel+"')")
               :(l.deel===bpDeel&&BP_INFO[l.id]?("bpKies('land','"+l.id+"')"):'');
     s+='<path class="'+kl+'" d="'+bpPad(l)+'"'+(klik?(' onclick="'+klik+'"'):'')+'></path>';
@@ -7589,7 +7644,8 @@ function bpKaartHTML(){
     const inf=BP_INFO[bpLandId], gehadSt=bpGehadStreken(bpLandId);
     (inf.streken||[]).forEach((st,i)=>{
       const x=bpX(st.ll[0]), y=bpY(st.ll[1]), aan=bpStreek===i;
-      s+='<circle class="stip'+(aan?' sel':(gehadSt.has(i)?' had':''))+'" cx="'+x+'" cy="'+y+'" r="1" data-x0="'+x+
+      const wensSt=bpWensenVoor(bpLandId,i).length>0;
+      s+='<circle class="stip'+(aan?' sel':(gehadSt.has(i)?' had':(wensSt?' wens':'')))+'" cx="'+x+'" cy="'+y+'" r="1" data-x0="'+x+
         '" data-y0="'+y+'" onclick="bpKies(\'streek\','+i+')"></circle>';
       s+='<text class="nr'+(aan?' aan':'')+'" x="'+x+'" y="'+y+'" data-i="'+i+
         '" onclick="bpKies(\'streek\','+i+')">'+(i+1)+'</text>';
@@ -7623,6 +7679,25 @@ function bpProcBlok(namen){
 }
 function bpSmaken(a){return '<div class="bp-smaken">'+a.map(x=>'<span class="bp-smaak">'+esc(x)+'</span>').join('')+'</div>';}
 
+/* Kom je hier vanaf je bonenplank, dan wil je eerst zien waar je zelf al
+   geweest bent — en pas daarna de rest van de wereld. */
+function bpPlankBlok(){
+  const gehad=[...bpGehad()], wensen=state.wishlist||[];
+  if(!gehad.length&&!wensen.length)return '';
+  const totaal=Object.keys(BP_INFO).length;
+  let h='<div class="bp-blok vol"><h3>jouw plank</h3>';
+  if(gehad.length)h+='<div class="bp-et">landen die je had</div><div class="bp-chips">'+
+    gehad.map(id=>'<button class="bp-chip" onclick="bpKies(\'land\',\''+id+'\')">'+
+      esc(BP_LAND[id].naam)+'</button>').join('')+'</div>';
+  if(wensen.length)h+='<div class="bp-et">op je lijstje</div><div class="bp-chips">'+
+    wensen.map(w=>{const r=bpRegios(w)[0];
+      return r?('<button class="bp-chip" onclick="bpKies(\'land\',\''+r.land+'\')">'+
+        esc(w.naam||bpRegioTekst(r))+'</button>'):('<span class="bp-smaak">'+esc(w.naam||'')+'</span>');
+    }).join('')+'</div>';
+  h+='<p class="bp-zacht" style="margin-top:9px">Nog nooit gehad: '+
+    (totaal-gehad.length)+' van de '+totaal+' landen met een verhaal.</p></div>';
+  return h;
+}
 function bpWereld(){
   const gehad=bpGehad();
   return '<div class="bp-kop"><div class="t">waar komt hij vandaan?</div>'+
@@ -7633,7 +7708,9 @@ function bpWereld(){
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een werelddeel om in te zoomen</div></div>'+
     '<div class="bp-legenda"><span><i></i> nog niet gehad</span>'+
-    '<span><i class="had"></i> al eens gehad'+(gehad.size?(' ('+gehad.size+')'):'')+'</span></div>'+
+    '<span><i class="had"></i> al eens gehad'+(gehad.size?(' ('+gehad.size+')'):'')+'</span>'+
+    ((state.wishlist||[]).length?'<span><i class="wenskleur"></i> op je lijstje</span>':'')+'</div>'+
+    bpPlankBlok()+
     Object.keys(BP_DELEN).map(d=>
       '<button class="bp-kies" onclick="bpKies(\'deel\',\''+d+'\')">'+
       '<span class="k1">'+esc(BP_DELEN[d].naam)+'</span>'+
@@ -7679,7 +7756,7 @@ function bpLandScherm(){
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p></div>'+
     '<div class="bp-blok"><h3>het droogproces van de boer</h3>'+bpProcBlok(inf.proc)+'</div>'+
-    (bpVoorBoon?('<div class="bp-blok vol"><h3>welke streek?</h3>'+
+    (bpVoor?('<div class="bp-blok vol"><h3>welke streek?</h3>'+
       '<p class="bp-zacht">Zegt de zak alleen het land, dan is dat ook goed.</p>'+
       '<div class="bp-knoppen"><button class="bp-knop leeg" onclick="bpNeemHerkomst(null)">'+
       'alleen '+esc(L.naam)+', geen streek</button></div></div>'):'')+
@@ -7701,12 +7778,8 @@ function bpStreekBlok(){
   const inf=BP_INFO[bpLandId], st=inf.streken[bpStreek], L=BP_LAND[bpLandId];
   const proc=(bpProc&&inf.proc.includes(bpProc))?bpProc:inf.proc[0];
   const br=bpBrand||'light', me=bpMeth||bpEersteMethode();
-  const mijne=bpBonenVoor(bpLandId,bpStreek);
   return '<div class="bp-open">'+
     '<p>'+esc(st.t)+'</p>'+bpSmaken(st.s)+
-    (mijne.length?('<p class="bp-zacht" style="margin-top:9px"><b>op je plank:</b> '+
-      mijne.map(b=>esc(b.name)+(b.roaster?(' van '+esc(b.roaster)):'')+
-        (bpScoreVan(b)?(' — je scoorde hem '+bpScoreVan(b)):'')).join('<br>')+'</p>'):'')+
     '<div class="bp-et">hoogte</div><p class="bp-zacht">'+esc(st.h||inf.hoogte)+
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p>'+
@@ -7739,10 +7812,10 @@ function bpStreekBlok(){
     '<button class="bp-knop leeg" onclick="bpZoekOpen()">zoek via Google</button></div>'+
     '<p class="bp-zacht" style="margin-top:9px">Wat er vandaag bij een brander op de plank '+
     'ligt weet de app niet — dat laatste klikje blijft van jou.</p>'+
-    '<div class="bp-knoppen">'+(bpVoorBoon
-      ? '<button class="bp-knop" onclick="bpNeemHerkomst('+bpStreek+')">✓ dit is mijn boon</button>'
+    '<div class="bp-knoppen">'+(bpVoor
+      ? '<button class="bp-knop" onclick="bpNeemHerkomst('+bpStreek+')">✓ deze is het</button>'
       : '<button class="bp-knop" onclick="bpOpLijst()">zet op mijn lijstje</button>')+'</div>'+
-    '</div></div>';
+    '</div>'+bpUitJeKast(bpLandId,bpStreek)+'</div>';
 }
 function bpMethodes(){
   const aan=(state.methods||[]).filter(m=>m.on);
@@ -7782,14 +7855,14 @@ function bpKies(wat,waarde){
   }
   bpTeken(wat==='streek');
 }
-function bpOpen(){bpVoorBoon=false;go('beanpick');}
+function bpOpen(){bpVoor=null;go('beanpick');}
 function bpNaarWereld(){
   bpNiv='wereld';bpDeel=null;bpLandId=null;bpStreek=null;bpZoom(BP_VIEWS.wereld);bpTeken();
 }
 function bpTerug(){
   if(bpNiv==='land'){bpNiv='deel';bpLandId=null;bpStreek=null;bpZoom(BP_VIEWS[bpDeel]);}
   else if(bpNiv==='deel'){bpNiv='wereld';bpDeel=null;bpZoom(BP_VIEWS.wereld);}
-  else{go(bpVoorBoon?'beanform':'learn');bpVoorBoon=false;return;}
+  else{go(bpVoor==='wens'?'wens':(bpVoor==='bean'?'beanform':'beans'));bpVoor=null;return;}
   bpTeken();
 }
 function bpZet(k,v){
@@ -7807,75 +7880,192 @@ function bpZoekOpen(){
 }
 /* De uitkomst gaat op je plank te staan als wens. Koop je hem echt, dan staat
    alles al ingevuld en hoef je alleen de branddatum nog toe te voegen. */
+/* ---------------- je lijstje ----------------
+   Een wens is een zak die je nog niet hebt. Hij ontstaat aan het eind van de
+   keuzehulp, of je vult hem zelf in als je er ergens een tegenkwam. In
+   allebei de gevallen kun je hem toekennen aan een plek op de kaart, en dan
+   staat hij daar tussen je eigen bonen.                                    */
+let wensRegions=[], wensBewerk=null, wensBrand='light';
+function bpNieuweWens(){
+  wensBewerk=null; wensRegions=[]; wensBrand='light';
+  ['w-naam','w-brander','w-url','w-proces','w-var','w-notitie'].forEach(i=>{
+    const e=document.getElementById(i); if(e)e.value='';
+  });
+  document.getElementById('wens-title').textContent='nieuwe wens';
+  renderWensHerkomst(); renderWensBrand(); go('wens');
+}
+function bpWijzigWens(id){
+  const w=(state.wishlist||[]).find(x=>x.id===id); if(!w)return;
+  wensBewerk=id; wensRegions=(bpRegios(w)||[]).map(r=>({land:r.land,i:r.i}));
+  wensBrand=w.brand||'light';
+  const zet=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||'';};
+  zet('w-naam',w.naam||w.streek||''); zet('w-brander',w.brander);
+  zet('w-url',w.url); zet('w-proces',w.proces); zet('w-var',w.variety);
+  zet('w-notitie',w.notitie);
+  document.getElementById('wens-title').textContent='wens bijwerken';
+  renderWensHerkomst(); renderWensBrand(); go('wens');
+}
+function renderWensHerkomst(){
+  const el=document.getElementById('w-herkomst'); if(!el)return;
+  el.innerHTML=bpHerkomstKiezer(wensRegions,'wensHerkomstWeg','bpKiesWensHerkomst');
+}
+function wensHerkomstWeg(i){wensRegions.splice(i,1);renderWensHerkomst();}
+function bpKiesWensHerkomst(){bpKiesHerkomstVoor('wens');}
+function renderWensBrand(){
+  const el=document.getElementById('w-brand'); if(!el)return;
+  el.innerHTML=Object.keys(BP_BRAND).map(b=>
+    '<button type="button" class="bp-chip'+(b===wensBrand?' sel':'')+
+    '" onclick="wensZetBrand(\''+b+'\')">'+b+'</button>').join('');
+}
+function wensZetBrand(b){wensBrand=b;renderWensBrand();}
+function wensAnnuleer(){wensBewerk=null;go('beans');}
+function wensOpslaan(){
+  const g=i=>{const e=document.getElementById(i);return e?e.value.trim():'';};
+  const naam=g('w-naam')||(wensRegions.length?bpRegioTekst(wensRegions[0]):'');
+  if(!naam){toast('geef hem een naam, of kies een herkomst');return;}
+  if(!Array.isArray(state.wishlist))state.wishlist=[];
+  const w={id:wensBewerk||uid(),naam,brander:g('w-brander'),url:g('w-url'),
+    regions:wensRegions.slice(),proces:g('w-proces'),variety:g('w-var'),
+    brand:wensBrand,notitie:g('w-notitie'),
+    smaak:wensRegions.length?bpRegioSmaak(wensRegions[0]).slice():[],
+    at:Date.now()};
+  const i=state.wishlist.findIndex(x=>x.id===w.id);
+  if(i>=0)state.wishlist[i]=Object.assign({},state.wishlist[i],w);
+  else state.wishlist.push(w);
+  save(); wensBewerk=null; toast('✓ op je lijstje'); go('beans');
+}
+/* vanuit de kaart: de streek die je bekeek als wens wegschrijven */
 function bpOpLijst(){
   const inf=BP_INFO[bpLandId], st=inf.streken[bpStreek], L=BP_LAND[bpLandId];
   const proc=(bpProc&&inf.proc.includes(bpProc))?bpProc:inf.proc[0];
   if(!Array.isArray(state.wishlist))state.wishlist=[];
-  if(state.wishlist.some(w=>w.land===L.naam&&w.streek===st.n)){toast('staat al op je lijstje');return;}
-  state.wishlist.push({id:uid(),land:L.naam,streek:st.n,proces:proc,
-    variety:st.v||inf.var,brand:bpBrand||'light',smaak:st.s.slice(),
+  if(state.wishlist.some(w=>bpHoortBij(w,bpLandId,bpStreek))){
+    toast('staat al op je lijstje');return;
+  }
+  state.wishlist.push({id:uid(),naam:st.n+' · '+L.naam,brander:'',url:'',
+    regions:[{land:bpLandId,i:bpStreek}],proces:proc,variety:st.v||inf.var,
+    brand:bpBrand||'light',smaak:st.s.slice(),notitie:'',
     zoek:bpZoekregel(),at:Date.now()});
   save();toast('✓ op je lijstje gezet');bpTeken(true);
 }
 function bpVanLijst(id){
-  state.wishlist=(state.wishlist||[]).filter(w=>w.id!==id);
+  const w=(state.wishlist||[]).find(x=>x.id===id);
+  if(w&&!confirm('“'+(w.naam||'deze wens')+'” van je lijstje halen?'))return;
+  state.wishlist=(state.wishlist||[]).filter(x=>x.id!==id);
   save();renderBeans();toast('van het lijstje af');
 }
-/* "gekocht" opent het bonenformulier met alles al ingevuld */
+/* "gekocht" opent het bonenformulier met alles al ingevuld — inclusief de
+   herkomsten, zodat de wens naadloos een zak op je plank wordt */
 function bpGekocht(id){
   const w=(state.wishlist||[]).find(x=>x.id===id); if(!w)return;
   openBeanForm();
   const zet=(veld,val)=>{const el=document.getElementById(veld);if(el)el.value=val||'';};
-  zet('b-name',w.streek+' — '+w.land);
-  zet('b-origin',w.streek+', '+w.land);
+  const regs=bpRegios(w).map(r=>({land:r.land,i:r.i}));
+  zet('b-name',w.naam||'');
+  zet('b-roaster',w.brander||'');
+  zet('b-url',w.url||'');
+  zet('b-origin',regs.map(bpRegioTekst).join(' · '));
   zet('b-process',w.proces);
   zet('b-variety',w.variety);
+  if(regs.length===1)zet('b-altitude',String(bpRegioHoogte(regs[0])).replace(/\s*m$/,'').trim());
   zet('b-roasternotes',(w.smaak||[]).join(', '));
+  beanFormRegions=regs; renderBeanHerkomst();
   beanFormRoast=(w.brand==='light')?'light':(w.brand==='dark'?'dark':'medium');
   renderBeanRoast();
   state.wishlist=(state.wishlist||[]).filter(x=>x.id!==id);save();
   toast('van je lijstje — vul de branddatum aan');
 }
+function bpWensDicht(){
+  state.wensDicht=!state.wensDicht;save();renderBeans();
+}
 function bpWensHTML(){
+  if(!featOn('beanpick'))return '';
   const lijst=state.wishlist||[];
-  if(!featOn('beanpick')||!lijst.length)return '';
-  return '<div class="sect"><span class="hand">op mijn lijstje</span>'+
-    '<span class="sd">'+lijst.length+' nog niet gekocht</span></div>'+
-    lijst.map(w=>
-      '<div class="bean-card sketch soft wens-card">'+
-      '<div class="bn hand">'+esc(w.streek)+' · '+esc(w.land)+'</div>'+
-      '<div class="bm">'+esc(w.proces)+', '+esc(w.brand)+' · '+esc((w.smaak||[]).join(', '))+
-      '<br>'+esc(w.variety||'')+'</div>'+
+  const kop='<button class="wens-kop" onclick="bpWensDicht()">'+
+    '<span class="hand">op mijn lijstje</span>'+
+    '<span class="sd">'+(lijst.length?(lijst.length+' nog niet gekocht'):'nog leeg')+'</span>'+
+    '<span class="wens-arr">'+(state.wensDicht?'›':'⌄')+'</span></button>';
+  if(state.wensDicht)return '<div class="sect wens-sect">'+kop+'</div>';
+  const knop='<button class="shelf-do" onclick="bpNieuweWens()">'+
+    '<span>＋ zelf een zak toevoegen</span><span class="ll-arr">›</span></button>';
+  if(!lijst.length)return '<div class="sect wens-sect">'+kop+'</div>'+
+    '<div class="empty-note">nog niets op je lijstje. Kom je ergens een mooie zak tegen, '+
+    'zet hem hier neer — met de link erbij.</div>'+knop;
+  return '<div class="sect wens-sect">'+kop+'</div>'+
+    lijst.map(w=>{
+      const regs=bpRegios(w);
+      const blend=regs.length>1;
+      return '<div class="bean-card sketch soft wens-card">'+
+      '<div class="bn hand">'+esc(w.naam||'zonder naam')+
+        (blend?' <span class="wens-tag">blend</span>':'')+'</div>'+
+      '<div class="bm">'+
+        (w.brander?('van '+esc(w.brander)+'<br>'):'')+
+        (regs.length?(regs.map(bpRegioTekst).map(esc).join(' · ')+'<br>'):'')+
+        [w.proces,w.brand].filter(Boolean).map(esc).join(', ')+
+        ((w.smaak||[]).length?(' · '+esc(w.smaak.join(', '))):'')+
+        (w.variety?('<br>'+esc(w.variety)):'')+
+        (w.notitie?('<br>'+esc(w.notitie)):'')+'</div>'+
       '<div class="wens-rij">'+
       '<button class="lp sel" onclick="bpGekocht(\''+w.id+'\')">gekocht ✓</button>'+
-      '<button class="lp" onclick="bpVanLijst(\''+w.id+'\')">van het lijstje af</button>'+
-      '</div></div>').join('');
+      (w.url?('<a class="lp" href="'+esc(w.url)+'" target="_blank" rel="noopener">bekijk de zak ↗</a>'):'')+
+      '<button class="lp" onclick="bpWijzigWens(\''+w.id+'\')">wijzig</button>'+
+      '<button class="lp" onclick="bpVanLijst(\''+w.id+'\')">×</button>'+
+      '</div></div>';
+    }).join('')+knop;
 }
-/* ---------------- de boon en de kaart aan elkaar ----------------
-   Tot nu toe was de band tussen een boon en zijn plek op de kaart een gok:
-   de app las de tekst op de zak en zocht daar een landnaam in. Dat werkt bij
-   "Guji, Ethiopia" en niet bij "Yirga Cheffe Konga Washed".
 
-   Nu kun je de streek zelf aanwijzen, en dan staat hij vast in b.region.
-   De tekstherkenning blijft als vangnet voor alles wat je nooit gekoppeld
-   hebt.                                                                   */
-function bpRegioVanBoon(b){
-  if(!b)return null;
-  if(b.region&&BP_INFO[b.region.land]){
-    const inf=BP_INFO[b.region.land];
-    const i=(b.region.i!=null&&inf.streken&&inf.streken[b.region.i])?b.region.i:null;
-    return {land:b.region.land,i,zelf:true};
-  }
-  const land=bpLandVanBoon(b);
-  if(!land||!BP_INFO[land])return null;
-  return {land,i:bpStreekVanBoon(b,land),zelf:false};
-}
-// welke bonen horen bij deze streek? (i weglaten = het hele land)
-function bpBonenVoor(landId,i){
-  return (state.beans||[]).filter(b=>{
-    const r=bpRegioVanBoon(b);
-    return r&&r.land===landId&&(i==null||r.i===i);
+/* ---------------- de boon en de kaart aan elkaar ----------------
+   Een zak heeft niet altijd één herkomst. Een single origin komt van één
+   streek, een blend van meer, en allebei moeten ze op de kaart terug te
+   vinden zijn. Vandaar een lijstje herkomsten in plaats van één veld.
+
+   Heb je nooit iets aangewezen, dan blijft de oude tekstherkenning het
+   vangnet: dan leest de app de landnaam uit wat er op de zak staat.      */
+function bpRegios(o){
+  if(!o)return [];
+  let ruw=Array.isArray(o.regions)?o.regions:(o.region?[o.region]:[]);
+  const uit=[];
+  ruw.forEach(r=>{
+    if(!r||!BP_INFO[r.land])return;
+    const inf=BP_INFO[r.land];
+    const i=(r.i!=null&&inf.streken&&inf.streken[r.i])?r.i:null;
+    if(!uit.some(x=>x.land===r.land&&x.i===i))uit.push({land:r.land,i,zelf:true});
   });
+  if(uit.length)return uit;
+  const land=bpLandVanBoon(o);
+  if(!land||!BP_INFO[land])return [];
+  return [{land,i:bpStreekVanBoon(o,land),zelf:false}];
+}
+function bpIsBlend(o){return bpRegios(o).length>1;}
+function bpRegioTekst(r){
+  const inf=BP_INFO[r.land]; if(!inf)return '';
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return st?(st.n+' · '+BP_LAND[r.land].naam):BP_LAND[r.land].naam;
+}
+function bpRegioHoogte(r){
+  const inf=BP_INFO[r.land]; if(!inf)return '';
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return (st&&st.h)?st.h:inf.hoogte;
+}
+function bpRegioVar(r){
+  const inf=BP_INFO[r.land]; if(!inf)return '';
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return (st&&st.v)?st.v:inf.var;
+}
+function bpRegioSmaak(r){
+  const inf=BP_INFO[r.land]; if(!inf)return [];
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return st?st.s:inf.smaak;
+}
+// hoort deze boon of wens bij die plek? (i weglaten = ergens in dat land)
+function bpHoortBij(o,landId,i){
+  return bpRegios(o).some(r=>r.land===landId&&(i==null||r.i===i));
+}
+function bpBonenVoor(landId,i){
+  return (state.beans||[]).filter(b=>bpHoortBij(b,landId,i));
+}
+function bpWensenVoor(landId,i){
+  return (state.wishlist||[]).filter(w=>bpHoortBij(w,landId,i));
 }
 function bpScoreVan(b){
   const sc=(state.brews||[]).filter(x=>x.beanId===b.id&&x.score!=null&&x.score!=='')
@@ -7887,14 +8077,32 @@ function bpSmaakVan(b){
   return [...new Set([].concat(...(state.brews||[]).filter(x=>x.beanId===b.id)
     .map(x=>x.tags||[])))];
 }
+/* Oude wensen bewaarden hun herkomst als losse namen. Die zoeken we één keer
+   terug op, zodat ze ook op de kaart verschijnen. */
+function bpMigreerWensen(){
+  let veranderd=false;
+  (state.wishlist||[]).forEach(w=>{
+    if(Array.isArray(w.regions)||!w.land)return;
+    const land=BP_LANDEN.find(l=>l.naam===w.land);
+    if(land&&BP_INFO[land.id]){
+      const st=(BP_INFO[land.id].streken||[]).findIndex(x=>x.n===w.streek);
+      w.regions=[{land:land.id,i:st>=0?st:null}];
+      if(!w.naam)w.naam=w.streek||land.naam;
+      veranderd=true;
+    }
+  });
+  if(veranderd)save();
+}
 
 /* ---- de kaart als invoermethode ----
-   Vanuit het bonenformulier open je de kaart om een streek aan te wijzen. */
-let bpVoorBoon=false;
-let beanFormRegion=null;
-function bpKiesHerkomst(){
-  bpVoorBoon=true; bpVarOpen=null;
-  const r=beanFormRegion;
+   Vanuit het bonenformulier of het wensformulier open je de kaart om een
+   streek aan te wijzen. bpVoor onthoudt waar je vandaan kwam.            */
+let bpVoor=null;              // null | 'bean' | 'wens'
+let beanFormRegions=[];
+function bpKiesHerkomstVoor(wat){
+  bpVoor=wat; bpVarOpen=null;
+  const lijst=(wat==='wens')?wensRegions:beanFormRegions;
+  const r=lijst[lijst.length-1];
   if(r&&BP_INFO[r.land]){
     bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
     bpStreek=(r.i!=null)?r.i:null; bpView=bpLandView(r.land).slice();
@@ -7904,104 +8112,191 @@ function bpKiesHerkomst(){
   }
   go('beanpick');
 }
+function bpKiesHerkomst(){bpKiesHerkomstVoor('bean');}
 function bpNeemHerkomst(i){
   const landId=bpLandId, inf=BP_INFO[landId];
-  const st=(i!=null&&inf.streken)?inf.streken[i]:null;
-  beanFormRegion={land:landId,i:(i!=null?i:null)};
+  const nieuw={land:landId,i:(i!=null?i:null)};
+  const naarWens=(bpVoor==='wens');
+  const lijst=naarWens?wensRegions:beanFormRegions;
+  if(!lijst.some(r=>r.land===nieuw.land&&r.i===nieuw.i))lijst.push(nieuw);
+  const eerste=(lijst.length===1);
   const el=id=>document.getElementById(id);
   const leegVul=(id,v)=>{const e=el(id);if(e&&!e.value.trim()&&v)e.value=v;};
-  const o=el('b-origin');
-  if(o)o.value=(st?(st.n+', '):'')+BP_LAND[landId].naam;
-  leegVul('b-variety',st?(st.v||inf.var):inf.var);
-  leegVul('b-altitude',String(st&&st.h?st.h:inf.hoogte).replace(/\s*m$/,'').trim());
-  // het proces alleen invullen als er in dit land maar één gebruikelijk is
-  if(inf.proc.length===1)leegVul('b-process',inf.proc[0]);
-  bpVoorBoon=false;
-  go('beanform'); renderBeanHerkomst();
-  toast('✓ herkomst overgenomen');
+  if(naarWens){
+    if(eerste){
+      leegVul('w-proces',inf.proc.length===1?inf.proc[0]:'');
+      leegVul('w-var',bpRegioVar(nieuw));
+      leegVul('w-naam',bpRegioTekst(nieuw));
+    }
+    bpVoor=null; go('wens'); renderWensHerkomst();
+  }else{
+    const o=el('b-origin');
+    if(o)o.value=lijst.map(bpRegioTekst).join(' · ');
+    if(eerste){
+      leegVul('b-variety',bpRegioVar(nieuw));
+      leegVul('b-altitude',String(bpRegioHoogte(nieuw)).replace(/\s*m$/,'').trim());
+      if(inf.proc.length===1)leegVul('b-process',inf.proc[0]);
+    }
+    bpVoor=null; go('beanform'); renderBeanHerkomst();
+  }
+  toast('✓ herkomst erbij');
 }
-function bpHerkomstWeg(){beanFormRegion=null;renderBeanHerkomst();}
+function bpHerkomstWeg(i){beanFormRegions.splice(i,1);renderBeanHerkomst();}
 function renderBeanHerkomst(){
   const el=document.getElementById('b-herkomst');
   const veld=document.getElementById('b-herkomst-veld');
   if(!el||!veld)return;
   if(!featOn('beanpick')){veld.style.display='none';return;}
   veld.style.display='';
-  const r=beanFormRegion;
-  if(!r||!BP_INFO[r.land]){
-    el.innerHTML='<div class="bh-rij"><div class="bh-uit"><span>weet je waar hij vandaan komt? '+
-      'Wijs het aan en de app vult origin, variëteit en hoogte voor je in.</span></div>'+
-      '<button type="button" class="bh-knop aan" onclick="bpKiesHerkomst()">kies op de kaart</button></div>';
-    return;
+  el.innerHTML=bpHerkomstKiezer(beanFormRegions,'bpHerkomstWeg','bpKiesHerkomst');
+}
+/* Dezelfde kiezer voor een boon en voor een wens: een rijtje herkomsten met
+   een kruisje, en een knop om er een bij te zoeken op de kaart. */
+function bpHerkomstKiezer(lijst,wegFn,kiesFn){
+  let h='';
+  if(!lijst.length){
+    h+='<div class="bh-rij"><div class="bh-uit"><span>weet je waar hij vandaan komt? '+
+      'Wijs het aan op de kaart, dan vult de app de rest voor je in.</span></div></div>';
+  }else{
+    if(lijst.length>1)h+='<div class="bh-blend">blend — '+lijst.length+' herkomsten</div>';
+    h+=lijst.map((r,i)=>'<div class="bh-rij"><div class="bh-uit"><b>'+esc(bpRegioTekst(r))+
+      '</b><span>'+esc(bpRegioHoogte(r))+' · '+esc(bpRegioSmaak(r).join(', '))+'</span></div>'+
+      '<button type="button" class="bh-knop" onclick="'+wegFn+'('+i+')">×</button></div>').join('');
   }
-  const inf=BP_INFO[r.land], st=(r.i!=null)?inf.streken[r.i]:null;
-  el.innerHTML='<div class="bh-rij"><div class="bh-uit">'+
-    '<b>'+esc(st?(st.n+' · '+BP_LAND[r.land].naam):BP_LAND[r.land].naam)+'</b>'+
-    '<span>'+esc(st&&st.h?st.h:inf.hoogte)+' · '+esc((st?st.s:inf.smaak).join(', '))+'</span></div>'+
-    '<button type="button" class="bh-knop" onclick="bpKiesHerkomst()">andere</button>'+
-    '<button type="button" class="bh-knop" onclick="bpHerkomstWeg()">×</button></div>';
+  h+='<div class="bh-rij" style="margin-top:6px"><button type="button" class="bh-knop aan" '+
+    'onclick="'+kiesFn+'()">'+(lijst.length?'＋ nog een herkomst':'kies op de kaart')+'</button></div>';
+  return h;
 }
 
-/* ---- wat de kaart over jouw boon vertelt, op de bonenplank ---- */
+
+/* ---- wat de kaart over jouw zak vertelt, op de bonenplank ---- */
 function bpHerkomstBlok(b){
   if(!featOn('beanpick'))return '';
-  const r=bpRegioVanBoon(b); if(!r)return '';
-  const inf=BP_INFO[r.land], st=(r.i!=null)?inf.streken[r.i]:null;
-  const belooft=(st?st.s:inf.smaak).join(', ');
+  const regs=bpRegios(b); if(!regs.length)return '';
   const geproefd=bpSmaakVan(b);
-  const proc=(inf.proc.length===1)?(inf.proc[0]+' is hier de norm')
-            :(inf.proc.join(' / ')+' komen hier voor');
+  const belooft=[...new Set([].concat(...regs.map(bpRegioSmaak)))];
+  const gok=regs.some(r=>!r.zelf);
   return '<div class="bk-herkomst">'+
-    '<div class="n hand">'+esc(st?(st.n+' · '+BP_LAND[r.land].naam):BP_LAND[r.land].naam)+
-    (r.zelf?'':' <span class="bp-zacht">(uit de tekst op de zak)</span>')+'</div>'+
-    '<div class="r">'+esc(st&&st.h?st.h:inf.hoogte)+' · '+esc(proc)+'<br>'+
-    '<b>de streek belooft</b> '+esc(belooft)+
+    '<div class="n hand">'+(regs.length>1?'blend — ':'')+
+    regs.map(r=>esc(bpRegioTekst(r))).join(' · ')+
+    (gok?' <span class="bp-zacht">(uit de tekst op de zak)</span>':'')+'</div>'+
+    '<div class="r">'+regs.map(r=>esc(bpRegioHoogte(r))).join(' · ')+'<br>'+
+    '<b>de streek belooft</b> '+esc(belooft.join(', '))+
     (geproefd.length?('<br><b>jij proefde</b> '+esc(geproefd.join(', '))):'')+'</div>'+
-    '<div style="margin-top:8px"><button class="lp" onclick="event.stopPropagation();bpVanBoon(\''+
-    b.id+'\')">bekijk op de kaart →</button></div></div>';
+    '<div class="wens-rij" style="margin-top:8px">'+
+    regs.map((r,i)=>'<button class="lp" onclick="event.stopPropagation();bpVanBoon(\''+
+      b.id+'\','+i+')">'+(regs.length>1?esc(bpRegioTekst(r)):'bekijk op de kaart')+
+      ' →</button>').join('')+'</div></div>';
 }
 
-/* ---- je plank als kaartje boven de bonenlijst ---- */
+/* ---- je plank als kaartje boven de bonenlijst, en de deur naar de kaart ---- */
 function bpPlankKaartHTML(){
   if(!featOn('beanpick'))return '';
   const punten=[];
-  (state.beans||[]).forEach(b=>{
-    const r=bpRegioVanBoon(b); if(!r)return;
-    const inf=BP_INFO[r.land], st=(r.i!=null)?inf.streken[r.i]:null;
-    const x=st?bpX(st.ll[0]):+bpMidden(BP_LAND[r.land])[0];
-    const y=st?bpY(st.ll[1]):+bpMidden(BP_LAND[r.land])[1];
-    punten.push({x,y,id:b.id,land:r.land});
-  });
-  if(!punten.length)return '';
-  // hier geen opgerekt kijkvenster: het kadertje is laag en breed, dus de
-  // kale omhullende van de koffiegordel vult hem het best
+  const zet=(o,soort)=>{
+    bpRegios(o).forEach(r=>{
+      const st=(r.i!=null)?BP_INFO[r.land].streken[r.i]:null;
+      const x=st?bpX(st.ll[0]):+bpMidden(BP_LAND[r.land])[0];
+      const y=st?bpY(st.ll[1]):+bpMidden(BP_LAND[r.land])[1];
+      punten.push({x,y,id:o.id,soort});
+    });
+  };
+  (state.beans||[]).forEach(b=>zet(b,'mijn'));
+  (state.wishlist||[]).forEach(w=>zet(w,'wens'));
+  const landen=new Set();
+  (state.beans||[]).forEach(b=>bpRegios(b).forEach(r=>landen.add(r.land)));
   const v=bpDoos(BP_LANDEN,6);
-  const landen=new Set(punten.map(p=>p.land));
   let sv='<svg viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
   sv+='<rect class="band" x="-200" y="'+bpY(23.5)+'" width="500" height="'+(bpY(-23.5)-bpY(23.5))+'"/>';
   BP_ACHTER.forEach(pl=>{
     sv+='<path class="achter" d="M'+pl.map(q=>bpX(q[0]).toFixed(1)+' '+bpY(q[1]).toFixed(1)).join('L')+'Z"/>';
   });
-  BP_LANDEN.forEach(l=>{
-    sv+='<path class="achter" d="'+bpPad(l)+'"/>';
-  });
+  BP_LANDEN.forEach(l=>{sv+='<path class="achter" d="'+bpPad(l)+'"/>';});
   punten.forEach(p=>{
-    sv+='<circle class="mijn" cx="'+p.x+'" cy="'+p.y+'" r="4.5" onclick="bpVanBoon(\''+p.id+'\')"/>';
+    sv+='<circle class="'+p.soort+'" cx="'+p.x+'" cy="'+p.y+'" r="4.5"'+
+      (p.soort==='mijn'?(' onclick="bpVanBoon(\''+p.id+'\')"'):'')+'/>';
   });
   sv+='</svg>';
-  return '<div class="plank-kaart">'+sv+'<div class="bij">'+punten.length+' zak'+
-    (punten.length===1?'':'ken')+' uit '+landen.size+' land'+(landen.size===1?'':'en')+
-    ' — tik een stip</div></div>';
+  const wensen=(state.wishlist||[]).length;
+  const regel=punten.length
+    ? (landen.size+' land'+(landen.size===1?'':'en')+' op je plank'+
+       (wensen?(' · '+wensen+' op je lijstje'):''))
+    : 'nog geen herkomst bekend';
+  return '<div class="plank-kaart">'+sv+'<div class="bij">'+regel+'</div></div>'+
+    '<button class="shelf-do plank-deur" onclick="bpOpen()">'+
+    '<span>welke zak koop ik nu? — ontdek een streek</span><span class="ll-arr">›</span></button>';
+}
+
+/* ---- uit je eigen kast ----
+   Onderaan een streek: wat jij van hier al hebt staan, en wat er nog op je
+   lijstje wacht. Een blend duikt hier bij elk van zijn herkomsten op, met
+   erbij waar hij verder nog vandaan komt.                                  */
+function bpUitJeKast(landId,i){
+  if(i==null)return '';
+  const bonen=bpBonenVoor(landId,i), wensen=bpWensenVoor(landId,i);
+  const elders=bpBonenVoor(landId,null).length-bonen.length;
+  if(!bonen.length&&!wensen.length){
+    return '<div class="bp-mijn"><div class="bp-et">uit je eigen kast</div>'+
+      '<p class="bp-zacht">Hier heb je nog niets van staan.'+
+      (elders?(' Wel '+elders+' zak'+(elders===1?'':'ken')+' van elders uit '+
+        esc(BP_LAND[landId].naam)+'.'):'')+'</p></div>';
+  }
+  const ander=(o)=>{
+    const rest=bpRegios(o).filter(r=>!(r.land===landId&&r.i===i));
+    return rest.length?('ook uit '+rest.map(bpRegioTekst).join(' · ')):'';
+  };
+  let h='<div class="bp-mijn"><div class="bp-et">uit je eigen kast</div>';
+  h+=bonen.map(b=>{
+    const sc=bpScoreVan(b), n=(state.brews||[]).filter(x=>x.beanId===b.id).length;
+    const regel=[b.roaster,b.process,b.variety].filter(Boolean).join(' · ');
+    const staat=(b.inStock===false)?'op is op':(sc?('jij gaf hem '+sc):
+      (n?(n+' brew'+(n===1?'':'s')):'nog niet gezet'));
+    return '<button class="bp-mijnkaart" onclick="bpNaarBoon(\''+b.id+'\')">'+
+      '<span class="mn hand">'+esc(b.name)+
+      (bpIsBlend(b)?' <span class="wens-tag">blend</span>':'')+'</span>'+
+      '<span class="mr">'+[regel,ander(b),staat].filter(Boolean).map(esc).join(' — ')+
+      '</span></button>';
+  }).join('');
+  h+=wensen.map(w=>{
+    const regel=[w.brander,w.proces,w.brand].filter(Boolean).join(' · ');
+    return '<button class="bp-mijnkaart wens" onclick="bpWijzigWens(\''+w.id+'\')">'+
+      '<span class="mn hand">'+esc(w.naam||'zonder naam')+
+      ' <span class="wens-tag">op je lijstje</span>'+
+      (bpIsBlend(w)?' <span class="wens-tag">blend</span>':'')+'</span>'+
+      '<span class="mr">'+[regel,ander(w)].filter(Boolean).map(esc).join(' — ')+
+      '</span></button>';
+  }).join('');
+  if(elders>0)h+='<p class="bp-zacht">En '+elders+' zak'+(elders===1?'':'ken')+
+    ' van elders uit '+esc(BP_LAND[landId].naam)+'.</p>';
+  return h+'</div>';
+}
+/* De weg terug: van de kaart naar de kaart van die boon op je plank. */
+function bpNaarBoon(id){
+  const b=beanById(id); if(!b)return;
+  if(!expandedBeans.has(id))expandedBeans.add(id);
+  if(b.inStock===false)extraKastOpen=true;
+  go('beans');
+  setTimeout(()=>{
+    const el=document.querySelector('.bean-card[data-bean="'+id+'"]');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  },60);
 }
 
 /* ---- de terugweg: van een boon op je plank naar zijn plek op de kaart ---- */
-function bpVanBoon(beanId){
+function bpVanBoon(beanId,idx){
   const b=beanById(beanId); if(!b)return;
-  const id=bpLandVanBoon(b);
-  if(!id||!BP_INFO[id]){toast('van deze boon weet ik het land nog niet');return;}
-  bpDeel=BP_LAND[id].deel; bpLandId=id; bpNiv='land';
-  bpStreek=bpStreekVanBoon(b,id); bpProc=null;
-  bpView=bpLandView(id).slice();
+  bpNaarPlek(bpRegios(b)[idx||0],'van deze boon weet ik het land nog niet');
+}
+function bpVanWens(wensId,idx){
+  const w=(state.wishlist||[]).find(x=>x.id===wensId); if(!w)return;
+  bpNaarPlek(bpRegios(w)[idx||0],'van deze wens weet ik het land nog niet');
+}
+/* Eén plek op de kaart openen, gebruikt door beide terugwegen hierboven. */
+function bpNaarPlek(r,klacht){
+  if(!r||!BP_INFO[r.land]){toast(klacht);return;}
+  bpVoor=null; bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
+  bpStreek=(r.i!=null)?r.i:null; bpProc=null; bpVarOpen=null;
+  bpView=bpLandView(r.land).slice();
   go('beanpick');
 }
 function bpTeken(behoudScroll){
@@ -8506,6 +8801,9 @@ function lbBean(b){
     roastLevel:b.roast||null,roastDate:b.roastdate||null,daysSinceRoast:f?f.days:null,
     roasterNotes:b.roasternotes||null,notes:b.notes||null,inStock:b.inStock!==false,
     decaf:isDecaf(b),bagLabel:b.fam||null,
+    regions:(Array.isArray(b.regions)?b.regions:(b.region?[b.region]:[]))
+      .map(r=>({land:r.land,i:r.i==null?null:r.i})),
+    region:(Array.isArray(b.regions)&&b.regions[0])||b.region||null,
     methodIds:(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).slice(),
     dials,
     brewIds:state.brews.filter(x=>x.beanId===b.id).map(x=>x.id)};
