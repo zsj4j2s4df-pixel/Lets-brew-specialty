@@ -297,6 +297,8 @@
     border-radius:15px;padding:5px 13px;font:inherit;font-size:15.5px;cursor:pointer;
     filter:url(#wobble);}
   .bp-chip.sel{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--cream);}
+  .bp-chip em{display:block;font-style:normal;font-size:13px;color:var(--ink-soft);
+    line-height:1.2;margin-top:1px;}
   .bp-zak{border:2px dashed var(--line);border-radius:16px;padding:11px 13px;font-size:15.5px;
     line-height:1.65;}
   .bp-zak em{font-style:normal;color:var(--ink-soft);display:inline-block;min-width:82px;}
@@ -321,10 +323,9 @@
   .wens-arr{color:var(--ink-soft);font-size:20px;}
   .wens-tag{font-size:14px;color:var(--ink-soft);border:1.5px solid var(--line);
     border-radius:10px;padding:1px 8px;vertical-align:3px;}
-  .plank-deur{margin-top:-4px;}
   .bh-blend{font-size:14px;color:var(--ink-soft);margin-bottom:5px;}
   .plank-kaart .wens{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 2;
-    vector-effect:non-scaling-stroke;}
+    vector-effect:non-scaling-stroke;cursor:pointer;}
   .bp-kaart .stip.wens{fill:var(--paper);stroke-dasharray:3 2;}
   .bp-kaart .land.wens{fill:var(--card-2);stroke-dasharray:5 3;}
   .bp-mijn{border-top:1.5px dashed var(--line);margin-top:13px;padding-top:3px;}
@@ -348,17 +349,15 @@
   .bk-herkomst .r{color:var(--ink-soft);font-size:14.5px;line-height:1.4;}
   .bk-herkomst .r b{color:var(--ink);font-weight:400;}
   /* je plank op een kaartje */
-  .plank-kaart{position:relative;background:var(--card-2);border:2px solid var(--line);
-    border-radius:18px;overflow:hidden;filter:url(#wobble);margin-bottom:14px;}
+  .plank-kaart{display:block;width:100%;padding:0;background:var(--card-2);
+    border:2px solid var(--line);border-radius:18px;overflow:hidden;filter:url(#wobble);
+    margin-bottom:14px;font:inherit;color:var(--ink);cursor:pointer;}
   .plank-kaart svg{width:100%;height:118px;display:block;}
   .plank-kaart .achter{fill:var(--desk);stroke:var(--line);stroke-width:.8;opacity:.5;
     stroke-linejoin:round;vector-effect:non-scaling-stroke;}
   .plank-kaart .band{fill:var(--v60);opacity:.4;}
   .plank-kaart .mijn{fill:var(--accent-soft);stroke:var(--ink);stroke-width:1.2;
     vector-effect:non-scaling-stroke;cursor:pointer;}
-  .plank-kaart .bij{position:absolute;left:0;right:0;bottom:0;padding:4px 10px;
-    font-size:12.5px;color:var(--ink-soft);text-align:center;pointer-events:none;
-    background:linear-gradient(transparent,var(--card-2) 60%);}
   .wens-rij{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;}
 
   /* taste wheel */
@@ -478,6 +477,7 @@
   .share-block .set-t{font-size:22px;}
   .photo-btns .half{width:auto;flex:1;margin-bottom:0;font-size:19px;padding:12px 8px;}
   .scan-status{font-size:16px;color:var(--ink-soft);min-height:22px;margin:0 4px 14px;text-align:center;}
+  .scan-status:empty{min-height:0;margin-bottom:0;}
   .recipe-btn{width:100%;background:var(--accent-soft);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:16px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:22px;cursor:pointer;margin-top:10px;}
   .recipe-card{padding:18px 22px;margin-top:12px;font-size:19px;line-height:1.5;}
   .recipe-card .rk{color:var(--ink-soft);font-size:16px;margin:10px 0 2px;}
@@ -1541,9 +1541,12 @@
   <div id="page-beanform" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand" id="beanform-title">new bean</div><button onclick="go('beans')">cancel</button></div>
+      <div class="form-head"><div class="h hand" id="beanform-title">nieuwe zak</div><button onclick="beanFormWeg()">cancel</button></div>
+      <div class="field"><label>waar hoort deze zak?</label>
+        <div class="bp-chips" id="b-mode"></div>
+        <div class="fx-note" id="b-mode-uitleg"></div></div>
 
-      <div class="photo-btns">
+      <div class="photo-btns" id="b-foto-rij">
         <button class="scan-btn half" onclick="document.getElementById('label-cam').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.3 8.2 Q6.9 7.6 8.5 7.7 Q9.3 6.3 10.1 5.4 Q12 5.1 13.9 5.4 Q14.7 6.5 15.5 7.9 Q17.4 7.6 19.7 8.1 M19.4 7.6 Q20.1 13 19.6 18.3 M19.9 17.9 Q12 18.6 4.2 18.1 M4.6 18.5 Q3.9 13 4.4 7.7"/><path d="M15.2 11.8 Q16 14.4 13.4 15.8 Q10.6 16.7 9 14.6 Q8.1 12.2 10.3 10.2 Q12.8 8.9 14.8 10.7 Q15.4 11.4 15.5 12.4"/><path d="M13.1 12.2 Q13.5 13.7 12 13.9 Q10.6 13.9 10.7 12.5 Q10.9 11.3 12.3 11.4" opacity="0.5"/></svg> take photo</button>
         <button class="scan-btn half" onclick="document.getElementById('label-file').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M5.2 15.8 Q8 12 10.1 13.7 Q13 9.4 15.6 12.1 Q17.6 14.1 19.1 16.7" opacity="0.8"/><path d="M9.9 8.7 Q10.3 10.4 8.6 10.5 Q7.1 10.4 7.3 8.9 Q7.6 7.5 9.2 7.7 Q9.9 7.9 10.2 8.4" opacity="0.7"/></svg> from gallery / files</button>
       </div>
@@ -1566,26 +1569,27 @@
         <div class="field"><label>variety</label><input id="b-variety" placeholder="e.g. heirloom"></div>
         <div class="field"><label>altitude (m)</label><input id="b-altitude" placeholder="e.g. 1900-2100"></div>
       </div>
-      <div class="field"><label>roast date</label><input id="b-roastdate" type="date"></div>
+      <div class="field" id="b-roastdate-veld"><label>roast date</label><input id="b-roastdate" type="date"></div>
       <div class="field-row" id="b-cost-row">
         <div class="field"><label>price paid (€)</label><input id="b-price" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 12.50"></div>
         <div class="field"><label>bag size (g)</label><input id="b-bagsize" type="number" inputmode="numeric" placeholder="e.g. 250"></div>
       </div>
       <div class="field"><label>roaster tasting notes</label><textarea id="b-roasternotes" placeholder="as on the bag, e.g. jasmine, peach, black tea"></textarea></div>
       <div class="field"><label>website / link to bean</label>
-        <input id="b-url" type="url" inputmode="url" placeholder="https://...">
-        <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M9.7 7.7 Q11.7 5.2 14.1 5.2 Q17.2 4.9 18.8 7.6 Q20.1 10.1 18.1 12.3 Q16.5 14.1 14.1 14.4 M14.2 16.3 Q12.1 18.8 9.8 18.8 Q6.7 19.1 5.2 16.4 Q3.9 13.9 5.9 11.7 Q7.5 9.9 9.8 9.6"/><path d="M9.2 14.9 Q12 12 15 9.1" opacity="0.6"/></svg> search for this bean (on roaster site)</button></div>
+        <input id="b-url" type="url" inputmode="url" placeholder="https://..." onchange="beanUitLink()">
+        <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M9.7 7.7 Q11.7 5.2 14.1 5.2 Q17.2 4.9 18.8 7.6 Q20.1 10.1 18.1 12.3 Q16.5 14.1 14.1 14.4 M14.2 16.3 Q12.1 18.8 9.8 18.8 Q6.7 19.1 5.2 16.4 Q3.9 13.9 5.9 11.7 Q7.5 9.9 9.8 9.6"/><path d="M9.2 14.9 Q12 12 15 9.1" opacity="0.6"/></svg> search for this bean (on roaster site)</button>
+        <div class="fx-note ai-only">plak een link en de app vult de rest zelf in, ook de plek op de kaart</div></div>
       <div class="field"><label>roast level</label>
         <div class="link-pick" id="b-roast"></div></div>
 
-      <div class="field"><label>roasted for</label>
+      <div class="field" id="b-fam-veld"><label>roasted for</label>
         <div class="link-pick" id="b-fam"></div>
         <div class="fx-note">only if the bag says so &mdash; it decides which methods the app puts first</div></div>
 
-      <div class="field"><label>brew methods for this bean (multiple allowed)</label>
+      <div class="field" id="b-methods-veld"><label>brew methods for this bean (multiple allowed)</label>
         <div class="link-pick" id="beanform-methods"></div></div>
       <div class="field"><label>own note</label><textarea id="b-notes" placeholder="your own note"></textarea></div>
-      <button class="save-btn" onclick="saveBean()">save bean</button>
+      <button class="save-btn" id="b-save" onclick="saveBean()">save bean</button>
     </div>
   </div>
   <div id="page-learn" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
@@ -1650,7 +1654,7 @@
           <p>Koffie is ~98% water, en bij filter staat er geen crema of melk overheen. Te zacht smaakt vlak en hol; te hard maskeert nuance en verkalkt je machine. Eén vaste waterbasis maakt je afstellen eerlijk: dan proef je de maling en niet het water.</p></div>
       </div>
 
-      <div class="learn-card sketch" id="beanpick-card" style="background:var(--v60)" onclick="bpOpen()">
+      <div class="learn-card sketch" id="beanpick-card" style="background:var(--v60)" onclick="bpOpen('learn')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12.2 2.6 Q18.4 3.1 20.8 8.4 Q22.6 13.6 19.1 18.1 Q15.4 22 10.1 20.9 Q4.6 19.6 2.9 14.4 Q1.6 9.2 5.6 5.3 Q8.4 2.7 12.4 2.7"/><path d="M2.6 11.8 Q11.8 10.9 21.3 11.9" opacity="0.55"/><path d="M12.1 2.8 Q8.4 7.4 8.6 12.1 Q8.8 17.2 12.3 20.9" opacity="0.55"/><path d="M12.1 2.8 Q16 7.4 15.8 12.1 Q15.6 17.2 12.3 20.9" opacity="0.35"/></svg></div>
         <div class="lc-body"><div class="lc-t hand">waar komt koffie vandaan?</div>
           <div class="lc-d" id="beanpick-sub">de wereldkaart van de koffiegordel — land, streek, proces en variëteit</div></div>
@@ -1719,29 +1723,6 @@
     </div>
   </div>
   <!-- EEN ZAK OP JE LIJSTJE -->
-  <div id="page-wens" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
-    <div class="statusbar"><span>▤ ◗ ▮</span></div>
-    <div class="screen">
-      <div class="form-head"><div class="h hand" id="wens-title">nieuwe wens</div>
-        <button onclick="wensAnnuleer()">cancel</button></div>
-      <div class="subtitle">een zak die je nog wilt kopen. Alles mag leeg blijven behalve de naam.</div>
-      <div class="field"><label>naam</label><input id="w-naam" placeholder="e.g. Kirinyaga AA"></div>
-      <div class="field"><label>brander</label><input id="w-brander" placeholder="e.g. Friedhats"></div>
-      <div class="field"><label>link naar de zak</label>
-        <input id="w-url" placeholder="https://…" inputmode="url">
-        <div class="fx-note">plak de pagina van de brander, dan vind je hem zo terug</div></div>
-      <div class="field"><label>herkomst</label><div id="w-herkomst"></div></div>
-      <div class="field-row">
-        <div class="field"><label>proces</label><input id="w-proces" placeholder="washed / natural"></div>
-        <div class="field"><label>variëteit</label><input id="w-var" placeholder="SL28, SL34"></div>
-      </div>
-      <div class="field"><label>branding</label><div class="bp-chips" id="w-brand"></div></div>
-      <div class="field"><label>waarom wil je deze?</label>
-        <textarea id="w-notitie" placeholder="vrije notitie (optioneel)"></textarea></div>
-      <button class="save-btn" onclick="wensOpslaan()">bewaar op mijn lijstje</button>
-    </div>
-  </div>
-
   <!-- BONENKEUZEHULP: van het land tot in je kop -->
   <div id="page-beanpick" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
@@ -2722,9 +2703,9 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick','wens'];
+const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick'];
 const navMap={home:'home',choosebean:'brews',form:'home',dialin:'home',recipe:'brews',detail:'home',
-  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'beans',wens:'beans',profile:'profile'};
+  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'beans',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -2768,7 +2749,6 @@ function go(p,isBack){
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLatte();
   if(p==='beanpick')bpTeken();
-  if(p==='wens'){renderWensHerkomst();renderWensBrand();}
   if(p==='profile')renderProfile();
   applyAIVisibility();
   document.querySelector('.phone').scrollTop=0;
@@ -5276,20 +5256,48 @@ function toggleStock(id){
   toast(b.inStock?'✓ back in stock':'○ marked as empty');
 }
 let editingBean=null;
-function openBeanForm(){
-  editingBean=null;
-  document.getElementById('beanform-title').textContent='new bean';
+/* Eén formulier voor allebei: een zak die op je plank staat, en een zak die je
+   nog wilt hebben. De keuze bovenin bepaalt waar hij heen gaat -- en welke
+   velden er iets toe doen. Van gedachten veranderen mag: sla je een wens op
+   als "op mijn plank", dan verhuist hij gewoon mee.                        */
+let beanFormWens=false, editingWens=null;
+const BEAN_MODES=[{w:false,n:'op mijn plank',u:'een zak die je in huis hebt — hij komt bij je bonen te staan en je kunt erop brouwen.'},
+                  {w:true, n:'op mijn lijstje',u:'een zak die je nog wilt kopen — hij komt op je lijstje en op de wereldkaart.'}];
+function renderBeanMode(){
+  const el=document.getElementById('b-mode'); if(!el)return;
+  // staat de keuzehulp uit, dan is er geen lijstje om iets op te zetten
+  if(!featOn('beanpick'))beanFormWens=false;
+  const veld=el.closest('.field'); if(veld)veld.style.display=featOn('beanpick')?'':'none';
+  el.innerHTML=BEAN_MODES.map(m=>'<button type="button" class="bp-chip'+(m.w===beanFormWens?' sel':'')+
+    '" onclick="beanZetMode('+m.w+')">'+m.n+'</button>').join('');
+  const u=document.getElementById('b-mode-uitleg');
+  if(u)u.textContent=(BEAN_MODES.find(m=>m.w===beanFormWens)||BEAN_MODES[0]).u;
+  const t=document.getElementById('beanform-title');
+  if(t)t.textContent=(editingBean||editingWens)?'zak bijwerken':'nieuwe zak';
+  const sv=document.getElementById('b-save');
+  if(sv)sv.textContent=beanFormWens?'bewaar op mijn lijstje':'bewaar op mijn plank';
+  // wat je pas weet als de zak er echt is, vraagt de app pas als hij er is
+  [['b-foto-rij',!beanFormWens],['label-preview',!beanFormWens],['b-roastdate-veld',!beanFormWens],
+   ['b-cost-row',!beanFormWens&&featOn('cost')],['b-fam-veld',!beanFormWens],
+   ['b-methods-veld',!beanFormWens]].forEach(([id,aan])=>{
+    const e=document.getElementById(id); if(e)e.style.display=aan?'':'none';
+  });
+}
+function beanZetMode(w){beanFormWens=!!w;renderBeanMode();}
+function beanFormWeg(){editingBean=null;editingWens=null;go('beans');}
+function openBeanForm(wens){
+  editingBean=null; editingWens=null; beanFormWens=!!wens;
   ['b-name','b-roaster','b-origin','b-process','b-variety','b-altitude','b-roastdate','b-roasternotes','b-url','b-notes','b-price','b-bagsize'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
   document.getElementById('scan-status').textContent='';
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null;const lp=document.getElementById('label-preview');if(lp)lp.innerHTML='';
   beanFormMethods=[];beanFormFam=null;beanFormRoast=null;beanFormRegions=[];
-  renderBeanFormMethods();renderBeanFam();renderBeanRoast();renderBeanHerkomst();go('beanform');applyAIVisibility();
+  renderBeanFormMethods();renderBeanFam();renderBeanRoast();renderBeanHerkomst();
+  renderBeanMode();go('beanform');applyAIVisibility();
 }
 function editBean(id){
   const b=state.beans.find(x=>x.id===id);if(!b)return;
-  editingBean=id;
-  document.getElementById('beanform-title').textContent='edit bean';
+  editingBean=id; editingWens=null; beanFormWens=false;
   const set=(f,v)=>{const el=document.getElementById(f);if(el)el.value=v||'';};
   set('b-name',b.name);set('b-roaster',b.roaster);set('b-origin',b.origin);
   set('b-process',b.process);set('b-variety',b.variety);set('b-altitude',b.altitude);
@@ -5305,7 +5313,7 @@ function editBean(id){
   beanFormMethods=(Array.isArray(b.methods)&&b.methods.length?[...b.methods]:(b.method?[b.method]:[]));
   beanFormFam=b.fam||null;renderBeanFam();
   beanFormRoast=b.roast||null;renderBeanRoast();
-  renderBeanFormMethods();go('beanform');applyAIVisibility();
+  renderBeanFormMethods();renderBeanMode();go('beanform');applyAIVisibility();
 }
 let beanFormMethods=[];
 /* Sommige branders branden een zak bewust voor espresso of juist voor filter,
@@ -5351,7 +5359,8 @@ function toggleBeanMethod(id){
 }
 function saveBean(){
   const name=document.getElementById('b-name').value.trim();
-  if(!name){toast('give the bean a name');return;}
+  if(!name){toast(beanFormWens?'geef hem een naam':'give the bean a name');return;}
+  if(beanFormWens)return saveBeanAlsWens(name);
   const data={name,
     roaster:document.getElementById('b-roaster').value.trim(),
     origin:document.getElementById('b-origin').value.trim(),
@@ -5376,9 +5385,36 @@ function saveBean(){
     toast('✓ bean updated');
   }else{
     data.id=uid();data.photo=beanPhoto||null;data.inStock=true;
-    state.beans.push(data);toast('✓ bean saved');
+    state.beans.push(data);
+    // stond hij nog op je lijstje, dan is hij daar nu vanaf
+    if(editingWens){state.wishlist=(state.wishlist||[]).filter(w=>w.id!==editingWens);
+      toast('✓ van je lijstje naar je plank');}
+    else toast('✓ bean saved');
   }
-  save();beanPhoto=null;go('beans');
+  editingWens=null;save();beanPhoto=null;go('beans');
+}
+/* Dezelfde velden, maar dan als wens. Wat een zak pas heeft als hij er is --
+   branddatum, prijs, waar je hem op zet -- slaan we niet op.               */
+function saveBeanAlsWens(naam){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  if(!Array.isArray(state.wishlist))state.wishlist=[];
+  const noten=g('b-roasternotes');
+  const w={id:editingWens||uid(),naam,name:naam,brander:g('b-roaster'),
+    origin:g('b-origin'),url:g('b-url'),
+    regions:beanFormRegions.slice(),proces:g('b-process'),variety:g('b-variety'),
+    altitude:g('b-altitude'),brand:beanFormRoast||'light',
+    roasternotes:noten,smaak:noten?noten.split(',').map(x=>x.trim()).filter(Boolean):[],
+    notitie:g('b-notes'),at:Date.now()};
+  const i=state.wishlist.findIndex(x=>x.id===w.id);
+  if(i>=0)state.wishlist[i]=Object.assign({},state.wishlist[i],w);
+  else state.wishlist.push(w);
+  // van je plank terug naar je lijstje: dan hoort hij niet meer bij je bonen
+  if(editingBean){
+    state.beans=state.beans.filter(b=>b.id!==editingBean);
+    state.brews.forEach(b=>{if(b.beanId===editingBean)b.beanId=null;});
+    toast('✓ terug op je lijstje');
+  }else toast('✓ op je lijstje');
+  editingBean=null;editingWens=null;save();beanPhoto=null;go('beans');
 }
 function delBean(id){
   if(!confirm('delete this bean?'))return;
@@ -5525,6 +5561,55 @@ async function scanLabel(ev){
   ev.target.value='';
 }
 // extra info aanvullen op basis van roaster + boon (modelkennis)
+/* ---- de link doet het werk ----
+   Plak je de pagina van de brander en staat AI aan, dan haalt de app eruit wat
+   erop staat: naam, brander, proces, variëteit, hoogte, smaaknoten -- en de
+   plek op de kaart, zodat de zak meteen bij zijn streek hoort. Alleen lege
+   velden worden gevuld; wat jij zelf typte blijft staan.                    */
+let beanLinkBezig='';
+async function beanUitLink(){
+  const el=document.getElementById('b-url'); if(!el)return;
+  const url=el.value.trim();
+  if(!url||!/^https?:\/\//i.test(url))return;
+  if(!aiReady()||url===beanLinkBezig)return;
+  beanLinkBezig=url;
+  const status=document.getElementById('scan-status');
+  const get=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const zetLeeg=(id,v)=>{if(v&&!get(id))setText(id,v);};
+  if(status)status.innerHTML='<span class="spin"></span>de link uitlezen…';
+  try{
+    const landen=BP_LANDEN.filter(l=>BP_INFO[l.id]).map(l=>l.naam).join(', ');
+    const prompt=`Je bent een specialty-koffie expert. Dit is de webpagina van een zak koffie: ${url}\n`+
+      `Al ingevuld: naam "${get('b-name')||'?'}", brander "${get('b-roaster')||'?'}".\n`+
+      `Leid uit de link (domein, pad, slug) en uit wat je over deze brander en boon weet zoveel mogelijk af. `+
+      `Verzin niets: laat een veld leeg als je het niet weet.\n`+
+      `Geef ALLEEN JSON terug zonder markdown: {"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roastlevel":"","roasternotes":"","notes":"","land":"","streek":""}\n`+
+      `roastlevel is één van: ${ROAST_LEVELS.join(', ')}. roasternotes = smaakprofiel, komma-gescheiden. `+
+      `land = het herkomstland, en kies het uit deze lijst als het erbij staat: ${landen}. `+
+      `streek = de streek binnen dat land, alleen als je hem echt weet.\n${BEAN_RULES}`;
+    const d=extractJSON(await callClaude([{role:"user",content:prompt}],800));
+    ['name','roaster','origin','process','variety','altitude'].forEach(k=>zetLeeg('b-'+k,d[k]));
+    zetLeeg('b-roasternotes',d.roasternotes); zetLeeg('b-notes',d.notes);
+    if(d.roastlevel&&!beanFormRoast&&ROAST_LEVELS.includes(d.roastlevel)){
+      beanFormRoast=d.roastlevel;renderBeanRoast();
+    }
+    // en zet hem op de kaart, als die er nog niet staat
+    let plek='';
+    if(!beanFormRegions.length&&(d.land||d.origin)){
+      const landId=bpLandVanBoon({origin:(d.land||'')+' '+(d.origin||'')});
+      if(landId&&BP_INFO[landId]){
+        const i=bpStreekVanBoon({origin:(d.streek||'')+' '+(d.origin||'')},landId);
+        beanFormRegions=[{land:landId,i:(i!=null?i:null)}];
+        renderBeanHerkomst();
+        plek=' · '+bpRegioTekst(beanFormRegions[0])+' op de kaart';
+      }
+    }
+    if(status)status.textContent='✓ ingevuld vanaf de link'+plek+' — kijk het even na';
+  }catch(e){
+    beanLinkBezig='';
+    if(status)status.textContent='de link uitlezen lukte niet (werkt alleen met AI aan)';
+  }
+}
 async function enrichBean(){
   const status=document.getElementById('scan-status');
   const get=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
@@ -7682,26 +7767,31 @@ function bpSmaken(a){return '<div class="bp-smaken">'+a.map(x=>'<span class="bp-
 /* Kom je hier vanaf je bonenplank, dan wil je eerst zien waar je zelf al
    geweest bent — en pas daarna de rest van de wereld. */
 function bpPlankBlok(){
-  const gehad=[...bpGehad()], wensen=state.wishlist||[];
-  if(!gehad.length&&!wensen.length)return '';
-  const totaal=Object.keys(BP_INFO).length;
-  let h='<div class="bp-blok vol"><h3>jouw plank</h3>';
-  if(gehad.length)h+='<div class="bp-et">landen die je had</div><div class="bp-chips">'+
-    gehad.map(id=>'<button class="bp-chip" onclick="bpKies(\'land\',\''+id+'\')">'+
-      esc(BP_LAND[id].naam)+'</button>').join('')+'</div>';
+  const totaal=Object.keys(BP_INFO).length, gehad=bpGehad();
+  const bonen=(state.beans||[]).filter(b=>bpRegios(b).length);
+  const wensen=(state.wishlist||[]).filter(w=>bpRegios(w).length);
+  if(!bonen.length&&!wensen.length)return '';
+  const chip=(o,fn)=>{
+    const r=bpRegios(o)[0];
+    return '<button class="bp-chip" onclick="'+fn+'(\''+o.id+'\')">'+
+      esc(o.name||o.naam||bpRegioTekst(r))+
+      '<em>'+esc(bpIsBlend(o)?'blend':bpRegioTekst(r))+'</em></button>';
+  };
+  let h='<div class="bp-blok vol"><h3>jouw plank</h3>'+
+    '<p class="bp-zacht">Tik een naam aan en de kaart zoomt naar zijn streek, met het '+
+    'verhaal erbij.</p>';
+  if(bonen.length)h+='<div class="bp-et">wat je in huis hebt</div><div class="bp-chips">'+
+    bonen.map(b=>chip(b,'bpVanBoon')).join('')+'</div>';
   if(wensen.length)h+='<div class="bp-et">op je lijstje</div><div class="bp-chips">'+
-    wensen.map(w=>{const r=bpRegios(w)[0];
-      return r?('<button class="bp-chip" onclick="bpKies(\'land\',\''+r.land+'\')">'+
-        esc(w.naam||bpRegioTekst(r))+'</button>'):('<span class="bp-smaak">'+esc(w.naam||'')+'</span>');
-    }).join('')+'</div>';
+    wensen.map(w=>chip(w,'bpVanWens')).join('')+'</div>';
   h+='<p class="bp-zacht" style="margin-top:9px">Nog nooit gehad: '+
-    (totaal-gehad.length)+' van de '+totaal+' landen met een verhaal.</p></div>';
+    (totaal-gehad.size)+' van de '+totaal+' landen met een verhaal.</p></div>';
   return h;
 }
 function bpWereld(){
   const gehad=bpGehad();
   return '<div class="bp-kop"><div class="t">waar komt hij vandaan?</div>'+
-    '<button class="bp-terug" onclick="go(\'learn\')">‹ learn</button></div>'+
+    '<button class="bp-terug" onclick="bpTerug()">‹ '+(bpVanaf==='beans'?'beans':'learn')+'</button></div>'+
     '<div class="bp-let">Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit '+
     'vorst. Elk stuk van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door '+
     'naar een land en een streek, en je eindigt met een lijstje waarmee je de goede zak herkent.</div>'+
@@ -7855,14 +7945,14 @@ function bpKies(wat,waarde){
   }
   bpTeken(wat==='streek');
 }
-function bpOpen(){bpVoor=null;go('beanpick');}
+function bpOpen(vanaf){bpVoor=null;bpVanaf=vanaf||'learn';go('beanpick');}
 function bpNaarWereld(){
   bpNiv='wereld';bpDeel=null;bpLandId=null;bpStreek=null;bpZoom(BP_VIEWS.wereld);bpTeken();
 }
 function bpTerug(){
   if(bpNiv==='land'){bpNiv='deel';bpLandId=null;bpStreek=null;bpZoom(BP_VIEWS[bpDeel]);}
   else if(bpNiv==='deel'){bpNiv='wereld';bpDeel=null;bpZoom(BP_VIEWS.wereld);}
-  else{go(bpVoor==='wens'?'wens':(bpVoor==='bean'?'beanform':'beans'));bpVoor=null;return;}
+  else{go(bpVoor?'beanform':(bpVanaf==='beans'?'beans':'learn'));bpVoor=null;return;}
   bpTeken();
 }
 function bpZet(k,v){
@@ -7885,54 +7975,21 @@ function bpZoekOpen(){
    keuzehulp, of je vult hem zelf in als je er ergens een tegenkwam. In
    allebei de gevallen kun je hem toekennen aan een plek op de kaart, en dan
    staat hij daar tussen je eigen bonen.                                    */
-let wensRegions=[], wensBewerk=null, wensBrand='light';
-function bpNieuweWens(){
-  wensBewerk=null; wensRegions=[]; wensBrand='light';
-  ['w-naam','w-brander','w-url','w-proces','w-var','w-notitie'].forEach(i=>{
-    const e=document.getElementById(i); if(e)e.value='';
-  });
-  document.getElementById('wens-title').textContent='nieuwe wens';
-  renderWensHerkomst(); renderWensBrand(); go('wens');
-}
+function bpNieuweWens(){openBeanForm(true);}
 function bpWijzigWens(id){
   const w=(state.wishlist||[]).find(x=>x.id===id); if(!w)return;
-  wensBewerk=id; wensRegions=(bpRegios(w)||[]).map(r=>({land:r.land,i:r.i}));
-  wensBrand=w.brand||'light';
-  const zet=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v||'';};
-  zet('w-naam',w.naam||w.streek||''); zet('w-brander',w.brander);
-  zet('w-url',w.url); zet('w-proces',w.proces); zet('w-var',w.variety);
-  zet('w-notitie',w.notitie);
-  document.getElementById('wens-title').textContent='wens bijwerken';
-  renderWensHerkomst(); renderWensBrand(); go('wens');
-}
-function renderWensHerkomst(){
-  const el=document.getElementById('w-herkomst'); if(!el)return;
-  el.innerHTML=bpHerkomstKiezer(wensRegions,'wensHerkomstWeg','bpKiesWensHerkomst');
-}
-function wensHerkomstWeg(i){wensRegions.splice(i,1);renderWensHerkomst();}
-function bpKiesWensHerkomst(){bpKiesHerkomstVoor('wens');}
-function renderWensBrand(){
-  const el=document.getElementById('w-brand'); if(!el)return;
-  el.innerHTML=Object.keys(BP_BRAND).map(b=>
-    '<button type="button" class="bp-chip'+(b===wensBrand?' sel':'')+
-    '" onclick="wensZetBrand(\''+b+'\')">'+b+'</button>').join('');
-}
-function wensZetBrand(b){wensBrand=b;renderWensBrand();}
-function wensAnnuleer(){wensBewerk=null;go('beans');}
-function wensOpslaan(){
-  const g=i=>{const e=document.getElementById(i);return e?e.value.trim():'';};
-  const naam=g('w-naam')||(wensRegions.length?bpRegioTekst(wensRegions[0]):'');
-  if(!naam){toast('geef hem een naam, of kies een herkomst');return;}
-  if(!Array.isArray(state.wishlist))state.wishlist=[];
-  const w={id:wensBewerk||uid(),naam,brander:g('w-brander'),url:g('w-url'),
-    regions:wensRegions.slice(),proces:g('w-proces'),variety:g('w-var'),
-    brand:wensBrand,notitie:g('w-notitie'),
-    smaak:wensRegions.length?bpRegioSmaak(wensRegions[0]).slice():[],
-    at:Date.now()};
-  const i=state.wishlist.findIndex(x=>x.id===w.id);
-  if(i>=0)state.wishlist[i]=Object.assign({},state.wishlist[i],w);
-  else state.wishlist.push(w);
-  save(); wensBewerk=null; toast('✓ op je lijstje'); go('beans');
+  openBeanForm(true);
+  editingWens=id;
+  const zet=(veld,val)=>{const el=document.getElementById(veld);if(el)el.value=val||'';};
+  zet('b-name',w.naam||w.name||''); zet('b-roaster',w.brander);
+  zet('b-url',w.url); zet('b-process',w.proces); zet('b-variety',w.variety);
+  zet('b-altitude',w.altitude); zet('b-notes',w.notitie);
+  zet('b-roasternotes',w.roasternotes||(w.smaak||[]).join(', '));
+  const regs=bpRegios(w).map(r=>({land:r.land,i:r.i}));
+  zet('b-origin',w.origin||regs.map(bpRegioTekst).join(' · '));
+  beanFormRegions=regs; renderBeanHerkomst();
+  beanFormRoast=w.brand||null; renderBeanRoast();
+  renderBeanMode();
 }
 /* vanuit de kaart: de streek die je bekeek als wens wegschrijven */
 function bpOpLijst(){
@@ -7954,25 +8011,12 @@ function bpVanLijst(id){
   state.wishlist=(state.wishlist||[]).filter(x=>x.id!==id);
   save();renderBeans();toast('van het lijstje af');
 }
-/* "gekocht" opent het bonenformulier met alles al ingevuld — inclusief de
-   herkomsten, zodat de wens naadloos een zak op je plank wordt */
+/* "gekocht" is hetzelfde formulier, maar dan omgezet naar je plank. De wens
+   blijft staan tot je opslaat, dus annuleren kost je niets. */
 function bpGekocht(id){
-  const w=(state.wishlist||[]).find(x=>x.id===id); if(!w)return;
-  openBeanForm();
-  const zet=(veld,val)=>{const el=document.getElementById(veld);if(el)el.value=val||'';};
-  const regs=bpRegios(w).map(r=>({land:r.land,i:r.i}));
-  zet('b-name',w.naam||'');
-  zet('b-roaster',w.brander||'');
-  zet('b-url',w.url||'');
-  zet('b-origin',regs.map(bpRegioTekst).join(' · '));
-  zet('b-process',w.proces);
-  zet('b-variety',w.variety);
-  if(regs.length===1)zet('b-altitude',String(bpRegioHoogte(regs[0])).replace(/\s*m$/,'').trim());
-  zet('b-roasternotes',(w.smaak||[]).join(', '));
-  beanFormRegions=regs; renderBeanHerkomst();
-  beanFormRoast=(w.brand==='light')?'light':(w.brand==='dark'?'dark':'medium');
-  renderBeanRoast();
-  state.wishlist=(state.wishlist||[]).filter(x=>x.id!==id);save();
+  bpWijzigWens(id);
+  if(editingWens!==id)return;
+  beanZetMode(false);
   toast('van je lijstje — vul de branddatum aan');
 }
 function bpWensDicht(){
@@ -7986,11 +8030,9 @@ function bpWensHTML(){
     '<span class="sd">'+(lijst.length?(lijst.length+' nog niet gekocht'):'nog leeg')+'</span>'+
     '<span class="wens-arr">'+(state.wensDicht?'›':'⌄')+'</span></button>';
   if(state.wensDicht)return '<div class="sect wens-sect">'+kop+'</div>';
-  const knop='<button class="shelf-do" onclick="bpNieuweWens()">'+
-    '<span>＋ zelf een zak toevoegen</span><span class="ll-arr">›</span></button>';
   if(!lijst.length)return '<div class="sect wens-sect">'+kop+'</div>'+
     '<div class="empty-note">nog niets op je lijstje. Kom je ergens een mooie zak tegen, '+
-    'zet hem hier neer — met de link erbij.</div>'+knop;
+    'zet hem hier neer via ＋ add — met de link erbij.</div>';
   return '<div class="sect wens-sect">'+kop+'</div>'+
     lijst.map(w=>{
       const regs=bpRegios(w);
@@ -8011,7 +8053,7 @@ function bpWensHTML(){
       '<button class="lp" onclick="bpWijzigWens(\''+w.id+'\')">wijzig</button>'+
       '<button class="lp" onclick="bpVanLijst(\''+w.id+'\')">×</button>'+
       '</div></div>';
-    }).join('')+knop;
+    }).join('');
 }
 
 /* ---------------- de boon en de kaart aan elkaar ----------------
@@ -8097,11 +8139,12 @@ function bpMigreerWensen(){
 /* ---- de kaart als invoermethode ----
    Vanuit het bonenformulier of het wensformulier open je de kaart om een
    streek aan te wijzen. bpVoor onthoudt waar je vandaan kwam.            */
-let bpVoor=null;              // null | 'bean' | 'wens'
+let bpVoor=null;              // null als je gewoon rondkijkt, 'bean' als een formulier wacht
+let bpVanaf='learn';          // waar je de kaart binnenkwam: 'beans' of 'learn'
 let beanFormRegions=[];
 function bpKiesHerkomstVoor(wat){
-  bpVoor=wat; bpVarOpen=null;
-  const lijst=(wat==='wens')?wensRegions:beanFormRegions;
+  bpVoor=wat||'bean'; bpVarOpen=null;
+  const lijst=beanFormRegions;
   const r=lijst[lijst.length-1];
   if(r&&BP_INFO[r.land]){
     bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
@@ -8116,29 +8159,19 @@ function bpKiesHerkomst(){bpKiesHerkomstVoor('bean');}
 function bpNeemHerkomst(i){
   const landId=bpLandId, inf=BP_INFO[landId];
   const nieuw={land:landId,i:(i!=null?i:null)};
-  const naarWens=(bpVoor==='wens');
-  const lijst=naarWens?wensRegions:beanFormRegions;
-  if(!lijst.some(r=>r.land===nieuw.land&&r.i===nieuw.i))lijst.push(nieuw);
-  const eerste=(lijst.length===1);
+  if(!beanFormRegions.some(r=>r.land===nieuw.land&&r.i===nieuw.i))beanFormRegions.push(nieuw);
+  const eerste=(beanFormRegions.length===1);
   const el=id=>document.getElementById(id);
   const leegVul=(id,v)=>{const e=el(id);if(e&&!e.value.trim()&&v)e.value=v;};
-  if(naarWens){
-    if(eerste){
-      leegVul('w-proces',inf.proc.length===1?inf.proc[0]:'');
-      leegVul('w-var',bpRegioVar(nieuw));
-      leegVul('w-naam',bpRegioTekst(nieuw));
-    }
-    bpVoor=null; go('wens'); renderWensHerkomst();
-  }else{
-    const o=el('b-origin');
-    if(o)o.value=lijst.map(bpRegioTekst).join(' · ');
-    if(eerste){
-      leegVul('b-variety',bpRegioVar(nieuw));
-      leegVul('b-altitude',String(bpRegioHoogte(nieuw)).replace(/\s*m$/,'').trim());
-      if(inf.proc.length===1)leegVul('b-process',inf.proc[0]);
-    }
-    bpVoor=null; go('beanform'); renderBeanHerkomst();
+  const o=el('b-origin');
+  if(o)o.value=beanFormRegions.map(bpRegioTekst).join(' · ');
+  if(eerste){
+    leegVul('b-variety',bpRegioVar(nieuw));
+    leegVul('b-altitude',String(bpRegioHoogte(nieuw)).replace(/\s*m$/,'').trim());
+    if(inf.proc.length===1)leegVul('b-process',inf.proc[0]);
+    leegVul('b-name',bpRegioTekst(nieuw));
   }
+  bpVoor=null; go('beanform'); renderBeanHerkomst();
   toast('✓ herkomst erbij');
 }
 function bpHerkomstWeg(i){beanFormRegions.splice(i,1);renderBeanHerkomst();}
@@ -8213,18 +8246,11 @@ function bpPlankKaartHTML(){
   });
   BP_LANDEN.forEach(l=>{sv+='<path class="achter" d="'+bpPad(l)+'"/>';});
   punten.forEach(p=>{
-    sv+='<circle class="'+p.soort+'" cx="'+p.x+'" cy="'+p.y+'" r="4.5"'+
-      (p.soort==='mijn'?(' onclick="bpVanBoon(\''+p.id+'\')"'):'')+'/>';
+    sv+='<circle class="'+p.soort+'" cx="'+p.x+'" cy="'+p.y+'" r="4.5" onclick="event.stopPropagation();'+
+      (p.soort==='mijn'?('bpVanBoon(\''+p.id+'\')'):('bpVanWens(\''+p.id+'\')'))+'"/>';
   });
   sv+='</svg>';
-  const wensen=(state.wishlist||[]).length;
-  const regel=punten.length
-    ? (landen.size+' land'+(landen.size===1?'':'en')+' op je plank'+
-       (wensen?(' · '+wensen+' op je lijstje'):''))
-    : 'nog geen herkomst bekend';
-  return '<div class="plank-kaart">'+sv+'<div class="bij">'+regel+'</div></div>'+
-    '<button class="shelf-do plank-deur" onclick="bpOpen()">'+
-    '<span>welke zak koop ik nu? — ontdek een streek</span><span class="ll-arr">›</span></button>';
+  return '<button class="plank-kaart" onclick="bpOpen(\'beans\')">'+sv+'</button>';
 }
 
 /* ---- uit je eigen kast ----
@@ -8294,17 +8320,24 @@ function bpVanWens(wensId,idx){
 /* Eén plek op de kaart openen, gebruikt door beide terugwegen hierboven. */
 function bpNaarPlek(r,klacht){
   if(!r||!BP_INFO[r.land]){toast(klacht);return;}
-  bpVoor=null; bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
+  bpVoor=null; bpVanaf='beans'; bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
   bpStreek=(r.i!=null)?r.i:null; bpProc=null; bpVarOpen=null;
   bpView=bpLandView(r.land).slice();
+  bpNaarStreek=(bpStreek!=null);
   go('beanpick');
 }
+let bpNaarStreek=false;   // net binnengekomen bij een streek: schuif hem in beeld
 function bpTeken(behoudScroll){
   const el=document.getElementById('bp-screen'); if(!el)return;
   const y=behoudScroll?el.scrollTop:0;
   el.innerHTML=(bpNiv==='wereld')?bpWereld():(bpNiv==='deel'?bpDeelScherm():bpLandScherm());
   el.scrollTop=y;
   bpVenster();
+  if(bpNaarStreek){
+    bpNaarStreek=false;
+    const op=el.querySelector('.bp-streek.op');
+    if(op)setTimeout(()=>op.scrollIntoView({behavior:'smooth',block:'start'}),120);
+  }
 }
 
 /* ---------------- taste wheel ----------------

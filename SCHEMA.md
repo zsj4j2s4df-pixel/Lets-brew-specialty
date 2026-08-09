@@ -164,12 +164,20 @@ lijstje → zelf een zak toevoegen*). `regions` werkt hetzelfde als bij een boon
 dus een blend verschijnt op de kaart bij elk van zijn herkomsten.
 
 ```json
-{ "id":"…", "naam":"Kirinyaga AA", "brander":"Friedhats",
-  "url":"https://…", "regions":[{"land":"kenia","i":0}],
-  "proces":"washed", "variety":"SL28, SL34, Ruiru 11", "brand":"light",
+{ "id":"…", "naam":"Kirinyaga AA", "name":"Kirinyaga AA",
+  "brander":"Friedhats", "url":"https://…", "origin":"Kirinyaga · Kenia",
+  "regions":[{"land":"kenia","i":0}], "proces":"washed", "altitude":"1700-1900",
+  "variety":"SL28, SL34, Ruiru 11", "brand":"light",
+  "roasternotes":"tomaat-zoet, rode appel",
   "smaak":["tomaat-zoet","rode appel"], "notitie":"", "zoek":"…",
   "at":1234567890 }
 ```
+
+Een wens en een boon komen uit hetzelfde formulier (*beans → ＋ add*, met de
+keuze *op mijn plank* of *op mijn lijstje*), dus de velden lopen parallel:
+`naam`/`name`, `brander` ↔ `roaster`, `proces` ↔ `process`, `brand` ↔
+`roastLevel`, `notitie` ↔ `notes`. Sla je een wens op als *op mijn plank*, dan
+verdwijnt hij hier en verschijnt hij als bean.
 
 Wensen van vóór deze versie bewaarden hun herkomst als losse namen (`land`,
 `streek`). Die worden bij het laden één keer omgezet naar `regions`.

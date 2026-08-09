@@ -1,4 +1,4 @@
-const CACHE = 'scc-v80';
+const CACHE = 'scc-v81';
 const ASSETS = [
   './','./index.html','./manifest.json',
   './icon-192.png','./icon-512.png','./logo.png',
