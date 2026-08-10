@@ -5567,10 +5567,34 @@ async function scanLabel(ev){
    plek op de kaart, zodat de zak meteen bij zijn streek hoort. Alleen lege
    velden worden gevuld; wat jij zelf typte blijft staan.                    */
 let beanLinkBezig='';
+/* De etiketregels gelden voor een foto: daar staat de tekst voor je neus, en
+   dan is aanvullen liegen. Bij een link is er juist geen tekst -- dan moet de
+   AI wél putten uit wat hij over deze brander en deze boon weet, anders komt
+   hij met lege handen terug. Vandaar een eigen set regels.               */
+const LINK_RULES=
+  'LINK-REGELS:\n'+
+  '- Je kunt de pagina niet openen. Werk met twee bronnen: (a) wat er in de URL zelf staat '+
+  '(domein = de brander, het pad/de slug = meestal de naam van de boon, soms ook herkomst, proces of variëteit), '+
+  'en (b) wat je uit je kennis weet over deze brander en over deze boon.\n'+
+  '- Zet slugs om naar leesbare tekst: "ethiopia-guji-natural-250g" -> naam "Ethiopia Guji", origin "Ethiopië, Guji", process "natural".\n'+
+  '- Ken je de brander maar niet deze specifieke zak, vul dan in wat voor die brander en die herkomst gebruikelijk is, '+
+  'en houd het bij wat je met redelijke zekerheid kunt zeggen.\n'+
+  '- Ken je de boon of de streek wel, vul dan ook variety, altitude en roasternotes in: dit is een schatting die de '+
+  'gebruiker naloopt, geen etiket dat je overtypt.\n'+
+  '- Laat een veld alleen leeg als je er echt niets zinnigs over kunt zeggen. Liever een goede gok die klopt met de '+
+  'herkomst dan een leeg veld.\n'+
+  '- process en variety in de gangbare term (washed, natural, honey, anaerobic). roasternotes komma-gescheiden.\n'+
+  '- roastlevel en fam alleen als de brander of het soort zak daar duidelijk over is.';
+/* ---- de link doet het werk ----
+   Plak je de pagina van de brander en staat AI aan, dan leidt de app eruit af
+   wat er op die zak zit: naam, brander, proces, variëteit, hoogte, smaaknoten
+   -- en de plek op de kaart, zodat de zak meteen bij zijn streek hoort. Alleen
+   lege velden worden gevuld; wat jij zelf typte blijft staan.             */
 async function beanUitLink(){
   const el=document.getElementById('b-url'); if(!el)return;
   const url=el.value.trim();
   if(!url||!/^https?:\/\//i.test(url))return;
+  if(/google\.[a-z.]+\/search/i.test(url))return;   // dat is een zoeklink, geen zak
   if(!aiReady()||url===beanLinkBezig)return;
   beanLinkBezig=url;
   const status=document.getElementById('scan-status');
@@ -5579,19 +5603,25 @@ async function beanUitLink(){
   if(status)status.innerHTML='<span class="spin"></span>de link uitlezen…';
   try{
     const landen=BP_LANDEN.filter(l=>BP_INFO[l.id]).map(l=>l.naam).join(', ');
-    const prompt=`Je bent een specialty-koffie expert. Dit is de webpagina van een zak koffie: ${url}\n`+
-      `Al ingevuld: naam "${get('b-name')||'?'}", brander "${get('b-roaster')||'?'}".\n`+
-      `Leid uit de link (domein, pad, slug) en uit wat je over deze brander en boon weet zoveel mogelijk af. `+
-      `Verzin niets: laat een veld leeg als je het niet weet.\n`+
-      `Geef ALLEEN JSON terug zonder markdown: {"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roastlevel":"","roasternotes":"","notes":"","land":"","streek":""}\n`+
-      `roastlevel is één van: ${ROAST_LEVELS.join(', ')}. roasternotes = smaakprofiel, komma-gescheiden. `+
-      `land = het herkomstland, en kies het uit deze lijst als het erbij staat: ${landen}. `+
-      `streek = de streek binnen dat land, alleen als je hem echt weet.\n${BEAN_RULES}`;
-    const d=extractJSON(await callClaude([{role:"user",content:prompt}],800));
+    const alIn=['name','roaster','origin','process','variety','altitude']
+      .map(k=>k+': '+(get('b-'+k)||'?')).join('; ');
+    const prompt='Dit is de webpagina van een zak specialty koffie: '+url+'\n'+
+      'Wat de gebruiker al invulde: '+alIn+'.\n'+
+      'Vul de zak zo volledig mogelijk in. Geef ALLEEN een JSON-object terug, zonder uitleg, zonder markdown:\n'+
+      '{"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roastlevel":"","fam":"","roasternotes":"","notes":"","land":"","streek":""}\n'+
+      'roastlevel is één van: '+ROAST_LEVELS.join(', ')+'. '+
+      'fam is "espresso", "filter" of "both" — alleen als duidelijk is waar de zak voor gebrand is.\n'+
+      'notes = twee zinnen over wat deze boon of deze streek bijzonder maakt.\n'+
+      'land = het herkomstland; kies het uit deze lijst als het erbij staat: '+landen+'. '+
+      'streek = de streek binnen dat land.\n'+LINK_RULES;
+    const d=extractJSON(await callClaude([{role:"user",content:prompt}],900));
     ['name','roaster','origin','process','variety','altitude'].forEach(k=>zetLeeg('b-'+k,d[k]));
     zetLeeg('b-roasternotes',d.roasternotes); zetLeeg('b-notes',d.notes);
-    if(d.roastlevel&&!beanFormRoast&&ROAST_LEVELS.includes(d.roastlevel)){
-      beanFormRoast=d.roastlevel;renderBeanRoast();
+    const roast=(d.roastlevel||'').toLowerCase().trim();
+    if(!beanFormRoast&&ROAST_LEVELS.includes(roast)){beanFormRoast=roast;renderBeanRoast();}
+    const fam=(d.fam||'').toLowerCase().trim();
+    if(!beanFormWens&&!beanFormFam&&['espresso','filter','both'].includes(fam)){
+      beanFormFam=fam;renderBeanFam();
     }
     // en zet hem op de kaart, als die er nog niet staat
     let plek='';
@@ -5605,6 +5635,7 @@ async function beanUitLink(){
       }
     }
     if(status)status.textContent='✓ ingevuld vanaf de link'+plek+' — kijk het even na';
+    const er=document.getElementById('enrich-row'); if(er)er.style.display='block';
   }catch(e){
     beanLinkBezig='';
     if(status)status.textContent='de link uitlezen lukte niet (werkt alleen met AI aan)';
