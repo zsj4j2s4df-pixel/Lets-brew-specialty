@@ -1137,7 +1137,7 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">new brew</div><button onclick="go('brews')">cancel</button></div>
-      <div class="subtitle">pick a bean — we'll take you to the right screen for it</div>
+      <div class="subtitle">Pick a bean</div>
       <div id="choosebean-list"></div>
       <button class="profile-btn" onclick="beginBrew(null)" style="margin-top:6px">no bean — just pick a method</button>
     </div>
@@ -1254,7 +1254,7 @@
       <div class="field" id="fb-grind"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine">
         <div class="fx-note" id="f-grind-note" style="display:none"></div></div>
 
-      <div class="field" id="prep-field" style="display:none"><label>puck-prep &amp; machine</label>
+      <div class="field" id="prep-field" style="display:none"><label>Puck prep &amp; machine settings</label>
         <div id="prep-list"></div>
         <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
@@ -1282,8 +1282,8 @@
   <div id="page-dialin" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">espresso · dial-in</div><button onclick="cancelForm()">cancel</button></div>
-      <div class="subtitle" id="di-sub">machine espresso — work toward your target</div>
+      <div class="form-head"><div class="h hand">Dial in</div><button onclick="cancelForm()">cancel</button></div>
+      <div class="subtitle" id="di-sub">work towards your espresso shot</div>
 
       <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
       <div class="start-hint" id="di-start"></div>
@@ -1291,7 +1291,7 @@
       <div class="di-goal sketch" id="di-goal"></div>
 
       <div class="di-card sketch soft" id="di-clock-card">
-        <div class="di-lbl hand">shot clock</div>
+        <div class="di-lbl hand">Shot timer</div>
         <div class="e61-box" id="e61" onclick="e61Toggle()">
           <svg viewBox="0 0 240 236">
             <defs><clipPath id="e61-cupclip">
@@ -1408,7 +1408,7 @@
       </button>
 
       <div class="di-card sketch soft">
-        <div class="di-lbl hand">puck-prep &amp; machine</div>
+        <div class="di-lbl hand">Puck prep &amp; machine settings</div>
         <div id="di-prep-list"></div>
         <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
@@ -1531,7 +1531,7 @@
   <div id="page-beans" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">＋ add</button></div>
+      <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">New Bean</button></div>
       <div class="subtitle" id="beans-sub">your bean shelf — linked to your brews.</div>
       <div id="beans-list"></div>
     </div>
@@ -1541,8 +1541,8 @@
   <div id="page-beanform" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand" id="beanform-title">nieuwe zak</div><button onclick="beanFormWeg()">cancel</button></div>
-      <div class="field"><label>waar hoort deze zak?</label>
+      <div class="form-head"><div class="h hand" id="beanform-title">New Bean</div><button onclick="beanFormWeg()">cancel</button></div>
+      <div class="field"><label>Where does it go?</label>
         <div class="bp-chips" id="b-mode"></div>
         <div class="fx-note" id="b-mode-uitleg"></div></div>
 
@@ -1561,10 +1561,10 @@
       <div class="field"><label>name</label><input id="b-name" placeholder="e.g. Ethiopia Guji"></div>
       <div class="field"><label>roaster</label><input id="b-roaster" placeholder="e.g. Friedhats"></div>
       <div class="field-row">
-        <div class="field"><label>origin</label><input id="b-origin" placeholder="country / region"></div>
+        <div class="field"><label>Origin as printed</label><input id="b-origin" placeholder="country / region"></div>
         <div class="field"><label>process</label><input id="b-process" placeholder="washed / natural"></div>
       </div>
-      <div class="field" id="b-herkomst-veld"><label>op de kaart</label><div id="b-herkomst"></div></div>
+      <div class="field" id="b-herkomst-veld"><label>Origin</label><div id="b-herkomst"></div></div>
       <div class="field-row">
         <div class="field"><label>variety</label><input id="b-variety" placeholder="e.g. heirloom"></div>
         <div class="field"><label>altitude (m)</label><input id="b-altitude" placeholder="e.g. 1900-2100"></div>
@@ -1623,7 +1623,7 @@
 
       <div class="learn-card sketch" style="background:var(--aeropress)" onclick="go('learn-latte')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M6.8 5.7 Q11.5 5.3 16.2 5.9 M16.1 5.6 Q16.7 12.6 16.1 19.3 M16.3 19 Q11.6 19.8 7.3 19.1 M7.5 19.4 Q6.5 12.6 6.9 5.4 M7.1 7.3 Q4.8 8.4 4.4 11 Q4.2 13.2 6.1 13.7 M16.1 6.8 Q17.7 5.8 18.9 7.1 Q19.8 8.5 18.3 9.4"/><path d="M9.3 8.9 Q11.5 8.5 14 9.1" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">latte art & melk</div>
+        <div class="lc-body"><div class="lc-t hand">Latte art &amp; milk</div>
           <div class="lc-d">opschuimen, gieten en de vormen op niveau</div></div>
         <div class="lc-arr">›</div>
       </div>
@@ -1656,7 +1656,7 @@
 
       <div class="learn-card sketch" id="beanpick-card" style="background:var(--v60)" onclick="bpOpen('learn')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12.2 2.6 Q18.4 3.1 20.8 8.4 Q22.6 13.6 19.1 18.1 Q15.4 22 10.1 20.9 Q4.6 19.6 2.9 14.4 Q1.6 9.2 5.6 5.3 Q8.4 2.7 12.4 2.7"/><path d="M2.6 11.8 Q11.8 10.9 21.3 11.9" opacity="0.55"/><path d="M12.1 2.8 Q8.4 7.4 8.6 12.1 Q8.8 17.2 12.3 20.9" opacity="0.55"/><path d="M12.1 2.8 Q16 7.4 15.8 12.1 Q15.6 17.2 12.3 20.9" opacity="0.35"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">waar komt koffie vandaan?</div>
+        <div class="lc-body"><div class="lc-t hand">Coffee finder</div>
           <div class="lc-d" id="beanpick-sub">de wereldkaart van de koffiegordel — land, streek, proces en variëteit</div></div>
         <div class="lc-arr">›</div>
       </div>
@@ -1665,7 +1665,7 @@
 
       <div class="learn-card sketch do" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">cuppen</div>
+        <div class="lc-body"><div class="lc-t hand">Cupping</div>
           <div class="lc-d">het SCA-protocol, met klok — blind proeven en scoren</div></div>
         <div class="lc-arr hand">start</div>
       </div>
@@ -1718,7 +1718,7 @@
   <div id="page-learn-latte" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">latte art & melk</div><div style="width:24px"></div></div>
+      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">Latte art &amp; milk</div><div style="width:24px"></div></div>
       <div id="latte-content"></div>
     </div>
   </div>
@@ -1733,7 +1733,7 @@
   <div id="page-cupping" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">cuppen</div><button onclick="go('learn')">klaar</button></div>
+      <div class="form-head"><div class="h hand">Cupping</div><button onclick="go('learn')">klaar</button></div>
       <div class="subtitle">zet ze allemaal hetzelfde, proef blind, scoor eerst — onthul daarna.</div>
       <div id="cupping-body"></div>
     </div>
@@ -1747,7 +1747,7 @@
       <div class="subtitle">elke giet vastgelegd — zie je rozet beter worden.</div>
 
       <div class="settings-card sketch soft" id="ga-help">
-        <button class="adv-head" onclick="document.getElementById('ga-help').classList.toggle('open')"><span class="set-t hand">hoe je giet</span><span class="g-arr">▸</span></button>
+        <button class="adv-head" onclick="document.getElementById('ga-help').classList.toggle('open')"><span class="set-t hand">How you pour</span><span class="g-arr">▸</span></button>
         <div class="adv-body" id="ga-help-body"></div>
       </div>
 
@@ -1796,7 +1796,7 @@
         <div class="set-t hand" style="font-size:19px;margin-top:4px">pairing</div>
         <div class="set-d" style="margin:4px 0 8px" id="pair-status"></div>
         <button class="profile-btn" id="pair-btn" onclick="pairScale()">pair a smart scale (Bluetooth)</button>
-        <div class="set-d" style="font-size:14px">tip: add your machine & grinder under "my gear" above — La Marzocco, Mahlkönig and friends have no open app-API yet, but their profiles make every AI tip sharper. live weight lands in the shot clock when a scale is paired.</div>
+        <div class="set-d" style="font-size:14px">tip: add your machine & grinder under "my gear" above — La Marzocco, Mahlkönig and friends have no open app-API yet, but their profiles make every AI tip sharper. live weight lands in the shot timer when a scale is paired.</div>
       </div>
         </div>
       </div>
@@ -5232,9 +5232,9 @@ function renderBeans(){
   const outBeans=state.beans.filter(b=>b.inStock===false);
   const sub=document.getElementById('beans-sub');
   if(sub)sub.textContent=state.beans.length?('your bean shelf · in stock ('+inBeans.length+')'):'your bean shelf — linked to your brews.';
-  if(!state.beans.length){el.innerHTML='<div class="empty-note">no beans yet.<br>tap ＋ add to add your first bean.</div>';return;}
+  if(!state.beans.length){el.innerHTML='<div class="empty-note">no beans yet.<br>tap New Bean to add your first bean.</div>';return;}
   let html=bpPlankKaartHTML()+bpWensHTML();
-  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap ＋ add or check your empty bags.</div>';
+  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap New Bean or check your empty bags.</div>';
   // cupping hoort bij je bonen, niet alleen achterin learn
   if(featOn('cupping')&&inBeans.length>=2){
     html+=`<button class="shelf-do" onclick="go('cupping')"><svg viewBox="0 0 24 24" class="acic"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg><span>proef er twee blind — cuppingsessie</span><span class="ll-arr">›</span></button>`;
@@ -5261,8 +5261,8 @@ let editingBean=null;
    velden er iets toe doen. Van gedachten veranderen mag: sla je een wens op
    als "op mijn plank", dan verhuist hij gewoon mee.                        */
 let beanFormWens=false, editingWens=null;
-const BEAN_MODES=[{w:false,n:'op mijn plank',u:'een zak die je in huis hebt — hij komt bij je bonen te staan en je kunt erop brouwen.'},
-                  {w:true, n:'op mijn lijstje',u:'een zak die je nog wilt kopen — hij komt op je lijstje en op de wereldkaart.'}];
+const BEAN_MODES=[{w:false,n:'Bean shelf',u:'een zak die je in huis hebt — hij komt bij je bonen te staan en je kunt erop brouwen.'},
+                  {w:true, n:'Bean wishlist',u:'een zak die je nog wilt kopen — hij komt op je lijstje en op de wereldkaart.'}];
 function renderBeanMode(){
   const el=document.getElementById('b-mode'); if(!el)return;
   // staat de keuzehulp uit, dan is er geen lijstje om iets op te zetten
@@ -5273,9 +5273,9 @@ function renderBeanMode(){
   const u=document.getElementById('b-mode-uitleg');
   if(u)u.textContent=(BEAN_MODES.find(m=>m.w===beanFormWens)||BEAN_MODES[0]).u;
   const t=document.getElementById('beanform-title');
-  if(t)t.textContent=(editingBean||editingWens)?'zak bijwerken':'nieuwe zak';
+  if(t)t.textContent=(editingBean||editingWens)?'Edit Bean':'New Bean';
   const sv=document.getElementById('b-save');
-  if(sv)sv.textContent=beanFormWens?'bewaar op mijn lijstje':'bewaar op mijn plank';
+  if(sv)sv.textContent=beanFormWens?'Save on wishlist':'Save on shelf';
   // wat je pas weet als de zak er echt is, vraagt de app pas als hij er is
   [['b-foto-rij',!beanFormWens],['label-preview',!beanFormWens],['b-roastdate-veld',!beanFormWens],
    ['b-cost-row',!beanFormWens&&featOn('cost')],['b-fam-veld',!beanFormWens],
@@ -6177,7 +6177,7 @@ function renderPairing(){
     st.textContent='this browser (iPhone Safari included) doesn\'t allow Web Bluetooth — pairing works on Android/Chrome. your gear profiles below still power every AI tip.';
     if(btn)btn.style.opacity=.55;
   }else{
-    st.textContent=scaleDevice?('paired: '+(scaleDevice.name||'scale')+' — live weight shows in the shot clock.'):'pair an Acaia/Felicita/generic BLE scale for live weight in the shot clock.';
+    st.textContent=scaleDevice?('paired: '+(scaleDevice.name||'scale')+' — live weight shows in the shot timer.'):'pair an Acaia/Felicita/generic BLE scale for live weight in the shot timer.';
   }
 }
 async function pairScale(){
@@ -6398,7 +6398,7 @@ function renderLatte(){
   <div class="la-intro">Latte art is voor tachtig procent melk en voor twintig procent hand.
     Krijg je de microfoam goed, dan tekent hij bijna vanzelf. Zit er lucht in, dan helpt geen enkele beweging.</div>
 
-  <div class="sect"><span class="hand">de melk</span><span class="sd">waar het mee staat of valt</span></div>
+  <div class="sect"><span class="hand">The milk</span><span class="sd">waar het mee staat of valt</span></div>
   <div class="lesson sketch soft">
     <p>Volle melk schuimt het best: ongeveer 3,5% vet en 3,4% eiwit. De eiwitten vangen de
       luchtbellen en houden ze overeind, het vet maakt het glanzend en romig. Halfvol werkt
@@ -6411,13 +6411,13 @@ function renderLatte(){
       — te vol en je kunt niet meer draaien.</p>
   </div>
 
-  <div class="sect"><span class="hand">opschuimen</span><span class="sd">lucht erin, dan glad draaien</span></div>
+  <div class="sect"><span class="hand">Steaming</span><span class="sd">lucht erin, dan glad draaien</span></div>
   ${laSteamBenchHTML()}
 
-  <div class="sect"><span class="hand">gieten</span><span class="sd">drie hoogtes, één beweging</span></div>
+  <div class="sect"><span class="hand">Pouring</span><span class="sd">drie hoogtes, één beweging</span></div>
   ${laPourBenchHTML()}
 
-  <div class="sect"><span class="hand">de vormen</span><span class="sd">van makkelijk naar levenswerk</span></div>
+  <div class="sect"><span class="hand">The shapes</span><span class="sd">van makkelijk naar levenswerk</span></div>
   <div class="la-key">
     <span><svg viewBox="0 0 34 12"><path class="la-mo" d="M2 6 C10 4 24 8 32 6"/></svg> gieten of wiebelen</span>
     <span><svg viewBox="0 0 34 12"><path class="la-mo2" d="M2 6 C10 4 24 8 32 6"/></svg> optillen en doortrekken</span>
@@ -6438,7 +6438,7 @@ function renderLatte(){
     });
   });
 
-  h+=`<div class="sect"><span class="hand">als het misgaat</span><span class="sd">wat je ziet, en wat je eraan doet</span></div>`;
+  h+=`<div class="sect"><span class="hand">When it goes wrong</span><span class="sd">wat je ziet, en wat je eraan doet</span></div>`;
   LA_FIX.forEach(f=>{
     h+=`<div class="la-fix sketch soft">
       <div class="lf-p hand">${esc(f.p)}</div>
@@ -6672,21 +6672,21 @@ function cupBowlSVG(){
 function cupExplainHTML(){
   return `<button class="cup-ex-t" onclick="cup.open=!cup.open;renderCupping()">
       <svg viewBox="0 0 24 24" class="acic"><path d="M11.5 3.4 Q17.2 3.2 17.8 8.4 Q18.2 11.6 15.7 13.8 Q15 14.4 14.9 16.3 M15 16 Q12 16.6 9.1 16.1 M9.3 16.3 Q9 14.2 8.3 13.6 Q5.8 11.4 6.2 8.2 Q6.8 3.3 12.5 3.6"/><path d="M9.7 18.4 Q12 18.9 14.3 18.4 M10.3 20.5 Q12 21 13.8 20.5" opacity="0.7"/></svg>
-      <span>hoe cuppen werkt</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
+      <span>How cupping works</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
     <div class="cup-ex ${cup.open?'':'hidden'}">
-      <div class="lesson sketch soft"><h3>waarom cuppen</h3>
+      <div class="lesson sketch soft"><h3>Why cup?</h3>
         <p>Bij cupping zet je koffie zonder techniek. Geen filter, geen druk, geen giettechniek — alleen maling, water en tijd, voor elke kom exact hetzelfde. Daardoor is het enige verschil dat je proeft de boon zelf. Dat is precies waarom de hele keten het zo doet: de boer, de brander en de inkoper vergelijken langs dezelfde lat.</p>
         <p>Thuis is de winst dubbel. Je leert je bonen kennen, én je leert je eigen tong kennen. Blind proeven haalt het etiket weg: geen prijs, geen herkomst, geen verwachting. Wat overblijft is wat je werkelijk lekker vindt.</p></div>
-      <div class="lesson sketch"><h3>het recept (SCA-102)</h3>
+      <div class="lesson sketch"><h3>The recipe (SCA-102)</h3>
         <p>De verhouding is <b>8,25 g per 150 ml</b> — ongeveer 1:18. Maal <b>medium-grof</b>, iets grover dan filter, en voor alle kommen op precies dezelfde stand. Water van <b>93 °C</b>, vers en zacht. Weeg alles, ook het water: de hele oefening staat of valt met gelijke omstandigheden.</p>
         <p>Professioneel zet men vijf kommen per koffie, om te zien of de partij overal hetzelfde smaakt. Thuis is één kom per boon genoeg; twee als je wilt controleren of je eigen werk consistent is.</p></div>
-      <div class="lesson sketch soft"><h3>het verloop</h3>
+      <div class="lesson sketch soft"><h3>How it runs</h3>
         <p><b>Voor het water</b> ruik je de droge maling. Dat is <i>fragrance</i>, en die is daarna weg.</p>
         <p><b>0:00</b> giet je alle kommen tegelijk vol en start je de klok. De koffie drijft boven en vormt een korst.</p>
         <p><b>4:00</b> breek je de korst: neus vlak boven de kom, drie keer roeren, diep inademen. Die stoot geur is <i>aroma</i>, het mooiste moment van de sessie.</p>
         <p><b>Daarna</b> schuim je af met twee lepels, van weerszijden over het oppervlak.</p>
         <p><b>Vanaf ±8 minuten</b>, rond 71 °C, slurp je. Hard, zodat de koffie verneveld over je hele tong slaat. Proef opnieuw terwijl het afkoelt: zuur en zoet laten zich op verschillende temperaturen zien, en fouten komen pas lauw boven.</p></div>
-      <div class="lesson sketch"><h3>de score</h3>
+      <div class="lesson sketch"><h3>Scoring</h3>
         <p>De SCA verving in november 2024 het oude 100-puntsformulier uit 2004 door de <b>Coffee Value Assessment</b>. Die splitst beschrijven (wát je proeft) van waarderen (hoe goed je het vindt). Dit scherm volgt het waarderende deel: acht secties, elk van 1 tot 9, waarbij 5 neutraal is — niet lekker, niet vies.</p>
         <p>De officiële omrekening naar honderd punten doet de SCA met een eigen rekenhulp; <b>80 punten of meer</b> heet specialty, 85+ excellent, 90+ outstanding. Het cijfer dat je hier ziet is je eigen voorkeursscore, geen SCA-keuring. Voor thuis is dat ook het enige dat telt: welke boon wil jij morgen weer.</p></div>
     </div>`;
@@ -6706,7 +6706,7 @@ function renderCupping(){
     h+=`<div class="k" style="margin:18px 2px 6px">kies twee tot vier bonen</div><div class="link-pick">`+
       beans.map(b=>`<button class="lp ${cup.picks.includes(b.id)?'sel':''}" onclick="cupPick('${b.id}')">${esc(b.name)}</button>`).join('')+'</div>';
     h+=`<div class="cup-recipe sketch">
-        <div class="cr-h hand">jouw recept</div>
+        <div class="cr-h hand">Your recipe</div>
         <div class="cr-row"><span>komformaat</span><span class="cr-in"><input type="number" min="100" max="400" step="10" value="${cup.size}" oninput="cupSize(this.value)"> ml</span></div>
         <div class="cr-row"><span>koffie per kom</span><b>${String(cupDose()).replace('.',',')} g</b></div>
         <div class="cr-row"><span>water</span><b>${cup.size} ml · 93 °C</b></div>
@@ -6773,7 +6773,7 @@ function renderCupping(){
   }).sort((a,b)=>b.tot-a.tot);
   const top=rows[0], tie=rows.length>1&&rows[1].tot===top.tot;
   let h=`<div class="settings-card sketch" style="background:var(--v60)">
-      <div class="set-t hand">de onthulling</div>
+      <div class="set-t hand">The reveal</div>
       <div class="cup-rev">`;
   rows.forEach(r=>{
     h+=`<div class="cr-line"><span class="cr-l hand">${r.L}</span>
@@ -6786,7 +6786,7 @@ function renderCupping(){
       : 'je tong kiest <b style="font-weight:400;color:var(--ink)">'+esc(top.b?top.b.name:'?')+'</b>'}</div></div>`;
   /* per sectie waar het verschil zat */
   if(rows.length>1){
-    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">waar ze verschilden</span></div>';
+    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">Where they differed</span></div>';
     const byLabel=cup.order.map((id,i)=>({L:CUP_LABELS[i],b:beanById(id),sc:cup.scores[CUP_LABELS[i]]||{}}));
     CUP_SECTIONS.forEach(s=>{
       const vals=byLabel.map(r=>(r.sc[s.k]||5));
@@ -7579,7 +7579,7 @@ function bpVarBlok(lijst){
   const namen=(lijst||'').split(',').map(x=>x.trim()).filter(Boolean);
   if(!namen.length)return '';
   const uitleg=bpVarOpen!=null?bpVarUitleg(namen[bpVarOpen]):'';
-  return '<div class="bp-et">variëteit</div><div class="bp-chips">'+
+  return '<div class="bp-et">Variety</div><div class="bp-chips">'+
     namen.map((n,i)=>'<button class="bp-chip'+(bpVarOpen===i?' sel':'')+
       '" onclick="bpVarTik('+i+')">'+esc(n)+'</button>').join('')+'</div>'+
     (bpVarOpen!=null
@@ -7808,12 +7808,12 @@ function bpPlankBlok(){
       esc(o.name||o.naam||bpRegioTekst(r))+
       '<em>'+esc(bpIsBlend(o)?'blend':bpRegioTekst(r))+'</em></button>';
   };
-  let h='<div class="bp-blok vol"><h3>jouw plank</h3>'+
+  let h='<div class="bp-blok vol"><h3>Your shelf</h3>'+
     '<p class="bp-zacht">Tik een naam aan en de kaart zoomt naar zijn streek, met het '+
     'verhaal erbij.</p>';
-  if(bonen.length)h+='<div class="bp-et">wat je in huis hebt</div><div class="bp-chips">'+
+  if(bonen.length)h+='<div class="bp-et">Beans you have</div><div class="bp-chips">'+
     bonen.map(b=>chip(b,'bpVanBoon')).join('')+'</div>';
-  if(wensen.length)h+='<div class="bp-et">op je lijstje</div><div class="bp-chips">'+
+  if(wensen.length)h+='<div class="bp-et">On your wishlist</div><div class="bp-chips">'+
     wensen.map(w=>chip(w,'bpVanWens')).join('')+'</div>';
   h+='<p class="bp-zacht" style="margin-top:9px">Nog nooit gehad: '+
     (totaal-gehad.size)+' van de '+totaal+' landen met een verhaal.</p></div>';
@@ -7821,7 +7821,7 @@ function bpPlankBlok(){
 }
 function bpWereld(){
   const gehad=bpGehad();
-  return '<div class="bp-kop"><div class="t">waar komt hij vandaan?</div>'+
+  return '<div class="bp-kop"><div class="t">Where\'s it from?</div>'+
     '<button class="bp-terug" onclick="bpTerug()">‹ '+(bpVanaf==='beans'?'beans':'learn')+'</button></div>'+
     '<div class="bp-let">Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit '+
     'vorst. Elk stuk van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door '+
@@ -7846,11 +7846,11 @@ function bpDeelScherm(){
     esc(D.kort)+'</b></div>'+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een land</div></div>'+
-    '<div class="bp-blok vol"><h3>waar dit deel bekend om staat</h3>'+
+    '<div class="bp-blok vol"><h3>What this part is known for</h3>'+
     '<p>'+D.bekend+'</p><p>'+D.waarom+'</p>'+
-    '<div class="bp-et">wat je hier tegenkomt</div>'+
+    '<div class="bp-et">What you\'ll find here</div>'+
     '<p class="bp-zacht">'+D.proc+'<br>hoogte meestal '+D.hoogte+'</p></div>'+
-    '<div class="bp-et">landen met een eigen verhaal</div>'+
+    '<div class="bp-et">Countries with a story</div>'+
     landen.map(l=>{
       const inf=BP_INFO[l.id];
       return '<button class="bp-kies" onclick="bpKies(\'land\',\''+l.id+'\')">'+
@@ -7869,19 +7869,19 @@ function bpLandScherm(){
     '</button> › <b>'+esc(L.naam)+'</b></div>'+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een genummerde stip, of kies hieronder</div></div>'+
-    '<div class="bp-blok vol"><h3>waar dit land bekend om staat</h3>'+
+    '<div class="bp-blok vol"><h3>What this country is known for</h3>'+
     '<p>'+inf.bekend+'</p>'+
-    '<div class="bp-et">de smaken die de brander op de zak zet</div>'+bpSmaken(inf.smaak)+
-    '<div class="bp-et">variëteit</div><p class="bp-zacht">'+esc(inf.var)+'</p>'+
-    '<div class="bp-et">hoogte</div><p class="bp-zacht">'+esc(inf.hoogte)+
+    '<div class="bp-et">The notes the roaster puts on the bag</div>'+bpSmaken(inf.smaak)+
+    '<div class="bp-et">Variety</div><p class="bp-zacht">'+esc(inf.var)+'</p>'+
+    '<div class="bp-et">Altitude</div><p class="bp-zacht">'+esc(inf.hoogte)+
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p></div>'+
-    '<div class="bp-blok"><h3>het droogproces van de boer</h3>'+bpProcBlok(inf.proc)+'</div>'+
-    (bpVoor?('<div class="bp-blok vol"><h3>welke streek?</h3>'+
+    '<div class="bp-blok"><h3>How the farmer dries it</h3>'+bpProcBlok(inf.proc)+'</div>'+
+    (bpVoor?('<div class="bp-blok vol"><h3>Which region?</h3>'+
       '<p class="bp-zacht">Zegt de zak alleen het land, dan is dat ook goed.</p>'+
       '<div class="bp-knoppen"><button class="bp-knop leeg" onclick="bpNeemHerkomst(null)">'+
       'alleen '+esc(L.naam)+', geen streek</button></div></div>'):'')+
-    '<div class="bp-et">de streken</div>'+
+    '<div class="bp-et">The regions</div>'+
     (function(){const g=bpGehadStreken(bpLandId);
       return (inf.streken||[]).map((st,i)=>{
         const op=bpStreek===i;
@@ -7901,24 +7901,24 @@ function bpStreekBlok(){
   const br=bpBrand||'light', me=bpMeth||bpEersteMethode();
   return '<div class="bp-open">'+
     '<p>'+esc(st.t)+'</p>'+bpSmaken(st.s)+
-    '<div class="bp-et">hoogte</div><p class="bp-zacht">'+esc(st.h||inf.hoogte)+
+    '<div class="bp-et">Altitude</div><p class="bp-zacht">'+esc(st.h||inf.hoogte)+
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p>'+
     bpVarBlok(st.v||inf.var)+
 
-    '<div class="bp-deel"><h4>hoe wil je hem hebben?</h4>'+
-    '<div class="bp-et">proces</div><div class="bp-chips">'+
+    '<div class="bp-deel"><h4>How do you want it?</h4>'+
+    '<div class="bp-et">Process</div><div class="bp-chips">'+
     inf.proc.map(p=>'<button class="bp-chip'+(p===proc?' sel':'')+'" onclick="bpZet(\'proc\',\''+p+'\')">'+esc(p)+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+esc(BP_PROCES[proc].u)+' Dat geeft een smaak die '+
     esc(BP_PROCES[proc].sm)+', en een mondgevoel dat '+esc(BP_PROCES[proc].mo)+' is.</p>'+
-    '<div class="bp-et">branding</div><div class="bp-chips">'+
+    '<div class="bp-et">Roast</div><div class="bp-chips">'+
     Object.keys(BP_BRAND).map(b=>'<button class="bp-chip'+(b===br?' sel':'')+'" onclick="bpZet(\'brand\',\''+b+'\')">'+b+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+BP_BRAND[br].t+'</p>'+
-    '<div class="bp-et">waar zet je hem</div><div class="bp-chips">'+
+    '<div class="bp-et">What you\'ll brew it on</div><div class="bp-chips">'+
     bpMethodes().map(m=>'<button class="bp-chip'+(m.id===me?' sel':'')+'" onclick="bpZet(\'meth\',\''+m.id+'\')">'+esc(m.name)+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+bpMethodeTip(me,br)+'</p></div>'+
 
-    '<div class="bp-deel"><h4>waar je op let bij de zak</h4>'+
+    '<div class="bp-deel"><h4>What to look for on the bag</h4>'+
     '<div class="bp-zak">'+
     '<em>land</em> '+esc(L.naam)+'<br>'+
     '<em>streek</em> '+esc(st.n)+'<br>'+
@@ -7935,7 +7935,7 @@ function bpStreekBlok(){
     'ligt weet de app niet — dat laatste klikje blijft van jou.</p>'+
     '<div class="bp-knoppen">'+(bpVoor
       ? '<button class="bp-knop" onclick="bpNeemHerkomst('+bpStreek+')">✓ deze is het</button>'
-      : '<button class="bp-knop" onclick="bpOpLijst()">zet op mijn lijstje</button>')+'</div>'+
+      : '<button class="bp-knop" onclick="bpOpLijst()">Add to wishlist</button>')+'</div>'+
     '</div>'+bpUitJeKast(bpLandId,bpStreek)+'</div>';
 }
 function bpMethodes(){
@@ -8057,13 +8057,13 @@ function bpWensHTML(){
   if(!featOn('beanpick'))return '';
   const lijst=state.wishlist||[];
   const kop='<button class="wens-kop" onclick="bpWensDicht()">'+
-    '<span class="hand">op mijn lijstje</span>'+
+    '<span class="hand">Bean wishlist</span>'+
     '<span class="sd">'+(lijst.length?(lijst.length+' nog niet gekocht'):'nog leeg')+'</span>'+
     '<span class="wens-arr">'+(state.wensDicht?'›':'⌄')+'</span></button>';
   if(state.wensDicht)return '<div class="sect wens-sect">'+kop+'</div>';
   if(!lijst.length)return '<div class="sect wens-sect">'+kop+'</div>'+
     '<div class="empty-note">nog niets op je lijstje. Kom je ergens een mooie zak tegen, '+
-    'zet hem hier neer via ＋ add — met de link erbij.</div>';
+    'zet hem hier neer via New Bean — met de link erbij.</div>';
   return '<div class="sect wens-sect">'+kop+'</div>'+
     lijst.map(w=>{
       const regs=bpRegios(w);
@@ -8293,7 +8293,7 @@ function bpUitJeKast(landId,i){
   const bonen=bpBonenVoor(landId,i), wensen=bpWensenVoor(landId,i);
   const elders=bpBonenVoor(landId,null).length-bonen.length;
   if(!bonen.length&&!wensen.length){
-    return '<div class="bp-mijn"><div class="bp-et">uit je eigen kast</div>'+
+    return '<div class="bp-mijn"><div class="bp-et">From your shelf</div>'+
       '<p class="bp-zacht">Hier heb je nog niets van staan.'+
       (elders?(' Wel '+elders+' zak'+(elders===1?'':'ken')+' van elders uit '+
         esc(BP_LAND[landId].naam)+'.'):'')+'</p></div>';
@@ -8302,7 +8302,7 @@ function bpUitJeKast(landId,i){
     const rest=bpRegios(o).filter(r=>!(r.land===landId&&r.i===i));
     return rest.length?('ook uit '+rest.map(bpRegioTekst).join(' · ')):'';
   };
-  let h='<div class="bp-mijn"><div class="bp-et">uit je eigen kast</div>';
+  let h='<div class="bp-mijn"><div class="bp-et">From your shelf</div>';
   h+=bonen.map(b=>{
     const sc=bpScoreVan(b), n=(state.brews||[]).filter(x=>x.beanId===b.id).length;
     const regel=[b.roaster,b.process,b.variety].filter(Boolean).join(' · ');
