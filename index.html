@@ -259,6 +259,11 @@
   .bp-blok h3{font-family:'Caveat',cursive;font-size:26px;font-weight:700;line-height:1.05;
     margin-bottom:4px;}
   .bp-blok p{font-size:16px;line-height:1.45;margin-bottom:8px;}
+  .bp-klap{display:flex;align-items:baseline;gap:9px;width:100%;text-align:left;
+    background:none;border:none;padding:0;font:inherit;color:var(--ink);cursor:pointer;}
+  .bp-klap h3{margin-bottom:0;}
+  .bp-klap .tel{flex:1;color:var(--ink-soft);font-size:15px;}
+  .bp-klap .ll-arr{color:var(--ink-soft);font-size:16px;}
   .bp-blok p:last-child{margin-bottom:0;}
   .bp-et{font-size:12.5px;letter-spacing:.7px;text-transform:uppercase;
     color:var(--ink-soft);margin:12px 0 5px;}
@@ -342,9 +347,6 @@
     filter:url(#wobble);padding:3px 12px;font:inherit;font-size:15px;color:var(--ink);
     cursor:pointer;}
   .fd-ai button.aan{background:var(--accent-soft);color:var(--cream);border-color:var(--accent-soft);}
-  .fd-tips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px;}
-  .fd-tips button{background:none;border:1.5px solid var(--line);border-radius:14px;
-    padding:4px 10px;font:inherit;font-size:15px;color:var(--ink-soft);cursor:pointer;}
   .fd-uit{margin-bottom:12px;}
   .fd-res{display:block;width:100%;text-align:left;background:var(--card);
     border:2px solid var(--line);border-radius:18px;filter:url(#wobble);
@@ -356,6 +358,13 @@
   .fd-res .m{display:block;margin-top:5px;font-size:14px;color:var(--ink-soft);
     border-top:1.5px dashed var(--line);padding-top:4px;}
   .fd-teller{text-align:center;font-size:14px;color:var(--ink-soft);margin:-6px 0 13px;}
+  /* uitklapbare uitleg: standaard dicht, dus het scherm blijft leeg voor wie het al weet */
+  .uitklapper{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+    background:none;border:none;padding:1px 2px 10px;font:inherit;font-size:16px;
+    color:var(--ink-soft);cursor:pointer;}
+  .uitklapper .ll-arr{color:var(--ink-soft);font-size:16px;}
+  .uitklap{color:var(--ink-soft);font-size:16px;line-height:1.45;margin:-5px 2px 12px;
+    border-left:2px dashed var(--line);padding-left:11px;}
   .fd-res.top1{border-width:3px;border-color:var(--ink);background:var(--card-2);}
   .fd-res .nr{float:right;font-family:'Caveat',cursive;font-weight:700;font-size:24px;
     color:var(--accent-soft);}
@@ -365,7 +374,6 @@
   .fd-balk i.op{background:var(--accent-soft);opacity:1;}
   .fd-vraag{font-family:'Caveat',cursive;font-weight:700;font-size:28px;line-height:1.1;
     margin-bottom:3px;}
-  .fd-waarom{color:var(--ink-soft);font-size:16px;margin-bottom:12px;}
   .fd-keus{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
     background:var(--card);border:2px solid var(--line);border-radius:18px;
     filter:url(#wobble);padding:11px 14px;font:inherit;color:var(--ink);cursor:pointer;
@@ -7861,6 +7869,17 @@ function bpProcBlok(namen){
 }
 function bpSmaken(a){return '<div class="bp-smaken">'+a.map(x=>'<span class="bp-smaak">'+esc(x)+'</span>').join('')+'</div>';}
 
+/* Welke uitklappers openstaan. Uitleg hoort niet altijd in beeld te staan: wie hem
+   één keer leest wil hem daarna niet meer zien, en wie hem nodig heeft weet nu waar
+   hij zit. Eén sleutel per uitklapper, en hij blijft open tot je hem dichtdoet. */
+const UIT={};
+function uitklapHTML(id,kop,tekst,teken){
+  const op=!!UIT[id];
+  return '<button class="uitklapper" onclick="UIT[\''+id+'\']=!UIT[\''+id+'\'];'+teken+'">'+
+    esc(kop)+'<span class="ll-arr">'+(op?'▾':'▸')+'</span></button>'+
+    (op?('<div class="uitklap">'+tekst+'</div>'):'');
+}
+
 /* Kom je hier vanaf je bonenplank, dan wil je eerst zien waar je zelf al
    geweest bent — en pas daarna de rest van de wereld. */
 function bpPlankBlok(){
@@ -7874,8 +7893,16 @@ function bpPlankBlok(){
       esc(o.name||o.naam||bpRegioTekst(r))+
       '<em>'+esc(bpIsBlend(o)?'blend':bpRegioTekst(r))+'</em></button>';
   };
-  let h='<div class="bp-blok vol"><h3>Your shelf</h3>'+
-    '<p class="bp-zacht">Tik een naam aan en de kaart zoomt naar zijn streek, met het '+
+  /* Dichtgeklapt is dit één regel; wie zijn eigen plank zoekt vindt hem meteen, en
+     wie de wereld af wil zoeken heeft er geen last van. */
+  const op=!!UIT.plank;
+  const tel=[bonen.length?(bonen.length+(bonen.length===1?' bean':' beans')):'',
+             wensen.length?(wensen.length+' on your list'):''].filter(Boolean).join(' · ');
+  let h='<div class="bp-blok vol"><button class="bp-klap" onclick="UIT.plank=!UIT.plank;bpTeken(true)">'+
+    '<h3>Your shelf</h3><span class="tel">'+esc(tel)+'</span>'+
+    '<span class="ll-arr">'+(op?'▾':'▸')+'</span></button>';
+  if(!op)return h+'</div>';
+  h+='<p class="bp-zacht">Tik een naam aan en de kaart zoomt naar zijn streek, met het '+
     'verhaal erbij.</p>';
   if(bonen.length)h+='<div class="bp-et">Beans you have</div><div class="bp-chips">'+
     bonen.map(b=>chip(b,'bpVanBoon')).join('')+'</div>';
@@ -7887,11 +7914,12 @@ function bpPlankBlok(){
 }
 function bpWereld(){
   const gehad=bpGehad();
-  return '<div class="bp-kop"><div class="t">Where\'s it from?</div>'+
+  return '<div class="bp-kop"><div class="t">Coffee finder</div>'+
     '<button class="bp-terug" onclick="bpTerug()">‹ '+(bpVanaf==='beans'?'beans':'learn')+'</button></div>'+
-    '<div class="bp-let">Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit '+
-    'vorst. Elk stuk van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door '+
-    'naar een land en een streek, en je eindigt met een lijstje waarmee je de goede zak herkent.</div>'+
+    uitklapHTML('wereld','why coffee grows only there',
+      'Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit vorst. Elk stuk '+
+      'van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door naar een land '+
+      'en een streek, en je eindigt met een lijstje waarmee je de goede zak herkent.','bpTeken(true)')+
     fdBalkHTML()+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een werelddeel om in te zoomen</div></div>'+
@@ -8531,7 +8559,9 @@ const FD_STAPPEN=[
       {v:'honey',n:'honey',u:'ertussenin — zoeter, zachter zuur'},
       {v:'egaal',n:'no preference',u:'laat de smaak beslissen'}]},
   {k:'avontuur',v:'How far from home?',
-   w:'De app weet welke landen al op je plank stonden.',
+   w:'Vertrouwd blijft bij landen die al eens op je plank stonden, nieuw zoekt er juist '+
+     'buiten, en verras springt naar een werelddeel waar je nog nooit zat. De app kijkt '+
+     'daarvoor naar je eigen bonen en brews — heb je er nog geen, dan telt deze vraag niet mee.',
    o:[{v:'vertrouwd',n:'keep it familiar',u:'een streek in een land dat je al kent'},
       {v:'nieuw',n:'something new',u:'een land dat je nog niet had'},
       {v:'verras',n:'surprise me',u:'een werelddeel waar je nog nooit zat'}]},
@@ -8640,8 +8670,6 @@ function fdBalkHTML(){
     '<div class="fd-ai"><button class="'+(fdAI?'aan':'')+'" onclick="fdAIAan()">'+
     (fdAI?'AI on':'AI off')+'</button>'+
     (fdAI?'typ een hele zin en druk op enter':'zoekt in 119 streken, ook zonder internet')+'</div>'+
-    (fdQ?'':'<div class="fd-tips">'+['bloemig','natural ethiopië','SL28','boven 1800 m']
-      .map(t=>'<button onclick="fdTik(\''+t+'\')">'+t+'</button>').join('')+'</div>')+
     '<div class="fd-uit" id="fd-uit">'+fdUitHTML()+'</div>'+
     '<button class="bp-knop" style="width:100%;margin-bottom:14px" onclick="fdOpen()">'+
     'find my bag — 5 steps ›</button>';
@@ -8693,10 +8721,11 @@ function fdNaar(land,i){
 
 /* ---- het scherm met de vijf stappen ---- */
 function fdOpen(){fdReset();go('finder');}
-function fdTeken(){
+function fdTeken(behoudScroll){
   const el=document.getElementById('fd-screen'); if(!el)return;
+  const y=el.scrollTop;
   el.innerHTML=(fdStap<5)?fdStapHTML():fdTopHTML();
-  el.scrollTop=0;
+  el.scrollTop=behoudScroll?y:0;
 }
 function fdKaartje(landen,top){
   const set=new Set(landen||[]), t=new Set(top||[]);
@@ -8725,9 +8754,6 @@ function fdStapHTML(){
       S.k+'\',\''+o.v+'\')"><span class="vk">'+(fdA[S.k]===o.v?'✓':'○')+'</span>'+
       '<span><b>'+o.n+'</b><em>'+o.u+'</em></span></button>').join('');
   }
-  const voor=(fdStap===0)?'je zet meestal '+fdA.meth
-           :(fdStap===1&&(fdA.fams||[]).join()===fdMijnSmaken().join())
-             ?'hier scoorde jij het hoogst in je eigen brews':'';
   return '<div class="bp-kop"><div class="t">Step '+(fdStap+1)+' of 5</div>'+
     '<button class="bp-terug" onclick="'+(fdStap?'fdStap--;fdTeken()':'go(\'beanpick\')')+
     '">‹ '+(fdStap?'back':'map')+'</button></div>'+
@@ -8735,8 +8761,8 @@ function fdStapHTML(){
       '<i class="'+(i<=fdStap?'op':'')+'"></i>').join('')+'</div>'+
     fdKaartje(raak,[])+
     '<div class="fd-teller">'+fdOver()+' of the 119 regions still fit</div>'+
-    '<div class="fd-vraag">'+S.v+'</div><div class="fd-waarom">'+S.w+'</div>'+
-    (voor?('<div class="fd-vooraf">alvast ingevuld: <b>'+esc(voor)+'</b> — verander gerust</div>'):'')+
+    '<div class="fd-vraag">'+S.v+'</div>'+
+    uitklapHTML('waarom','why we ask this',S.w,'fdTeken(true)')+
     keuze+
     '<button class="bp-knop" style="width:100%;margin-top:6px" onclick="fdVerder()">'+
     (fdStap===4?'show my top 3 ›':'next ›')+'</button>';
