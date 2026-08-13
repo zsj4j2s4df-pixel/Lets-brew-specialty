@@ -252,12 +252,18 @@
   .bp-legenda i{width:11px;height:11px;border-radius:3px;border:1.5px solid var(--ink);
     display:inline-block;background:var(--card);}
   .bp-legenda i.had{background:#c3ad91;}
+  .bp-legenda i.wenskleur{background:none;border-style:dashed;}
   .bp-blok{background:var(--card);border:2px solid var(--line);border-radius:20px;
     padding:12px 15px;margin-bottom:11px;filter:url(#wobble);}
   .bp-blok.vol{border-color:var(--ink);}
   .bp-blok h3{font-family:'Caveat',cursive;font-size:26px;font-weight:700;line-height:1.05;
     margin-bottom:4px;}
   .bp-blok p{font-size:16px;line-height:1.45;margin-bottom:8px;}
+  .bp-klap{display:flex;align-items:baseline;gap:9px;width:100%;text-align:left;
+    background:none;border:none;padding:0;font:inherit;color:var(--ink);cursor:pointer;}
+  .bp-klap h3{margin-bottom:0;}
+  .bp-klap .tel{flex:1;color:var(--ink-soft);font-size:15px;}
+  .bp-klap .ll-arr{color:var(--ink-soft);font-size:16px;}
   .bp-blok p:last-child{margin-bottom:0;}
   .bp-et{font-size:12.5px;letter-spacing:.7px;text-transform:uppercase;
     color:var(--ink-soft);margin:12px 0 5px;}
@@ -296,6 +302,8 @@
     border-radius:15px;padding:5px 13px;font:inherit;font-size:15.5px;cursor:pointer;
     filter:url(#wobble);}
   .bp-chip.sel{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--cream);}
+  .bp-chip em{display:block;font-style:normal;font-size:13px;color:var(--ink-soft);
+    line-height:1.2;margin-top:1px;}
   .bp-zak{border:2px dashed var(--line);border-radius:16px;padding:11px 13px;font-size:15.5px;
     line-height:1.65;}
   .bp-zak em{font-style:normal;color:var(--ink-soft);display:inline-block;min-width:82px;}
@@ -312,6 +320,87 @@
     line-height:1.45;color:var(--ink-soft);margin-bottom:12px;}
   .bp-let b{color:var(--ink);font-weight:400;}
   .wens-card{border-style:dashed!important;}
+  .wens-sect{padding:0;}
+  .wens-kop{display:flex;align-items:baseline;gap:9px;width:100%;background:none;
+    border:none;padding:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;}
+  .wens-kop .hand{font-size:26px;}
+  .wens-kop .sd{color:var(--ink-soft);font-size:16px;flex:1;}
+  .wens-arr{color:var(--ink-soft);font-size:20px;}
+  .wens-tag{font-size:14px;color:var(--ink-soft);border:1.5px solid var(--line);
+    border-radius:10px;padding:1px 8px;vertical-align:3px;}
+  .bh-blend{font-size:14px;color:var(--ink-soft);margin-bottom:5px;}
+  .plank-kaart .wens{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 2;
+    vector-effect:non-scaling-stroke;cursor:pointer;}
+  .bp-kaart .stip.wens{fill:var(--paper);stroke-dasharray:3 2;}
+  .bp-kaart .land.wens{fill:var(--card-2);stroke-dasharray:5 3;}
+  /* ---- coffee finder: zoekbalk en smaakfilter ---- */
+  .fd-zoek{position:relative;margin-bottom:8px;}
+  .fd-zoek input{width:100%;background:var(--card);border:2px solid var(--line);
+    border-radius:17px;filter:url(#wobble);padding:12px 42px 12px 14px;
+    font:inherit;font-size:17px;color:var(--ink);}
+  .fd-zoek input::placeholder{color:var(--ink-soft);opacity:.75;}
+  .fd-zoek .wis{position:absolute;right:8px;top:7px;background:none;border:none;
+    font:inherit;font-size:21px;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
+  .fd-ai{display:flex;align-items:center;gap:8px;margin:0 2px 9px;font-size:15px;
+    color:var(--ink-soft);}
+  .fd-ai button{background:var(--card);border:2px solid var(--line);border-radius:20px;
+    filter:url(#wobble);padding:3px 12px;font:inherit;font-size:15px;color:var(--ink);
+    cursor:pointer;}
+  .fd-ai button.aan{background:var(--accent-soft);color:var(--cream);border-color:var(--accent-soft);}
+  .fd-uit{margin-bottom:12px;}
+  .fd-res{display:block;width:100%;text-align:left;background:var(--card);
+    border:2px solid var(--line);border-radius:18px;filter:url(#wobble);
+    padding:10px 14px;margin-bottom:8px;font:inherit;color:var(--ink);cursor:pointer;}
+  .fd-res .n{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:22px;
+    line-height:1.1;}
+  .fd-res .l{display:block;color:var(--ink-soft);font-size:15px;}
+  .fd-res .s{display:block;font-size:15px;margin-top:3px;}
+  .fd-res .m{display:block;margin-top:5px;font-size:14px;color:var(--ink-soft);
+    border-top:1.5px dashed var(--line);padding-top:4px;}
+  .fd-teller{text-align:center;font-size:14px;color:var(--ink-soft);margin:-6px 0 13px;}
+  /* uitklapbare uitleg: standaard dicht, dus het scherm blijft leeg voor wie het al weet */
+  .uitklapper{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+    background:none;border:none;padding:1px 2px 10px;font:inherit;font-size:16px;
+    color:var(--ink-soft);cursor:pointer;}
+  .uitklapper .ll-arr{color:var(--ink-soft);font-size:16px;}
+  .uitklap{color:var(--ink-soft);font-size:16px;line-height:1.45;margin:-5px 2px 12px;
+    border-left:2px dashed var(--line);padding-left:11px;}
+  .fd-res.top1{border-width:3px;border-color:var(--ink);background:var(--card-2);}
+  .fd-res .nr{float:right;font-family:'Caveat',cursive;font-weight:700;font-size:24px;
+    color:var(--accent-soft);}
+  .fd-niks{text-align:center;color:var(--ink-soft);font-size:16px;padding:14px 8px;}
+  .fd-balk{display:flex;gap:5px;margin:2px 0 13px;}
+  .fd-balk i{flex:1;height:5px;border-radius:3px;background:var(--line);opacity:.45;}
+  .fd-balk i.op{background:var(--accent-soft);opacity:1;}
+  .fd-vraag{font-family:'Caveat',cursive;font-weight:700;font-size:28px;line-height:1.1;
+    margin-bottom:3px;}
+  .fd-keus{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
+    background:var(--card);border:2px solid var(--line);border-radius:18px;
+    filter:url(#wobble);padding:11px 14px;font:inherit;color:var(--ink);cursor:pointer;
+    margin-bottom:8px;}
+  .fd-keus.sel{background:var(--card-2);border-color:var(--ink);}
+  .fd-keus .vk{flex:none;width:20px;font-size:18px;color:var(--accent-soft);}
+  .fd-keus b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:21px;
+    line-height:1.15;}
+  .fd-keus em{font-style:normal;color:var(--ink-soft);font-size:15px;line-height:1.3;}
+  .fd-fam{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px;}
+  .fd-fam button{background:var(--card);border:2px solid var(--line);border-radius:16px;
+    filter:url(#wobble);padding:7px 13px;font:inherit;font-size:16px;color:var(--ink);
+    cursor:pointer;text-align:left;}
+  .fd-fam button.sel{background:var(--accent-soft);border-color:var(--accent-soft);
+    color:var(--cream);}
+  .fd-fam button em{display:block;font-style:normal;font-size:13px;opacity:.75;}
+  .fd-vooraf{background:var(--card);border:2px dashed var(--line);border-radius:16px;
+    padding:9px 13px;margin-bottom:11px;color:var(--ink-soft);font-size:15px;}
+  .fd-vooraf b{color:var(--ink);}
+  .bp-kaart .land.raak{fill:var(--accent-soft);stroke:var(--ink);opacity:.95;}
+  .bp-mijn{border-top:1.5px dashed var(--line);margin-top:13px;padding-top:3px;}
+  .bp-mijnkaart{display:block;width:100%;text-align:left;background:var(--card-2);
+    border:2px solid var(--line);border-radius:16px;padding:9px 12px;margin-bottom:7px;
+    font:inherit;color:var(--ink);cursor:pointer;filter:url(#wobble);}
+  .bp-mijnkaart.wens{border-style:dashed;background:none;}
+  .bp-mijnkaart .mn{font-size:16.5px;}
+  .bp-mijnkaart .mr{display:block;color:var(--ink-soft);font-size:14px;line-height:1.35;margin-top:2px;}
   .bh-rij{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
   .bh-uit{flex:1;min-width:0;font-size:15px;}
   .bh-uit b{display:block;font-size:16px;}
@@ -326,17 +415,15 @@
   .bk-herkomst .r{color:var(--ink-soft);font-size:14.5px;line-height:1.4;}
   .bk-herkomst .r b{color:var(--ink);font-weight:400;}
   /* je plank op een kaartje */
-  .plank-kaart{position:relative;background:var(--card-2);border:2px solid var(--line);
-    border-radius:18px;overflow:hidden;filter:url(#wobble);margin-bottom:14px;}
+  .plank-kaart{display:block;width:100%;padding:0;background:var(--card-2);
+    border:2px solid var(--line);border-radius:18px;overflow:hidden;filter:url(#wobble);
+    margin-bottom:14px;font:inherit;color:var(--ink);cursor:pointer;}
   .plank-kaart svg{width:100%;height:118px;display:block;}
   .plank-kaart .achter{fill:var(--desk);stroke:var(--line);stroke-width:.8;opacity:.5;
     stroke-linejoin:round;vector-effect:non-scaling-stroke;}
   .plank-kaart .band{fill:var(--v60);opacity:.4;}
   .plank-kaart .mijn{fill:var(--accent-soft);stroke:var(--ink);stroke-width:1.2;
     vector-effect:non-scaling-stroke;cursor:pointer;}
-  .plank-kaart .bij{position:absolute;left:0;right:0;bottom:0;padding:4px 10px;
-    font-size:12.5px;color:var(--ink-soft);text-align:center;pointer-events:none;
-    background:linear-gradient(transparent,var(--card-2) 60%);}
   .wens-rij{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;}
 
   /* taste wheel */
@@ -456,6 +543,7 @@
   .share-block .set-t{font-size:22px;}
   .photo-btns .half{width:auto;flex:1;margin-bottom:0;font-size:19px;padding:12px 8px;}
   .scan-status{font-size:16px;color:var(--ink-soft);min-height:22px;margin:0 4px 14px;text-align:center;}
+  .scan-status:empty{min-height:0;margin-bottom:0;}
   .recipe-btn{width:100%;background:var(--accent-soft);color:var(--cream);border:2px solid var(--ink);filter:url(#wobble);border-radius:16px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:22px;cursor:pointer;margin-top:10px;}
   .recipe-card{padding:18px 22px;margin-top:12px;font-size:19px;line-height:1.5;}
   .recipe-card .rk{color:var(--ink-soft);font-size:16px;margin:10px 0 2px;}
@@ -1115,7 +1203,7 @@
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
       <div class="form-head"><div class="h hand">new brew</div><button onclick="go('brews')">cancel</button></div>
-      <div class="subtitle">pick a bean — we'll take you to the right screen for it</div>
+      <div class="subtitle">Pick a bean</div>
       <div id="choosebean-list"></div>
       <button class="profile-btn" onclick="beginBrew(null)" style="margin-top:6px">no bean — just pick a method</button>
     </div>
@@ -1232,7 +1320,7 @@
       <div class="field" id="fb-grind"><label>grind (setting)</label><input id="f-grind" placeholder="e.g. 1.3 or medium-fine">
         <div class="fx-note" id="f-grind-note" style="display:none"></div></div>
 
-      <div class="field" id="prep-field" style="display:none"><label>puck-prep &amp; machine</label>
+      <div class="field" id="prep-field" style="display:none"><label>Puck prep &amp; machine settings</label>
         <div id="prep-list"></div>
         <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
@@ -1260,8 +1348,8 @@
   <div id="page-dialin" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">espresso · dial-in</div><button onclick="cancelForm()">cancel</button></div>
-      <div class="subtitle" id="di-sub">machine espresso — work toward your target</div>
+      <div class="form-head"><div class="h hand">Dial in</div><button onclick="cancelForm()">cancel</button></div>
+      <div class="subtitle" id="di-sub">work towards your espresso shot</div>
 
       <div class="field"><label>beans</label><div class="link-pick" id="di-beans"></div></div>
       <div class="start-hint" id="di-start"></div>
@@ -1269,7 +1357,7 @@
       <div class="di-goal sketch" id="di-goal"></div>
 
       <div class="di-card sketch soft" id="di-clock-card">
-        <div class="di-lbl hand">shot clock</div>
+        <div class="di-lbl hand">Shot timer</div>
         <div class="e61-box" id="e61" onclick="e61Toggle()">
           <svg viewBox="0 0 240 236">
             <defs><clipPath id="e61-cupclip">
@@ -1386,7 +1474,7 @@
       </button>
 
       <div class="di-card sketch soft">
-        <div class="di-lbl hand">puck-prep &amp; machine</div>
+        <div class="di-lbl hand">Puck prep &amp; machine settings</div>
         <div id="di-prep-list"></div>
         <button class="profile-btn" onclick="addPrepItem()" style="margin-top:4px">＋ own step</button>
       </div>
@@ -1509,7 +1597,7 @@
   <div id="page-beans" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">＋ add</button></div>
+      <div class="form-head"><div class="h hand">beans</div><button onclick="openBeanForm()">New Bean</button></div>
       <div class="subtitle" id="beans-sub">your bean shelf — linked to your brews.</div>
       <div id="beans-list"></div>
     </div>
@@ -1519,9 +1607,12 @@
   <div id="page-beanform" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand" id="beanform-title">new bean</div><button onclick="go('beans')">cancel</button></div>
+      <div class="form-head"><div class="h hand" id="beanform-title">New Bean</div><button onclick="beanFormWeg()">cancel</button></div>
+      <div class="field"><label>Where does it go?</label>
+        <div class="bp-chips" id="b-mode"></div>
+        <div class="fx-note" id="b-mode-uitleg"></div></div>
 
-      <div class="photo-btns">
+      <div class="photo-btns" id="b-foto-rij">
         <button class="scan-btn half" onclick="document.getElementById('label-cam').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.3 8.2 Q6.9 7.6 8.5 7.7 Q9.3 6.3 10.1 5.4 Q12 5.1 13.9 5.4 Q14.7 6.5 15.5 7.9 Q17.4 7.6 19.7 8.1 M19.4 7.6 Q20.1 13 19.6 18.3 M19.9 17.9 Q12 18.6 4.2 18.1 M4.6 18.5 Q3.9 13 4.4 7.7"/><path d="M15.2 11.8 Q16 14.4 13.4 15.8 Q10.6 16.7 9 14.6 Q8.1 12.2 10.3 10.2 Q12.8 8.9 14.8 10.7 Q15.4 11.4 15.5 12.4"/><path d="M13.1 12.2 Q13.5 13.7 12 13.9 Q10.6 13.9 10.7 12.5 Q10.9 11.3 12.3 11.4" opacity="0.5"/></svg> take photo</button>
         <button class="scan-btn half" onclick="document.getElementById('label-file').click()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M4.4 5.8 Q12 5.2 19.8 5.6 M19.5 5.1 Q20.1 12 19.6 18.9 M19.9 18.5 Q12 19.1 4.2 18.6 M4.6 19 Q4 12 4.4 5.2"/><path d="M5.2 15.8 Q8 12 10.1 13.7 Q13 9.4 15.6 12.1 Q17.6 14.1 19.1 16.7" opacity="0.8"/><path d="M9.9 8.7 Q10.3 10.4 8.6 10.5 Q7.1 10.4 7.3 8.9 Q7.6 7.5 9.2 7.7 Q9.9 7.9 10.2 8.4" opacity="0.7"/></svg> from gallery / files</button>
       </div>
@@ -1536,34 +1627,35 @@
       <div class="field"><label>name</label><input id="b-name" placeholder="e.g. Ethiopia Guji"></div>
       <div class="field"><label>roaster</label><input id="b-roaster" placeholder="e.g. Friedhats"></div>
       <div class="field-row">
-        <div class="field"><label>origin</label><input id="b-origin" placeholder="country / region"></div>
+        <div class="field"><label>Origin as printed</label><input id="b-origin" placeholder="country / region"></div>
         <div class="field"><label>process</label><input id="b-process" placeholder="washed / natural"></div>
       </div>
-      <div class="field" id="b-herkomst-veld"><div id="b-herkomst"></div></div>
+      <div class="field" id="b-herkomst-veld"><label>Origin</label><div id="b-herkomst"></div></div>
       <div class="field-row">
         <div class="field"><label>variety</label><input id="b-variety" placeholder="e.g. heirloom"></div>
         <div class="field"><label>altitude (m)</label><input id="b-altitude" placeholder="e.g. 1900-2100"></div>
       </div>
-      <div class="field"><label>roast date</label><input id="b-roastdate" type="date"></div>
+      <div class="field" id="b-roastdate-veld"><label>roast date</label><input id="b-roastdate" type="date"></div>
       <div class="field-row" id="b-cost-row">
         <div class="field"><label>price paid (€)</label><input id="b-price" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 12.50"></div>
         <div class="field"><label>bag size (g)</label><input id="b-bagsize" type="number" inputmode="numeric" placeholder="e.g. 250"></div>
       </div>
       <div class="field"><label>roaster tasting notes</label><textarea id="b-roasternotes" placeholder="as on the bag, e.g. jasmine, peach, black tea"></textarea></div>
       <div class="field"><label>website / link to bean</label>
-        <input id="b-url" type="url" inputmode="url" placeholder="https://...">
-        <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M9.7 7.7 Q11.7 5.2 14.1 5.2 Q17.2 4.9 18.8 7.6 Q20.1 10.1 18.1 12.3 Q16.5 14.1 14.1 14.4 M14.2 16.3 Q12.1 18.8 9.8 18.8 Q6.7 19.1 5.2 16.4 Q3.9 13.9 5.9 11.7 Q7.5 9.9 9.8 9.6"/><path d="M9.2 14.9 Q12 12 15 9.1" opacity="0.6"/></svg> search for this bean (on roaster site)</button></div>
+        <input id="b-url" type="url" inputmode="url" placeholder="https://..." onchange="beanUitLink()">
+        <button type="button" class="mini-btn" onclick="fillSearchLink()"><svg viewBox="0 0 24 24" class="acic btn-svg"><path d="M9.7 7.7 Q11.7 5.2 14.1 5.2 Q17.2 4.9 18.8 7.6 Q20.1 10.1 18.1 12.3 Q16.5 14.1 14.1 14.4 M14.2 16.3 Q12.1 18.8 9.8 18.8 Q6.7 19.1 5.2 16.4 Q3.9 13.9 5.9 11.7 Q7.5 9.9 9.8 9.6"/><path d="M9.2 14.9 Q12 12 15 9.1" opacity="0.6"/></svg> search for this bean (on roaster site)</button>
+        <div class="fx-note ai-only">plak een link en de app vult de rest zelf in, ook de plek op de kaart</div></div>
       <div class="field"><label>roast level</label>
         <div class="link-pick" id="b-roast"></div></div>
 
-      <div class="field"><label>roasted for</label>
+      <div class="field" id="b-fam-veld"><label>roasted for</label>
         <div class="link-pick" id="b-fam"></div>
         <div class="fx-note">only if the bag says so &mdash; it decides which methods the app puts first</div></div>
 
-      <div class="field"><label>brew methods for this bean (multiple allowed)</label>
+      <div class="field" id="b-methods-veld"><label>brew methods for this bean (multiple allowed)</label>
         <div class="link-pick" id="beanform-methods"></div></div>
       <div class="field"><label>own note</label><textarea id="b-notes" placeholder="your own note"></textarea></div>
-      <button class="save-btn" onclick="saveBean()">save bean</button>
+      <button class="save-btn" id="b-save" onclick="saveBean()">save bean</button>
     </div>
   </div>
   <div id="page-learn" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
@@ -1597,7 +1689,7 @@
 
       <div class="learn-card sketch" style="background:var(--aeropress)" onclick="go('learn-latte')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M6.8 5.7 Q11.5 5.3 16.2 5.9 M16.1 5.6 Q16.7 12.6 16.1 19.3 M16.3 19 Q11.6 19.8 7.3 19.1 M7.5 19.4 Q6.5 12.6 6.9 5.4 M7.1 7.3 Q4.8 8.4 4.4 11 Q4.2 13.2 6.1 13.7 M16.1 6.8 Q17.7 5.8 18.9 7.1 Q19.8 8.5 18.3 9.4"/><path d="M9.3 8.9 Q11.5 8.5 14 9.1" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">latte art & melk</div>
+        <div class="lc-body"><div class="lc-t hand">Latte art &amp; milk</div>
           <div class="lc-d">opschuimen, gieten en de vormen op niveau</div></div>
         <div class="lc-arr">›</div>
       </div>
@@ -1628,10 +1720,10 @@
           <p>Koffie is ~98% water, en bij filter staat er geen crema of melk overheen. Te zacht smaakt vlak en hol; te hard maskeert nuance en verkalkt je machine. Eén vaste waterbasis maakt je afstellen eerlijk: dan proef je de maling en niet het water.</p></div>
       </div>
 
-      <div class="learn-card sketch" id="beanpick-card" style="background:var(--v60)" onclick="bpOpen()">
+      <div class="learn-card sketch" id="beanpick-card" style="background:var(--v60)" onclick="bpOpen('learn')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M12.2 2.6 Q18.4 3.1 20.8 8.4 Q22.6 13.6 19.1 18.1 Q15.4 22 10.1 20.9 Q4.6 19.6 2.9 14.4 Q1.6 9.2 5.6 5.3 Q8.4 2.7 12.4 2.7"/><path d="M2.6 11.8 Q11.8 10.9 21.3 11.9" opacity="0.55"/><path d="M12.1 2.8 Q8.4 7.4 8.6 12.1 Q8.8 17.2 12.3 20.9" opacity="0.55"/><path d="M12.1 2.8 Q16 7.4 15.8 12.1 Q15.6 17.2 12.3 20.9" opacity="0.35"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">welke zak koop ik nu?</div>
-          <div class="lc-d" id="beanpick-sub">van een koffieland naar een streek — en wat er op de zak moet staan</div></div>
+        <div class="lc-body"><div class="lc-t hand">Coffee finder</div>
+          <div class="lc-d" id="beanpick-sub">de wereldkaart van de koffiegordel — land, streek, proces en variëteit</div></div>
         <div class="lc-arr">›</div>
       </div>
 
@@ -1639,7 +1731,7 @@
 
       <div class="learn-card sketch do" id="cupping-card" style="background:var(--v60)" onclick="go('cupping')">
         <div class="lc-ic"><svg viewBox="0 0 24 24" class="acic lc-svg"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg></div>
-        <div class="lc-body"><div class="lc-t hand">cuppen</div>
+        <div class="lc-body"><div class="lc-t hand">Cupping</div>
           <div class="lc-d">het SCA-protocol, met klok — blind proeven en scoren</div></div>
         <div class="lc-arr hand">start</div>
       </div>
@@ -1692,10 +1784,17 @@
   <div id="page-learn-latte" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">latte art & melk</div><div style="width:24px"></div></div>
+      <div class="detail-top"><button onclick="go('learn')">‹</button><div class="h hand">Latte art &amp; milk</div><div style="width:24px"></div></div>
       <div id="latte-content"></div>
     </div>
   </div>
+  <!-- EEN ZAK OP JE LIJSTJE -->
+  <!-- COFFEE FINDER: het smaakfilter in vijf stappen -->
+  <div id="page-finder" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen" id="fd-screen"></div>
+  </div>
+
   <!-- BONENKEUZEHULP: van het land tot in je kop -->
   <div id="page-beanpick" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
@@ -1706,7 +1805,7 @@
   <div id="page-cupping" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
     <div class="screen">
-      <div class="form-head"><div class="h hand">cuppen</div><button onclick="go('learn')">klaar</button></div>
+      <div class="form-head"><div class="h hand">Cupping</div><button onclick="go('learn')">klaar</button></div>
       <div class="subtitle">zet ze allemaal hetzelfde, proef blind, scoor eerst — onthul daarna.</div>
       <div id="cupping-body"></div>
     </div>
@@ -1720,7 +1819,7 @@
       <div class="subtitle">elke giet vastgelegd — zie je rozet beter worden.</div>
 
       <div class="settings-card sketch soft" id="ga-help">
-        <button class="adv-head" onclick="document.getElementById('ga-help').classList.toggle('open')"><span class="set-t hand">hoe je giet</span><span class="g-arr">▸</span></button>
+        <button class="adv-head" onclick="document.getElementById('ga-help').classList.toggle('open')"><span class="set-t hand">How you pour</span><span class="g-arr">▸</span></button>
         <div class="adv-body" id="ga-help-body"></div>
       </div>
 
@@ -1769,7 +1868,7 @@
         <div class="set-t hand" style="font-size:19px;margin-top:4px">pairing</div>
         <div class="set-d" style="margin:4px 0 8px" id="pair-status"></div>
         <button class="profile-btn" id="pair-btn" onclick="pairScale()">pair a smart scale (Bluetooth)</button>
-        <div class="set-d" style="font-size:14px">tip: add your machine & grinder under "my gear" above — La Marzocco, Mahlkönig and friends have no open app-API yet, but their profiles make every AI tip sharper. live weight lands in the shot clock when a scale is paired.</div>
+        <div class="set-d" style="font-size:14px">tip: add your machine & grinder under "my gear" above — La Marzocco, Mahlkönig and friends have no open app-API yet, but their profiles make every AI tip sharper. live weight lands in the shot timer when a scale is paired.</div>
       </div>
         </div>
       </div>
@@ -2562,7 +2661,7 @@ async function load(){
       }
     }catch(e){}
   }
-  if(s&&s.methods&&s.brews){hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();return;}
+  if(s&&s.methods&&s.brews){hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();try{bpMigreerWensen();}catch(e){}return;}
   state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[],prepItems:JSON.parse(JSON.stringify(DEFAULT_PREP))};
   save();
 }
@@ -2676,9 +2775,9 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick'];
+const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick','finder'];
 const navMap={home:'home',choosebean:'brews',form:'home',dialin:'home',recipe:'brews',detail:'home',
-  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'learn',profile:'profile'};
+  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'beans',finder:'beans',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -2722,6 +2821,7 @@ function go(p,isBack){
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLatte();
   if(p==='beanpick')bpTeken();
+  if(p==='finder')fdTeken();
   if(p==='profile')renderProfile();
   applyAIVisibility();
   document.querySelector('.phone').scrollTop=0;
@@ -5162,13 +5262,13 @@ function beanCardHTML(b){
     if(fresh)bits.push('<span class="fresh">'+fresh.label+'</span>');
     const vast=beanDial(b,null);
     if(vast)bits.push('dial '+esc(vast[0].grind));
-    return `<div class="bean-card sketch soft collapsed" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
+    return `<div class="bean-card sketch soft collapsed" data-bean="${b.id}" style="background:${tint};${inStock?'':'opacity:.7'}" onclick="toggleBeanCard('${b.id}')">
       <div class="brow"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▸</span></div>
       <div class="bean-meta">${bits.join(' <span class="dot">·</span> ')}</div>
     </div>`;
   }
   const methodLine=mList.length?('<br>method'+(mList.length>1?'s':'')+': '+mList.map(x=>'<span class="bean-method"><span class="bean-method-ic">'+iconHTML(x,18)+'</span>'+esc(x.name)+'</span>').join(' ')):'';
-  return `<div class="bean-card sketch soft" style="background:${tint};${inStock?'':'opacity:.7'}">
+  return `<div class="bean-card sketch soft" data-bean="${b.id}" style="background:${tint};${inStock?'':'opacity:.7'}">
     <div class="brow">
       <div class="bean-head" onclick="toggleBeanCard('${b.id}')"><div class="bn hand">${esc(b.name)}</div><span class="bchev">▾</span></div>
       <div class="brow-btns">
@@ -5205,9 +5305,9 @@ function renderBeans(){
   const outBeans=state.beans.filter(b=>b.inStock===false);
   const sub=document.getElementById('beans-sub');
   if(sub)sub.textContent=state.beans.length?('your bean shelf · in stock ('+inBeans.length+')'):'your bean shelf — linked to your brews.';
-  if(!state.beans.length){el.innerHTML='<div class="empty-note">no beans yet.<br>tap ＋ add to add your first bean.</div>';return;}
+  if(!state.beans.length){el.innerHTML='<div class="empty-note">no beans yet.<br>tap New Bean to add your first bean.</div>';return;}
   let html=bpPlankKaartHTML()+bpWensHTML();
-  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap ＋ add or check your empty bags.</div>';
+  html+=inBeans.length?inBeans.map(beanCardHTML).join(''):'<div class="empty-note">no beans in stock.<br>tap New Bean or check your empty bags.</div>';
   // cupping hoort bij je bonen, niet alleen achterin learn
   if(featOn('cupping')&&inBeans.length>=2){
     html+=`<button class="shelf-do" onclick="go('cupping')"><svg viewBox="0 0 24 24" class="acic"><path d="M3.8 8.6 Q3.6 15.2 7 16.9 Q9.6 18.4 12.1 16.7 Q14.6 18.4 17.2 16.8 Q20.5 15 20.2 8.4 M3.6 9.2 Q8 7.7 12.2 9.1 Q16.2 7.7 20.5 9.2"/><path d="M6.8 12.3 Q9.5 13.6 12.2 12.4 Q14.7 13.6 17.3 12.3" opacity="0.5"/></svg><span>proef er twee blind — cuppingsessie</span><span class="ll-arr">›</span></button>`;
@@ -5229,24 +5329,53 @@ function toggleStock(id){
   toast(b.inStock?'✓ back in stock':'○ marked as empty');
 }
 let editingBean=null;
-function openBeanForm(){
-  editingBean=null;
-  document.getElementById('beanform-title').textContent='new bean';
+/* Eén formulier voor allebei: een zak die op je plank staat, en een zak die je
+   nog wilt hebben. De keuze bovenin bepaalt waar hij heen gaat -- en welke
+   velden er iets toe doen. Van gedachten veranderen mag: sla je een wens op
+   als "op mijn plank", dan verhuist hij gewoon mee.                        */
+let beanFormWens=false, editingWens=null;
+const BEAN_MODES=[{w:false,n:'Bean shelf',u:'een zak die je in huis hebt — hij komt bij je bonen te staan en je kunt erop brouwen.'},
+                  {w:true, n:'Bean wishlist',u:'een zak die je nog wilt kopen — hij komt op je lijstje en op de wereldkaart.'}];
+function renderBeanMode(){
+  const el=document.getElementById('b-mode'); if(!el)return;
+  // staat de keuzehulp uit, dan is er geen lijstje om iets op te zetten
+  if(!featOn('beanpick'))beanFormWens=false;
+  const veld=el.closest('.field'); if(veld)veld.style.display=featOn('beanpick')?'':'none';
+  el.innerHTML=BEAN_MODES.map(m=>'<button type="button" class="bp-chip'+(m.w===beanFormWens?' sel':'')+
+    '" onclick="beanZetMode('+m.w+')">'+m.n+'</button>').join('');
+  const u=document.getElementById('b-mode-uitleg');
+  if(u)u.textContent=(BEAN_MODES.find(m=>m.w===beanFormWens)||BEAN_MODES[0]).u;
+  const t=document.getElementById('beanform-title');
+  if(t)t.textContent=(editingBean||editingWens)?'Edit Bean':'New Bean';
+  const sv=document.getElementById('b-save');
+  if(sv)sv.textContent=beanFormWens?'Save on wishlist':'Save on shelf';
+  // wat je pas weet als de zak er echt is, vraagt de app pas als hij er is
+  [['b-foto-rij',!beanFormWens],['label-preview',!beanFormWens],['b-roastdate-veld',!beanFormWens],
+   ['b-cost-row',!beanFormWens&&featOn('cost')],['b-fam-veld',!beanFormWens],
+   ['b-methods-veld',!beanFormWens]].forEach(([id,aan])=>{
+    const e=document.getElementById(id); if(e)e.style.display=aan?'':'none';
+  });
+}
+function beanZetMode(w){beanFormWens=!!w;renderBeanMode();}
+function beanFormWeg(){editingBean=null;editingWens=null;go('beans');}
+function openBeanForm(wens){
+  editingBean=null; editingWens=null; beanFormWens=!!wens;
   ['b-name','b-roaster','b-origin','b-process','b-variety','b-altitude','b-roastdate','b-roasternotes','b-url','b-notes','b-price','b-bagsize'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
   document.getElementById('scan-status').textContent='';
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null;const lp=document.getElementById('label-preview');if(lp)lp.innerHTML='';
-  beanFormMethods=[];beanFormFam=null;beanFormRoast=null;beanFormRegion=null;
-  renderBeanFormMethods();renderBeanFam();renderBeanRoast();renderBeanHerkomst();go('beanform');applyAIVisibility();
+  beanFormMethods=[];beanFormFam=null;beanFormRoast=null;beanFormRegions=[];
+  renderBeanFormMethods();renderBeanFam();renderBeanRoast();renderBeanHerkomst();
+  renderBeanMode();go('beanform');applyAIVisibility();
 }
 function editBean(id){
   const b=state.beans.find(x=>x.id===id);if(!b)return;
-  editingBean=id;
-  document.getElementById('beanform-title').textContent='edit bean';
+  editingBean=id; editingWens=null; beanFormWens=false;
   const set=(f,v)=>{const el=document.getElementById(f);if(el)el.value=v||'';};
   set('b-name',b.name);set('b-roaster',b.roaster);set('b-origin',b.origin);
   set('b-process',b.process);set('b-variety',b.variety);set('b-altitude',b.altitude);
-  beanFormRegion=b.region||null;renderBeanHerkomst();
+  beanFormRegions=bpRegios(b).filter(r=>r.zelf).map(r=>({land:r.land,i:r.i}));
+  renderBeanHerkomst();
   set('b-roastdate',b.roastdate);set('b-roasternotes',b.roasternotes);
   set('b-url',b.url);set('b-notes',b.notes);set('b-price',b.price);set('b-bagsize',b.bagsize);
   document.getElementById('scan-status').textContent='';
@@ -5257,7 +5386,7 @@ function editBean(id){
   beanFormMethods=(Array.isArray(b.methods)&&b.methods.length?[...b.methods]:(b.method?[b.method]:[]));
   beanFormFam=b.fam||null;renderBeanFam();
   beanFormRoast=b.roast||null;renderBeanRoast();
-  renderBeanFormMethods();go('beanform');applyAIVisibility();
+  renderBeanFormMethods();renderBeanMode();go('beanform');applyAIVisibility();
 }
 let beanFormMethods=[];
 /* Sommige branders branden een zak bewust voor espresso of juist voor filter,
@@ -5303,14 +5432,16 @@ function toggleBeanMethod(id){
 }
 function saveBean(){
   const name=document.getElementById('b-name').value.trim();
-  if(!name){toast('give the bean a name');return;}
+  if(!name){toast(beanFormWens?'geef hem een naam':'give the bean a name');return;}
+  if(beanFormWens)return saveBeanAlsWens(name);
   const data={name,
     roaster:document.getElementById('b-roaster').value.trim(),
     origin:document.getElementById('b-origin').value.trim(),
     process:document.getElementById('b-process').value.trim(),
     variety:document.getElementById('b-variety').value.trim(),
     altitude:document.getElementById('b-altitude').value.trim(),
-    region:beanFormRegion||null,
+    regions:beanFormRegions.slice(),
+    region:beanFormRegions[0]||null,
     roastdate:document.getElementById('b-roastdate').value,
     roasternotes:document.getElementById('b-roasternotes').value.trim(),
     url:document.getElementById('b-url').value.trim(),
@@ -5327,9 +5458,36 @@ function saveBean(){
     toast('✓ bean updated');
   }else{
     data.id=uid();data.photo=beanPhoto||null;data.inStock=true;
-    state.beans.push(data);toast('✓ bean saved');
+    state.beans.push(data);
+    // stond hij nog op je lijstje, dan is hij daar nu vanaf
+    if(editingWens){state.wishlist=(state.wishlist||[]).filter(w=>w.id!==editingWens);
+      toast('✓ van je lijstje naar je plank');}
+    else toast('✓ bean saved');
   }
-  save();beanPhoto=null;go('beans');
+  editingWens=null;save();beanPhoto=null;go('beans');
+}
+/* Dezelfde velden, maar dan als wens. Wat een zak pas heeft als hij er is --
+   branddatum, prijs, waar je hem op zet -- slaan we niet op.               */
+function saveBeanAlsWens(naam){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  if(!Array.isArray(state.wishlist))state.wishlist=[];
+  const noten=g('b-roasternotes');
+  const w={id:editingWens||uid(),naam,name:naam,brander:g('b-roaster'),
+    origin:g('b-origin'),url:g('b-url'),
+    regions:beanFormRegions.slice(),proces:g('b-process'),variety:g('b-variety'),
+    altitude:g('b-altitude'),brand:beanFormRoast||'light',
+    roasternotes:noten,smaak:noten?noten.split(',').map(x=>x.trim()).filter(Boolean):[],
+    notitie:g('b-notes'),at:Date.now()};
+  const i=state.wishlist.findIndex(x=>x.id===w.id);
+  if(i>=0)state.wishlist[i]=Object.assign({},state.wishlist[i],w);
+  else state.wishlist.push(w);
+  // van je plank terug naar je lijstje: dan hoort hij niet meer bij je bonen
+  if(editingBean){
+    state.beans=state.beans.filter(b=>b.id!==editingBean);
+    state.brews.forEach(b=>{if(b.beanId===editingBean)b.beanId=null;});
+    toast('✓ terug op je lijstje');
+  }else toast('✓ op je lijstje');
+  editingBean=null;editingWens=null;save();beanPhoto=null;go('beans');
 }
 function delBean(id){
   if(!confirm('delete this bean?'))return;
@@ -5476,6 +5634,86 @@ async function scanLabel(ev){
   ev.target.value='';
 }
 // extra info aanvullen op basis van roaster + boon (modelkennis)
+/* ---- de link doet het werk ----
+   Plak je de pagina van de brander en staat AI aan, dan haalt de app eruit wat
+   erop staat: naam, brander, proces, variëteit, hoogte, smaaknoten -- en de
+   plek op de kaart, zodat de zak meteen bij zijn streek hoort. Alleen lege
+   velden worden gevuld; wat jij zelf typte blijft staan.                    */
+let beanLinkBezig='';
+/* De etiketregels gelden voor een foto: daar staat de tekst voor je neus, en
+   dan is aanvullen liegen. Bij een link is er juist geen tekst -- dan moet de
+   AI wél putten uit wat hij over deze brander en deze boon weet, anders komt
+   hij met lege handen terug. Vandaar een eigen set regels.               */
+const LINK_RULES=
+  'LINK-REGELS:\n'+
+  '- Je kunt de pagina niet openen. Werk met twee bronnen: (a) wat er in de URL zelf staat '+
+  '(domein = de brander, het pad/de slug = meestal de naam van de boon, soms ook herkomst, proces of variëteit), '+
+  'en (b) wat je uit je kennis weet over deze brander en over deze boon.\n'+
+  '- Zet slugs om naar leesbare tekst: "ethiopia-guji-natural-250g" -> naam "Ethiopia Guji", origin "Ethiopië, Guji", process "natural".\n'+
+  '- Ken je de brander maar niet deze specifieke zak, vul dan in wat voor die brander en die herkomst gebruikelijk is, '+
+  'en houd het bij wat je met redelijke zekerheid kunt zeggen.\n'+
+  '- Ken je de boon of de streek wel, vul dan ook variety, altitude en roasternotes in: dit is een schatting die de '+
+  'gebruiker naloopt, geen etiket dat je overtypt.\n'+
+  '- Laat een veld alleen leeg als je er echt niets zinnigs over kunt zeggen. Liever een goede gok die klopt met de '+
+  'herkomst dan een leeg veld.\n'+
+  '- process en variety in de gangbare term (washed, natural, honey, anaerobic). roasternotes komma-gescheiden.\n'+
+  '- roastlevel en fam alleen als de brander of het soort zak daar duidelijk over is.';
+/* ---- de link doet het werk ----
+   Plak je de pagina van de brander en staat AI aan, dan leidt de app eruit af
+   wat er op die zak zit: naam, brander, proces, variëteit, hoogte, smaaknoten
+   -- en de plek op de kaart, zodat de zak meteen bij zijn streek hoort. Alleen
+   lege velden worden gevuld; wat jij zelf typte blijft staan.             */
+async function beanUitLink(){
+  const el=document.getElementById('b-url'); if(!el)return;
+  const url=el.value.trim();
+  if(!url||!/^https?:\/\//i.test(url))return;
+  if(/google\.[a-z.]+\/search/i.test(url))return;   // dat is een zoeklink, geen zak
+  if(!aiReady()||url===beanLinkBezig)return;
+  beanLinkBezig=url;
+  const status=document.getElementById('scan-status');
+  const get=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const zetLeeg=(id,v)=>{if(v&&!get(id))setText(id,v);};
+  if(status)status.innerHTML='<span class="spin"></span>de link uitlezen…';
+  try{
+    const landen=BP_LANDEN.filter(l=>BP_INFO[l.id]).map(l=>l.naam).join(', ');
+    const alIn=['name','roaster','origin','process','variety','altitude']
+      .map(k=>k+': '+(get('b-'+k)||'?')).join('; ');
+    const prompt='Dit is de webpagina van een zak specialty koffie: '+url+'\n'+
+      'Wat de gebruiker al invulde: '+alIn+'.\n'+
+      'Vul de zak zo volledig mogelijk in. Geef ALLEEN een JSON-object terug, zonder uitleg, zonder markdown:\n'+
+      '{"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roastlevel":"","fam":"","roasternotes":"","notes":"","land":"","streek":""}\n'+
+      'roastlevel is één van: '+ROAST_LEVELS.join(', ')+'. '+
+      'fam is "espresso", "filter" of "both" — alleen als duidelijk is waar de zak voor gebrand is.\n'+
+      'notes = twee zinnen over wat deze boon of deze streek bijzonder maakt.\n'+
+      'land = het herkomstland; kies het uit deze lijst als het erbij staat: '+landen+'. '+
+      'streek = de streek binnen dat land.\n'+LINK_RULES;
+    const d=extractJSON(await callClaude([{role:"user",content:prompt}],900));
+    ['name','roaster','origin','process','variety','altitude'].forEach(k=>zetLeeg('b-'+k,d[k]));
+    zetLeeg('b-roasternotes',d.roasternotes); zetLeeg('b-notes',d.notes);
+    const roast=(d.roastlevel||'').toLowerCase().trim();
+    if(!beanFormRoast&&ROAST_LEVELS.includes(roast)){beanFormRoast=roast;renderBeanRoast();}
+    const fam=(d.fam||'').toLowerCase().trim();
+    if(!beanFormWens&&!beanFormFam&&['espresso','filter','both'].includes(fam)){
+      beanFormFam=fam;renderBeanFam();
+    }
+    // en zet hem op de kaart, als die er nog niet staat
+    let plek='';
+    if(!beanFormRegions.length&&(d.land||d.origin)){
+      const landId=bpLandVanBoon({origin:(d.land||'')+' '+(d.origin||'')});
+      if(landId&&BP_INFO[landId]){
+        const i=bpStreekVanBoon({origin:(d.streek||'')+' '+(d.origin||'')},landId);
+        beanFormRegions=[{land:landId,i:(i!=null?i:null)}];
+        renderBeanHerkomst();
+        plek=' · '+bpRegioTekst(beanFormRegions[0])+' op de kaart';
+      }
+    }
+    if(status)status.textContent='✓ ingevuld vanaf de link'+plek+' — kijk het even na';
+    const er=document.getElementById('enrich-row'); if(er)er.style.display='block';
+  }catch(e){
+    beanLinkBezig='';
+    if(status)status.textContent='de link uitlezen lukte niet (werkt alleen met AI aan)';
+  }
+}
 async function enrichBean(){
   const status=document.getElementById('scan-status');
   const get=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
@@ -6012,7 +6250,7 @@ function renderPairing(){
     st.textContent='this browser (iPhone Safari included) doesn\'t allow Web Bluetooth — pairing works on Android/Chrome. your gear profiles below still power every AI tip.';
     if(btn)btn.style.opacity=.55;
   }else{
-    st.textContent=scaleDevice?('paired: '+(scaleDevice.name||'scale')+' — live weight shows in the shot clock.'):'pair an Acaia/Felicita/generic BLE scale for live weight in the shot clock.';
+    st.textContent=scaleDevice?('paired: '+(scaleDevice.name||'scale')+' — live weight shows in the shot timer.'):'pair an Acaia/Felicita/generic BLE scale for live weight in the shot timer.';
   }
 }
 async function pairScale(){
@@ -6233,7 +6471,7 @@ function renderLatte(){
   <div class="la-intro">Latte art is voor tachtig procent melk en voor twintig procent hand.
     Krijg je de microfoam goed, dan tekent hij bijna vanzelf. Zit er lucht in, dan helpt geen enkele beweging.</div>
 
-  <div class="sect"><span class="hand">de melk</span><span class="sd">waar het mee staat of valt</span></div>
+  <div class="sect"><span class="hand">The milk</span><span class="sd">waar het mee staat of valt</span></div>
   <div class="lesson sketch soft">
     <p>Volle melk schuimt het best: ongeveer 3,5% vet en 3,4% eiwit. De eiwitten vangen de
       luchtbellen en houden ze overeind, het vet maakt het glanzend en romig. Halfvol werkt
@@ -6246,13 +6484,13 @@ function renderLatte(){
       — te vol en je kunt niet meer draaien.</p>
   </div>
 
-  <div class="sect"><span class="hand">opschuimen</span><span class="sd">lucht erin, dan glad draaien</span></div>
+  <div class="sect"><span class="hand">Steaming</span><span class="sd">lucht erin, dan glad draaien</span></div>
   ${laSteamBenchHTML()}
 
-  <div class="sect"><span class="hand">gieten</span><span class="sd">drie hoogtes, één beweging</span></div>
+  <div class="sect"><span class="hand">Pouring</span><span class="sd">drie hoogtes, één beweging</span></div>
   ${laPourBenchHTML()}
 
-  <div class="sect"><span class="hand">de vormen</span><span class="sd">van makkelijk naar levenswerk</span></div>
+  <div class="sect"><span class="hand">The shapes</span><span class="sd">van makkelijk naar levenswerk</span></div>
   <div class="la-key">
     <span><svg viewBox="0 0 34 12"><path class="la-mo" d="M2 6 C10 4 24 8 32 6"/></svg> gieten of wiebelen</span>
     <span><svg viewBox="0 0 34 12"><path class="la-mo2" d="M2 6 C10 4 24 8 32 6"/></svg> optillen en doortrekken</span>
@@ -6273,7 +6511,7 @@ function renderLatte(){
     });
   });
 
-  h+=`<div class="sect"><span class="hand">als het misgaat</span><span class="sd">wat je ziet, en wat je eraan doet</span></div>`;
+  h+=`<div class="sect"><span class="hand">When it goes wrong</span><span class="sd">wat je ziet, en wat je eraan doet</span></div>`;
   LA_FIX.forEach(f=>{
     h+=`<div class="la-fix sketch soft">
       <div class="lf-p hand">${esc(f.p)}</div>
@@ -6507,21 +6745,21 @@ function cupBowlSVG(){
 function cupExplainHTML(){
   return `<button class="cup-ex-t" onclick="cup.open=!cup.open;renderCupping()">
       <svg viewBox="0 0 24 24" class="acic"><path d="M11.5 3.4 Q17.2 3.2 17.8 8.4 Q18.2 11.6 15.7 13.8 Q15 14.4 14.9 16.3 M15 16 Q12 16.6 9.1 16.1 M9.3 16.3 Q9 14.2 8.3 13.6 Q5.8 11.4 6.2 8.2 Q6.8 3.3 12.5 3.6"/><path d="M9.7 18.4 Q12 18.9 14.3 18.4 M10.3 20.5 Q12 21 13.8 20.5" opacity="0.7"/></svg>
-      <span>hoe cuppen werkt</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
+      <span>How cupping works</span><span class="ll-arr">${cup.open?'▾':'▸'}</span></button>
     <div class="cup-ex ${cup.open?'':'hidden'}">
-      <div class="lesson sketch soft"><h3>waarom cuppen</h3>
+      <div class="lesson sketch soft"><h3>Why cup?</h3>
         <p>Bij cupping zet je koffie zonder techniek. Geen filter, geen druk, geen giettechniek — alleen maling, water en tijd, voor elke kom exact hetzelfde. Daardoor is het enige verschil dat je proeft de boon zelf. Dat is precies waarom de hele keten het zo doet: de boer, de brander en de inkoper vergelijken langs dezelfde lat.</p>
         <p>Thuis is de winst dubbel. Je leert je bonen kennen, én je leert je eigen tong kennen. Blind proeven haalt het etiket weg: geen prijs, geen herkomst, geen verwachting. Wat overblijft is wat je werkelijk lekker vindt.</p></div>
-      <div class="lesson sketch"><h3>het recept (SCA-102)</h3>
+      <div class="lesson sketch"><h3>The recipe (SCA-102)</h3>
         <p>De verhouding is <b>8,25 g per 150 ml</b> — ongeveer 1:18. Maal <b>medium-grof</b>, iets grover dan filter, en voor alle kommen op precies dezelfde stand. Water van <b>93 °C</b>, vers en zacht. Weeg alles, ook het water: de hele oefening staat of valt met gelijke omstandigheden.</p>
         <p>Professioneel zet men vijf kommen per koffie, om te zien of de partij overal hetzelfde smaakt. Thuis is één kom per boon genoeg; twee als je wilt controleren of je eigen werk consistent is.</p></div>
-      <div class="lesson sketch soft"><h3>het verloop</h3>
+      <div class="lesson sketch soft"><h3>How it runs</h3>
         <p><b>Voor het water</b> ruik je de droge maling. Dat is <i>fragrance</i>, en die is daarna weg.</p>
         <p><b>0:00</b> giet je alle kommen tegelijk vol en start je de klok. De koffie drijft boven en vormt een korst.</p>
         <p><b>4:00</b> breek je de korst: neus vlak boven de kom, drie keer roeren, diep inademen. Die stoot geur is <i>aroma</i>, het mooiste moment van de sessie.</p>
         <p><b>Daarna</b> schuim je af met twee lepels, van weerszijden over het oppervlak.</p>
         <p><b>Vanaf ±8 minuten</b>, rond 71 °C, slurp je. Hard, zodat de koffie verneveld over je hele tong slaat. Proef opnieuw terwijl het afkoelt: zuur en zoet laten zich op verschillende temperaturen zien, en fouten komen pas lauw boven.</p></div>
-      <div class="lesson sketch"><h3>de score</h3>
+      <div class="lesson sketch"><h3>Scoring</h3>
         <p>De SCA verving in november 2024 het oude 100-puntsformulier uit 2004 door de <b>Coffee Value Assessment</b>. Die splitst beschrijven (wát je proeft) van waarderen (hoe goed je het vindt). Dit scherm volgt het waarderende deel: acht secties, elk van 1 tot 9, waarbij 5 neutraal is — niet lekker, niet vies.</p>
         <p>De officiële omrekening naar honderd punten doet de SCA met een eigen rekenhulp; <b>80 punten of meer</b> heet specialty, 85+ excellent, 90+ outstanding. Het cijfer dat je hier ziet is je eigen voorkeursscore, geen SCA-keuring. Voor thuis is dat ook het enige dat telt: welke boon wil jij morgen weer.</p></div>
     </div>`;
@@ -6541,7 +6779,7 @@ function renderCupping(){
     h+=`<div class="k" style="margin:18px 2px 6px">kies twee tot vier bonen</div><div class="link-pick">`+
       beans.map(b=>`<button class="lp ${cup.picks.includes(b.id)?'sel':''}" onclick="cupPick('${b.id}')">${esc(b.name)}</button>`).join('')+'</div>';
     h+=`<div class="cup-recipe sketch">
-        <div class="cr-h hand">jouw recept</div>
+        <div class="cr-h hand">Your recipe</div>
         <div class="cr-row"><span>komformaat</span><span class="cr-in"><input type="number" min="100" max="400" step="10" value="${cup.size}" oninput="cupSize(this.value)"> ml</span></div>
         <div class="cr-row"><span>koffie per kom</span><b>${String(cupDose()).replace('.',',')} g</b></div>
         <div class="cr-row"><span>water</span><b>${cup.size} ml · 93 °C</b></div>
@@ -6608,7 +6846,7 @@ function renderCupping(){
   }).sort((a,b)=>b.tot-a.tot);
   const top=rows[0], tie=rows.length>1&&rows[1].tot===top.tot;
   let h=`<div class="settings-card sketch" style="background:var(--v60)">
-      <div class="set-t hand">de onthulling</div>
+      <div class="set-t hand">The reveal</div>
       <div class="cup-rev">`;
   rows.forEach(r=>{
     h+=`<div class="cr-line"><span class="cr-l hand">${r.L}</span>
@@ -6621,7 +6859,7 @@ function renderCupping(){
       : 'je tong kiest <b style="font-weight:400;color:var(--ink)">'+esc(top.b?top.b.name:'?')+'</b>'}</div></div>`;
   /* per sectie waar het verschil zat */
   if(rows.length>1){
-    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">waar ze verschilden</span></div>';
+    h+='<div class="cup-card sketch"><div class="cc-h"><span class="cc-l hand">Where they differed</span></div>';
     const byLabel=cup.order.map((id,i)=>({L:CUP_LABELS[i],b:beanById(id),sc:cup.scores[CUP_LABELS[i]]||{}}));
     CUP_SECTIONS.forEach(s=>{
       const vals=byLabel.map(r=>(r.sc[s.k]||5));
@@ -7295,16 +7533,21 @@ function bpStreekVanBoon(b,landId){
    oogopslag waar je nog nooit geweest bent. */
 function bpGehad(){
   const uit=new Set();
-  (state.beans||[]).forEach(b=>{const r=bpRegioVanBoon(b);if(r)uit.add(r.land);});
+  (state.beans||[]).forEach(b=>bpRegios(b).forEach(r=>uit.add(r.land)));
+  return uit;
+}
+// landen waar alleen nog een wens ligt
+function bpGewenst(){
+  const uit=new Set();
+  (state.wishlist||[]).forEach(w=>bpRegios(w).forEach(r=>uit.add(r.land)));
   return uit;
 }
 // en hetzelfde een niveau dieper: welke streken van dit land had je al?
 function bpGehadStreken(landId){
   const uit=new Set();
-  (state.beans||[]).forEach(b=>{
-    const r=bpRegioVanBoon(b);
-    if(r&&r.land===landId&&r.i!=null)uit.add(r.i);
-  });
+  (state.beans||[]).forEach(b=>bpRegios(b).forEach(r=>{
+    if(r.land===landId&&r.i!=null)uit.add(r.i);
+  }));
   return uit;
 }
 function bpPaspoortRegel(){
@@ -7312,7 +7555,7 @@ function bpPaspoortRegel(){
   const n=bpGehad().size, totaal=Object.keys(BP_INFO).length;
   el.textContent=n
     ? (n+' van de '+totaal+' landen gehad — kijk waar je nog niet geweest bent')
-    : 'van een koffieland naar een streek — en wat er op de zak moet staan';
+    : 'de wereldkaart van de koffiegordel — land, streek, proces en variëteit';
 }
 
 const BP_PROCES={
@@ -7409,7 +7652,7 @@ function bpVarBlok(lijst){
   const namen=(lijst||'').split(',').map(x=>x.trim()).filter(Boolean);
   if(!namen.length)return '';
   const uitleg=bpVarOpen!=null?bpVarUitleg(namen[bpVarOpen]):'';
-  return '<div class="bp-et">variëteit</div><div class="bp-chips">'+
+  return '<div class="bp-et">Variety</div><div class="bp-chips">'+
     namen.map((n,i)=>'<button class="bp-chip'+(bpVarOpen===i?' sel':'')+
       '" onclick="bpVarTik('+i+')">'+esc(n)+'</button>').join('')+'</div>'+
     (bpVarOpen!=null
@@ -7554,7 +7797,7 @@ function bpZoom(doel){
 }
 
 function bpKaartHTML(){
-  const v=bpView, gehad=bpGehad();
+  const v=bpView, gehad=bpGehad(), gewenst=bpGewenst();
   let s='<svg class="bp-kaart" viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
   s+='<rect class="zee" x="-200" y="-200" width="500" height="400"/>';
   s+='<rect class="band" x="-200" y="'+bpY(23.5)+'" width="500" height="'+(bpY(-23.5)-bpY(23.5))+'"/>';
@@ -7566,13 +7809,15 @@ function bpKaartHTML(){
   });
   BP_VOLGORDE.forEach(l=>{
     let kl='land';
-    if(bpNiv==='wereld'){ if(gehad.has(l.id))kl+=' had'; }
+    if(bpNiv==='wereld'){ if(gehad.has(l.id))kl+=' had'; else if(gewenst.has(l.id))kl+=' wens'; }
     else if(l.deel!==bpDeel)kl+=' uit';
     else if(l.id===bpLandId)kl+=' sel';
     else if(gehad.has(l.id))kl+=' had';
+    else if(gewenst.has(l.id))kl+=' wens';
     const klik=(bpNiv==='wereld')?("bpKies('deel','"+l.deel+"')")
               :(l.deel===bpDeel&&BP_INFO[l.id]?("bpKies('land','"+l.id+"')"):'');
-    s+='<path class="'+kl+'" d="'+bpPad(l)+'"'+(klik?(' onclick="'+klik+'"'):'')+'></path>';
+    s+='<path class="'+kl+'" data-land="'+l.id+'" d="'+bpPad(l)+'"'+
+       (klik?(' onclick="'+klik+'"'):'')+'></path>';
   });
   if(bpNiv==='wereld'){
     [['amerika',-62,27],['afrika',22,27],['azie',112,27]].forEach(function(a){
@@ -7589,7 +7834,8 @@ function bpKaartHTML(){
     const inf=BP_INFO[bpLandId], gehadSt=bpGehadStreken(bpLandId);
     (inf.streken||[]).forEach((st,i)=>{
       const x=bpX(st.ll[0]), y=bpY(st.ll[1]), aan=bpStreek===i;
-      s+='<circle class="stip'+(aan?' sel':(gehadSt.has(i)?' had':''))+'" cx="'+x+'" cy="'+y+'" r="1" data-x0="'+x+
+      const wensSt=bpWensenVoor(bpLandId,i).length>0;
+      s+='<circle class="stip'+(aan?' sel':(gehadSt.has(i)?' had':(wensSt?' wens':'')))+'" cx="'+x+'" cy="'+y+'" r="1" data-x0="'+x+
         '" data-y0="'+y+'" onclick="bpKies(\'streek\','+i+')"></circle>';
       s+='<text class="nr'+(aan?' aan':'')+'" x="'+x+'" y="'+y+'" data-i="'+i+
         '" onclick="bpKies(\'streek\','+i+')">'+(i+1)+'</text>';
@@ -7623,17 +7869,64 @@ function bpProcBlok(namen){
 }
 function bpSmaken(a){return '<div class="bp-smaken">'+a.map(x=>'<span class="bp-smaak">'+esc(x)+'</span>').join('')+'</div>';}
 
+/* Welke uitklappers openstaan. Uitleg hoort niet altijd in beeld te staan: wie hem
+   één keer leest wil hem daarna niet meer zien, en wie hem nodig heeft weet nu waar
+   hij zit. Eén sleutel per uitklapper, en hij blijft open tot je hem dichtdoet. */
+const UIT={};
+function uitklapHTML(id,kop,tekst,teken){
+  const op=!!UIT[id];
+  return '<button class="uitklapper" onclick="UIT[\''+id+'\']=!UIT[\''+id+'\'];'+teken+'">'+
+    esc(kop)+'<span class="ll-arr">'+(op?'▾':'▸')+'</span></button>'+
+    (op?('<div class="uitklap">'+tekst+'</div>'):'');
+}
+
+/* Kom je hier vanaf je bonenplank, dan wil je eerst zien waar je zelf al
+   geweest bent — en pas daarna de rest van de wereld. */
+function bpPlankBlok(){
+  const totaal=Object.keys(BP_INFO).length, gehad=bpGehad();
+  const bonen=(state.beans||[]).filter(b=>bpRegios(b).length);
+  const wensen=(state.wishlist||[]).filter(w=>bpRegios(w).length);
+  if(!bonen.length&&!wensen.length)return '';
+  const chip=(o,fn)=>{
+    const r=bpRegios(o)[0];
+    return '<button class="bp-chip" onclick="'+fn+'(\''+o.id+'\')">'+
+      esc(o.name||o.naam||bpRegioTekst(r))+
+      '<em>'+esc(bpIsBlend(o)?'blend':bpRegioTekst(r))+'</em></button>';
+  };
+  /* Dichtgeklapt is dit één regel; wie zijn eigen plank zoekt vindt hem meteen, en
+     wie de wereld af wil zoeken heeft er geen last van. */
+  const op=!!UIT.plank;
+  const tel=[bonen.length?(bonen.length+(bonen.length===1?' bean':' beans')):'',
+             wensen.length?(wensen.length+' on your list'):''].filter(Boolean).join(' · ');
+  let h='<div class="bp-blok vol"><button class="bp-klap" onclick="UIT.plank=!UIT.plank;bpTeken(true)">'+
+    '<h3>Your shelf</h3><span class="tel">'+esc(tel)+'</span>'+
+    '<span class="ll-arr">'+(op?'▾':'▸')+'</span></button>';
+  if(!op)return h+'</div>';
+  h+='<p class="bp-zacht">Tik een naam aan en de kaart zoomt naar zijn streek, met het '+
+    'verhaal erbij.</p>';
+  if(bonen.length)h+='<div class="bp-et">Beans you have</div><div class="bp-chips">'+
+    bonen.map(b=>chip(b,'bpVanBoon')).join('')+'</div>';
+  if(wensen.length)h+='<div class="bp-et">On your wishlist</div><div class="bp-chips">'+
+    wensen.map(w=>chip(w,'bpVanWens')).join('')+'</div>';
+  h+='<p class="bp-zacht" style="margin-top:9px">Nog nooit gehad: '+
+    (totaal-gehad.size)+' van de '+totaal+' landen met een verhaal.</p></div>';
+  return h;
+}
 function bpWereld(){
   const gehad=bpGehad();
-  return '<div class="bp-kop"><div class="t">waar komt hij vandaan?</div>'+
-    '<button class="bp-terug" onclick="go(\'learn\')">‹ learn</button></div>'+
-    '<div class="bp-let">Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit '+
-    'vorst. Elk stuk van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door '+
-    'naar een land en een streek, en je eindigt met een lijstje waarmee je de goede zak herkent.</div>'+
+  return '<div class="bp-kop"><div class="t">Coffee finder</div>'+
+    '<button class="bp-terug" onclick="bpTerug()">‹ '+(bpVanaf==='beans'?'beans':'learn')+'</button></div>'+
+    uitklapHTML('wereld','why coffee grows only there',
+      'Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit vorst. Elk stuk '+
+      'van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door naar een land '+
+      'en een streek, en je eindigt met een lijstje waarmee je de goede zak herkent.','bpTeken(true)')+
+    fdBalkHTML()+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een werelddeel om in te zoomen</div></div>'+
     '<div class="bp-legenda"><span><i></i> nog niet gehad</span>'+
-    '<span><i class="had"></i> al eens gehad'+(gehad.size?(' ('+gehad.size+')'):'')+'</span></div>'+
+    '<span><i class="had"></i> al eens gehad'+(gehad.size?(' ('+gehad.size+')'):'')+'</span>'+
+    ((state.wishlist||[]).length?'<span><i class="wenskleur"></i> op je lijstje</span>':'')+'</div>'+
+    bpPlankBlok()+
     Object.keys(BP_DELEN).map(d=>
       '<button class="bp-kies" onclick="bpKies(\'deel\',\''+d+'\')">'+
       '<span class="k1">'+esc(BP_DELEN[d].naam)+'</span>'+
@@ -7648,11 +7941,11 @@ function bpDeelScherm(){
     esc(D.kort)+'</b></div>'+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een land</div></div>'+
-    '<div class="bp-blok vol"><h3>waar dit deel bekend om staat</h3>'+
+    '<div class="bp-blok vol"><h3>What this part is known for</h3>'+
     '<p>'+D.bekend+'</p><p>'+D.waarom+'</p>'+
-    '<div class="bp-et">wat je hier tegenkomt</div>'+
+    '<div class="bp-et">What you\'ll find here</div>'+
     '<p class="bp-zacht">'+D.proc+'<br>hoogte meestal '+D.hoogte+'</p></div>'+
-    '<div class="bp-et">landen met een eigen verhaal</div>'+
+    '<div class="bp-et">Countries with a story</div>'+
     landen.map(l=>{
       const inf=BP_INFO[l.id];
       return '<button class="bp-kies" onclick="bpKies(\'land\',\''+l.id+'\')">'+
@@ -7671,19 +7964,19 @@ function bpLandScherm(){
     '</button> › <b>'+esc(L.naam)+'</b></div>'+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een genummerde stip, of kies hieronder</div></div>'+
-    '<div class="bp-blok vol"><h3>waar dit land bekend om staat</h3>'+
+    '<div class="bp-blok vol"><h3>What this country is known for</h3>'+
     '<p>'+inf.bekend+'</p>'+
-    '<div class="bp-et">de smaken die de brander op de zak zet</div>'+bpSmaken(inf.smaak)+
-    '<div class="bp-et">variëteit</div><p class="bp-zacht">'+esc(inf.var)+'</p>'+
-    '<div class="bp-et">hoogte</div><p class="bp-zacht">'+esc(inf.hoogte)+
+    '<div class="bp-et">The notes the roaster puts on the bag</div>'+bpSmaken(inf.smaak)+
+    '<div class="bp-et">Variety</div><p class="bp-zacht">'+esc(inf.var)+'</p>'+
+    '<div class="bp-et">Altitude</div><p class="bp-zacht">'+esc(inf.hoogte)+
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p></div>'+
-    '<div class="bp-blok"><h3>het droogproces van de boer</h3>'+bpProcBlok(inf.proc)+'</div>'+
-    (bpVoorBoon?('<div class="bp-blok vol"><h3>welke streek?</h3>'+
+    '<div class="bp-blok"><h3>How the farmer dries it</h3>'+bpProcBlok(inf.proc)+'</div>'+
+    (bpVoor?('<div class="bp-blok vol"><h3>Which region?</h3>'+
       '<p class="bp-zacht">Zegt de zak alleen het land, dan is dat ook goed.</p>'+
       '<div class="bp-knoppen"><button class="bp-knop leeg" onclick="bpNeemHerkomst(null)">'+
       'alleen '+esc(L.naam)+', geen streek</button></div></div>'):'')+
-    '<div class="bp-et">de streken</div>'+
+    '<div class="bp-et">The regions</div>'+
     (function(){const g=bpGehadStreken(bpLandId);
       return (inf.streken||[]).map((st,i)=>{
         const op=bpStreek===i;
@@ -7701,30 +7994,26 @@ function bpStreekBlok(){
   const inf=BP_INFO[bpLandId], st=inf.streken[bpStreek], L=BP_LAND[bpLandId];
   const proc=(bpProc&&inf.proc.includes(bpProc))?bpProc:inf.proc[0];
   const br=bpBrand||'light', me=bpMeth||bpEersteMethode();
-  const mijne=bpBonenVoor(bpLandId,bpStreek);
   return '<div class="bp-open">'+
     '<p>'+esc(st.t)+'</p>'+bpSmaken(st.s)+
-    (mijne.length?('<p class="bp-zacht" style="margin-top:9px"><b>op je plank:</b> '+
-      mijne.map(b=>esc(b.name)+(b.roaster?(' van '+esc(b.roaster)):'')+
-        (bpScoreVan(b)?(' — je scoorde hem '+bpScoreVan(b)):'')).join('<br>')+'</p>'):'')+
-    '<div class="bp-et">hoogte</div><p class="bp-zacht">'+esc(st.h||inf.hoogte)+
+    '<div class="bp-et">Altitude</div><p class="bp-zacht">'+esc(st.h||inf.hoogte)+
     ' — hoe hoger, hoe langzamer de kers rijpt. Dat maakt de boon dichter, zoeter en '+
     'levendiger van zuur.</p>'+
     bpVarBlok(st.v||inf.var)+
 
-    '<div class="bp-deel"><h4>hoe wil je hem hebben?</h4>'+
-    '<div class="bp-et">proces</div><div class="bp-chips">'+
+    '<div class="bp-deel"><h4>How do you want it?</h4>'+
+    '<div class="bp-et">Process</div><div class="bp-chips">'+
     inf.proc.map(p=>'<button class="bp-chip'+(p===proc?' sel':'')+'" onclick="bpZet(\'proc\',\''+p+'\')">'+esc(p)+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+esc(BP_PROCES[proc].u)+' Dat geeft een smaak die '+
     esc(BP_PROCES[proc].sm)+', en een mondgevoel dat '+esc(BP_PROCES[proc].mo)+' is.</p>'+
-    '<div class="bp-et">branding</div><div class="bp-chips">'+
+    '<div class="bp-et">Roast</div><div class="bp-chips">'+
     Object.keys(BP_BRAND).map(b=>'<button class="bp-chip'+(b===br?' sel':'')+'" onclick="bpZet(\'brand\',\''+b+'\')">'+b+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+BP_BRAND[br].t+'</p>'+
-    '<div class="bp-et">waar zet je hem</div><div class="bp-chips">'+
+    '<div class="bp-et">What you\'ll brew it on</div><div class="bp-chips">'+
     bpMethodes().map(m=>'<button class="bp-chip'+(m.id===me?' sel':'')+'" onclick="bpZet(\'meth\',\''+m.id+'\')">'+esc(m.name)+'</button>').join('')+
     '</div><p class="bp-zacht" style="margin-top:7px">'+bpMethodeTip(me,br)+'</p></div>'+
 
-    '<div class="bp-deel"><h4>waar je op let bij de zak</h4>'+
+    '<div class="bp-deel"><h4>What to look for on the bag</h4>'+
     '<div class="bp-zak">'+
     '<em>land</em> '+esc(L.naam)+'<br>'+
     '<em>streek</em> '+esc(st.n)+'<br>'+
@@ -7739,10 +8028,10 @@ function bpStreekBlok(){
     '<button class="bp-knop leeg" onclick="bpZoekOpen()">zoek via Google</button></div>'+
     '<p class="bp-zacht" style="margin-top:9px">Wat er vandaag bij een brander op de plank '+
     'ligt weet de app niet — dat laatste klikje blijft van jou.</p>'+
-    '<div class="bp-knoppen">'+(bpVoorBoon
-      ? '<button class="bp-knop" onclick="bpNeemHerkomst('+bpStreek+')">✓ dit is mijn boon</button>'
-      : '<button class="bp-knop" onclick="bpOpLijst()">zet op mijn lijstje</button>')+'</div>'+
-    '</div></div>';
+    '<div class="bp-knoppen">'+(bpVoor
+      ? '<button class="bp-knop" onclick="bpNeemHerkomst('+bpStreek+')">✓ deze is het</button>'
+      : '<button class="bp-knop" onclick="bpOpLijst()">Add to wishlist</button>')+'</div>'+
+    '</div>'+bpUitJeKast(bpLandId,bpStreek)+'</div>';
 }
 function bpMethodes(){
   const aan=(state.methods||[]).filter(m=>m.on);
@@ -7782,14 +8071,14 @@ function bpKies(wat,waarde){
   }
   bpTeken(wat==='streek');
 }
-function bpOpen(){bpVoorBoon=false;go('beanpick');}
+function bpOpen(vanaf){bpVoor=null;bpVanaf=vanaf||'learn';go('beanpick');}
 function bpNaarWereld(){
   bpNiv='wereld';bpDeel=null;bpLandId=null;bpStreek=null;bpZoom(BP_VIEWS.wereld);bpTeken();
 }
 function bpTerug(){
   if(bpNiv==='land'){bpNiv='deel';bpLandId=null;bpStreek=null;bpZoom(BP_VIEWS[bpDeel]);}
   else if(bpNiv==='deel'){bpNiv='wereld';bpDeel=null;bpZoom(BP_VIEWS.wereld);}
-  else{go(bpVoorBoon?'beanform':'learn');bpVoorBoon=false;return;}
+  else{go(bpVoor?'beanform':(bpVanaf==='beans'?'beans':'learn'));bpVoor=null;return;}
   bpTeken();
 }
 function bpZet(k,v){
@@ -7807,75 +8096,144 @@ function bpZoekOpen(){
 }
 /* De uitkomst gaat op je plank te staan als wens. Koop je hem echt, dan staat
    alles al ingevuld en hoef je alleen de branddatum nog toe te voegen. */
+/* ---------------- je lijstje ----------------
+   Een wens is een zak die je nog niet hebt. Hij ontstaat aan het eind van de
+   keuzehulp, of je vult hem zelf in als je er ergens een tegenkwam. In
+   allebei de gevallen kun je hem toekennen aan een plek op de kaart, en dan
+   staat hij daar tussen je eigen bonen.                                    */
+function bpNieuweWens(){openBeanForm(true);}
+function bpWijzigWens(id){
+  const w=(state.wishlist||[]).find(x=>x.id===id); if(!w)return;
+  openBeanForm(true);
+  editingWens=id;
+  const zet=(veld,val)=>{const el=document.getElementById(veld);if(el)el.value=val||'';};
+  zet('b-name',w.naam||w.name||''); zet('b-roaster',w.brander);
+  zet('b-url',w.url); zet('b-process',w.proces); zet('b-variety',w.variety);
+  zet('b-altitude',w.altitude); zet('b-notes',w.notitie);
+  zet('b-roasternotes',w.roasternotes||(w.smaak||[]).join(', '));
+  const regs=bpRegios(w).map(r=>({land:r.land,i:r.i}));
+  zet('b-origin',w.origin||regs.map(bpRegioTekst).join(' · '));
+  beanFormRegions=regs; renderBeanHerkomst();
+  beanFormRoast=w.brand||null; renderBeanRoast();
+  renderBeanMode();
+}
+/* vanuit de kaart: de streek die je bekeek als wens wegschrijven */
 function bpOpLijst(){
   const inf=BP_INFO[bpLandId], st=inf.streken[bpStreek], L=BP_LAND[bpLandId];
   const proc=(bpProc&&inf.proc.includes(bpProc))?bpProc:inf.proc[0];
   if(!Array.isArray(state.wishlist))state.wishlist=[];
-  if(state.wishlist.some(w=>w.land===L.naam&&w.streek===st.n)){toast('staat al op je lijstje');return;}
-  state.wishlist.push({id:uid(),land:L.naam,streek:st.n,proces:proc,
-    variety:st.v||inf.var,brand:bpBrand||'light',smaak:st.s.slice(),
+  if(state.wishlist.some(w=>bpHoortBij(w,bpLandId,bpStreek))){
+    toast('staat al op je lijstje');return;
+  }
+  state.wishlist.push({id:uid(),naam:st.n+' · '+L.naam,brander:'',url:'',
+    regions:[{land:bpLandId,i:bpStreek}],proces:proc,variety:st.v||inf.var,
+    brand:bpBrand||'light',smaak:st.s.slice(),notitie:'',
     zoek:bpZoekregel(),at:Date.now()});
   save();toast('✓ op je lijstje gezet');bpTeken(true);
 }
 function bpVanLijst(id){
-  state.wishlist=(state.wishlist||[]).filter(w=>w.id!==id);
+  const w=(state.wishlist||[]).find(x=>x.id===id);
+  if(w&&!confirm('“'+(w.naam||'deze wens')+'” van je lijstje halen?'))return;
+  state.wishlist=(state.wishlist||[]).filter(x=>x.id!==id);
   save();renderBeans();toast('van het lijstje af');
 }
-/* "gekocht" opent het bonenformulier met alles al ingevuld */
+/* "gekocht" is hetzelfde formulier, maar dan omgezet naar je plank. De wens
+   blijft staan tot je opslaat, dus annuleren kost je niets. */
 function bpGekocht(id){
-  const w=(state.wishlist||[]).find(x=>x.id===id); if(!w)return;
-  openBeanForm();
-  const zet=(veld,val)=>{const el=document.getElementById(veld);if(el)el.value=val||'';};
-  zet('b-name',w.streek+' — '+w.land);
-  zet('b-origin',w.streek+', '+w.land);
-  zet('b-process',w.proces);
-  zet('b-variety',w.variety);
-  zet('b-roasternotes',(w.smaak||[]).join(', '));
-  beanFormRoast=(w.brand==='light')?'light':(w.brand==='dark'?'dark':'medium');
-  renderBeanRoast();
-  state.wishlist=(state.wishlist||[]).filter(x=>x.id!==id);save();
+  bpWijzigWens(id);
+  if(editingWens!==id)return;
+  beanZetMode(false);
   toast('van je lijstje — vul de branddatum aan');
 }
+function bpWensDicht(){
+  state.wensDicht=!state.wensDicht;save();renderBeans();
+}
 function bpWensHTML(){
+  if(!featOn('beanpick'))return '';
   const lijst=state.wishlist||[];
-  if(!featOn('beanpick')||!lijst.length)return '';
-  return '<div class="sect"><span class="hand">op mijn lijstje</span>'+
-    '<span class="sd">'+lijst.length+' nog niet gekocht</span></div>'+
-    lijst.map(w=>
-      '<div class="bean-card sketch soft wens-card">'+
-      '<div class="bn hand">'+esc(w.streek)+' · '+esc(w.land)+'</div>'+
-      '<div class="bm">'+esc(w.proces)+', '+esc(w.brand)+' · '+esc((w.smaak||[]).join(', '))+
-      '<br>'+esc(w.variety||'')+'</div>'+
+  const kop='<button class="wens-kop" onclick="bpWensDicht()">'+
+    '<span class="hand">Bean wishlist</span>'+
+    '<span class="sd">'+(lijst.length?(lijst.length+' nog niet gekocht'):'nog leeg')+'</span>'+
+    '<span class="wens-arr">'+(state.wensDicht?'›':'⌄')+'</span></button>';
+  if(state.wensDicht)return '<div class="sect wens-sect">'+kop+'</div>';
+  if(!lijst.length)return '<div class="sect wens-sect">'+kop+'</div>'+
+    '<div class="empty-note">nog niets op je lijstje. Kom je ergens een mooie zak tegen, '+
+    'zet hem hier neer via New Bean — met de link erbij.</div>';
+  return '<div class="sect wens-sect">'+kop+'</div>'+
+    lijst.map(w=>{
+      const regs=bpRegios(w);
+      const blend=regs.length>1;
+      return '<div class="bean-card sketch soft wens-card">'+
+      '<div class="bn hand">'+esc(w.naam||'zonder naam')+
+        (blend?' <span class="wens-tag">blend</span>':'')+'</div>'+
+      '<div class="bm">'+
+        (w.brander?('van '+esc(w.brander)+'<br>'):'')+
+        (regs.length?(regs.map(bpRegioTekst).map(esc).join(' · ')+'<br>'):'')+
+        [w.proces,w.brand].filter(Boolean).map(esc).join(', ')+
+        ((w.smaak||[]).length?(' · '+esc(w.smaak.join(', '))):'')+
+        (w.variety?('<br>'+esc(w.variety)):'')+
+        (w.notitie?('<br>'+esc(w.notitie)):'')+'</div>'+
       '<div class="wens-rij">'+
       '<button class="lp sel" onclick="bpGekocht(\''+w.id+'\')">gekocht ✓</button>'+
-      '<button class="lp" onclick="bpVanLijst(\''+w.id+'\')">van het lijstje af</button>'+
-      '</div></div>').join('');
+      (w.url?('<a class="lp" href="'+esc(w.url)+'" target="_blank" rel="noopener">bekijk de zak ↗</a>'):'')+
+      '<button class="lp" onclick="bpWijzigWens(\''+w.id+'\')">wijzig</button>'+
+      '<button class="lp" onclick="bpVanLijst(\''+w.id+'\')">×</button>'+
+      '</div></div>';
+    }).join('');
 }
-/* ---------------- de boon en de kaart aan elkaar ----------------
-   Tot nu toe was de band tussen een boon en zijn plek op de kaart een gok:
-   de app las de tekst op de zak en zocht daar een landnaam in. Dat werkt bij
-   "Guji, Ethiopia" en niet bij "Yirga Cheffe Konga Washed".
 
-   Nu kun je de streek zelf aanwijzen, en dan staat hij vast in b.region.
-   De tekstherkenning blijft als vangnet voor alles wat je nooit gekoppeld
-   hebt.                                                                   */
-function bpRegioVanBoon(b){
-  if(!b)return null;
-  if(b.region&&BP_INFO[b.region.land]){
-    const inf=BP_INFO[b.region.land];
-    const i=(b.region.i!=null&&inf.streken&&inf.streken[b.region.i])?b.region.i:null;
-    return {land:b.region.land,i,zelf:true};
-  }
-  const land=bpLandVanBoon(b);
-  if(!land||!BP_INFO[land])return null;
-  return {land,i:bpStreekVanBoon(b,land),zelf:false};
-}
-// welke bonen horen bij deze streek? (i weglaten = het hele land)
-function bpBonenVoor(landId,i){
-  return (state.beans||[]).filter(b=>{
-    const r=bpRegioVanBoon(b);
-    return r&&r.land===landId&&(i==null||r.i===i);
+/* ---------------- de boon en de kaart aan elkaar ----------------
+   Een zak heeft niet altijd één herkomst. Een single origin komt van één
+   streek, een blend van meer, en allebei moeten ze op de kaart terug te
+   vinden zijn. Vandaar een lijstje herkomsten in plaats van één veld.
+
+   Heb je nooit iets aangewezen, dan blijft de oude tekstherkenning het
+   vangnet: dan leest de app de landnaam uit wat er op de zak staat.      */
+function bpRegios(o){
+  if(!o)return [];
+  let ruw=Array.isArray(o.regions)?o.regions:(o.region?[o.region]:[]);
+  const uit=[];
+  ruw.forEach(r=>{
+    if(!r||!BP_INFO[r.land])return;
+    const inf=BP_INFO[r.land];
+    const i=(r.i!=null&&inf.streken&&inf.streken[r.i])?r.i:null;
+    if(!uit.some(x=>x.land===r.land&&x.i===i))uit.push({land:r.land,i,zelf:true});
   });
+  if(uit.length)return uit;
+  const land=bpLandVanBoon(o);
+  if(!land||!BP_INFO[land])return [];
+  return [{land,i:bpStreekVanBoon(o,land),zelf:false}];
+}
+function bpIsBlend(o){return bpRegios(o).length>1;}
+function bpRegioTekst(r){
+  const inf=BP_INFO[r.land]; if(!inf)return '';
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return st?(st.n+' · '+BP_LAND[r.land].naam):BP_LAND[r.land].naam;
+}
+function bpRegioHoogte(r){
+  const inf=BP_INFO[r.land]; if(!inf)return '';
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return (st&&st.h)?st.h:inf.hoogte;
+}
+function bpRegioVar(r){
+  const inf=BP_INFO[r.land]; if(!inf)return '';
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return (st&&st.v)?st.v:inf.var;
+}
+function bpRegioSmaak(r){
+  const inf=BP_INFO[r.land]; if(!inf)return [];
+  const st=(r.i!=null)?inf.streken[r.i]:null;
+  return st?st.s:inf.smaak;
+}
+// hoort deze boon of wens bij die plek? (i weglaten = ergens in dat land)
+function bpHoortBij(o,landId,i){
+  return bpRegios(o).some(r=>r.land===landId&&(i==null||r.i===i));
+}
+function bpBonenVoor(landId,i){
+  return (state.beans||[]).filter(b=>bpHoortBij(b,landId,i));
+}
+function bpWensenVoor(landId,i){
+  return (state.wishlist||[]).filter(w=>bpHoortBij(w,landId,i));
 }
 function bpScoreVan(b){
   const sc=(state.brews||[]).filter(x=>x.beanId===b.id&&x.score!=null&&x.score!=='')
@@ -7887,14 +8245,33 @@ function bpSmaakVan(b){
   return [...new Set([].concat(...(state.brews||[]).filter(x=>x.beanId===b.id)
     .map(x=>x.tags||[])))];
 }
+/* Oude wensen bewaarden hun herkomst als losse namen. Die zoeken we één keer
+   terug op, zodat ze ook op de kaart verschijnen. */
+function bpMigreerWensen(){
+  let veranderd=false;
+  (state.wishlist||[]).forEach(w=>{
+    if(Array.isArray(w.regions)||!w.land)return;
+    const land=BP_LANDEN.find(l=>l.naam===w.land);
+    if(land&&BP_INFO[land.id]){
+      const st=(BP_INFO[land.id].streken||[]).findIndex(x=>x.n===w.streek);
+      w.regions=[{land:land.id,i:st>=0?st:null}];
+      if(!w.naam)w.naam=w.streek||land.naam;
+      veranderd=true;
+    }
+  });
+  if(veranderd)save();
+}
 
 /* ---- de kaart als invoermethode ----
-   Vanuit het bonenformulier open je de kaart om een streek aan te wijzen. */
-let bpVoorBoon=false;
-let beanFormRegion=null;
-function bpKiesHerkomst(){
-  bpVoorBoon=true; bpVarOpen=null;
-  const r=beanFormRegion;
+   Vanuit het bonenformulier of het wensformulier open je de kaart om een
+   streek aan te wijzen. bpVoor onthoudt waar je vandaan kwam.            */
+let bpVoor=null;              // null als je gewoon rondkijkt, 'bean' als een formulier wacht
+let bpVanaf='learn';          // waar je de kaart binnenkwam: 'beans' of 'learn'
+let beanFormRegions=[];
+function bpKiesHerkomstVoor(wat){
+  bpVoor=wat||'bean'; bpVarOpen=null;
+  const lijst=beanFormRegions;
+  const r=lijst[lijst.length-1];
   if(r&&BP_INFO[r.land]){
     bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
     bpStreek=(r.i!=null)?r.i:null; bpView=bpLandView(r.land).slice();
@@ -7904,112 +8281,534 @@ function bpKiesHerkomst(){
   }
   go('beanpick');
 }
+function bpKiesHerkomst(){bpKiesHerkomstVoor('bean');}
 function bpNeemHerkomst(i){
   const landId=bpLandId, inf=BP_INFO[landId];
-  const st=(i!=null&&inf.streken)?inf.streken[i]:null;
-  beanFormRegion={land:landId,i:(i!=null?i:null)};
+  const nieuw={land:landId,i:(i!=null?i:null)};
+  if(!beanFormRegions.some(r=>r.land===nieuw.land&&r.i===nieuw.i))beanFormRegions.push(nieuw);
+  const eerste=(beanFormRegions.length===1);
   const el=id=>document.getElementById(id);
   const leegVul=(id,v)=>{const e=el(id);if(e&&!e.value.trim()&&v)e.value=v;};
   const o=el('b-origin');
-  if(o)o.value=(st?(st.n+', '):'')+BP_LAND[landId].naam;
-  leegVul('b-variety',st?(st.v||inf.var):inf.var);
-  leegVul('b-altitude',String(st&&st.h?st.h:inf.hoogte).replace(/\s*m$/,'').trim());
-  // het proces alleen invullen als er in dit land maar één gebruikelijk is
-  if(inf.proc.length===1)leegVul('b-process',inf.proc[0]);
-  bpVoorBoon=false;
-  go('beanform'); renderBeanHerkomst();
-  toast('✓ herkomst overgenomen');
+  if(o)o.value=beanFormRegions.map(bpRegioTekst).join(' · ');
+  if(eerste){
+    leegVul('b-variety',bpRegioVar(nieuw));
+    leegVul('b-altitude',String(bpRegioHoogte(nieuw)).replace(/\s*m$/,'').trim());
+    if(inf.proc.length===1)leegVul('b-process',inf.proc[0]);
+    leegVul('b-name',bpRegioTekst(nieuw));
+  }
+  bpVoor=null; go('beanform'); renderBeanHerkomst();
+  toast('✓ herkomst erbij');
 }
-function bpHerkomstWeg(){beanFormRegion=null;renderBeanHerkomst();}
+function bpHerkomstWeg(i){beanFormRegions.splice(i,1);renderBeanHerkomst();}
 function renderBeanHerkomst(){
   const el=document.getElementById('b-herkomst');
   const veld=document.getElementById('b-herkomst-veld');
   if(!el||!veld)return;
   if(!featOn('beanpick')){veld.style.display='none';return;}
   veld.style.display='';
-  const r=beanFormRegion;
-  if(!r||!BP_INFO[r.land]){
-    el.innerHTML='<div class="bh-rij"><div class="bh-uit"><span>weet je waar hij vandaan komt? '+
-      'Wijs het aan en de app vult origin, variëteit en hoogte voor je in.</span></div>'+
-      '<button type="button" class="bh-knop aan" onclick="bpKiesHerkomst()">kies op de kaart</button></div>';
-    return;
+  el.innerHTML=bpHerkomstKiezer(beanFormRegions,'bpHerkomstWeg','bpKiesHerkomst');
+}
+/* Dezelfde kiezer voor een boon en voor een wens: een rijtje herkomsten met
+   een kruisje, en een knop om er een bij te zoeken op de kaart. */
+function bpHerkomstKiezer(lijst,wegFn,kiesFn){
+  let h='';
+  if(!lijst.length){
+    h+='<div class="bh-rij"><div class="bh-uit"><span>weet je waar hij vandaan komt? '+
+      'Wijs het aan op de kaart, dan vult de app de rest voor je in.</span></div></div>';
+  }else{
+    if(lijst.length>1)h+='<div class="bh-blend">blend — '+lijst.length+' herkomsten</div>';
+    h+=lijst.map((r,i)=>'<div class="bh-rij"><div class="bh-uit"><b>'+esc(bpRegioTekst(r))+
+      '</b><span>'+esc(bpRegioHoogte(r))+' · '+esc(bpRegioSmaak(r).join(', '))+'</span></div>'+
+      '<button type="button" class="bh-knop" onclick="'+wegFn+'('+i+')">×</button></div>').join('');
   }
-  const inf=BP_INFO[r.land], st=(r.i!=null)?inf.streken[r.i]:null;
-  el.innerHTML='<div class="bh-rij"><div class="bh-uit">'+
-    '<b>'+esc(st?(st.n+' · '+BP_LAND[r.land].naam):BP_LAND[r.land].naam)+'</b>'+
-    '<span>'+esc(st&&st.h?st.h:inf.hoogte)+' · '+esc((st?st.s:inf.smaak).join(', '))+'</span></div>'+
-    '<button type="button" class="bh-knop" onclick="bpKiesHerkomst()">andere</button>'+
-    '<button type="button" class="bh-knop" onclick="bpHerkomstWeg()">×</button></div>';
+  h+='<div class="bh-rij" style="margin-top:6px"><button type="button" class="bh-knop aan" '+
+    'onclick="'+kiesFn+'()">'+(lijst.length?'＋ nog een herkomst':'kies op de kaart')+'</button></div>';
+  return h;
 }
 
-/* ---- wat de kaart over jouw boon vertelt, op de bonenplank ---- */
+
+/* ---- wat de kaart over jouw zak vertelt, op de bonenplank ---- */
 function bpHerkomstBlok(b){
   if(!featOn('beanpick'))return '';
-  const r=bpRegioVanBoon(b); if(!r)return '';
-  const inf=BP_INFO[r.land], st=(r.i!=null)?inf.streken[r.i]:null;
-  const belooft=(st?st.s:inf.smaak).join(', ');
+  const regs=bpRegios(b); if(!regs.length)return '';
   const geproefd=bpSmaakVan(b);
-  const proc=(inf.proc.length===1)?(inf.proc[0]+' is hier de norm')
-            :(inf.proc.join(' / ')+' komen hier voor');
+  const belooft=[...new Set([].concat(...regs.map(bpRegioSmaak)))];
+  const gok=regs.some(r=>!r.zelf);
   return '<div class="bk-herkomst">'+
-    '<div class="n hand">'+esc(st?(st.n+' · '+BP_LAND[r.land].naam):BP_LAND[r.land].naam)+
-    (r.zelf?'':' <span class="bp-zacht">(uit de tekst op de zak)</span>')+'</div>'+
-    '<div class="r">'+esc(st&&st.h?st.h:inf.hoogte)+' · '+esc(proc)+'<br>'+
-    '<b>de streek belooft</b> '+esc(belooft)+
+    '<div class="n hand">'+(regs.length>1?'blend — ':'')+
+    regs.map(r=>esc(bpRegioTekst(r))).join(' · ')+
+    (gok?' <span class="bp-zacht">(uit de tekst op de zak)</span>':'')+'</div>'+
+    '<div class="r">'+regs.map(r=>esc(bpRegioHoogte(r))).join(' · ')+'<br>'+
+    '<b>de streek belooft</b> '+esc(belooft.join(', '))+
     (geproefd.length?('<br><b>jij proefde</b> '+esc(geproefd.join(', '))):'')+'</div>'+
-    '<div style="margin-top:8px"><button class="lp" onclick="event.stopPropagation();bpVanBoon(\''+
-    b.id+'\')">bekijk op de kaart →</button></div></div>';
+    '<div class="wens-rij" style="margin-top:8px">'+
+    regs.map((r,i)=>'<button class="lp" onclick="event.stopPropagation();bpVanBoon(\''+
+      b.id+'\','+i+')">'+(regs.length>1?esc(bpRegioTekst(r)):'bekijk op de kaart')+
+      ' →</button>').join('')+'</div></div>';
 }
 
-/* ---- je plank als kaartje boven de bonenlijst ---- */
+/* ---- je plank als kaartje boven de bonenlijst, en de deur naar de kaart ---- */
 function bpPlankKaartHTML(){
   if(!featOn('beanpick'))return '';
   const punten=[];
-  (state.beans||[]).forEach(b=>{
-    const r=bpRegioVanBoon(b); if(!r)return;
-    const inf=BP_INFO[r.land], st=(r.i!=null)?inf.streken[r.i]:null;
-    const x=st?bpX(st.ll[0]):+bpMidden(BP_LAND[r.land])[0];
-    const y=st?bpY(st.ll[1]):+bpMidden(BP_LAND[r.land])[1];
-    punten.push({x,y,id:b.id,land:r.land});
-  });
-  if(!punten.length)return '';
-  // hier geen opgerekt kijkvenster: het kadertje is laag en breed, dus de
-  // kale omhullende van de koffiegordel vult hem het best
+  const zet=(o,soort)=>{
+    bpRegios(o).forEach(r=>{
+      const st=(r.i!=null)?BP_INFO[r.land].streken[r.i]:null;
+      const x=st?bpX(st.ll[0]):+bpMidden(BP_LAND[r.land])[0];
+      const y=st?bpY(st.ll[1]):+bpMidden(BP_LAND[r.land])[1];
+      punten.push({x,y,id:o.id,soort});
+    });
+  };
+  (state.beans||[]).forEach(b=>zet(b,'mijn'));
+  (state.wishlist||[]).forEach(w=>zet(w,'wens'));
+  const landen=new Set();
+  (state.beans||[]).forEach(b=>bpRegios(b).forEach(r=>landen.add(r.land)));
   const v=bpDoos(BP_LANDEN,6);
-  const landen=new Set(punten.map(p=>p.land));
   let sv='<svg viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
   sv+='<rect class="band" x="-200" y="'+bpY(23.5)+'" width="500" height="'+(bpY(-23.5)-bpY(23.5))+'"/>';
   BP_ACHTER.forEach(pl=>{
     sv+='<path class="achter" d="M'+pl.map(q=>bpX(q[0]).toFixed(1)+' '+bpY(q[1]).toFixed(1)).join('L')+'Z"/>';
   });
-  BP_LANDEN.forEach(l=>{
-    sv+='<path class="achter" d="'+bpPad(l)+'"/>';
-  });
+  BP_LANDEN.forEach(l=>{sv+='<path class="achter" d="'+bpPad(l)+'"/>';});
   punten.forEach(p=>{
-    sv+='<circle class="mijn" cx="'+p.x+'" cy="'+p.y+'" r="4.5" onclick="bpVanBoon(\''+p.id+'\')"/>';
+    sv+='<circle class="'+p.soort+'" cx="'+p.x+'" cy="'+p.y+'" r="4.5" onclick="event.stopPropagation();'+
+      (p.soort==='mijn'?('bpVanBoon(\''+p.id+'\')'):('bpVanWens(\''+p.id+'\')'))+'"/>';
   });
   sv+='</svg>';
-  return '<div class="plank-kaart">'+sv+'<div class="bij">'+punten.length+' zak'+
-    (punten.length===1?'':'ken')+' uit '+landen.size+' land'+(landen.size===1?'':'en')+
-    ' — tik een stip</div></div>';
+  return '<button class="plank-kaart" onclick="bpOpen(\'beans\')">'+sv+'</button>';
+}
+
+/* ---- uit je eigen kast ----
+   Onderaan een streek: wat jij van hier al hebt staan, en wat er nog op je
+   lijstje wacht. Een blend duikt hier bij elk van zijn herkomsten op, met
+   erbij waar hij verder nog vandaan komt.                                  */
+function bpUitJeKast(landId,i){
+  if(i==null)return '';
+  const bonen=bpBonenVoor(landId,i), wensen=bpWensenVoor(landId,i);
+  const elders=bpBonenVoor(landId,null).length-bonen.length;
+  if(!bonen.length&&!wensen.length){
+    return '<div class="bp-mijn"><div class="bp-et">From your shelf</div>'+
+      '<p class="bp-zacht">Hier heb je nog niets van staan.'+
+      (elders?(' Wel '+elders+' zak'+(elders===1?'':'ken')+' van elders uit '+
+        esc(BP_LAND[landId].naam)+'.'):'')+'</p></div>';
+  }
+  const ander=(o)=>{
+    const rest=bpRegios(o).filter(r=>!(r.land===landId&&r.i===i));
+    return rest.length?('ook uit '+rest.map(bpRegioTekst).join(' · ')):'';
+  };
+  let h='<div class="bp-mijn"><div class="bp-et">From your shelf</div>';
+  h+=bonen.map(b=>{
+    const sc=bpScoreVan(b), n=(state.brews||[]).filter(x=>x.beanId===b.id).length;
+    const regel=[b.roaster,b.process,b.variety].filter(Boolean).join(' · ');
+    const staat=(b.inStock===false)?'op is op':(sc?('jij gaf hem '+sc):
+      (n?(n+' brew'+(n===1?'':'s')):'nog niet gezet'));
+    return '<button class="bp-mijnkaart" onclick="bpNaarBoon(\''+b.id+'\')">'+
+      '<span class="mn hand">'+esc(b.name)+
+      (bpIsBlend(b)?' <span class="wens-tag">blend</span>':'')+'</span>'+
+      '<span class="mr">'+[regel,ander(b),staat].filter(Boolean).map(esc).join(' — ')+
+      '</span></button>';
+  }).join('');
+  h+=wensen.map(w=>{
+    const regel=[w.brander,w.proces,w.brand].filter(Boolean).join(' · ');
+    return '<button class="bp-mijnkaart wens" onclick="bpWijzigWens(\''+w.id+'\')">'+
+      '<span class="mn hand">'+esc(w.naam||'zonder naam')+
+      ' <span class="wens-tag">op je lijstje</span>'+
+      (bpIsBlend(w)?' <span class="wens-tag">blend</span>':'')+'</span>'+
+      '<span class="mr">'+[regel,ander(w)].filter(Boolean).map(esc).join(' — ')+
+      '</span></button>';
+  }).join('');
+  if(elders>0)h+='<p class="bp-zacht">En '+elders+' zak'+(elders===1?'':'ken')+
+    ' van elders uit '+esc(BP_LAND[landId].naam)+'.</p>';
+  return h+'</div>';
+}
+/* De weg terug: van de kaart naar de kaart van die boon op je plank. */
+function bpNaarBoon(id){
+  const b=beanById(id); if(!b)return;
+  if(!expandedBeans.has(id))expandedBeans.add(id);
+  if(b.inStock===false)extraKastOpen=true;
+  go('beans');
+  setTimeout(()=>{
+    const el=document.querySelector('.bean-card[data-bean="'+id+'"]');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  },60);
 }
 
 /* ---- de terugweg: van een boon op je plank naar zijn plek op de kaart ---- */
-function bpVanBoon(beanId){
+function bpVanBoon(beanId,idx){
   const b=beanById(beanId); if(!b)return;
-  const id=bpLandVanBoon(b);
-  if(!id||!BP_INFO[id]){toast('van deze boon weet ik het land nog niet');return;}
-  bpDeel=BP_LAND[id].deel; bpLandId=id; bpNiv='land';
-  bpStreek=bpStreekVanBoon(b,id); bpProc=null;
-  bpView=bpLandView(id).slice();
+  bpNaarPlek(bpRegios(b)[idx||0],'van deze boon weet ik het land nog niet');
+}
+function bpVanWens(wensId,idx){
+  const w=(state.wishlist||[]).find(x=>x.id===wensId); if(!w)return;
+  bpNaarPlek(bpRegios(w)[idx||0],'van deze wens weet ik het land nog niet');
+}
+/* Eén plek op de kaart openen, gebruikt door beide terugwegen hierboven. */
+function bpNaarPlek(r,klacht){
+  if(!r||!BP_INFO[r.land]){toast(klacht);return;}
+  bpVoor=null; bpVanaf='beans'; bpDeel=BP_LAND[r.land].deel; bpLandId=r.land; bpNiv='land';
+  bpStreek=(r.i!=null)?r.i:null; bpProc=null; bpVarOpen=null;
+  bpView=bpLandView(r.land).slice();
+  bpNaarStreek=(bpStreek!=null);
   go('beanpick');
 }
+/* ================= coffee finder: zoeken en filteren =================
+   Twee manieren om bij een streek te komen zonder eerst de kaart af te struinen:
+   je typt wat je zoekt, of je laat vijf vragen de 119 streken uitdunnen.
+
+   De hele kern is dat de 57 losse smaakwoorden uit BP_INFO op zeven families
+   gelegd worden. Zonder die ordening kun je niet filteren -- 'cacao',
+   'chocolade' en 'donkere chocolade' zijn voor een zoeker hetzelfde woord.  */
+const FD_FAM={
+  fris:  {n:'fresh fruit',   u:'citrus en rood fruit',
+          w:['sinaasappel','citroen','citrus','limoen','grapefruit','bergamot','zachte citrus',
+             'rood fruit','rode bes','zwarte bes','aardbei','bosbes','blauwe bes','rode vruchten',
+             'rode appel','appel','tomaat','tomaat-zoet']},
+  steen: {n:'stone fruit',   u:'perzik, pruim, tropisch',
+          w:['perzik','abrikoos','pruim','tropisch fruit','rijp fruit','vijg','gedroogd fruit',
+             'gedroogde vijg','rozijn','rode wijn','rum']},
+  bloem: {n:'floral & tea',  u:'jasmijn, zwarte thee',
+          w:['bloemig','jasmijn','zwarte thee']},
+  zoet:  {n:'sweet & caramel',u:'honing, bruine suiker',
+          w:['honing','bruine suiker','karamel','toffee']},
+  choc:  {n:'chocolate',     u:'cacao tot donkere chocolade',
+          w:['cacao','chocolade','donkere chocolade','melkchocolade','cacaonib']},
+  noot:  {n:'nutty',         u:'amandel, hazelnoot',
+          w:['noot','amandel','hazelnoot','macadamia','walnoot','pinda']},
+  kruid: {n:'spice & wood',  u:'specerij, tabak, rook',
+          w:['specerij','kaneel','kardemom','zwarte peper','kruidig','tabak','cederhout',
+             'hout','rook','aarde']},
+};
+const FD_FAMS=Object.keys(FD_FAM);
+const FD_WOORD={};
+FD_FAMS.forEach(f=>FD_FAM[f].w.forEach(w=>{FD_WOORD[w]=f;}));
+/* het smaakwiel waarmee je je brews tagt, in dezelfde zeven families */
+const FD_WIEL={berry:'fris',citrus:'fris',floral:'bloem',honey:'zoet',caramel:'zoet',
+  choc:'choc',nutty:'noot',spice:'kruid'};
+/* hoe levendig smaakt een familie? 0 = rond en zacht, 1 = fel en helder */
+const FD_ZUUR={fris:1,bloem:.9,steen:.6,zoet:.35,noot:.2,choc:.15,kruid:.3};
+
+/* de 119 streken één keer plat, met hun families en een schatting van hoe
+   levendig ze smaken (uit de smaakwoorden en de teelthoogte) */
+let FD_STREKEN=null;
+function fdStreken(){
+  if(FD_STREKEN)return FD_STREKEN;
+  FD_STREKEN=[];
+  Object.keys(BP_INFO).forEach(land=>{
+    const inf=BP_INFO[land], L=BP_LAND[land]; if(!L)return;
+    (inf.streken||[]).forEach((st,i)=>{
+      const fams=[...new Set((st.s||[]).map(w=>FD_WOORD[w]).filter(Boolean))];
+      const h=(String(st.h||inf.hoogte).match(/\d+/g)||['1500']).map(Number);
+      const hoog=h.reduce((a,b)=>a+b,0)/h.length;
+      let zuur=fams.length?fams.reduce((a,f)=>a+FD_ZUUR[f],0)/fams.length:.5;
+      zuur=Math.max(0,Math.min(1,zuur*.7+((hoog-900)/1400)*.3));
+      FD_STREKEN.push({land,i,naam:st.n,landnaam:L.naam,deel:L.deel,h:st.h||inf.hoogte,
+        hoog,t:st.t,s:st.s||[],v:st.v||inf.var,proc:inf.proc,fams,zuur});
+    });
+  });
+  return FD_STREKEN;
+}
+
+/* ---- wat de app al van je weet, zodat de eerste twee vragen ingevuld staan ---- */
+function fdMijnMethode(){
+  const aan=(state.methods||[]).filter(m=>m.on);
+  const esp=aan.some(m=>methodFamily(m)==='espresso');
+  const fil=aan.some(m=>methodFamily(m)==='filter');
+  return (esp&&fil)?'allebei':esp?'espresso':'filter';
+}
+function fdMijnSmaken(){
+  const tel={};
+  (state.brews||[]).forEach(b=>{
+    if(b.score!=null&&+b.score<7.5)return;
+    (b.tags||[]).forEach(t=>{
+      let f=FD_WIEL[t];
+      if(!f)for(const k in WHEEL_SUB)if((WHEEL_SUB[k]||[]).includes(t))f=FD_WIEL[k];
+      if(f)tel[f]=(tel[f]||0)+1;
+    });
+  });
+  const uit=Object.keys(tel).sort((a,b)=>tel[b]-tel[a]).slice(0,2);
+  return uit.length?uit:['fris','zoet'];
+}
+
+/* ---- de stand van de zoeker ---- */
+let fdQ='', fdAI=false, fdStap=0, fdBezig=false, fdAIuit='';
+let fdA={meth:null,fams:null,zuur:null,proc:'egaal',avontuur:null};
+function fdReset(){
+  fdStap=0; fdAIuit='';
+  fdA={meth:fdMijnMethode(),fams:fdMijnSmaken(),zuur:null,proc:'egaal',avontuur:null};
+}
+
+const FD_STAPPEN=[
+  {k:'meth',v:'Where will you brew it?',
+   w:'Dit bepaalt welke branding en welke streken passen — daar begint elke goede koffiezoeker mee.',
+   o:[{v:'filter',n:'filter',u:'V60, Chemex, Aeropress — helderheid en zuur mogen er zijn'},
+      {v:'espresso',n:'espresso',u:'onder druk: je wilt body, zoet en weinig scherpte'},
+      {v:'allebei',n:'both',u:'een zak die op allebei werkt'}]},
+  {k:'fams',v:'Which way, taste-wise?',
+   w:'Kies er één tot drie. Dit is de grofste zeef: hij haalt er meteen driekwart uit.',
+   soort:'fam'},
+  {k:'zuur',v:'How bright may it be?',
+   w:'Niet hoe donker de branding is, maar wat je in de kop proeft. Hoogte en proces bepalen dit het meest.',
+   o:[{v:'zacht',n:'soft and round',u:'laag zuur, veel body — chocolade en noot'},
+      {v:'balans',n:'balanced',u:'zoet met een randje, het veilige midden'},
+      {v:'fel',n:'lively and bright',u:'citrus die prikt, thee-achtig, hoog gegroeid'}]},
+  {k:'proc',v:'What sounds interesting?',
+   w:'Het proces op de boerderij verandert de smaak meer dan welk land ook.',
+   o:[{v:'washed',n:'washed',u:'schoon en rechtlijnig — je proeft de streek zelf'},
+      {v:'natural',n:'natural',u:'de kers droogt om de boon: fruit, wijn, meer body'},
+      {v:'honey',n:'honey',u:'ertussenin — zoeter, zachter zuur'},
+      {v:'egaal',n:'no preference',u:'laat de smaak beslissen'}]},
+  {k:'avontuur',v:'How far from home?',
+   w:'Vertrouwd blijft bij landen die al eens op je plank stonden, nieuw zoekt er juist '+
+     'buiten, en verras springt naar een werelddeel waar je nog nooit zat. De app kijkt '+
+     'daarvoor naar je eigen bonen en brews — heb je er nog geen, dan telt deze vraag niet mee.',
+   o:[{v:'vertrouwd',n:'keep it familiar',u:'een streek in een land dat je al kent'},
+      {v:'nieuw',n:'something new',u:'een land dat je nog niet had'},
+      {v:'verras',n:'surprise me',u:'een werelddeel waar je nog nooit zat'}]},
+];
+
+/* ---- de score. Elke regel is uit te leggen; wat dat niet is, telt niet mee ---- */
+function fdScore(st){
+  const r=[]; let p=0;
+  const raak=st.fams.filter(f=>(fdA.fams||[]).includes(f));
+  if((fdA.fams||[]).length){
+    p+=raak.length*3;
+    if(raak.length)r.push(raak.map(f=>FD_FAM[f].n).join(' en ')+' zit erin');
+  }
+  if(fdA.zuur){
+    const doel=fdA.zuur==='zacht'?.15:fdA.zuur==='balans'?.5:.85;
+    const af=Math.abs(st.zuur-doel); p+=(1-af)*3;
+    if(af<.18)r.push(fdA.zuur==='fel'?'hoog gegroeid en levendig'
+      :fdA.zuur==='zacht'?'rond, weinig zuur':'mooi in balans');
+  }
+  if(fdA.proc!=='egaal'){
+    if(st.proc.includes(fdA.proc)){p+=2;r.push(fdA.proc+' komt hier vandaan');}
+    else p-=2;
+  }
+  if(fdA.meth==='espresso')p+=(1-st.zuur)*2;
+  else if(fdA.meth==='filter')p+=st.zuur*2;
+  const had=bpGehad().has(st.land);
+  if(fdA.avontuur==='vertrouwd'){p+=had?2:-1;if(had)r.push('een land dat je al kent');}
+  if(fdA.avontuur==='nieuw'){p+=had?-2:2;if(!had)r.push('nog nooit op je plank gehad');}
+  if(fdA.avontuur==='verras'){
+    const delen=new Set([...bpGehad()].map(l=>(BP_LAND[l]||{}).deel));
+    p+=delen.has(st.deel)?-2:3;
+    if(!delen.has(st.deel))r.push('een werelddeel waar je nog nooit zat');
+  }
+  return {p,r};
+}
+function fdRang(){return fdStreken().map(st=>Object.assign({st},fdScore(st))).sort((a,b)=>b.p-a.p);}
+function fdOver(){
+  const f=fdA.fams||[];
+  if(!f.length)return fdStreken().length;
+  return fdStreken().filter(st=>st.fams.some(x=>f.includes(x))).length;
+}
+
+/* ---- zoeken zonder AI: alles wat de app al heeft staan ---- */
+function fdZoek(q){
+  const t=(q||'').toLowerCase().trim();
+  const hoogte=(t.match(/boven\s*(\d{3,4})|(\d{3,4})\s*m\+/)||[]).filter(Boolean)[1];
+  // woorden van één of twee letters slaan we over: een losse "m" zit in bijna elke
+  // beschrijving en maakt de uitslag waardeloos
+  const woorden=t.split(/[\s,]+/).filter(w=>w.length>2&&!/^\d+$/.test(w)&&w!=='boven');
+  if(!woorden.length&&!hoogte)return [];
+  return fdStreken().map(st=>{
+    let p=0; const r=[]; let alles=true;
+    woorden.forEach(w=>{
+      let q2=0;
+      if(st.landnaam.toLowerCase().includes(w)){q2+=5;r.push('land');}
+      if(st.naam.toLowerCase().includes(w)){q2+=6;r.push('streek');}
+      if(st.s.some(x=>x.toLowerCase().includes(w))){q2+=4;r.push('smaak');}
+      const fam=FD_FAMS.find(f=>FD_FAM[f].n.toLowerCase().includes(w)||FD_FAM[f].u.includes(w));
+      if(fam&&st.fams.includes(fam)){q2+=4;r.push('smaakfamilie');}
+      if(st.proc.some(x=>x.includes(w))){q2+=3;r.push('proces');}
+      if((st.v||'').toLowerCase().includes(w)){q2+=3;r.push('variëteit');}
+      if(!q2&&st.t.toLowerCase().includes(w)){q2+=1;r.push('beschrijving');}
+      if(!q2)alles=false;
+      p+=q2;
+    });
+    // elk woord moet ergens raken: "natural ethiopië" is een eis, geen wens
+    if(!alles)return {st,p:0,r:[]};
+    if(hoogte){ if(st.hoog>=+hoogte){p+=3;r.push('hoogte');} else return {st,p:0,r:[]}; }
+    return {st,p,r:[...new Set(r)]};
+  }).filter(x=>x.p>0).sort((a,b)=>b.p-a.p);
+}
+
+/* ---- met AI: hij vult alleen de filters in. Het antwoord komt nog steeds uit
+   diezelfde 119 streken, niet uit het model. ---- */
+async function fdAIZoek(){
+  const t=fdQ.trim();
+  if(!t||!aiReady())return;
+  fdBezig=true; fdSchilder();
+  try{
+    const prompt='Iemand zoekt een zak specialty koffie en beschrijft wat hij wil: "'+t+'"\n'+
+      'Zet dat om in zoekwoorden voor een database van koffiestreken. Geef ALLEEN JSON terug, '+
+      'zonder uitleg: {"woorden":[],"fams":[],"zuur":"","meth":""}\n'+
+      'woorden = Nederlandse smaakwoorden, landnamen of processen uit de tekst.\n'+
+      'fams = nul tot drie van: '+FD_FAMS.join(', ')+'.\n'+
+      'zuur = "zacht", "balans" of "fel", of leeg.\n'+
+      'meth = "filter", "espresso" of leeg.';
+    const d=extractJSON(await callClaude([{role:'user',content:prompt}],400));
+    if(Array.isArray(d.fams)&&d.fams.length)fdA.fams=d.fams.filter(f=>FD_FAM[f]).slice(0,3);
+    if(d.zuur)fdA.zuur=d.zuur;
+    if(d.meth)fdA.meth=d.meth;
+    const w=(d.woorden||[]).filter(Boolean);
+    fdAIuit=[(fdA.fams||[]).map(f=>FD_FAM[f].n).join(' + '),d.zuur?(d.zuur+' zuur'):'',d.meth]
+      .filter(Boolean).join(', ');
+    if(w.length)fdQ=w.join(' ');
+  }catch(e){ fdAIuit='de AI kon er niets van maken — zoek gewoon op een woord'; }
+  fdBezig=false; fdSchilder();
+}
+
+/* ---- de zoekbalk op het wereldscherm ---- */
+function fdBalkHTML(){
+  if(!featOn('finder'))return '';
+  return '<div class="fd-zoek"><input id="fd-veld" value="'+esc(fdQ)+'" '+
+    'placeholder="'+(fdAI?'describe what you want…':'country, region, taste, process…')+'" '+
+    'oninput="fdTik(this.value)"'+(fdAI?' onkeydown="if(event.key===\'Enter\')fdAIZoek()"':'')+'>'+
+    (fdQ?'<button class="wis" onclick="fdTik(\'\')">×</button>':'')+'</div>'+
+    '<div class="fd-ai"><button class="'+(fdAI?'aan':'')+'" onclick="fdAIAan()">'+
+    (fdAI?'AI on':'AI off')+'</button>'+
+    (fdAI?'typ een hele zin en druk op enter':'zoekt in 119 streken, ook zonder internet')+'</div>'+
+    '<div class="fd-uit" id="fd-uit">'+fdUitHTML()+'</div>'+
+    '<button class="bp-knop" style="width:100%;margin-bottom:14px" onclick="fdOpen()">'+
+    'find my bag — 5 steps ›</button>';
+}
+function fdUitHTML(){
+  if(fdBezig)return '<div class="fd-niks"><span class="spin"></span> de AI leest je zin…</div>';
+  if(!fdQ.trim())return fdAIuit?('<div class="fd-vooraf">'+esc(fdAIuit)+'</div>'):'';
+  const rij=fdZoek(fdQ);
+  const kop=fdAIuit?('<div class="fd-vooraf">De AI las: <b>'+esc(fdAIuit)+'</b>. '+
+    'De streken hieronder komen uit de app zelf.</div>'):'';
+  if(!rij.length)return kop+'<div class="fd-niks">Niets gevonden. Probeer een smaakwoord '+
+    'zoals <b>jasmijn</b> of <b>cacao</b>.</div>';
+  return kop+'<div class="fd-niks" style="padding:2px 0 8px">'+rij.length+' streken gevonden</div>'+
+    rij.slice(0,12).map(x=>
+      '<button class="fd-res" onclick="fdNaar(\''+x.st.land+'\','+x.st.i+')">'+
+      '<span class="n">'+esc(x.st.naam)+'</span>'+
+      '<span class="l">'+esc(x.st.landnaam)+' · '+esc(x.st.h)+'</span>'+
+      '<span class="s">'+esc(x.st.s.join(' · '))+'</span>'+
+      '<span class="m">raak op '+x.r.join(', ')+'</span></button>').join('');
+}
+/* alleen het resultaatvak en de kaartkleuren bijwerken -- het hele scherm
+   opnieuw tekenen zou de cursor uit het zoekveld gooien */
+function fdSchilder(){
+  const uit=document.getElementById('fd-uit');
+  if(uit)uit.innerHTML=fdUitHTML();
+  const raak=new Set(fdQ.trim()?fdZoek(fdQ).slice(0,14).map(x=>x.st.land):[]);
+  document.querySelectorAll('#bp-screen .bp-kaart path[data-land]').forEach(el=>{
+    el.classList.toggle('raak',raak.has(el.getAttribute('data-land')));
+  });
+}
+function fdTik(v){
+  fdQ=v; fdAIuit='';
+  const veld=document.getElementById('fd-veld');
+  if(veld&&veld.value!==v)veld.value=v;
+  fdSchilder();
+  // het kruisje en de tips verschijnen pas bij de volgende hele tekening
+  if(!v&&veld)bpTeken(true);
+}
+function fdAIAan(){
+  if(!fdAI&&!aiReady()){toast('zet AI aan onder profile');return;}
+  fdAI=!fdAI; bpTeken(true);
+}
+function fdNaar(land,i){
+  bpVoor=null; bpVanaf=bpVanaf||'beans';
+  bpDeel=BP_LAND[land].deel; bpLandId=land; bpNiv='land'; bpStreek=i; bpVarOpen=null;
+  bpView=bpLandView(land).slice(); bpNaarStreek=true;
+  bpTeken();
+}
+
+/* ---- het scherm met de vijf stappen ---- */
+function fdOpen(){fdReset();go('finder');}
+function fdTeken(behoudScroll){
+  const el=document.getElementById('fd-screen'); if(!el)return;
+  const y=el.scrollTop;
+  el.innerHTML=(fdStap<5)?fdStapHTML():fdTopHTML();
+  el.scrollTop=behoudScroll?y:0;
+}
+function fdKaartje(landen,top){
+  const set=new Set(landen||[]), t=new Set(top||[]);
+  const v=BP_VIEWS.wereld;
+  let s='<svg class="bp-kaart" viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
+  s+='<rect class="band" x="-200" y="'+bpY(23.5)+'" width="500" height="'+(bpY(-23.5)-bpY(23.5))+'"/>';
+  BP_ACHTER.forEach(pl=>{
+    s+='<path class="achter" d="M'+pl.map(q=>bpX(q[0]).toFixed(1)+' '+bpY(q[1]).toFixed(1)).join('L')+'Z"/>';
+  });
+  BP_VOLGORDE.forEach(l=>{
+    const kl='land'+(t.has(l.id)?' sel':set.has(l.id)?' raak':'');
+    s+='<path class="'+kl+'" d="'+bpPad(l)+'"></path>';
+  });
+  return '<div class="bp-doos">'+s+'</svg></div>';
+}
+function fdStapHTML(){
+  const S=FD_STAPPEN[fdStap];
+  const rij=fdRang(), raak=[...new Set(rij.slice(0,18).map(x=>x.st.land))];
+  let keuze='';
+  if(S.soort==='fam'){
+    keuze='<div class="fd-fam">'+FD_FAMS.map(f=>
+      '<button class="'+((fdA.fams||[]).includes(f)?'sel':'')+'" onclick="fdFam(\''+f+'\')">'+
+      FD_FAM[f].n+'<em>'+FD_FAM[f].u+'</em></button>').join('')+'</div>';
+  }else{
+    keuze=S.o.map(o=>'<button class="fd-keus'+(fdA[S.k]===o.v?' sel':'')+'" onclick="fdKies(\''+
+      S.k+'\',\''+o.v+'\')"><span class="vk">'+(fdA[S.k]===o.v?'✓':'○')+'</span>'+
+      '<span><b>'+o.n+'</b><em>'+o.u+'</em></span></button>').join('');
+  }
+  return '<div class="bp-kop"><div class="t">Step '+(fdStap+1)+' of 5</div>'+
+    '<button class="bp-terug" onclick="'+(fdStap?'fdStap--;fdTeken()':'go(\'beanpick\')')+
+    '">‹ '+(fdStap?'back':'map')+'</button></div>'+
+    '<div class="fd-balk">'+FD_STAPPEN.map((_,i)=>
+      '<i class="'+(i<=fdStap?'op':'')+'"></i>').join('')+'</div>'+
+    fdKaartje(raak,[])+
+    '<div class="fd-teller">'+fdOver()+' of the 119 regions still fit</div>'+
+    '<div class="fd-vraag">'+S.v+'</div>'+
+    uitklapHTML('waarom','why we ask this',S.w,'fdTeken(true)')+
+    keuze+
+    '<button class="bp-knop" style="width:100%;margin-top:6px" onclick="fdVerder()">'+
+    (fdStap===4?'show my top 3 ›':'next ›')+'</button>';
+}
+function fdTopHTML(){
+  const rij=fdRang().slice(0,3), landen=rij.map(x=>x.st.land);
+  return '<div class="bp-kop"><div class="t">Your top 3</div>'+
+    '<button class="bp-terug" onclick="fdStap=4;fdTeken()">‹ steps</button></div>'+
+    '<div class="bp-let">Uit 119 streken, op wat je net koos.</div>'+
+    fdKaartje(landen,landen)+
+    rij.map((x,i)=>'<div class="fd-res'+(i?'':' top1')+'"><span class="nr">'+(i+1)+'</span>'+
+      '<span class="n">'+esc(x.st.naam)+'</span>'+
+      '<span class="l">'+esc(x.st.landnaam)+' · '+esc(x.st.h)+'</span>'+
+      '<span class="s">'+esc(x.st.s.join(' · '))+'</span>'+
+      '<span class="m">'+esc(x.r.slice(0,3).join(' · ')||'past het dichtst bij je antwoorden')+
+      '</span><div class="wens-rij">'+
+      '<button class="lp sel" onclick="fdNaarStreek(\''+x.st.land+'\','+x.st.i+')">'+
+      'bekijk op de kaart →</button></div></div>').join('')+
+    '<button class="bp-knop leeg" style="width:100%;margin-top:6px" onclick="fdStap=1;fdTeken()">'+
+    'try something else</button>';
+}
+function fdNaarStreek(land,i){
+  if(fdA.proc!=='egaal'&&BP_INFO[land].proc.includes(fdA.proc))bpProc=fdA.proc;
+  fdNaar(land,i); go('beanpick');
+}
+function fdKies(k,v){fdA[k]=v;fdTeken();}
+function fdFam(f){
+  const l=fdA.fams||(fdA.fams=[]), i=l.indexOf(f);
+  if(i>=0)l.splice(i,1); else if(l.length<3)l.push(f);
+  fdTeken();
+}
+function fdVerder(){ if(fdStap<4)fdStap++; else fdStap=5; fdTeken(); }
+
+let bpNaarStreek=false;   // net binnengekomen bij een streek: schuif hem in beeld
 function bpTeken(behoudScroll){
   const el=document.getElementById('bp-screen'); if(!el)return;
   const y=behoudScroll?el.scrollTop:0;
   el.innerHTML=(bpNiv==='wereld')?bpWereld():(bpNiv==='deel'?bpDeelScherm():bpLandScherm());
   el.scrollTop=y;
   bpVenster();
+  if(bpNiv==='wereld'&&fdQ.trim())fdSchilder();
+  if(bpNaarStreek){
+    bpNaarStreek=false;
+    const op=el.querySelector('.bp-streek.op');
+    if(op)setTimeout(()=>op.scrollIntoView({behavior:'smooth',block:'start'}),120);
+  }
 }
 
 /* ---------------- taste wheel ----------------
@@ -8161,6 +8960,7 @@ const FEATURES=[
   {id:'drawdown', n:'drawdown & bed', d:'log how long it drained and what the bed looked like', def:true, cat:'app'},
   {id:'filtercompass', n:'filter compass', d:'what you tasted, plotted — with one next change', def:true, cat:'app'},
   {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true, cat:'app'},
+  {id:'finder', n:'taste finder', d:'search the world map by taste, or let five questions narrow it to three regions', def:true, cat:'people'},
   {id:'beanpick', n:'bean chooser', d:'a drawn world map: from a coffee country down to a region, and what to look for on the bag', def:true, cat:'people'},
   {id:'wheelbig', n:'big flavour wheel', d:'tap a family and the wheel opens up — berry becomes blueberry, raspberry, cherry', def:false, cat:'app'},
   {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true, cat:'app'},
@@ -8506,6 +9306,9 @@ function lbBean(b){
     roastLevel:b.roast||null,roastDate:b.roastdate||null,daysSinceRoast:f?f.days:null,
     roasterNotes:b.roasternotes||null,notes:b.notes||null,inStock:b.inStock!==false,
     decaf:isDecaf(b),bagLabel:b.fam||null,
+    regions:(Array.isArray(b.regions)?b.regions:(b.region?[b.region]:[]))
+      .map(r=>({land:r.land,i:r.i==null?null:r.i})),
+    region:(Array.isArray(b.regions)&&b.regions[0])||b.region||null,
     methodIds:(Array.isArray(b.methods)&&b.methods.length?b.methods:(b.method?[b.method]:[])).slice(),
     dials,
     brewIds:state.brews.filter(x=>x.beanId===b.id).map(x=>x.id)};

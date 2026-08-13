@@ -1,0 +1,111 @@
+LETS BREW — DE VIJF LUMA-PROMPTS
+
+Instellingen voor alle vijf: 9:16, 5 seconden, loop uit, het startbeeld
+erbij, 2 tot 3 pogingen per shot.
+
+Gegenereerd uit STAPPEN.md — pas daar aan, niet hier.
+
+========================================================================
+Shot 1 — het begin
+startbeeld: keyframes/s01-begin.png
+========================================================================
+
+hand-drawn pen sketch on warm cream paper, dark brown ink only, no fill and no
+shading, every contour drawn twice with a slight offset, lines overshoot at the
+corners, wobbling uneven contours, flat 2D illustration, calm and unhurried.
+
+The barista is a calm craftsman: canvas apron over a plain shirt with rolled-up
+sleeves, short dark hair, two small dashes for eyes and no other facial detail.
+
+The coffee bean on the left finishes drawing itself, line by line, as if an unseen pen
+is going over it. The barista looks over at it and gives a small nod.
+Camera: locked off, straight on, no movement.
+Only the drawing lines and his head move; the counter stays completely still.
+
+Negative: photograph, 3D render, glossy highlights, gradients, colour, readable text,
+letters, numbers, watermark, extra fingers, warped hands.
+
+========================================================================
+Shot 5 — de zak
+startbeeld: keyframes/s05-zak.png
+========================================================================
+
+hand-drawn pen sketch on warm cream paper, dark brown ink only, no fill and no
+shading, every contour drawn twice with a slight offset, lines overshoot at the
+corners, wobbling uneven contours, flat 2D illustration, calm and unhurried.
+
+The barista is a calm craftsman: canvas apron over a plain shirt with rolled-up
+sleeves, short dark hair, two small dashes for eyes and no other facial detail.
+
+He picks up the bag of coffee from the counter, holds it up and turns it to read the
+label. The bag has no readable text, only the drawn logo shape.
+Camera: slow push in from waist height to chest height.
+Keep the counter and his head steady; only the arms and the bag move.
+
+Negative: photograph, 3D render, glossy highlights, gradients, colour, readable text,
+letters, numbers, watermark, extra fingers, warped hands.
+
+========================================================================
+Shot 9 — aan de machine
+startbeeld: keyframes/s09-machine.png
+========================================================================
+
+Dit is het shot waar de video het meest naar een koffiebar ruikt. Geef hem twee
+pogingen extra.
+
+hand-drawn pen sketch on warm cream paper, dark brown ink only, no fill and no
+shading, every contour drawn twice with a slight offset, lines overshoot at the
+corners, wobbling uneven contours, flat 2D illustration, calm and unhurried.
+
+The barista is a calm craftsman: canvas apron over a plain shirt with rolled-up
+sleeves, short dark hair, two small dashes for eyes and no other facial detail.
+
+He reaches over to the lever espresso machine beside him, takes hold of the lever and
+pulls it down. Two loose curls of steam drift up from the machine.
+Camera: slow push in, chest height, no shake.
+Keep the machine outline steady; only his arm and the steam move.
+
+Negative: photograph, 3D render, glossy highlights, gradients, colour, readable text,
+letters, numbers, watermark, extra fingers, warped hands.
+
+========================================================================
+Shot 12 — omschakelen naar filter
+startbeeld: keyframes/s12-v60.png
+========================================================================
+
+hand-drawn pen sketch on warm cream paper, dark brown ink only, no fill and no
+shading, every contour drawn twice with a slight offset, lines overshoot at the
+corners, wobbling uneven contours, flat 2D illustration, calm and unhurried.
+
+The barista is a calm craftsman: canvas apron over a plain shirt with rolled-up
+sleeves, short dark hair, two small dashes for eyes and no other facial detail.
+
+He lifts a gooseneck kettle into frame from the right and pours a thin stream of water
+into the V60 dripper beside him. One thin curl of steam rises from the spout.
+Camera: slow pan right to left, following the kettle.
+Keep the dripper and the counter steady; only the kettle, the water and the steam move.
+
+Negative: photograph, 3D render, glossy highlights, gradients, colour, readable text,
+letters, numbers, watermark, extra fingers, warped hands.
+
+========================================================================
+Shot 14 — de afsluiter
+startbeeld: keyframes/s14-slot.png
+========================================================================
+
+De laatste seconde moet stilstaan — daar tekent de knop zich overheen (stap 5).
+Vraag Luma daar expliciet om, anders blijft hij bewegen en danst je knop mee.
+
+hand-drawn pen sketch on warm cream paper, dark brown ink only, no fill and no
+shading, every contour drawn twice with a slight offset, lines overshoot at the
+corners, wobbling uneven contours, flat 2D illustration, calm and unhurried.
+
+The barista is a calm craftsman: canvas apron over a plain shirt with rolled-up
+sleeves, short dark hair, two small dashes for eyes and no other facial detail.
+
+He picks up the finished cup from the counter, lifts it toward the camera and holds it
+there. The final second is completely still — nothing moves at all.
+Camera: locked off, chest height, settling to a stop.
+
+Negative: photograph, 3D render, glossy highlights, gradients, colour, readable text,
+letters, numbers, watermark, extra fingers, warped hands.

@@ -102,7 +102,8 @@ string of een 0 die iets anders betekent.
 |---|---|---|
 | `id` `name` | string | |
 | `roaster` `origin` `process` `variety` | string \| null | van de zak |
-| `region` | object \| null | de plek op de kaart die je zelf aanwees: `{land, i}` — `land` is een land-id uit de keuzehulp, `i` de index van de streek, of `null` als alleen het land bekend is |
+| `regions` | object[] | de plekken op de kaart die je zelf aanwees, in volgorde: `{land, i}` — `land` is een land-id uit de keuzehulp, `i` de index van de streek binnen dat land, of `null` als alleen het land bekend is. Een single origin heeft er één, een blend meer. Leeg als je niets aanwees; de app leest dan het land uit `origin`. |
+| `region` | object \| null | de eerste uit `regions`, of `null`. Alleen voor lezers van vóór deze versie — nieuwe code leest `regions`. |
 | `altitudeM` | number \| null | teeltHoogte in meters, uit een bereik het midden |
 | `roastLevel` | `light` \| `medium-light` \| `medium` \| `medium-dark` \| `dark` \| null | |
 | `roastDate` | `YYYY-MM-DD` \| null | |
@@ -158,11 +159,28 @@ twaalf.
 Bonen die je via de keuzehulp koos maar nog niet gekocht hebt. Ze staan boven
 je bonenplank, en "gekocht" opent het bonenformulier met alles al ingevuld.
 
+Een wens komt uit de keuzehulp, of je vult hem zelf in (*beans → op mijn
+lijstje → zelf een zak toevoegen*). `regions` werkt hetzelfde als bij een boon,
+dus een blend verschijnt op de kaart bij elk van zijn herkomsten.
+
 ```json
-{ "id":"…", "land":"Kenia", "streek":"Kirinyaga", "proces":"washed",
+{ "id":"…", "naam":"Kirinyaga AA", "name":"Kirinyaga AA",
+  "brander":"Friedhats", "url":"https://…", "origin":"Kirinyaga · Kenia",
+  "regions":[{"land":"kenia","i":0}], "proces":"washed", "altitude":"1700-1900",
   "variety":"SL28, SL34, Ruiru 11", "brand":"light",
-  "smaak":["tomaat-zoet","rode appel"], "zoek":"…", "at":1234567890 }
+  "roasternotes":"tomaat-zoet, rode appel",
+  "smaak":["tomaat-zoet","rode appel"], "notitie":"", "zoek":"…",
+  "at":1234567890 }
 ```
+
+Een wens en een boon komen uit hetzelfde formulier (*beans → ＋ add*, met de
+keuze *op mijn plank* of *op mijn lijstje*), dus de velden lopen parallel:
+`naam`/`name`, `brander` ↔ `roaster`, `proces` ↔ `process`, `brand` ↔
+`roastLevel`, `notitie` ↔ `notes`. Sla je een wens op als *op mijn plank*, dan
+verdwijnt hij hier en verschijnt hij als bean.
+
+Wensen van vóór deze versie bewaarden hun herkomst als losse namen (`land`,
+`streek`). Die worden bij het laden één keer omgezet naar `regions`.
 
 ### gear
 
