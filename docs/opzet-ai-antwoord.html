@@ -1,0 +1,632 @@
+<style>
+/* het prototype vult het scherm, zoals de app zelf */
+body{padding:0;height:100dvh;overflow:hidden;}
+.mk-wrap{max-width:430px;width:100%;margin:0;}
+.phone{width:100%;max-width:430px;height:100dvh;border:none;border-radius:0;filter:none;}
+
+.scherm{height:100%;overflow-y:auto;padding:0 20px 40px;}
+.kop{display:flex;align-items:baseline;justify-content:space-between;padding:16px 0 4px;}
+.kop .t{font-family:'Caveat',cursive;font-weight:700;font-size:33px;line-height:1;}
+.terug{background:none;border:none;color:var(--ink-soft);font:inherit;font-size:16px;
+  cursor:pointer;padding:4px 0;}
+.uitklapper{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  background:none;border:none;padding:1px 2px 10px;font:inherit;font-size:16px;
+  color:var(--ink-soft);cursor:pointer;}
+
+/* ---- de zoekbalk ---- */
+.zoekbak{position:relative;margin-bottom:9px;}
+.zoekbak input{width:100%;background:var(--card);border:2px solid var(--line);
+  border-radius:17px;filter:url(#wobble);padding:12px 44px 12px 14px;
+  font:inherit;font-size:17px;color:var(--ink);}
+.zoekbak input::placeholder{color:var(--ink-soft);opacity:.75;}
+.zoekbak .wis{position:absolute;right:9px;top:8px;background:none;border:none;
+  font:inherit;font-size:20px;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
+.aivlag{display:flex;align-items:center;gap:8px;margin:0 2px 11px;font-size:15.5px;
+  color:var(--ink-soft);}
+.aivlag button{background:var(--card);border:2px solid var(--line);border-radius:20px;
+  filter:url(#wobble);padding:3px 12px;font:inherit;font-size:15px;color:var(--ink);
+  cursor:pointer;}
+.aivlag button.aan{background:var(--accent-soft);color:var(--cream);border-color:var(--accent-soft);}
+
+/* ---- de vragen die je kunt stellen ---- */
+.vragenkop{font-size:12.5px;letter-spacing:.7px;text-transform:uppercase;
+  color:var(--ink-soft);margin:4px 0 6px;}
+.vraagknop{display:block;width:100%;text-align:left;background:none;
+  border:1.5px dashed var(--line);border-radius:15px;padding:8px 13px;margin-bottom:7px;
+  font:inherit;font-size:16px;color:var(--ink);cursor:pointer;}
+.vraagknop em{font-style:normal;color:var(--ink-soft);font-size:14px;display:block;}
+
+/* ---- de kaart ---- */
+.kaartbak{background:var(--card-2);border:2px solid var(--line);border-radius:20px;
+  filter:url(#wobble);padding:5px;margin-bottom:11px;position:relative;}
+.kaartbak svg{display:block;width:100%;height:150px;}
+.kaartbak .band{fill:var(--v60);opacity:.45;}
+.kaartbak .achter{fill:var(--desk);stroke:var(--line);stroke-width:.7;opacity:.45;
+  vector-effect:non-scaling-stroke;}
+.kaartbak .land{fill:var(--desk);stroke:var(--line);stroke-width:.8;opacity:.4;
+  vector-effect:non-scaling-stroke;transition:opacity .45s,fill .45s;}
+.kaartbak .land.raak{fill:var(--accent-soft);stroke:var(--ink);stroke-width:1.6;opacity:1;}
+.kaartbak .bij{position:absolute;left:0;right:0;bottom:2px;text-align:center;
+  font-size:13px;color:var(--ink-soft);pointer-events:none;}
+.kaartbak.stil .land{opacity:.28;}
+
+/* ---- het antwoord ---- */
+.soort{display:inline-block;background:var(--card-2);border:1.5px solid var(--line);
+  border-radius:12px;padding:2px 9px;font-size:13px;color:var(--ink-soft);
+  margin-bottom:7px;}
+.zin{font-size:17.5px;line-height:1.45;margin-bottom:10px;}
+.zin b{border-bottom:2px solid var(--line);font-weight:400;}
+.uitleg{background:var(--card);border:2px dashed var(--line);border-radius:18px;
+  padding:11px 14px;margin-bottom:11px;font-size:16px;line-height:1.5;}
+.uitleg p{margin:0 0 8px;}
+.uitleg p:last-child{margin:0;}
+.res{display:block;width:100%;text-align:left;background:var(--card);
+  border:2px solid var(--line);border-radius:19px;filter:url(#wobble);
+  padding:11px 14px;margin-bottom:9px;font:inherit;color:var(--ink);cursor:pointer;}
+.res .n{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:23px;
+  line-height:1.1;}
+.res .l{display:block;color:var(--ink-soft);font-size:15px;}
+.res .s{display:block;font-size:15px;margin-top:3px;}
+.res .m{display:block;margin-top:5px;font-size:15px;color:var(--ink-soft);
+  border-top:1.5px dashed var(--line);padding-top:5px;}
+.vervolg{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 12px;}
+.vervolg button{background:none;border:1.5px solid var(--line);border-radius:15px;
+  padding:5px 11px;font:inherit;font-size:15px;color:var(--ink-soft);cursor:pointer;}
+.doe{width:100%;background:var(--accent-soft);color:var(--cream);border:2px solid var(--ink);
+  border-radius:18px;filter:url(#wobble);padding:12px;font-family:'Caveat',cursive;
+  font-weight:700;font-size:23px;cursor:pointer;margin-bottom:10px;}
+.doe.leeg{background:none;color:var(--ink);border-color:var(--line);}
+.bezig{text-align:center;color:var(--ink-soft);font-size:16px;padding:16px 8px;}
+.json{background:var(--paper);border:2px solid var(--line);border-radius:16px;
+  padding:10px 12px;margin-bottom:12px;font-family:ui-monospace,Menlo,monospace;
+  font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;
+  color:var(--ink-soft);}
+.voet{border-top:2px dashed var(--line);margin-top:6px;padding-top:10px;
+  color:var(--ink-soft);font-size:15px;line-height:1.45;}
+</style>
+
+<div class="phone"><div class="scherm" id="scherm"></div></div>
+
+<script>
+const BP_LANDEN=[
+ {id:'elsalvador',deel:'amerika',naam:'El Salvador',pts:[[-90.1,14.1],[-87.7,14],[-87.7,13.15],[-89.7,13.15],[-90.1,13.8]]},
+ {id:'jamaica',deel:'amerika',naam:'Jamaica',pts:[[-78.4,18.5],[-76.2,18.2],[-76.2,17.7],[-78.4,18]]},
+ {id:'dominicaans',deel:'amerika',naam:'Dominicaanse Rep.',pts:[[-72,19.9],[-68.3,19],[-68.5,18.2],[-71.7,17.6],[-72,18.6]]},
+ {id:'hawai',deel:'amerika',naam:'Hawaï',pts:[[-156.1,20],[-155,20.3],[-154.8,19.5],[-155.6,18.9],[-156.05,19.5]]},
+ {id:'malawi',deel:'afrika',naam:'Malawi',pts:[[33.2,-9.6],[33,-12],[32.7,-13.6],[34.5,-16.2],[35.4,-16],[35.9,-14.3],[34.6,-11.6],[34,-9.5]]},
+ {id:'zambia',deel:'afrika',naam:'Zambia',pts:[[22,-16.2],[25.3,-17.8],[28.9,-16],[30.4,-15.6],[33.7,-12.5],[33,-9.6],[30.5,-8.3],[29,-13.4],[24.5,-13],[22,-13]]},
+ {id:'zimbabwe',deel:'afrika',naam:'Zimbabwe',pts:[[25.2,-17.8],[26,-19],[27.7,-20.1],[29.4,-22.2],[31.3,-22.4],[32.5,-21.3],[32.9,-19.7],[33,-16.6],[30.4,-15.6],[28.9,-16]]},
+ {id:'kameroen',deel:'afrika',naam:'Kameroen',pts:[[8.5,4.6],[9.9,2.2],[16.1,2.3],[15,7.6],[15.7,9.9],[14.1,13.1],[13.2,12.4],[12.8,8.7],[10.7,6.9],[8.8,5.8]]},
+ {id:'ivoorkust',deel:'afrika',naam:'Ivoorkust',pts:[[-8.6,10.5],[-6.2,10.7],[-2.5,9.5],[-2.8,5.1],[-4.6,5.1],[-7.5,4.4],[-8,6.4],[-8.6,7.7]]},
+ {id:'yunnan',deel:'azie',naam:'Yunnan (China)',pts:[[97.5,25.5],[99,28.2],[100.2,29.2],[103,28.5],[106,27.5],[105.9,24.5],[104,22.5],[101.6,21.2],[99,22.5],[97.6,23.5]]},
+ {id:'thailand',deel:'azie',naam:'Thailand',pts:[[97.4,18.6],[99.1,20.4],[100.5,20.3],[101.2,18.2],[103,18.4],[105.6,16],[103.6,14],[102.4,13.6],[100,13.4],[99.2,11],[98.3,8.2],[100.3,6.6],[101.9,6],[100.8,9.5],[99,14.5],[98.2,16.6]]},
+ {id:'laos',deel:'azie',naam:'Laos',pts:[[100.1,20.3],[101.2,21.4],[102.1,22.5],[104,22.5],[104.8,20.4],[105.2,19],[106.5,17],[107.6,15.9],[107.4,14.5],[105.5,14],[105,15],[104,15.9],[102.1,18.1],[101.1,18.3],[100.6,19.5]]},
+ {id:'myanmar',deel:'azie',naam:'Myanmar',pts:[[92.2,21.3],[93,23.7],[95,26.6],[97.4,28.5],[98.8,27.5],[98.7,24.1],[99.6,22.1],[100.2,21.5],[101.2,21.4],[100.2,20.4],[99,19.7],[98.5,16.8],[98.2,14.9],[99,13],[98.6,10],[97.6,16],[95.4,15.8],[94.2,16],[94,18],[93,19.5]]},
+ {id:'filipijnen',deel:'azie',naam:'Filipijnen',pts:[[120,18.5],[121.9,18.3],[122.3,16.5],[121.5,14.2],[123,13],[124.2,11.5],[125.5,9.8],[126.5,7.2],[125.4,5.6],[123,6.5],[121.9,7],[122,9.5],[120.3,11.5],[119.9,14],[119.8,16.5]]},
+ {id:'timor',deel:'azie',naam:'Oost-Timor',pts:[[124,-9.2],[125.1,-8.1],[126.6,-8.4],[127.3,-8.4],[126.9,-8.9],[125,-9.5]]},
+ {id:'bali',deel:'azie',naam:'Bali',pts:[[114.45,-8.15],[115.7,-8.1],[115.6,-8.75],[114.55,-8.8]]},
+ {id:'flores',deel:'azie',naam:'Flores',pts:[[119.9,-8.5],[121,-8.25],[122.4,-8.35],[123,-8.5],[122.3,-8.85],[120.8,-8.75],[119.9,-8.8]]},
+ {id:'mexico',deel:'amerika',naam:'Mexico',pts:[[-117,32],[-109,31],[-97,26],[-97,18],[-91,18.5],[-88,21],[-87,17],[-94,16],[-96,15.5],[-104,19],[-106,23],[-112,29]]},
+ {id:'guatemala',deel:'amerika',naam:'Guatemala',pts:[[-92.2,17.8],[-89,17.8],[-88.2,15.9],[-89.2,14],[-92.2,14.5]]},
+ {id:'honduras',deel:'amerika',naam:'Honduras',pts:[[-89.3,16],[-83.2,15],[-83.4,13],[-87.8,13.2],[-89.2,14.4]]},
+ {id:'nicaragua',deel:'amerika',naam:'Nicaragua',pts:[[-87.7,13.2],[-83.1,15],[-83.5,11],[-85.7,11],[-87.7,12.9]]},
+ {id:'costarica',deel:'amerika',naam:'Costa Rica',pts:[[-85.9,11],[-82.6,9.6],[-82.9,8.1],[-85.6,9.8]]},
+ {id:'panama',deel:'amerika',naam:'Panama',pts:[[-83,8.9],[-81.5,9.2],[-79,9.6],[-77.3,8.7],[-78.5,7.3],[-81,8],[-83,8.2]]},
+ {id:'colombia',deel:'amerika',naam:'Colombia',pts:[[-77.4,8.5],[-71.5,12],[-67,6],[-67.3,1.2],[-69.5,-4],[-74,-2],[-78,0.5],[-79,2]]},
+ {id:'ecuador',deel:'amerika',naam:'Ecuador',pts:[[-80.9,1.4],[-75.2,0.5],[-75.2,-4.5],[-80.2,-4.4]]},
+ {id:'peru',deel:'amerika',naam:'Peru',pts:[[-81.3,-4.2],[-75,-4],[-70,-9.5],[-69,-13],[-68.9,-17],[-71.4,-17.7],[-76,-14],[-79,-8]]},
+ {id:'bolivia',deel:'amerika',naam:'Bolivia',pts:[[-69.5,-10.5],[-65.3,-9.7],[-58.2,-19.9],[-62.3,-22],[-67.2,-22],[-69.6,-18]]},
+ {id:'brazilie',deel:'amerika',naam:'Brazilië',pts:[[-73.9,-7.3],[-69.5,-1],[-64,1.9],[-60,4.5],[-51,4.2],[-49.9,-1],[-44,-2.5],[-38,-5],[-35,-9],[-39,-17],[-40,-21],[-48,-25],[-53,-33],[-57,-30],[-57.6,-25],[-54.6,-24],[-58,-20],[-58,-16],[-60,-15],[-65,-11],[-70,-11]]},
+ {id:'ethiopie',deel:'afrika',naam:'Ethiopië',pts:[[34,8],[33,10],[36,14.5],[39,14.9],[43,12],[48,8],[44.5,4.9],[41,3.9],[36,4.5],[35,7]]},
+ {id:'kenia',deel:'afrika',naam:'Kenia',pts:[[33.9,-1],[35,4.6],[41,3.9],[41.9,-1],[40.1,-2.5],[39,-4.7],[37.6,-3]]},
+ {id:'tanzania',deel:'afrika',naam:'Tanzania',pts:[[29.6,-4.5],[30.8,-1],[34,-1],[37.6,-3],[39.5,-6.8],[40.4,-10.4],[37.5,-11.7],[33,-9.5],[30.7,-8.2],[29.4,-6.5]]},
+ {id:'oeganda',deel:'afrika',naam:'Oeganda',pts:[[29.6,-1],[34,-1],[34.4,3.5],[31,3.8],[29.7,1.4]]},
+ {id:'rwanda',deel:'afrika',naam:'Rwanda',pts:[[28.9,-1.1],[30.5,-1.1],[30.8,-2.4],[29,-2.8]]},
+ {id:'burundi',deel:'afrika',naam:'Burundi',pts:[[29,-2.8],[30.8,-2.4],[30.6,-4.4],[29.2,-4.4]]},
+ {id:'congo',deel:'afrika',naam:'DR Congo',pts:[[13,-5],[17,-8],[22,-11],[27,-11.5],[28.4,-13],[28.7,-4.6],[28.9,1.2],[27,5],[18,5],[16,-2]]},
+ {id:'jemen',deel:'afrika',naam:'Jemen',pts:[[42.6,12.6],[52.2,15.5],[52.2,17.8],[44.5,17.5],[42.8,13.8]]},
+ {id:'india',deel:'azie',naam:'India',pts:[[68.5,23.5],[72.8,19],[73.5,15],[77,8.1],[80.3,13],[84,18],[89,22],[88,26],[80,28],[74,31],[70,27]]},
+ {id:'vietnam',deel:'azie',naam:'Vietnam',pts:[[102.2,22.3],[105.8,23.3],[108,21],[109.5,15],[109.3,11],[106.5,9.5],[104.9,10.5],[107,16],[105,20]]},
+ {id:'sumatra',deel:'azie',naam:'Sumatra',pts:[[95.2,5.5],[97.5,5.2],[106,-5.5],[105,-6.2],[100.5,-2.5],[95.9,2.5]]},
+ {id:'java',deel:'azie',naam:'Java',pts:[[105.5,-5.9],[114.5,-8],[114.4,-8.8],[106,-7.4]]},
+ {id:'sulawesi',deel:'azie',naam:'Sulawesi',pts:[[119,1.5],[120.5,1],[121,-2],[124.5,-1.8],[125,-5.5],[120.5,-5.6],[119.5,-3],[118.8,-1]]},
+ {id:'papoea',deel:'azie',naam:'Papoea-Nieuw-Guinea',pts:[[141,-2.7],[147,-6],[150,-10.5],[143,-9],[141,-6]]},
+];
+const BP_ACHTER=[
+ [[-168,66],[-140,70],[-95,70],[-80,62],[-64,47],[-70,42],[-75,35],[-81,25],[-97,26],[-104,19],[-106,23],[-117,32],[-125,40],[-125,49],[-135,58],[-160,60]],
+ [[-17,15],[0,16],[15,32],[32,31],[35,23],[43,12],[51,12],[42,-2],[40,-16],[35,-24],[25,-34],[18,-34],[12,-18],[9,4],[-8,4]],
+ [[-10,36],[3,52],[12,55],[30,60],[60,70],[100,75],[140,70],[135,55],[125,45],[122,31],[110,20],[100,10],[95,16],[92,22],[80,30],[70,35],[60,25],[52,30],[45,40],[36,36],[20,38],[10,37]],
+ [[113,-22],[122,-18],[130,-12],[142,-11],[147,-20],[153,-28],[150,-38],[140,-38],[130,-32],[115,-34]],
+];
+const BP_INFO={
+ elsalvador:{hoogte:'1100–1800 m',var:'Bourbon, Pacas, Pacamara',
+  bekend:'Het kleinste koffieland van Midden-Amerika, en het meest eigenzinnige. Waar de rest overstapte op nieuwe variëteiten hielden zij vast aan oude Bourbon, en hier werd Pacamara gekweekt — een reuzenboon die op cuppingtafels alles overstemt.',
+  smaak:['karamel','rode appel','cacao','sinaasappel'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Apaneca-Ilamatepec',h:'1200–1800 m',ll:[-89.85,13.83],v:'Bourbon, Pacamara',t:'De vulkaanketen in het westen, het hoogste en bekendste gebied. Zoet en rond, met karamel en rode appel.',s:['karamel','rode appel','amandel']},
+   {n:'Chalatenango',h:'1200–1600 m',ll:[-89,13.95],v:'Bourbon, Pacas',t:'Het noorden, tegen Honduras aan. Iets helderder en fruitiger, met citrus en steenfruit.',s:['sinaasappel','perzik','honing']},
+   {n:'Tecapa-Chinameca',h:'1100–1500 m',ll:[-88.5,13.5],v:'Bourbon, Pacamara',t:'De oostelijke vulkanen, warm en vruchtbaar. Voller en chocoladiger, met een zachte afdronk.',s:['cacao','pruim','noot']}]},
+ jamaica:{hoogte:'900–1700 m',var:'Typica (Jamaica Blue Mountain)',
+  bekend:'Blue Mountain: een van de duurste en meest vervalste namen in koffie. Echt gecertificeerd komt in houten vaten en heeft een zeldzaam zachte, gebalanceerde kop — weinig zuur, veel zoet, geen scherpe randen.',
+  smaak:['melkchocolade','noot','honing','zachte citrus'],proc:['washed'],
+  streken:[
+   {n:'Blue Mountain',h:'900–1700 m',ll:[-76.6,18.05],v:'Typica',t:'De oostelijke bergen boven Kingston, waar de mist bijna elke dag hangt. Traag rijpen, en daardoor die beroemde zachtheid: chocolade, noot en een heel milde zuurgraad.',s:['melkchocolade','hazelnoot','honing']},
+   {n:'High Mountain',h:'500–900 m',ll:[-77.3,18.15],v:'Typica',t:'Lager en westelijker, buiten het beschermde gebied. Dezelfde stijl maar steviger van body, en een stuk betaalbaarder.',s:['cacao','karamel','noot']}]},
+ dominicaans:{hoogte:'800–1600 m',var:'Typica, Caturra, Catuai',
+  bekend:'Koffie sinds de achttiende eeuw, maar bijna alles wordt op het eiland zelf opgedronken — daardoor kom je het buiten de Cariben weinig tegen. Zacht, zoet en nootachtig, met een lage zuurgraad.',
+  smaak:['cacao','noot','karamel','rijp fruit'],proc:['washed','natural'],
+  streken:[
+   {n:'Barahona',h:'800–1400 m',ll:[-71.1,18.25],v:'Typica',t:'Het zuidwesten, het hoogst en het bekendst. Voller en complexer dan de rest van het eiland, met cacao en rood fruit.',s:['cacao','rood fruit','karamel']},
+   {n:'Jarabacoa',h:'900–1600 m',ll:[-70.63,19.12],v:'Caturra, Typica',t:'In de Cordillera Central, koel en groen. Zoet en zacht, met noot en een lichte citrus.',s:['hazelnoot','honing','citrus']},
+   {n:'Ocoa',h:'800–1300 m',ll:[-70.5,18.55],v:'Typica, Catuai',t:'Kleine boeren in de bergen boven de zuidkust. Rond en mild, een makkelijke alledaagse kop.',s:['melkchocolade','amandel','appel']}]},
+ hawai:{hoogte:'150–900 m',var:'Kona Typica, Caturra, Geisha',
+  bekend:'Het enige koffiegebied van de Verenigde Staten, en een uitzondering op alle regels: hier groeit koffie láág, op jonge vulkanische grond met een wolkendek dat elke middag als vanzelf opkomt. Duur, want alles wordt met de hand geplukt tegen Amerikaans loon.',
+  smaak:['macadamia','melkchocolade','bruine suiker','zachte citrus'],proc:['washed','natural'],
+  streken:[
+   {n:'Kona',h:'150–800 m',ll:[-155.9,19.6],v:'Kona Typica',t:'De westhelling van de Hualalai en Mauna Loa, een strook van dertig kilometer. Zacht en zoet, met macadamia en melkchocolade — bijna geen scherpte.',s:['macadamia','melkchocolade','bruine suiker']},
+   {n:'Ka\'u',h:'500–900 m',ll:[-155.6,19.1],v:'Typica, Caturra',t:'Het zuiden, ooit suikerriet en nu koffie. Iets levendiger dan Kona, met meer fruit en citrus.',s:['sinaasappel','honing','cacao']}]},
+ malawi:{hoogte:'1200–2000 m',var:'Geisha, Catimor, Agaro, Mundo Novo',
+  bekend:'Klein en zacht, met een verrassing: Malawi was een van de eerste landen buiten Panama waar Geisha commercieel geplant werd. De rest is mild en thee-achtig, met een fijne body.',
+  smaak:['zwarte thee','citroen','honing','amandel'],proc:['washed','natural'],
+  streken:[
+   {n:'Misuku Hills',h:'1700–2000 m',ll:[33.6,-9.9],v:'Geisha, Agaro',t:'Het uiterste noorden, tegen Tanzania aan en het hoogst van het land. Helder en bloemig, met citroen en zwarte thee.',s:['citroen','zwarte thee','jasmijn']},
+   {n:'Viphya-noord',h:'1200–1700 m',ll:[33.8,-11.8],v:'Catimor, Geisha',t:'Het beboste plateau in het midden. Zachter en zoeter, met honing en steenfruit.',s:['honing','perzik','amandel']},
+   {n:'Thyolo-Mulanje',h:'900–1300 m',ll:[35,-15.9],v:'Mundo Novo, Catimor',t:'Het zuiden, rond de Mulanje-berg, waar ook de thee groeit. Voller en nootachtiger.',s:['noot','cacao','zwarte thee']}]},
+ zambia:{hoogte:'1200–1700 m',var:'Bourbon, Catimor, Java',
+  bekend:'Grote landgoederen in het afgelegen noorden, dicht bij het Tanganyikameer. Lang nauwelijks te krijgen door de afstand tot een haven, maar wat eruit komt is schoon, zoet en verrassend fruitig.',
+  smaak:['rood fruit','bruine suiker','citrus','cacao'],proc:['washed','natural'],
+  streken:[
+   {n:'Kasama',h:'1300–1700 m',ll:[31.2,-10.2],v:'Bourbon, Java',t:'Het hart van de Zambiaanse koffie, op het noordelijke plateau. Zoet en helder, met rood fruit en bruine suiker.',s:['rood fruit','bruine suiker','sinaasappel']},
+   {n:'Isoka',h:'1400–1700 m',ll:[32.6,-10.1],v:'Bourbon, Catimor',t:'Tegen de Tanzaniaanse grens, iets hoger en koeler. Steviger van zuur, met citrus en cacao.',s:['citrus','cacao','pruim']}]},
+ zimbabwe:{hoogte:'1000–1700 m',var:'Catimor, SL28, Caturra',
+  bekend:'De koffie kwam bijna helemaal tot stilstand na de landhervormingen, en wordt sinds een paar jaar met kleine boeren weer opgebouwd. Wie hem vindt, krijgt een kop met stevig zuur en veel karakter.',
+  smaak:['zwarte bes','sinaasappel','cacao','bruine suiker'],proc:['washed'],
+  streken:[
+   {n:'Chipinge',h:'1100–1700 m',ll:[32.6,-20.2],v:'SL28, Catimor',t:'De oostelijke hooglanden tegen Mozambique aan, met veel regen. Het bekendste van Zimbabwe: fel zuur, zwarte bes en een volle body.',s:['zwarte bes','sinaasappel','bruine suiker']},
+   {n:'Honde Valley',h:'1000–1500 m',ll:[32.8,-18.6],v:'Catimor, Caturra',t:'Noordelijker, in de schaduw van de Nyanga-bergen. Zachter en zoeter, met cacao en steenfruit.',s:['cacao','perzik','honing']}]},
+ kameroen:{hoogte:'1000–2000 m',var:'Java, Typica, Bourbon, robusta',
+  bekend:'Arabica op de vulkanische hooglanden in het westen, robusta in het zuiden. Lang alleen bulk, maar de laatste jaren komen er coöperaties op die hun lots apart houden — en die zijn de moeite waard.',
+  smaak:['cacao','specerij','rood fruit','noot'],proc:['washed','natural'],
+  streken:[
+   {n:'Bamboutos',h:'1400–2000 m',ll:[10.2,5.6],v:'Java, Typica',t:'Het westelijke hoogland, op oude vulkaangrond. Vol en zoet, met cacao en rood fruit.',s:['cacao','rood fruit','karamel']},
+   {n:'Mount Cameroon',h:'1000–1500 m',ll:[9.3,4.3],v:'Typica, Bourbon',t:'Aan de voet van de actieve vulkaan, waar het het natst is van heel Afrika. Kruidig en vol, met een zachte zuurgraad.',s:['specerij','noot','pruim']},
+   {n:'Boyo (Noordwest)',h:'1500–2000 m',ll:[10.3,6.2],v:'Java, Bourbon',t:'De hoogste percelen van het land, bij Belo en Fundong. Helderder en fruitiger dan de rest van Kameroen.',s:['citrus','rood fruit','honing']}]},
+ ivoorkust:{hoogte:'300–700 m',var:'robusta (Kouilou), Arabusta',
+  bekend:'Ooit de grootste robusta-producent ter wereld en nog altijd een zwaargewicht. Niet het land voor een heldere filterkop, maar zonder Ivoorkust zou de helft van de espressoblends anders smaken.',
+  smaak:['donkere chocolade','hout','tabak','noot'],proc:['natural','washed'],
+  streken:[
+   {n:'Man',h:'400–700 m',ll:[-7.55,7.4],v:'robusta',t:'De westelijke bergen, het hoogste stukje van het land. Hier zit de meeste smaak: minder hout, meer cacao.',s:['cacao','noot','specerij']},
+   {n:'Daloa',h:'250–450 m',ll:[-6.45,6.87],v:'robusta',t:'Het centrale bosgebied, de grootste productiestreek. Zwaar en vol, met tabak en donkere chocolade.',s:['tabak','donkere chocolade','hout']},
+   {n:'Abengourou',h:'200–400 m',ll:[-3.5,6.7],v:'robusta, Arabusta',t:'Het oosten, tegen Ghana aan. Iets zachter, en waar geëxperimenteerd wordt met betere verwerking.',s:['noot','cacao','gedroogd fruit']}]},
+ yunnan:{hoogte:'1000–1900 m',var:'Catimor, Typica, Bourbon, Geisha',
+  bekend:'In dertig jaar van niets naar het grootste koffiegebied van Azië na Vietnam. Lang alleen volume voor de grote ketens, maar sinds kort komen er echt goede washed en natural lots uit — vaak nog een koopje, omdat de naam nog moet landen.',
+  smaak:['bruine suiker','zwarte thee','pruim','noot'],proc:['washed','natural','honey'],
+  streken:[
+   {n:'Pu\'er',h:'1000–1600 m',ll:[100.97,22.82],v:'Catimor, Typica',t:'De grootste streek, ook bekend van de thee. Zoet en rond, met bruine suiker en gedroogd fruit.',s:['bruine suiker','pruim','noot']},
+   {n:'Baoshan',h:'1200–1900 m',ll:[99.17,25.11],v:'Bourbon, Typica',t:'Het noorden, hoger en koeler, met de oudste aanplant van China. De helderste kop van Yunnan: zwarte thee en citrus.',s:['zwarte thee','citrus','honing']},
+   {n:'Dehong',h:'1000–1500 m',ll:[98.58,24.44],v:'Catimor, Geisha',t:'Tegen Myanmar aan, warm en nat. Voller en fruitiger, en waar de meeste experimenten gebeuren.',s:['rood fruit','cacao','karamel']},
+   {n:'Lincang',h:'1100–1700 m',ll:[100.09,23.88],v:'Catimor',t:'Tussen Pu\'er en Baoshan in, met steile percelen. Nootachtig en zacht, met een lange zoete afdronk.',s:['amandel','melkchocolade','honing']}]},
+ thailand:{hoogte:'800–1600 m',var:'Catimor, Typica, Bourbon, Geisha',
+  bekend:'Koffie kwam hier als vervanging voor papaver, in een koninklijk project om de opiumteelt te stoppen. Dat is gelukt: de noordelijke bergen leveren nu heldere, zoete arabica, en Doi Chaang is een naam op zich geworden.',
+  smaak:['honing','sinaasappel','cacao','jasmijn'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Doi Chaang',h:'1200–1600 m',ll:[99.6,19.6],v:'Catimor, Typica',t:'Een dorp in Chiang Rai dat zijn eigen merk werd, met de boeren als mede-eigenaar. Zoet en gebalanceerd, met honing en sinaasappel.',s:['honing','sinaasappel','cacao']},
+   {n:'Chiang Mai',h:'1000–1600 m',ll:[98.99,18.79],v:'Typica, Bourbon',t:'De bergen rond Doi Inthanon, het hoogste punt van Thailand. Helderder en bloemiger, met jasmijn en citrus.',s:['jasmijn','citroen','honing']},
+   {n:'Nan',h:'900–1400 m',ll:[100.77,18.78],v:'Catimor, Geisha',t:'Het oosten, tegen Laos aan en pas net in beeld. Fruitig en zacht, met veel natural en honey.',s:['perzik','rood fruit','karamel']}]},
+ laos:{hoogte:'1000–1350 m',var:'Typica, Bourbon, Catimor, robusta',
+  bekend:'Bijna alles komt van één plek: het Bolaven-plateau, een oude vulkaankrater in het zuiden waar de Fransen de koffie brachten. Rijke rode grond, koele nachten, en een zoete kop met een volle body.',
+  smaak:['cacao','karamel','gedroogd fruit','noot'],proc:['washed','natural','honey'],
+  streken:[
+   {n:'Bolaven-plateau',h:'1000–1350 m',ll:[106.3,15.1],v:'Typica, Bourbon, Catimor',t:'De krater zelf, rond Paksong. Diepe vulkanische grond en veel regen. Zoet en vol, met cacao en gedroogd fruit — en steeds meer mooie naturals.',s:['cacao','gedroogd fruit','karamel']},
+   {n:'Xieng Khouang',h:'1000–1300 m',ll:[103.4,19.4],v:'Typica, Catimor',t:'Het noordelijke hoogland, klein en jong. Helderder en lichter van body dan het zuiden.',s:['citrus','honing','amandel']}]},
+ myanmar:{hoogte:'1000–1600 m',var:'S795, Catuai, Caturra, Java',
+  bekend:'Pas sinds een jaar of tien op de specialty-kaart, en het ging hard: kleine boeren in de Shan-heuvels leerden in korte tijd washed en natural verwerken. Bloemig, zoet en helder — verrassend dicht bij Ethiopië.',
+  smaak:['jasmijn','sinaasappel','honing','zwarte thee'],proc:['washed','natural','honey'],
+  streken:[
+   {n:'Ywangan (Shan)',h:'1200–1600 m',ll:[96.5,21.2],v:'S795, Catuai',t:'Kalksteenheuvels op grote hoogte, met koele nachten. Het bloemigste van Myanmar: jasmijn, sinaasappel en een lange zoete afdronk.',s:['jasmijn','sinaasappel','honing']},
+   {n:'Pyin Oo Lwin',h:'1000–1300 m',ll:[96.5,22.03],v:'Caturra, Catuai',t:'Een oude Britse bergplaats bij Mandalay, waar de eerste plantages stonden. Ronder en nootachtiger.',s:['amandel','cacao','karamel']},
+   {n:'Chin Hills',h:'1200–1600 m',ll:[93.6,22.6],v:'Java, S795',t:'Het afgelegen westen, tegen India aan. Klein, hoog en kruidig, met donker fruit.',s:['specerij','pruim','zwarte thee']}]},
+ filipijnen:{hoogte:'900–1800 m',var:'Typica, Bourbon, Excelsa, Liberica',
+  bekend:'Het enige land waar alle vier de commerciële koffiesoorten groeien — arabica, robusta, excelsa én liberica, hier barako genoemd. De arabica uit de Cordillera is zacht en zoet; barako is een smaak die je nergens anders vindt.',
+  smaak:['cacao','noot','specerij','gedroogd fruit'],proc:['washed','natural'],
+  streken:[
+   {n:'Benguet',h:'1000–1800 m',ll:[120.75,16.4],v:'Typica, Bourbon',t:'De Cordillera boven Baguio, het hoogste van het land. Zacht en zoet, met cacao en amandel.',s:['cacao','amandel','honing']},
+   {n:'Sagada',h:'1200–1600 m',ll:[120.9,17.08],v:'Typica',t:'Kleine terrassen in de bergen, in de schaduw van pijnbomen. Helderder en fruitiger, met citrus en steenfruit.',s:['citrus','perzik','bloemig']},
+   {n:'Mount Apo',h:'900–1400 m',ll:[125.27,6.99],v:'Typica, Bourbon',t:'Op Mindanao, aan de hoogste vulkaan van het land. Vol en kruidig, met gedroogd fruit.',s:['specerij','rozijn','cacao']}]},
+ timor:{hoogte:'1000–1800 m',var:'Hibrido de Timor, Typica, Bourbon',
+  bekend:'Een half eiland met een grote naam in de koffiewereld: hier ontstond spontaan de Hibrido de Timor, een kruising van arabica en robusta die tegen koffieroest kan. Bijna elke moderne variëteit heeft er iets van in zich. De koffie zelf groeit half wild in het bos.',
+  smaak:['cacao','specerij','gedroogd fruit','noot'],proc:['washed','natural'],
+  streken:[
+   {n:'Ermera',h:'1200–1700 m',ll:[125.4,-8.72],v:'Hibrido de Timor, Typica',t:'De grootste koffiestreek, in de bergen boven Dili. Half wild onder schaduwbomen, bijna altijd biologisch omdat er nooit iets bijgekomen is. Vol en kruidig.',s:['cacao','specerij','noot']},
+   {n:'Ainaro',h:'1300–1800 m',ll:[125.5,-8.99],v:'Typica, Bourbon',t:'Hoger en zuidelijker, tegen de bergrug aan. Helderder en zoeter, met gedroogd fruit en citrus.',s:['gedroogd fruit','citrus','honing']}]},
+ bali:{hoogte:'1200–1600 m',var:'Typica, Kartika, S795',
+  bekend:'Anders dan de rest van Indonesië: op Bali wordt vooral washed verwerkt, en de boeren werken in een subak abian — een traditioneel coöperatief systeem waarin ook koffie, sinaasappel en groente door elkaar staan. Dat proef je: schoon en zoet, met citrus.',
+  smaak:['sinaasappel','cacao','honing','noot'],proc:['washed','natural','honey'],
+  streken:[
+   {n:'Kintamani',h:'1200–1600 m',ll:[115.36,-8.24],v:'Typica, Kartika',t:'Op de helling van de Batur-vulkaan, tussen de sinaasappelbomen. Die staan er niet toevallig: de citrus zit ook in de kop. Schoon, zoet en licht van body.',s:['sinaasappel','honing','cacao']}]},
+ flores:{hoogte:'1200–1750 m',var:'Typica, S795, Juria',
+  bekend:'Een vulkanisch eiland ten oosten van Bali, met koffie die in kleine tuinen tussen de dorpen groeit. Voller dan Bali, schoner dan Sumatra — voor veel mensen de fijnste Indonesische koffie om mee te beginnen.',
+  smaak:['cacao','tabak','bruine suiker','specerij'],proc:['washed','wet hulling','natural'],
+  streken:[
+   {n:'Bajawa',h:'1200–1750 m',ll:[120.98,-8.7],v:'Typica, S795',t:'Het hoogland in het midden, op de flank van de Inerie-vulkaan. Zoet en vol, met cacao en bruine suiker, en net genoeg zuur om levendig te blijven.',s:['cacao','bruine suiker','sinaasappel']},
+   {n:'Manggarai',h:'1100–1500 m',ll:[120.4,-8.6],v:'Juria, Typica',t:'Het westen, rond Ruteng. Kruidiger en aardser, dichter bij de Sumatra-stijl.',s:['specerij','tabak','pruim']}]},
+ mexico:{hoogte:'900–1700 m',var:'Typica, Bourbon, Mundo Novo, Garnica',
+  bekend:'De grootste producent van biologische koffie ter wereld, bijna allemaal kleine boeren in coöperaties. Zacht en nootachtig, met een lichte body — vaak onderschat, en daardoor vriendelijk geprijsd.',
+  smaak:['amandel','melkchocolade','bruine suiker','appel'],proc:['washed','natural'],
+  streken:[
+   {n:'Chiapas',h:'1000–1700 m',ll:[-92.6,16.5],v:'Typica, Bourbon',t:'Tegen Guatemala aan, en dat proef je: het hoogste en helderste van Mexico, met citrus en cacao.',s:['citrus','cacao','amandel']},
+   {n:'Oaxaca',h:'900–1650 m',ll:[-96.7,16.9],v:'Typica, Garnica',t:'Droge bergen, veel schaduwteelt. Zacht en zoet, met noot en een lichte bloemigheid.',s:['hazelnoot','honing','bloemig']},
+   {n:'Veracruz',h:'800–1400 m',ll:[-97.6,18.9],v:'Bourbon, Mundo Novo',t:'De laagste en natste streek, dicht bij de Golf. Rond en mild, met chocolade en appel.',s:['melkchocolade','appel','karamel']}]},
+ nicaragua:{hoogte:'1000–1700 m',var:'Caturra, Bourbon, Maragogype, Pacamara',
+  bekend:'Het land van de reuzenbonen: Maragogype en Pacamara komen hiervandaan, met korrels twee keer zo groot als normaal. Zacht en zoet, met veel cacao.',
+  smaak:['cacao','sinaasappel','karamel','noot'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Jinotega',h:'1100–1700 m',ll:[-86,13.1],v:'Caturra, Bourbon',t:'De grootste en hoogste streek, koel en bewolkt. Zoet en gebalanceerd, met cacao en citrus.',s:['cacao','sinaasappel','karamel']},
+   {n:'Matagalpa',h:'1000–1500 m',ll:[-85.9,12.9],v:'Caturra, Maragogype',t:'Naast Jinotega, iets warmer. Voller en nootachtiger, met een zachte zuurgraad.',s:['noot','chocolade','honing']},
+   {n:'Nueva Segovia',h:'1100–1650 m',ll:[-86.4,13.4],v:'Pacamara, Caturra',t:'Tegen Honduras aan, waar de wedstrijdkoffies vandaan komen. Fruitiger en helderder dan de rest van het land.',s:['perzik','citrus','bloemig']}]},
+ panama:{hoogte:'1200–1900 m',var:'Geisha, Caturra, Typica, Catuai',
+  bekend:'Klein land, grote naam. Hier werd Geisha ontdekt: een variëteit die naar jasmijn en bergamot smaakt en op veilingen de hoogste prijzen ter wereld haalt. De rest van Panama is ook goed, en een stuk betaalbaarder.',
+  smaak:['jasmijn','bergamot','perzik','honing'],proc:['washed','natural','honey'],
+  streken:[
+   {n:'Boquete',h:'1200–1800 m',ll:[-82.44,8.78],v:'Geisha, Caturra',t:'Aan de voet van de Barú-vulkaan, met een mist die de kers langzaam laat rijpen. Hier komt de beroemdste Geisha vandaan: jasmijn, bergamot, bijna thee.',s:['jasmijn','bergamot','zwarte thee']},
+   {n:'Volcán–Candela',h:'1200–1700 m',ll:[-82.63,8.83],v:'Geisha, Typica',t:'De andere kant van dezelfde vulkaan, droger en zonniger. Steviger van body, met steenfruit.',s:['perzik','honing','karamel']},
+   {n:'Renacimiento',h:'1100–1500 m',ll:[-82.88,8.86],v:'Caturra, Catuai',t:'Het minst bekend en het meest betaalbaar. Zoet en rond, een goede kennismaking met Panama.',s:['cacao','sinaasappel','noot']}]},
+ ecuador:{hoogte:'1200–2000 m',var:'Typica, Bourbon, Sidra, Caturra',
+  bekend:'Klein maar eigenzinnig. Het enige land waar koffie op de evenaar én op grote hoogte groeit, en de bakermat van Sidra — een variëteit die je bijna nergens anders vindt.',
+  smaak:['bloemig','tropisch fruit','honing','citrus'],proc:['washed','natural','honey'],
+  streken:[
+   {n:'Loja',h:'1400–2000 m',ll:[-79.2,-4],v:'Typica, Bourbon',t:'Het zuiden, tegen Peru aan. Hoog en koel, met een helder zuur en veel bloemen.',s:['bloemig','citroen','honing']},
+   {n:'Pichincha',h:'1200–1900 m',ll:[-78.6,-0.2],v:'Sidra, Typica',t:'Pal op de evenaar, in de schaduw van de vulkanen. Hier komen de Sidra-lots vandaan: zoet, tropisch en heel aromatisch.',s:['tropisch fruit','jasmijn','perzik']},
+   {n:'Zamora-Chinchipe',h:'1200–1800 m',ll:[-78.9,-4.1],v:'Typica, Caturra',t:'Aan de rand van het Amazonegebied, nat en groen. Voller en fruitiger, met een zachte afdronk.',s:['rood fruit','cacao','honing']}]},
+ peru:{hoogte:'1200–1900 m',var:'Typica, Bourbon, Caturra, Catimor',
+  bekend:'Veel kleine boeren, veel biologisch en fairtrade. Lang vooral bulk, maar de laatste jaren komen er steeds meer heldere, zoete lots uit die je zo naast een Colombiaan kunt zetten.',
+  smaak:['noot','melkchocolade','sinaasappel','karamel'],proc:['washed','natural'],
+  streken:[
+   {n:'Cajamarca',h:'1500–1900 m',ll:[-78.5,-6.2],v:'Bourbon, Typica',t:'Het noorden, hoog en droog. De schoonste kop van Peru: citrus, bruine suiker en een nette body.',s:['sinaasappel','bruine suiker','amandel']},
+   {n:'Amazonas',h:'1400–1900 m',ll:[-77.9,-5.9],v:'Typica, Caturra',t:'Naast Cajamarca, natter en groener. Zachter zuur, meer cacao en gedroogd fruit.',s:['cacao','rozijn','noot']},
+   {n:'Cusco',h:'1200–1800 m',ll:[-72.5,-13],v:'Typica, Bourbon',t:'Diep in het zuiden, in de valleien onder Machu Picchu. Kruidig en vol, met een lange zoete afdronk.',s:['specerij','honing','walnoot']}]},
+ bolivia:{hoogte:'1400–1900 m',var:'Typica, Caturra, Java, Geisha',
+  bekend:'Klein en kwetsbaar: veel koffieland verdween naar andere gewassen. Wat er over is, is vaak bijzonder — delicaat, bloemig en zoet, met een fijne body.',
+  smaak:['bloemig','honing','rood fruit','amandel'],proc:['washed','natural'],
+  streken:[
+   {n:'Caranavi',h:'1400–1750 m',ll:[-67.57,-15.84],v:'Typica, Java',t:'De bekendste streek, in de Yungas-vallei. Steile hellingen, kleine percelen. Bloemig en zoet, met een heldere zuurgraad.',s:['bloemig','honing','perzik']},
+   {n:'Yungas',h:'1200–1700 m',ll:[-67.8,-16.3],v:'Typica, Caturra',t:'Het bredere gebied waar Caranavi in ligt, tussen de Andes en het Amazonegebied. Ronder en nootachtiger.',s:['amandel','cacao','sinaasappel']}]},
+ oeganda:{hoogte:'1200–2200 m',var:'SL14, SL28, Nyasaland, robusta',
+  bekend:'Na Ethiopië de grootste van Afrika, en het enige land waar robusta nog echt wild in het bos groeit. De arabica komt van de vulkanen: Mount Elgon en de Rwenzori.',
+  smaak:['zwarte bes','cacao','sinaasappel','gedroogd fruit'],proc:['washed','natural'],
+  streken:[
+   {n:'Mount Elgon (Sipi)',h:'1600–2200 m',ll:[34.05,1.33],v:'SL14, SL28, Nyasaland',t:'Op de vulkaanhelling bij de Sipi-watervallen. Het bekendste van Oeganda: zwarte bes en cacao, met een stevige body.',s:['zwarte bes','cacao','sinaasappel']},
+   {n:'Rwenzori',h:'1400–2000 m',ll:[30,0.4],v:'SL14, Bourbon',t:'De Maanbergen, aan de grens met Congo. Koeler en natter, met een zachtere zuurgraad en meer bloemen.',s:['bloemig','pruim','honing']},
+   {n:'West Nile',h:'1200–1600 m',ll:[31.2,3],v:'Nyasaland, robusta',t:'Het droge noordwesten. Vol en kruidig, en hier vind je de wilde robusta die nergens anders zo groeit.',s:['specerij','tabak','donkere chocolade']}]},
+ burundi:{hoogte:'1400–2000 m',var:'Red Bourbon, Jackson, Mibirizi',
+  bekend:'De kleine broer van Rwanda, met hetzelfde systeem van gezamenlijke wasstations en dezelfde heldere, bloemige stijl. Vaak nog een tikje zoeter en fruitiger.',
+  smaak:['rode bes','bloemig','zwarte thee','citroen'],proc:['washed','natural'],
+  streken:[
+   {n:'Kayanza',h:'1600–2000 m',ll:[29.63,-2.92],v:'Red Bourbon',t:'Het noorden, hoog en dichtbevolkt. De bekendste wasstations van het land staan hier. Helder, bloemig en zoet.',s:['rode bes','jasmijn','citroen']},
+   {n:'Ngozi',h:'1500–1900 m',ll:[29.83,-2.9],v:'Red Bourbon, Jackson',t:'Naast Kayanza, iets lager. Ronder en zoeter, met steenfruit en karamel.',s:['perzik','karamel','sinaasappel']},
+   {n:'Kirimiro',h:'1400–1800 m',ll:[29.9,-3.4],v:'Mibirizi, Bourbon',t:'Het centrale hoogland. Vol en kruidig, met een lange, zoete afdronk.',s:['specerij','honing','cacao']}]},
+ congo:{hoogte:'1400–2000 m',var:'Bourbon, Rumangabo, Blue Mountain',
+  bekend:'Aan het Kivumeer, tussen de vulkanen — op papier een van de beste plekken voor koffie ter wereld. Jarenlang onbereikbaar door conflict; nu bouwen coöperaties het weer op, en wat eruit komt is vol, zoet en verrassend fruitig.',
+  smaak:['rood fruit','cacao','sinaasappel','bruine suiker'],proc:['washed','natural'],
+  streken:[
+   {n:'Zuid-Kivu',h:'1500–2000 m',ll:[28.5,-2.8],v:'Bourbon, Rumangabo',t:'Aan de westoever van het Kivumeer, waar het water de temperatuur dempt. Zoet en vol, met rood fruit en cacao.',s:['rood fruit','cacao','bruine suiker']},
+   {n:'Noord-Kivu',h:'1400–1900 m',ll:[28.6,-1],v:'Bourbon, Blue Mountain',t:'In de schaduw van de Nyiragongo-vulkaan. Steviger van body, met citrus en een kruidige afdronk.',s:['sinaasappel','specerij','chocolade']},
+   {n:'Ituri',h:'1300–1800 m',ll:[28.7,1],v:'Bourbon, robusta',t:'Het noorden, tegen Oeganda aan. Jonger en minder bekend, met een zachte, nootachtige kop.',s:['noot','honing','cacao']}]},
+ jemen:{hoogte:'1500–2400 m',var:'Udaini, Dawairi, Tuffahi (oude landrassen)',
+  bekend:'Waar koffie voor het eerst verhandeld werd — de haven Mokha gaf de mokka zijn naam. Op terrassen in de bergen, met bijna geen water, dus altijd natural en gedroogd op het dak. Wild, kruidig en onvergelijkbaar.',
+  smaak:['gedroogd fruit','donkere chocolade','specerij','tabak'],proc:['natural'],
+  streken:[
+   {n:'Haraaz',h:'1800–2400 m',ll:[43.9,14.9],v:'Udaini, Dawairi',t:'Steile terrassen ten westen van Sanaa, tot boven de 2200 meter. Het meest verfijnde van Jemen: gedroogde vijg, kaneel en donkere chocolade.',s:['vijg','kaneel','donkere chocolade']},
+   {n:'Bura\'a',h:'1500–2100 m',ll:[44.6,15.6],v:'Tuffahi, Udaini',t:'Een groen bergmassief in een droog land, met eigen mist. Zoeter en fruitiger, richting rode wijn.',s:['rode wijn','rozijn','specerij']},
+   {n:'Yafa\'',h:'1600–2200 m',ll:[45.8,14.6],v:'Dawairi',t:'Het zuiden, afgelegen en klein. Aards en kruidig, met tabak en donker fruit.',s:['tabak','pruim','specerij']}]},
+ vietnam:{hoogte:'500–1600 m',var:'robusta, Catimor, Typica, Bourbon',
+  bekend:'De tweede grootste koffieproducent ter wereld, en veruit de grootste in robusta — die zit in bijna elke supermarktblend. Maar in de hooglanden rond Da Lat groeit inmiddels arabica die de moeite waard is, en boeren experimenteren volop met honey en natural.',
+  smaak:['donkere chocolade','noot','specerij','karamel'],proc:['natural','washed','honey'],
+  streken:[
+   {n:'Da Lat (Lam Dong)',h:'1300–1600 m',ll:[108.45,11.94],v:'Catimor, Bourbon, Typica',t:'Het hoogste van Vietnam, koel en fris. Hier komt de arabica vandaan die het land op de kaart zet: zoet, met cacao en steenfruit.',s:['cacao','perzik','karamel']},
+   {n:'Buon Ma Thuot',h:'500–800 m',ll:[108.05,12.67],v:'robusta',t:'De robusta-hoofdstad. Zwaar, bitterzoet en vol — de basis van het glas Vietnamese ijskoffie met gecondenseerde melk.',s:['donkere chocolade','noot','tabak']},
+   {n:'Son La',h:'1000–1400 m',ll:[104,21.3],v:'Catimor, Typica',t:'Het verre noorden, tegen Laos aan. Jong, klein en verrassend helder voor Vietnam.',s:['citrus','honing','amandel']}]},
+ java:{hoogte:'900–1600 m',var:'Typica, Ateng, S795',
+  bekend:'Waar "a cup of java" vandaan komt. De oude plantages op de Ijen liggen er nog, en anders dan op Sumatra wordt hier meestal gewoon washed verwerkt — dus schoner en rustiger, met dezelfde kruidige ondergrond.',
+  smaak:['specerij','cederhout','donkere chocolade','noot'],proc:['washed','wet hulling'],
+  streken:[
+   {n:'Ijen Plateau',h:'1000–1600 m',ll:[114.2,-8.06],v:'Typica, Ateng',t:'Oost-Java, op het vulkanische plateau met de zwavelmijn. De klassieke Java: kruidig, vol en laag in zuur, met cederhout.',s:['cederhout','specerij','chocolade']},
+   {n:'Preanger (West-Java)',h:'900–1400 m',ll:[107.6,-7],v:'Typica, S795',t:'De oudste koffiestreek van Indonesië, aangelegd in de koloniale tijd. Zoeter en ronder dan Oost-Java.',s:['bruine suiker','noot','pruim']}]},
+ papoea:{hoogte:'1300–1900 m',var:'Typica (Blue Mountain), Arusha, Bourbon',
+  bekend:'Bijna alles komt van kleine "garden"-boeren met een paar honderd struiken achter het huis. Weinig techniek, veel karakter: een wilde, tropische kop die je nergens anders zo tegenkomt.',
+  smaak:['tropisch fruit','cacao','specerij','gedroogd fruit'],proc:['washed','natural'],
+  streken:[
+   {n:'Eastern Highlands',h:'1400–1900 m',ll:[145.4,-6.08],v:'Typica, Arusha',t:'Rond Goroka, het hart van de Papoease koffie. Vol en fruitig, met cacao en een zachte zuurgraad.',s:['tropisch fruit','cacao','karamel']},
+   {n:'Western Highlands',h:'1500–1900 m',ll:[144.3,-5.85],v:'Typica (Blue Mountain)',t:'Rond Mount Hagen, iets hoger en koeler. Helderder en zoeter, met citrus en bloemen.',s:['citrus','bloemig','honing']},
+   {n:'Simbu',h:'1300–1900 m',ll:[145,-6.4],v:'Arusha, Bourbon',t:'De steilste valleien van het land, moeilijk bereikbaar. Kruidig en aards, met gedroogd fruit.',s:['specerij','rozijn','tabak']}]},
+ guatemala:{hoogte:'1300–2000 m',var:'Bourbon, Caturra, Catuai, Pache',
+  bekend:'Acht heel verschillende streken op een klein oppervlak. Van rokerig en vol tot bloemig en helder — Guatemala is eigenlijk acht landen in één.',
+  smaak:['cacao','sinaasappel','karamel','rook'],proc:['washed','honey'],
+  streken:[
+   {n:'Antigua',h:'1500–1700 m',ll:[-90.73,14.56],v:'Bourbon, Caturra',t:'Tussen drie vulkanen, in een dal dat de warmte vasthoudt. Vol en rond, met cacao en een lichte rokerigheid.',s:['cacao','toffee','rook']},
+   {n:'Huehuetenango',h:'1500–2000 m',ll:[-91.5,15.32],v:'Bourbon, Caturra',t:'Het hoogste van Guatemala, tegen Mexico aan. Droge wind uit Tehuantepec houdt de vorst weg, waardoor ze hier hoger kunnen planten dan waar dan ook. Fel en fruitig.',s:['sinaasappel','rode appel','honing']},
+   {n:'Atitlán',h:'1500–1700 m',ll:[-91.2,14.7],v:'Bourbon, Typica',t:'Aan het meer, op vulkanische grond die veel voedsel vasthoudt. Voller en zoeter, met een duidelijke bloemige neus.',s:['bloemig','citrus','chocolade']},
+   {n:'Cobán',h:'1300–1500 m',ll:[-90.37,15.47],v:'Caturra, Catuai',t:'Nat en bewolkt bijna het hele jaar. Drogen duurt lang, wat een zachtere zuurgraad geeft en een fruitig karakter.',s:['pruim','specerij','cacao']}]},
+ costarica:{hoogte:'1000–1900 m',var:'Caturra, Catuai, Villa Sarchi, Geisha',
+  bekend:'Het enige land dat bij wet alleen arabica toestaat. Veel boeren verwerken hun eigen oogst op een kleine micromill, en experimenteren daardoor volop met honey.',
+  smaak:['honing','sinaasappel','amandel','rode appel'],proc:['washed','honey'],
+  streken:[
+   {n:'Tarrazú',h:'1200–1900 m',ll:[-84,9.65],v:'Caturra, Catuai',t:'De bekendste streek, hoog en koel. Helder zuur met een duidelijke zoetheid — netjes en betrouwbaar.',s:['sinaasappel','honing','amandel']},
+   {n:'West Valley',h:'1000–1600 m',ll:[-84.4,10.05],v:'Villa Sarchi, Caturra',t:'Waar de meeste micromills staan, en waar honey het verst is doorgevoerd. Vaak zoeter en ronder dan Tarrazú.',s:['rode appel','karamel','abrikoos']},
+   {n:'Brunca',h:'800–1300 m',ll:[-83,8.8],v:'Caturra, Catuai',t:'Zuidelijk en lager, tegen Panama aan. Zachter zuur, meer chocolade — een makkelijke kop.',s:['cacao','noot','honing']}]},
+ honduras:{hoogte:'1100–1700 m',var:'Bourbon, Caturra, Catuai, Pacas',
+  bekend:'Lang alleen bekend als bulkland, inmiddels een van de spannendste van Midden-Amerika. Goede prijs-kwaliteit, en steeds meer boeren die hun eigen lot apart houden.',
+  smaak:['karamel','citrus','cacao','gedroogd fruit'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Marcala',h:'1300–1700 m',ll:[-88,14.15],v:'Bourbon, Pacas',t:'Hoog en droog, met een beschermde herkomstnaam. Zoet en helder, met citrus en karamel.',s:['citrus','karamel','honing']},
+   {n:'Santa Bárbara',h:'1200–1700 m',ll:[-88.24,14.92],v:'Bourbon, Parainema, Pacas',t:'De streek waar de wedstrijdkoffies vandaan komen. Uitgesproken fruitig — perzik, abrikoos, soms tropisch.',s:['perzik','abrikoos','bloemig']},
+   {n:'Copán',h:'1000–1500 m',ll:[-89.15,14.85],v:'Bourbon, Caturra',t:'Tegen Guatemala aan, op vulkanische grond. Voller en chocoladiger, met een zachte zuurgraad.',s:['cacao','pruim','noot']}]},
+ colombia:{hoogte:'1200–2000 m',var:'Caturra, Castillo, Colombia, Typica',
+  bekend:'Twee oogsten per jaar, dus vrijwel altijd verse koffie te krijgen. Evenwichtig: genoeg zuur om levendig te zijn, genoeg zoet om makkelijk weg te drinken.',
+  smaak:['karamel','rode appel','citrus','noot'],proc:['washed','honey','natural'],
+  streken:[
+   {n:'Huila',h:'1300–2000 m',ll:[-75.5,2.5],v:'Caturra, Castillo',t:'De bekendste, en niet voor niets. Hoog, zuidelijk, met een fruitig zuur dat naar rode appel en tropisch fruit trekt.',s:['rode appel','karamel','tropisch fruit']},
+   {n:'Nariño',h:'1600–2300 m',ll:[-77.3,1.2],v:'Caturra, Typica',t:'Vlak bij de evenaar maar heel hoog, dus koude nachten. De boon rijpt langzaam en wordt daardoor zoeter en complexer.',s:['limoen','bruine suiker','bloemig']},
+   {n:'Tolima',h:'1300–1900 m',ll:[-75.2,4],v:'Caturra, Castillo',t:'Lang moeilijk bereikbaar, nu een van de spannendste streken. Zoet en zacht, met een romige body.',s:['honing','sinaasappel','cacao']},
+   {n:'Antioquia',h:'1300–1800 m',ll:[-75.6,6.6],v:'Castillo, Colombia',t:'Rond Medellín, het hart van de oude koffiestreek. Klassiek en nootachtig — dit is de smaak die veel mensen "Colombiaans" noemen.',s:['noot','chocolade','karamel']}]},
+ brazilie:{hoogte:'800–1350 m',var:'Yellow Bourbon, Mundo Novo, Catuai, Icatú',
+  bekend:'Het grootste koffieland ter wereld, en de ruggengraat van bijna elke espressoblend. Laag zuur, veel zoet, veel body.',
+  smaak:['pinda','chocolade','karamel'],proc:['natural','pulped natural','washed'],
+  streken:[
+   {n:'Cerrado Mineiro',h:'900–1250 m',ll:[-46.5,-18.5],v:'Mundo Novo, Catuai',t:'Vlak en droog, met een scherp gescheiden regen- en droogseizoen. Daardoor rijpt alles tegelijk en kan er machinaal geplukt worden. Heel constant.',s:['chocolade','noot','karamel']},
+   {n:'Sul de Minas',h:'800–1350 m',ll:[-45.5,-21.5],v:'Yellow Bourbon, Catuai',t:'Heuvelachtig en iets koeler. Zoeter en ronder dan Cerrado, met meer fruit erin.',s:['karamel','sinaasappel','hazelnoot']},
+   {n:'Mogiana',h:'900–1300 m',ll:[-47,-21],v:'Mundo Novo, Yellow Bourbon',t:'Rode, ijzerrijke grond langs de rivier. Geeft een volle kop met een zachte zuurgraad — geliefd als basis voor espresso.',s:['cacao','rode vruchten','noot']},
+   {n:'Bahia',h:'700–1300 m',ll:[-41,-13],v:'Catuai, Icatú',t:'De nieuwkomer, met irrigatie en veel techniek. Schoner en helderder dan je van Brazilië verwacht.',s:['citrus','honing','amandel']}]},
+ ethiopie:{hoogte:'1500–2200 m',var:'heirloom (landrassen), 74110, 74112',
+  bekend:'De geboortegrond van arabica. Duizenden wilde variëteiten die nergens anders groeien — daarom smaakt Ethiopische koffie naar dingen die je bij andere landen niet tegenkomt.',
+  smaak:['jasmijn','bergamot','blauwe bes','zwarte thee'],proc:['washed','natural'],
+  streken:[
+   {n:'Yirgacheffe',h:'1750–2200 m',ll:[38.2,6.16],v:'heirloom, 74110',t:'De klassieker onder de lichte filterkoffies. Washed is hier jasmijn, citroen en thee; natural gaat richting blauwe bes.',s:['jasmijn','citroen','zwarte thee']},
+   {n:'Guji',h:'1800–2300 m',ll:[38.8,5.6],v:'heirloom, 74158',t:'Naast Sidamo, pas de laatste jaren apart verkocht. Vaak natural, en dan uitgesproken fruitig — aardbei, perzik, soms bijna wijnachtig.',s:['aardbei','perzik','cacaonib']},
+   {n:'Sidamo',h:'1500–2200 m',ll:[38.5,6.7],v:'heirloom',t:'Groot gebied met veel kleine boeren. Zoet en gebalanceerd, met bloemen en citrus. Een goed startpunt als Ethiopië nieuw voor je is.',s:['bloemig','citroen','honing']},
+   {n:'Harrar',h:'1400–2100 m',ll:[42.1,9.3],v:'heirloom (longberry)',t:'Droog oosten, waar altijd natural verwerkt wordt omdat er weinig water is. Zwaar fruit, bijna bosbes en rode wijn.',s:['bosbes','rode wijn','specerij']},
+   {n:'Jimma',h:'1400–2000 m',ll:[36.8,7.7],v:'heirloom',t:'Westelijk en groen, met veel bos. Vroeger vooral bulk, nu ook mooie lots met een zachte, kruidige zoetheid.',s:['kruidig','honing','citrus']}]},
+ kenia:{hoogte:'1400–2100 m',var:'SL28, SL34, Ruiru 11, Batian',
+  bekend:'Het scherpste zuur op de kaart. Vulkanische grond en een veilingsysteem dat kwaliteit beloont — daardoor is de lat hier hoog.',
+  smaak:['zwarte bes','grapefruit','tomaat','bruine suiker'],proc:['washed'],
+  streken:[
+   {n:'Nyeri',h:'1600–1900 m',ll:[36.95,-0.42],v:'SL28, SL34',t:'Aan de voet van Mount Kenya, op diepe rode grond. Het meest uitgesproken: zwarte bes, stevig zuur en veel body.',s:['zwarte bes','grapefruit','bruine suiker']},
+   {n:'Kirinyaga',h:'1500–1900 m',ll:[37.3,-0.5],v:'SL28, SL34, Ruiru 11',t:'Dezelfde hooglanden, maar ronder en zoeter. Als Nyeri je te fel is, begin je hier.',s:['tomaat-zoet','rode appel','karamel']},
+   {n:'Kiambu',h:'1400–1800 m',ll:[36.8,-1.1],v:'SL28, Batian',t:'Dicht bij Nairobi, met grotere landgoederen. Zachter en klassieker van smaak.',s:['pruim','cacao','citrus']},
+   {n:'Embu',h:'1300–1800 m',ll:[37.45,-0.53],v:'SL28, Ruiru 11',t:'Kleiner en minder bekend. Steeds vaker experimenteert men hier met natural — ongewoon voor Kenia, en verrassend goed.',s:['aardbei','rum','bruine suiker']}]},
+ tanzania:{hoogte:'1400–2000 m',var:'Bourbon, Kent, N39, Blue Mountain',
+  bekend:'Twee gezichten: het noorden bij de Kilimanjaro lijkt op Kenia, het zuiden is zachter en zoeter. Ook het land van de peaberry — één ronde boon in plaats van twee platte.',
+  smaak:['zwarte bes','citroen','cacao','gedroogde vijg'],proc:['washed','natural'],
+  streken:[
+   {n:'Kilimanjaro',h:'1400–1900 m',ll:[37.35,-3.07],v:'Bourbon, Kent',t:'Op de hellingen van de berg, op vulkanische grond. Fel en helder, het dichtst bij het Keniaanse profiel.',s:['zwarte bes','citroen','bruine suiker']},
+   {n:'Mbeya',h:'1400–2000 m',ll:[33,-8.9],v:'Bourbon, N39',t:'Het zuidelijke hoogland. Zachter en zoeter, met steenfruit en cacao — een toegankelijke kop.',s:['perzik','cacao','honing']},
+   {n:'Kigoma',h:'1200–1700 m',ll:[30,-4.9],v:'Bourbon',t:'Bij het Tanganyikameer, afgelegen en klein. Kruidig en vol, met gedroogd fruit.',s:['vijg','specerij','chocolade']}]},
+ rwanda:{hoogte:'1500–2000 m',var:'Red Bourbon, Jackson',
+  bekend:'Het land van de duizend heuvels, en van de wasstations: kleine boeren brengen hun kersen naar een gezamenlijk station, en dáár wordt de kwaliteit gemaakt.',
+  smaak:['rode bes','bloemig','sinaasappel','zwarte thee'],proc:['washed','natural'],
+  streken:[
+   {n:'Nyamasheke',h:'1500–2000 m',ll:[29.15,-2.35],v:'Red Bourbon',t:'Aan het Kivumeer, waar het water de temperatuur dempt. Bloemig en delicaat, met rode bessen.',s:['rode bes','bloemig','zwarte thee']},
+   {n:'Huye',h:'1600–2000 m',ll:[29.74,-2.6],v:'Red Bourbon, Jackson',t:'In het zuiden, op grote hoogte. Steviger en zoeter, met sinaasappel en karamel.',s:['sinaasappel','karamel','pruim']},
+   {n:'Rulindo',h:'1500–1900 m',ll:[30,-1.75],v:'Red Bourbon',t:'Noordelijk en heuvelachtig. Schoon en helder, met een lange zoete afdronk.',s:['citroen','honing','bloemig']}]},
+ sumatra:{hoogte:'1100–1600 m',var:'Ateng, Tim Tim, Gayo 1 & 2',
+  bekend:'Aards, zwaar en laag in zuur. Dat komt niet van de boon maar van het proces: wet hulling geeft Sumatra zijn eigen handtekening.',
+  smaak:['cederhout','tabak','donkere chocolade','specerij'],proc:['wet hulling','washed'],
+  streken:[
+   {n:'Gayo (Aceh)',h:'1100–1600 m',ll:[96.8,4.6],v:'Gayo 1 & 2, Ateng',t:'Het noordelijkste puntje, rond het Tawarmeer. Iets schoner dan de rest van Sumatra, met kruiden en donker fruit.',s:['specerij','pruim','cacao']},
+   {n:'Lintong',h:'1100–1500 m',ll:[98.9,2.3],v:'Ateng, Tim Tim',t:'Bij het Tobameer. De klassieke Sumatra: dik, aards, cederhout en tabak. Weinig zuur, veel body.',s:['cederhout','tabak','aarde']}]},
+ sulawesi:{hoogte:'1400–1900 m',var:'S795, Typica',
+  bekend:'Schoner en helderder dan Sumatra, terwijl het dezelfde eilandenrij is. Een goede eerste stap in Indonesische koffie.',
+  smaak:['specerij','donkere chocolade','noot'],proc:['wet hulling','washed'],
+  streken:[
+   {n:'Toraja',h:'1400–1900 m',ll:[119.9,-3],v:'S795, Typica',t:'Hoog in de bergen van het binnenland. Vol en zacht, met kaneel en donkere chocolade, en net iets meer zuur dan Sumatra.',s:['kaneel','chocolade','walnoot']}]},
+ india:{hoogte:'900–1600 m',var:'S795, Kent, Selection 9, Cauvery',
+  bekend:'Koffie die in de schaduw van peper- en kardemomstruiken groeit — en dat proef je. Weinig zuur, veel kruiden en body. Ook de thuisbasis van monsooned malabar, waar de bonen expres vochtig worden van de moesson.',
+  smaak:['zwarte peper','cacao','kardemom','noot'],proc:['washed','natural'],
+  streken:[
+   {n:'Chikmagalur',h:'1000–1500 m',ll:[75.77,13.32],v:'S795, Kent',t:'Waar de Indiase koffie begon. Vol en kruidig, met cacao en een zachte zuurgraad.',s:['cacao','specerij','noot']},
+   {n:'Coorg (Kodagu)',h:'900–1300 m',ll:[75.8,12.4],v:'S795, Selection 9',t:'De grootste streek, tussen peper en sinaasappelbomen. Zwaar en zoet, met een lange afdronk.',s:['zwarte peper','karamel','sinaasappel']},
+   {n:'Araku',h:'900–1300 m',ll:[82.87,18.33],v:'S795, Cauvery',t:'Ver naar het noordoosten, een jong project met kleine boeren. Verrassend helder en bloemig voor India.',s:['bloemig','honing','citrus']}]},
+};
+const BP_REK=1.9;
+const bpX=lon=>lon, bpY=lat=>-lat*BP_REK;
+const BP_LAND=Object.fromEntries(BP_LANDEN.map(l=>[l.id,l]));
+
+/* ---------- de 119 streken, plat ---------- */
+const STREEK = {};
+Object.keys(BP_INFO).forEach(land => {
+  const inf = BP_INFO[land], L = BP_LAND[land];
+  if (!L) return;
+  (inf.streken || []).forEach((st, i) => {
+    STREEK[land + ':' + i] = {land, i, naam: st.n, landnaam: L.naam,
+      h: st.h || inf.hoogte, s: st.s || []};
+  });
+});
+
+/* ---------- wat de app al van je weet (in het echt uit je logboek) ---------- */
+const IK = {
+  plank: ['Apaneca-Ilamatepec (El Salvador)', 'Yirgacheffe (Ethiopië)'],
+  gehad: ['elsalvador', 'ethiopie', 'brazilie', 'colombia'],
+  hoogst: ['bloemig', 'fris fruit'],
+  methode: 'filter',
+};
+
+/* ---------- de ingeblikte antwoorden ----------
+   Precies de vorm die de echte functie teruggeeft: soort, zin, streken met een
+   eigen reden, eventueel uitleg, en een paar vervolgvragen. */
+const ANTWOORDEN = [
+  {v: 'Welke boon is gelijkwaardig aan mijn oude El Salvador?',
+   bij: 'vergelijken — hij kijkt op je eigen plank',
+   a: {soort: 'kaart',
+       zin: 'Je <b>Apaneca-Ilamatepec</b> was zoet en rond: karamel, rode appel, amandel, ' +
+            'gewassen, rond 1500 m. Dit zijn de drie die daar het dichtst bij liggen — en ' +
+            'bewust geen El Salvador.',
+       streken: [
+         ['honduras:0', 'zelfde hoogte, zelfde gewassen zoetheid: citrus, karamel, honing'],
+         ['costarica:1', 'rode appel en karamel als in je oude zak; honey maakt hem iets ronder'],
+         ['colombia:0', 'dezelfde kant op, met wat meer fruit erbij als je een stap wilt zetten']],
+       vervolg: ['en welke daarvan is het minst zuur?', 'zet dit om in vijf stappen']}},
+
+  {v: 'Wat is natural eigenlijk, en proef ik dat?',
+   bij: 'een vraag — uitleg met de kaart erbij',
+   a: {soort: 'uitleg',
+       zin: 'Natural betekent dat de kers met vrucht en al om de boon heen droogt.',
+       uitleg: ['Bij <b>washed</b> spoelt het vruchtvlees er meteen af: je proeft de streek zelf, ' +
+                'schoon en rechtlijnig. Bij <b>natural</b> ligt de hele kers wekenlang te drogen ' +
+                'en trekken die suikers de boon in.',
+                'In de kop merk je dat als meer body, meer zoet, en fruit dat richting wijn of ' +
+                'bessen gaat. Het zuur wordt er niet minder van, maar wel minder scherp omlijnd. ' +
+                'Het is ook het risicovolste proces: gaat het drogen mis, dan smaakt het gegist.',
+                'Op de zak staat het bij het proces. Staat er niets, dan is het meestal washed.'],
+       streken: [
+         ['ethiopie:3', 'het schoolvoorbeeld: bosbes en rode wijn, allemaal droog gedroogd'],
+         ['brazilie:0', 'hier is bijna alles natural, maar dan chocolade en noot in plaats van fruit']],
+       vervolg: ['laat me alleen washed zien', 'en wat is honey dan?']}},
+
+  {v: 'Mijn Kenia smaakt zuur en dun. Wat doe ik fout?',
+   bij: 'geen streekvraag — hij zoekt in je eigen brews',
+   a: {soort: 'tekst',
+       zin: 'Waarschijnlijk niets aan de boon — Kenia hóórt fel te zijn. <b>Dun</b> erbij wijst ' +
+            'op onderextractie, niet op de zak.',
+       uitleg: ['Je laatste drie V60’s met deze zak liepen in 2:35 tot 2:45 op 18 g. Dat is ' +
+                'snel voor Kenia; je haalt het zoet er niet uit en dan blijft het zuur alleen over.',
+                'Maal een stap fijner tot je rond 3:00 tot 3:15 uitkomt, en giet de bloom met wat ' +
+                'meer water zodat het bed echt nat is. Blijft het dun, ga dan van 1:16 naar 1:15.'],
+       streken: [],
+       vervolg: ['zet dit om in een dial in', 'laat Kenia zien op de kaart']}},
+
+  {v: 'Iets fruitigs onder de 15 euro, voor filter',
+   bij: 'half te beantwoorden — en dat zegt hij ook',
+   a: {soort: 'kaart',
+       zin: 'De prijs weet ik niet: de app kent geen winkels of voorraad. Wat ik wél kan is ' +
+            'fruitig én goed op filter, uit gebieden die breed geteeld worden — daar zit je ' +
+            'zelden in de dure hoek.',
+       streken: [
+         ['ethiopie:2', 'bloemig en citroen, en veel breder te krijgen dan Yirgacheffe'],
+         ['colombia:1', 'limoen en bloemig op grote hoogte, het hele jaar door te vinden'],
+         ['honduras:1', 'perzik en abrikoos; Honduras is zelden een prijzige zak']],
+       vervolg: ['alleen wat ik nog nooit had', 'zet dit om in vijf stappen']}},
+
+  {v: 'Wat kan ik proberen dat ik nog nooit had?',
+   bij: 'de kaart als antwoord — hij weet waar je al zat',
+   a: {soort: 'kaart',
+       zin: 'Op je plank stonden El Salvador, Ethiopië, Brazilië en Colombia. Deze drie liggen ' +
+            'in een hoek waar je nog nooit was, en sluiten toch aan bij waar jij het hoogst ' +
+            'scoorde: <b>bloemig</b> en <b>fris fruit</b>.',
+       streken: [
+         ['burundi:0', 'rode bes en jasmijn op 1600 m — dichtbij je Ethiopië, ander werelddeelhoekje'],
+         ['malawi:0', 'citroen en zwarte thee; bijna niemand heeft dit ooit gehad'],
+         ['panama:0', 'jasmijn en bergamot, de bloemigste kant van Midden-Amerika']],
+       vervolg: ['welke is het makkelijkst te vinden?', 'zet dit om in vijf stappen']}},
+];
+
+/* ---------- stand ---------- */
+let vraag = '', antwoord = null, bezig = false, jsonOpen = false;
+
+function esc(t) { return String(t == null ? '' : t)
+  .replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function kaartHTML(landen, stil, bij) {
+  const set = new Set(landen || []);
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  BP_LANDEN.forEach(l => l.pts.forEach(p => {
+    const x = bpX(p[0]), y = bpY(p[1]);
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }));
+  const m = 8, vb = [x0 - m, y0 - m, (x1 - x0) + m * 2, (y1 - y0) + m * 2];
+  let sv = '<svg viewBox="' + vb.join(' ') + '" preserveAspectRatio="xMidYMid meet">';
+  sv += '<rect class="band" x="-200" y="' + bpY(23.5) + '" width="500" height="' +
+        (bpY(-23.5) - bpY(23.5)) + '"/>';
+  BP_ACHTER.forEach(pl => {
+    sv += '<path class="achter" d="M' + pl.map(q => bpX(q[0]).toFixed(1) + ' ' +
+          bpY(q[1]).toFixed(1)).join('L') + 'Z"/>';
+  });
+  BP_LANDEN.forEach(l => {
+    sv += '<path class="land' + (set.has(l.id) ? ' raak' : '') + '" d="M' +
+          l.pts.map(p => bpX(p[0]).toFixed(1) + ' ' + bpY(p[1]).toFixed(1)).join('L') + 'Z"/>';
+  });
+  return '<div class="kaartbak' + (stil ? ' stil' : '') + '">' + sv + '</svg>' +
+         (bij ? '<div class="bij">' + esc(bij) + '</div>' : '') + '</div>';
+}
+
+function balkHTML() {
+  return '<div class="zoekbak"><input id="veld" value="' + esc(vraag) + '" ' +
+    'placeholder="vraag maar iets — of typ een smaakwoord" oninput="tik(this.value)">' +
+    (vraag ? '<button class="wis" onclick="wis()">×</button>' : '') + '</div>' +
+    '<div class="aivlag"><button class="aan">AI on</button>' +
+    'typ een hele vraag en druk op enter</div>';
+}
+
+function jsonHTML(a) {
+  const d = {soort: a.soort, zin: '…', streken: a.streken.map(x => ({streek: x[0], waarom: '…'})),
+             vervolg: a.vervolg};
+  return '<button class="uitklapper" onclick="jsonOpen=!jsonOpen;teken()">' +
+    'wat de AI teruggaf<span>' + (jsonOpen ? '▾' : '▸') + '</span></button>' +
+    (jsonOpen ? '<div class="json">' + esc(JSON.stringify(d, null, 1)) + '</div>' : '');
+}
+
+function antwoordHTML(a) {
+  const landen = [...new Set(a.streken.map(x => x[0].split(':')[0]))];
+  const label = {kaart: 'de kaart als antwoord', uitleg: 'uitleg, met de kaart erbij',
+                 tekst: 'gewoon antwoord'}[a.soort];
+  /* geen streken? dan ook geen kaart -- een leeg wereldbeeld van 150 px zegt niets */
+  let h = landen.length
+    ? kaartHTML(landen, false,
+        landen.length === 1 ? '1 land aangewezen' : landen.length + ' landen aangewezen')
+    : '';
+  h += '<span class="soort">' + esc(label) + '</span>';
+  h += '<div class="zin">' + a.zin + '</div>';
+  if (a.uitleg) h += '<div class="uitleg">' + a.uitleg.map(p => '<p>' + p + '</p>').join('') + '</div>';
+  a.streken.forEach(([sleutel, waarom]) => {
+    const st = STREEK[sleutel];
+    if (!st) return;
+    h += '<button class="res" onclick="naar()"><span class="n">' + esc(st.naam) + '</span>' +
+      '<span class="l">' + esc(st.landnaam) + ' · ' + esc(st.h) + '</span>' +
+      '<span class="s">' + esc(st.s.join(' · ')) + '</span>' +
+      '<span class="m">' + esc(waarom) + '</span></button>';
+  });
+  h += '<div class="vervolg">' + a.vervolg.map(v =>
+    '<button onclick="stel(' + JSON.stringify(v).replace(/"/g, '&quot;') + ')">' +
+    esc(v) + '</button>').join('') + '</div>';
+  h += jsonHTML(a);
+  h += '<button class="doe leeg" onclick="wis()">iets anders vragen</button>';
+  return h;
+}
+
+function teken() {
+  const el = document.getElementById('scherm');
+  let h = '<div class="kop"><div class="t">Coffee finder</div>' +
+          '<button class="terug" onclick="wis()">‹ beans</button></div>' + balkHTML();
+
+  if (bezig) {
+    h += '<div class="bezig">de AI leest je vraag…</div>';
+  } else if (antwoord) {
+    h += antwoordHTML(antwoord);
+  } else {
+    h += kaartHTML([], true, 'tik op een werelddeel om in te zoomen');
+    h += '<div class="vragenkop">probeer eens</div>';
+    ANTWOORDEN.forEach((x, i) => {
+      h += '<button class="vraagknop" onclick="stel(null,' + i + ')">' + esc(x.v) +
+           '<em>' + esc(x.bij) + '</em></button>';
+    });
+    h += '<div class="voet">Dit is een opzet, geen werkende AI: een artifact mag niet naar ' +
+         'buiten praten, dus deze vijf antwoorden staan van tevoren klaar. In de app schrijft ' +
+         'Claude ze zelf, met de 119 streken en jouw eigen plank als menu.</div>';
+  }
+  el.innerHTML = h;
+}
+
+function stel(tekst, i) {
+  if (i == null) { i = ANTWOORDEN.findIndex(x => x.v === tekst); }
+  vraag = ANTWOORDEN[i > -1 ? i : 0].v;
+  bezig = true; antwoord = null; jsonOpen = false; teken();
+  setTimeout(() => {
+    bezig = false; antwoord = ANTWOORDEN[i > -1 ? i : 0].a; teken();
+    document.getElementById('scherm').scrollTop = 0;
+  }, 850);
+}
+function tik(v) { vraag = v; }
+function wis() { vraag = ''; antwoord = null; bezig = false; teken(); }
+function naar() { /* in de app zoomt dit de kaart naar die streek */ }
+
+teken();
+</script>
