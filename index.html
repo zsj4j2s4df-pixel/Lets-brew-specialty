@@ -328,6 +328,64 @@
     vector-effect:non-scaling-stroke;cursor:pointer;}
   .bp-kaart .stip.wens{fill:var(--paper);stroke-dasharray:3 2;}
   .bp-kaart .land.wens{fill:var(--card-2);stroke-dasharray:5 3;}
+  /* ---- coffee finder: zoekbalk en smaakfilter ---- */
+  .fd-zoek{position:relative;margin-bottom:8px;}
+  .fd-zoek input{width:100%;background:var(--card);border:2px solid var(--line);
+    border-radius:17px;filter:url(#wobble);padding:12px 42px 12px 14px;
+    font:inherit;font-size:17px;color:var(--ink);}
+  .fd-zoek input::placeholder{color:var(--ink-soft);opacity:.75;}
+  .fd-zoek .wis{position:absolute;right:8px;top:7px;background:none;border:none;
+    font:inherit;font-size:21px;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
+  .fd-ai{display:flex;align-items:center;gap:8px;margin:0 2px 9px;font-size:15px;
+    color:var(--ink-soft);}
+  .fd-ai button{background:var(--card);border:2px solid var(--line);border-radius:20px;
+    filter:url(#wobble);padding:3px 12px;font:inherit;font-size:15px;color:var(--ink);
+    cursor:pointer;}
+  .fd-ai button.aan{background:var(--accent-soft);color:var(--cream);border-color:var(--accent-soft);}
+  .fd-tips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px;}
+  .fd-tips button{background:none;border:1.5px solid var(--line);border-radius:14px;
+    padding:4px 10px;font:inherit;font-size:15px;color:var(--ink-soft);cursor:pointer;}
+  .fd-uit{margin-bottom:12px;}
+  .fd-res{display:block;width:100%;text-align:left;background:var(--card);
+    border:2px solid var(--line);border-radius:18px;filter:url(#wobble);
+    padding:10px 14px;margin-bottom:8px;font:inherit;color:var(--ink);cursor:pointer;}
+  .fd-res .n{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:22px;
+    line-height:1.1;}
+  .fd-res .l{display:block;color:var(--ink-soft);font-size:15px;}
+  .fd-res .s{display:block;font-size:15px;margin-top:3px;}
+  .fd-res .m{display:block;margin-top:5px;font-size:14px;color:var(--ink-soft);
+    border-top:1.5px dashed var(--line);padding-top:4px;}
+  .fd-teller{text-align:center;font-size:14px;color:var(--ink-soft);margin:-6px 0 13px;}
+  .fd-res.top1{border-width:3px;border-color:var(--ink);background:var(--card-2);}
+  .fd-res .nr{float:right;font-family:'Caveat',cursive;font-weight:700;font-size:24px;
+    color:var(--accent-soft);}
+  .fd-niks{text-align:center;color:var(--ink-soft);font-size:16px;padding:14px 8px;}
+  .fd-balk{display:flex;gap:5px;margin:2px 0 13px;}
+  .fd-balk i{flex:1;height:5px;border-radius:3px;background:var(--line);opacity:.45;}
+  .fd-balk i.op{background:var(--accent-soft);opacity:1;}
+  .fd-vraag{font-family:'Caveat',cursive;font-weight:700;font-size:28px;line-height:1.1;
+    margin-bottom:3px;}
+  .fd-waarom{color:var(--ink-soft);font-size:16px;margin-bottom:12px;}
+  .fd-keus{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
+    background:var(--card);border:2px solid var(--line);border-radius:18px;
+    filter:url(#wobble);padding:11px 14px;font:inherit;color:var(--ink);cursor:pointer;
+    margin-bottom:8px;}
+  .fd-keus.sel{background:var(--card-2);border-color:var(--ink);}
+  .fd-keus .vk{flex:none;width:20px;font-size:18px;color:var(--accent-soft);}
+  .fd-keus b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:21px;
+    line-height:1.15;}
+  .fd-keus em{font-style:normal;color:var(--ink-soft);font-size:15px;line-height:1.3;}
+  .fd-fam{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px;}
+  .fd-fam button{background:var(--card);border:2px solid var(--line);border-radius:16px;
+    filter:url(#wobble);padding:7px 13px;font:inherit;font-size:16px;color:var(--ink);
+    cursor:pointer;text-align:left;}
+  .fd-fam button.sel{background:var(--accent-soft);border-color:var(--accent-soft);
+    color:var(--cream);}
+  .fd-fam button em{display:block;font-style:normal;font-size:13px;opacity:.75;}
+  .fd-vooraf{background:var(--card);border:2px dashed var(--line);border-radius:16px;
+    padding:9px 13px;margin-bottom:11px;color:var(--ink-soft);font-size:15px;}
+  .fd-vooraf b{color:var(--ink);}
+  .bp-kaart .land.raak{fill:var(--accent-soft);stroke:var(--ink);opacity:.95;}
   .bp-mijn{border-top:1.5px dashed var(--line);margin-top:13px;padding-top:3px;}
   .bp-mijnkaart{display:block;width:100%;text-align:left;background:var(--card-2);
     border:2px solid var(--line);border-radius:16px;padding:9px 12px;margin-bottom:7px;
@@ -1723,6 +1781,12 @@
     </div>
   </div>
   <!-- EEN ZAK OP JE LIJSTJE -->
+  <!-- COFFEE FINDER: het smaakfilter in vijf stappen -->
+  <div id="page-finder" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="statusbar"><span>▤ ◗ ▮</span></div>
+    <div class="screen" id="fd-screen"></div>
+  </div>
+
   <!-- BONENKEUZEHULP: van het land tot in je kop -->
   <div id="page-beanpick" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column;">
     <div class="statusbar"><span>▤ ◗ ▮</span></div>
@@ -2703,9 +2767,9 @@ function beanById(id){return state.beans.find(b=>b.id===id);}
 function methodById(id){return state.methods.find(m=>m.id===id)||{name:id,glyph:'☕',tint:'--card'};}
 
 /* ---------------- navigatie ---------------- */
-const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick'];
+const pages=['welcome','home','choosebean','form','dialin','recipe','detail','brews','methods','beans','beanform','learn','learn-barista','learn-filter','learn-academy','learn-latte','profile','cupping','gallery','beanpick','finder'];
 const navMap={home:'home',choosebean:'brews',form:'home',dialin:'home',recipe:'brews',detail:'home',
-  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'beans',profile:'profile'};
+  cupping:'beans',gallery:'learn',brews:'brews',methods:'home',beans:'beans',beanform:'beans',learn:'learn','learn-barista':'learn','learn-filter':'learn','learn-academy':'learn','learn-latte':'learn',beanpick:'beans',finder:'beans',profile:'profile'};
 let navHistory=[];
 let currentPage='welcome';
 function go(p,isBack){
@@ -2749,6 +2813,7 @@ function go(p,isBack){
   if(p==='learn-academy')renderLesson('academy-content',LESSONS.academy);
   if(p==='learn-latte')renderLatte();
   if(p==='beanpick')bpTeken();
+  if(p==='finder')fdTeken();
   if(p==='profile')renderProfile();
   applyAIVisibility();
   document.querySelector('.phone').scrollTop=0;
@@ -7743,7 +7808,8 @@ function bpKaartHTML(){
     else if(gewenst.has(l.id))kl+=' wens';
     const klik=(bpNiv==='wereld')?("bpKies('deel','"+l.deel+"')")
               :(l.deel===bpDeel&&BP_INFO[l.id]?("bpKies('land','"+l.id+"')"):'');
-    s+='<path class="'+kl+'" d="'+bpPad(l)+'"'+(klik?(' onclick="'+klik+'"'):'')+'></path>';
+    s+='<path class="'+kl+'" data-land="'+l.id+'" d="'+bpPad(l)+'"'+
+       (klik?(' onclick="'+klik+'"'):'')+'></path>';
   });
   if(bpNiv==='wereld'){
     [['amerika',-62,27],['afrika',22,27],['azie',112,27]].forEach(function(a){
@@ -7826,6 +7892,7 @@ function bpWereld(){
     '<div class="bp-let">Koffie groeit alleen in de band rond de evenaar: warm genoeg, en nooit '+
     'vorst. Elk stuk van die gordel smaakt anders. Kies waar je nieuwsgierig naar bent, zoom door '+
     'naar een land en een streek, en je eindigt met een lijstje waarmee je de goede zak herkent.</div>'+
+    fdBalkHTML()+
     '<div class="bp-doos">'+bpKaartHTML()+bpPlek()+
     '<div class="bp-tip">tik op een werelddeel om in te zoomen</div></div>'+
     '<div class="bp-legenda"><span><i></i> nog niet gehad</span>'+
@@ -8357,6 +8424,352 @@ function bpNaarPlek(r,klacht){
   bpNaarStreek=(bpStreek!=null);
   go('beanpick');
 }
+/* ================= coffee finder: zoeken en filteren =================
+   Twee manieren om bij een streek te komen zonder eerst de kaart af te struinen:
+   je typt wat je zoekt, of je laat vijf vragen de 119 streken uitdunnen.
+
+   De hele kern is dat de 57 losse smaakwoorden uit BP_INFO op zeven families
+   gelegd worden. Zonder die ordening kun je niet filteren -- 'cacao',
+   'chocolade' en 'donkere chocolade' zijn voor een zoeker hetzelfde woord.  */
+const FD_FAM={
+  fris:  {n:'fresh fruit',   u:'citrus en rood fruit',
+          w:['sinaasappel','citroen','citrus','limoen','grapefruit','bergamot','zachte citrus',
+             'rood fruit','rode bes','zwarte bes','aardbei','bosbes','blauwe bes','rode vruchten',
+             'rode appel','appel','tomaat','tomaat-zoet']},
+  steen: {n:'stone fruit',   u:'perzik, pruim, tropisch',
+          w:['perzik','abrikoos','pruim','tropisch fruit','rijp fruit','vijg','gedroogd fruit',
+             'gedroogde vijg','rozijn','rode wijn','rum']},
+  bloem: {n:'floral & tea',  u:'jasmijn, zwarte thee',
+          w:['bloemig','jasmijn','zwarte thee']},
+  zoet:  {n:'sweet & caramel',u:'honing, bruine suiker',
+          w:['honing','bruine suiker','karamel','toffee']},
+  choc:  {n:'chocolate',     u:'cacao tot donkere chocolade',
+          w:['cacao','chocolade','donkere chocolade','melkchocolade','cacaonib']},
+  noot:  {n:'nutty',         u:'amandel, hazelnoot',
+          w:['noot','amandel','hazelnoot','macadamia','walnoot','pinda']},
+  kruid: {n:'spice & wood',  u:'specerij, tabak, rook',
+          w:['specerij','kaneel','kardemom','zwarte peper','kruidig','tabak','cederhout',
+             'hout','rook','aarde']},
+};
+const FD_FAMS=Object.keys(FD_FAM);
+const FD_WOORD={};
+FD_FAMS.forEach(f=>FD_FAM[f].w.forEach(w=>{FD_WOORD[w]=f;}));
+/* het smaakwiel waarmee je je brews tagt, in dezelfde zeven families */
+const FD_WIEL={berry:'fris',citrus:'fris',floral:'bloem',honey:'zoet',caramel:'zoet',
+  choc:'choc',nutty:'noot',spice:'kruid'};
+/* hoe levendig smaakt een familie? 0 = rond en zacht, 1 = fel en helder */
+const FD_ZUUR={fris:1,bloem:.9,steen:.6,zoet:.35,noot:.2,choc:.15,kruid:.3};
+
+/* de 119 streken één keer plat, met hun families en een schatting van hoe
+   levendig ze smaken (uit de smaakwoorden en de teelthoogte) */
+let FD_STREKEN=null;
+function fdStreken(){
+  if(FD_STREKEN)return FD_STREKEN;
+  FD_STREKEN=[];
+  Object.keys(BP_INFO).forEach(land=>{
+    const inf=BP_INFO[land], L=BP_LAND[land]; if(!L)return;
+    (inf.streken||[]).forEach((st,i)=>{
+      const fams=[...new Set((st.s||[]).map(w=>FD_WOORD[w]).filter(Boolean))];
+      const h=(String(st.h||inf.hoogte).match(/\d+/g)||['1500']).map(Number);
+      const hoog=h.reduce((a,b)=>a+b,0)/h.length;
+      let zuur=fams.length?fams.reduce((a,f)=>a+FD_ZUUR[f],0)/fams.length:.5;
+      zuur=Math.max(0,Math.min(1,zuur*.7+((hoog-900)/1400)*.3));
+      FD_STREKEN.push({land,i,naam:st.n,landnaam:L.naam,deel:L.deel,h:st.h||inf.hoogte,
+        hoog,t:st.t,s:st.s||[],v:st.v||inf.var,proc:inf.proc,fams,zuur});
+    });
+  });
+  return FD_STREKEN;
+}
+
+/* ---- wat de app al van je weet, zodat de eerste twee vragen ingevuld staan ---- */
+function fdMijnMethode(){
+  const aan=(state.methods||[]).filter(m=>m.on);
+  const esp=aan.some(m=>methodFamily(m)==='espresso');
+  const fil=aan.some(m=>methodFamily(m)==='filter');
+  return (esp&&fil)?'allebei':esp?'espresso':'filter';
+}
+function fdMijnSmaken(){
+  const tel={};
+  (state.brews||[]).forEach(b=>{
+    if(b.score!=null&&+b.score<7.5)return;
+    (b.tags||[]).forEach(t=>{
+      let f=FD_WIEL[t];
+      if(!f)for(const k in WHEEL_SUB)if((WHEEL_SUB[k]||[]).includes(t))f=FD_WIEL[k];
+      if(f)tel[f]=(tel[f]||0)+1;
+    });
+  });
+  const uit=Object.keys(tel).sort((a,b)=>tel[b]-tel[a]).slice(0,2);
+  return uit.length?uit:['fris','zoet'];
+}
+
+/* ---- de stand van de zoeker ---- */
+let fdQ='', fdAI=false, fdStap=0, fdBezig=false, fdAIuit='';
+let fdA={meth:null,fams:null,zuur:null,proc:'egaal',avontuur:null};
+function fdReset(){
+  fdStap=0; fdAIuit='';
+  fdA={meth:fdMijnMethode(),fams:fdMijnSmaken(),zuur:null,proc:'egaal',avontuur:null};
+}
+
+const FD_STAPPEN=[
+  {k:'meth',v:'Where will you brew it?',
+   w:'Dit bepaalt welke branding en welke streken passen — daar begint elke goede koffiezoeker mee.',
+   o:[{v:'filter',n:'filter',u:'V60, Chemex, Aeropress — helderheid en zuur mogen er zijn'},
+      {v:'espresso',n:'espresso',u:'onder druk: je wilt body, zoet en weinig scherpte'},
+      {v:'allebei',n:'both',u:'een zak die op allebei werkt'}]},
+  {k:'fams',v:'Which way, taste-wise?',
+   w:'Kies er één tot drie. Dit is de grofste zeef: hij haalt er meteen driekwart uit.',
+   soort:'fam'},
+  {k:'zuur',v:'How bright may it be?',
+   w:'Niet hoe donker de branding is, maar wat je in de kop proeft. Hoogte en proces bepalen dit het meest.',
+   o:[{v:'zacht',n:'soft and round',u:'laag zuur, veel body — chocolade en noot'},
+      {v:'balans',n:'balanced',u:'zoet met een randje, het veilige midden'},
+      {v:'fel',n:'lively and bright',u:'citrus die prikt, thee-achtig, hoog gegroeid'}]},
+  {k:'proc',v:'What sounds interesting?',
+   w:'Het proces op de boerderij verandert de smaak meer dan welk land ook.',
+   o:[{v:'washed',n:'washed',u:'schoon en rechtlijnig — je proeft de streek zelf'},
+      {v:'natural',n:'natural',u:'de kers droogt om de boon: fruit, wijn, meer body'},
+      {v:'honey',n:'honey',u:'ertussenin — zoeter, zachter zuur'},
+      {v:'egaal',n:'no preference',u:'laat de smaak beslissen'}]},
+  {k:'avontuur',v:'How far from home?',
+   w:'De app weet welke landen al op je plank stonden.',
+   o:[{v:'vertrouwd',n:'keep it familiar',u:'een streek in een land dat je al kent'},
+      {v:'nieuw',n:'something new',u:'een land dat je nog niet had'},
+      {v:'verras',n:'surprise me',u:'een werelddeel waar je nog nooit zat'}]},
+];
+
+/* ---- de score. Elke regel is uit te leggen; wat dat niet is, telt niet mee ---- */
+function fdScore(st){
+  const r=[]; let p=0;
+  const raak=st.fams.filter(f=>(fdA.fams||[]).includes(f));
+  if((fdA.fams||[]).length){
+    p+=raak.length*3;
+    if(raak.length)r.push(raak.map(f=>FD_FAM[f].n).join(' en ')+' zit erin');
+  }
+  if(fdA.zuur){
+    const doel=fdA.zuur==='zacht'?.15:fdA.zuur==='balans'?.5:.85;
+    const af=Math.abs(st.zuur-doel); p+=(1-af)*3;
+    if(af<.18)r.push(fdA.zuur==='fel'?'hoog gegroeid en levendig'
+      :fdA.zuur==='zacht'?'rond, weinig zuur':'mooi in balans');
+  }
+  if(fdA.proc!=='egaal'){
+    if(st.proc.includes(fdA.proc)){p+=2;r.push(fdA.proc+' komt hier vandaan');}
+    else p-=2;
+  }
+  if(fdA.meth==='espresso')p+=(1-st.zuur)*2;
+  else if(fdA.meth==='filter')p+=st.zuur*2;
+  const had=bpGehad().has(st.land);
+  if(fdA.avontuur==='vertrouwd'){p+=had?2:-1;if(had)r.push('een land dat je al kent');}
+  if(fdA.avontuur==='nieuw'){p+=had?-2:2;if(!had)r.push('nog nooit op je plank gehad');}
+  if(fdA.avontuur==='verras'){
+    const delen=new Set([...bpGehad()].map(l=>(BP_LAND[l]||{}).deel));
+    p+=delen.has(st.deel)?-2:3;
+    if(!delen.has(st.deel))r.push('een werelddeel waar je nog nooit zat');
+  }
+  return {p,r};
+}
+function fdRang(){return fdStreken().map(st=>Object.assign({st},fdScore(st))).sort((a,b)=>b.p-a.p);}
+function fdOver(){
+  const f=fdA.fams||[];
+  if(!f.length)return fdStreken().length;
+  return fdStreken().filter(st=>st.fams.some(x=>f.includes(x))).length;
+}
+
+/* ---- zoeken zonder AI: alles wat de app al heeft staan ---- */
+function fdZoek(q){
+  const t=(q||'').toLowerCase().trim();
+  const hoogte=(t.match(/boven\s*(\d{3,4})|(\d{3,4})\s*m\+/)||[]).filter(Boolean)[1];
+  // woorden van één of twee letters slaan we over: een losse "m" zit in bijna elke
+  // beschrijving en maakt de uitslag waardeloos
+  const woorden=t.split(/[\s,]+/).filter(w=>w.length>2&&!/^\d+$/.test(w)&&w!=='boven');
+  if(!woorden.length&&!hoogte)return [];
+  return fdStreken().map(st=>{
+    let p=0; const r=[]; let alles=true;
+    woorden.forEach(w=>{
+      let q2=0;
+      if(st.landnaam.toLowerCase().includes(w)){q2+=5;r.push('land');}
+      if(st.naam.toLowerCase().includes(w)){q2+=6;r.push('streek');}
+      if(st.s.some(x=>x.toLowerCase().includes(w))){q2+=4;r.push('smaak');}
+      const fam=FD_FAMS.find(f=>FD_FAM[f].n.toLowerCase().includes(w)||FD_FAM[f].u.includes(w));
+      if(fam&&st.fams.includes(fam)){q2+=4;r.push('smaakfamilie');}
+      if(st.proc.some(x=>x.includes(w))){q2+=3;r.push('proces');}
+      if((st.v||'').toLowerCase().includes(w)){q2+=3;r.push('variëteit');}
+      if(!q2&&st.t.toLowerCase().includes(w)){q2+=1;r.push('beschrijving');}
+      if(!q2)alles=false;
+      p+=q2;
+    });
+    // elk woord moet ergens raken: "natural ethiopië" is een eis, geen wens
+    if(!alles)return {st,p:0,r:[]};
+    if(hoogte){ if(st.hoog>=+hoogte){p+=3;r.push('hoogte');} else return {st,p:0,r:[]}; }
+    return {st,p,r:[...new Set(r)]};
+  }).filter(x=>x.p>0).sort((a,b)=>b.p-a.p);
+}
+
+/* ---- met AI: hij vult alleen de filters in. Het antwoord komt nog steeds uit
+   diezelfde 119 streken, niet uit het model. ---- */
+async function fdAIZoek(){
+  const t=fdQ.trim();
+  if(!t||!aiReady())return;
+  fdBezig=true; fdSchilder();
+  try{
+    const prompt='Iemand zoekt een zak specialty koffie en beschrijft wat hij wil: "'+t+'"\n'+
+      'Zet dat om in zoekwoorden voor een database van koffiestreken. Geef ALLEEN JSON terug, '+
+      'zonder uitleg: {"woorden":[],"fams":[],"zuur":"","meth":""}\n'+
+      'woorden = Nederlandse smaakwoorden, landnamen of processen uit de tekst.\n'+
+      'fams = nul tot drie van: '+FD_FAMS.join(', ')+'.\n'+
+      'zuur = "zacht", "balans" of "fel", of leeg.\n'+
+      'meth = "filter", "espresso" of leeg.';
+    const d=extractJSON(await callClaude([{role:'user',content:prompt}],400));
+    if(Array.isArray(d.fams)&&d.fams.length)fdA.fams=d.fams.filter(f=>FD_FAM[f]).slice(0,3);
+    if(d.zuur)fdA.zuur=d.zuur;
+    if(d.meth)fdA.meth=d.meth;
+    const w=(d.woorden||[]).filter(Boolean);
+    fdAIuit=[(fdA.fams||[]).map(f=>FD_FAM[f].n).join(' + '),d.zuur?(d.zuur+' zuur'):'',d.meth]
+      .filter(Boolean).join(', ');
+    if(w.length)fdQ=w.join(' ');
+  }catch(e){ fdAIuit='de AI kon er niets van maken — zoek gewoon op een woord'; }
+  fdBezig=false; fdSchilder();
+}
+
+/* ---- de zoekbalk op het wereldscherm ---- */
+function fdBalkHTML(){
+  if(!featOn('finder'))return '';
+  return '<div class="fd-zoek"><input id="fd-veld" value="'+esc(fdQ)+'" '+
+    'placeholder="'+(fdAI?'describe what you want…':'country, region, taste, process…')+'" '+
+    'oninput="fdTik(this.value)"'+(fdAI?' onkeydown="if(event.key===\'Enter\')fdAIZoek()"':'')+'>'+
+    (fdQ?'<button class="wis" onclick="fdTik(\'\')">×</button>':'')+'</div>'+
+    '<div class="fd-ai"><button class="'+(fdAI?'aan':'')+'" onclick="fdAIAan()">'+
+    (fdAI?'AI on':'AI off')+'</button>'+
+    (fdAI?'typ een hele zin en druk op enter':'zoekt in 119 streken, ook zonder internet')+'</div>'+
+    (fdQ?'':'<div class="fd-tips">'+['bloemig','natural ethiopië','SL28','boven 1800 m']
+      .map(t=>'<button onclick="fdTik(\''+t+'\')">'+t+'</button>').join('')+'</div>')+
+    '<div class="fd-uit" id="fd-uit">'+fdUitHTML()+'</div>'+
+    '<button class="bp-knop" style="width:100%;margin-bottom:14px" onclick="fdOpen()">'+
+    'find my bag — 5 steps ›</button>';
+}
+function fdUitHTML(){
+  if(fdBezig)return '<div class="fd-niks"><span class="spin"></span> de AI leest je zin…</div>';
+  if(!fdQ.trim())return fdAIuit?('<div class="fd-vooraf">'+esc(fdAIuit)+'</div>'):'';
+  const rij=fdZoek(fdQ);
+  const kop=fdAIuit?('<div class="fd-vooraf">De AI las: <b>'+esc(fdAIuit)+'</b>. '+
+    'De streken hieronder komen uit de app zelf.</div>'):'';
+  if(!rij.length)return kop+'<div class="fd-niks">Niets gevonden. Probeer een smaakwoord '+
+    'zoals <b>jasmijn</b> of <b>cacao</b>.</div>';
+  return kop+'<div class="fd-niks" style="padding:2px 0 8px">'+rij.length+' streken gevonden</div>'+
+    rij.slice(0,12).map(x=>
+      '<button class="fd-res" onclick="fdNaar(\''+x.st.land+'\','+x.st.i+')">'+
+      '<span class="n">'+esc(x.st.naam)+'</span>'+
+      '<span class="l">'+esc(x.st.landnaam)+' · '+esc(x.st.h)+'</span>'+
+      '<span class="s">'+esc(x.st.s.join(' · '))+'</span>'+
+      '<span class="m">raak op '+x.r.join(', ')+'</span></button>').join('');
+}
+/* alleen het resultaatvak en de kaartkleuren bijwerken -- het hele scherm
+   opnieuw tekenen zou de cursor uit het zoekveld gooien */
+function fdSchilder(){
+  const uit=document.getElementById('fd-uit');
+  if(uit)uit.innerHTML=fdUitHTML();
+  const raak=new Set(fdQ.trim()?fdZoek(fdQ).slice(0,14).map(x=>x.st.land):[]);
+  document.querySelectorAll('#bp-screen .bp-kaart path[data-land]').forEach(el=>{
+    el.classList.toggle('raak',raak.has(el.getAttribute('data-land')));
+  });
+}
+function fdTik(v){
+  fdQ=v; fdAIuit='';
+  const veld=document.getElementById('fd-veld');
+  if(veld&&veld.value!==v)veld.value=v;
+  fdSchilder();
+  // het kruisje en de tips verschijnen pas bij de volgende hele tekening
+  if(!v&&veld)bpTeken(true);
+}
+function fdAIAan(){
+  if(!fdAI&&!aiReady()){toast('zet AI aan onder profile');return;}
+  fdAI=!fdAI; bpTeken(true);
+}
+function fdNaar(land,i){
+  bpVoor=null; bpVanaf=bpVanaf||'beans';
+  bpDeel=BP_LAND[land].deel; bpLandId=land; bpNiv='land'; bpStreek=i; bpVarOpen=null;
+  bpView=bpLandView(land).slice(); bpNaarStreek=true;
+  bpTeken();
+}
+
+/* ---- het scherm met de vijf stappen ---- */
+function fdOpen(){fdReset();go('finder');}
+function fdTeken(){
+  const el=document.getElementById('fd-screen'); if(!el)return;
+  el.innerHTML=(fdStap<5)?fdStapHTML():fdTopHTML();
+  el.scrollTop=0;
+}
+function fdKaartje(landen,top){
+  const set=new Set(landen||[]), t=new Set(top||[]);
+  const v=BP_VIEWS.wereld;
+  let s='<svg class="bp-kaart" viewBox="'+v.join(' ')+'" preserveAspectRatio="xMidYMid meet">';
+  s+='<rect class="band" x="-200" y="'+bpY(23.5)+'" width="500" height="'+(bpY(-23.5)-bpY(23.5))+'"/>';
+  BP_ACHTER.forEach(pl=>{
+    s+='<path class="achter" d="M'+pl.map(q=>bpX(q[0]).toFixed(1)+' '+bpY(q[1]).toFixed(1)).join('L')+'Z"/>';
+  });
+  BP_VOLGORDE.forEach(l=>{
+    const kl='land'+(t.has(l.id)?' sel':set.has(l.id)?' raak':'');
+    s+='<path class="'+kl+'" d="'+bpPad(l)+'"></path>';
+  });
+  return '<div class="bp-doos">'+s+'</svg></div>';
+}
+function fdStapHTML(){
+  const S=FD_STAPPEN[fdStap];
+  const rij=fdRang(), raak=[...new Set(rij.slice(0,18).map(x=>x.st.land))];
+  let keuze='';
+  if(S.soort==='fam'){
+    keuze='<div class="fd-fam">'+FD_FAMS.map(f=>
+      '<button class="'+((fdA.fams||[]).includes(f)?'sel':'')+'" onclick="fdFam(\''+f+'\')">'+
+      FD_FAM[f].n+'<em>'+FD_FAM[f].u+'</em></button>').join('')+'</div>';
+  }else{
+    keuze=S.o.map(o=>'<button class="fd-keus'+(fdA[S.k]===o.v?' sel':'')+'" onclick="fdKies(\''+
+      S.k+'\',\''+o.v+'\')"><span class="vk">'+(fdA[S.k]===o.v?'✓':'○')+'</span>'+
+      '<span><b>'+o.n+'</b><em>'+o.u+'</em></span></button>').join('');
+  }
+  const voor=(fdStap===0)?'je zet meestal '+fdA.meth
+           :(fdStap===1&&(fdA.fams||[]).join()===fdMijnSmaken().join())
+             ?'hier scoorde jij het hoogst in je eigen brews':'';
+  return '<div class="bp-kop"><div class="t">Step '+(fdStap+1)+' of 5</div>'+
+    '<button class="bp-terug" onclick="'+(fdStap?'fdStap--;fdTeken()':'go(\'beanpick\')')+
+    '">‹ '+(fdStap?'back':'map')+'</button></div>'+
+    '<div class="fd-balk">'+FD_STAPPEN.map((_,i)=>
+      '<i class="'+(i<=fdStap?'op':'')+'"></i>').join('')+'</div>'+
+    fdKaartje(raak,[])+
+    '<div class="fd-teller">'+fdOver()+' of the 119 regions still fit</div>'+
+    '<div class="fd-vraag">'+S.v+'</div><div class="fd-waarom">'+S.w+'</div>'+
+    (voor?('<div class="fd-vooraf">alvast ingevuld: <b>'+esc(voor)+'</b> — verander gerust</div>'):'')+
+    keuze+
+    '<button class="bp-knop" style="width:100%;margin-top:6px" onclick="fdVerder()">'+
+    (fdStap===4?'show my top 3 ›':'next ›')+'</button>';
+}
+function fdTopHTML(){
+  const rij=fdRang().slice(0,3), landen=rij.map(x=>x.st.land);
+  return '<div class="bp-kop"><div class="t">Your top 3</div>'+
+    '<button class="bp-terug" onclick="fdStap=4;fdTeken()">‹ steps</button></div>'+
+    '<div class="bp-let">Uit 119 streken, op wat je net koos.</div>'+
+    fdKaartje(landen,landen)+
+    rij.map((x,i)=>'<div class="fd-res'+(i?'':' top1')+'"><span class="nr">'+(i+1)+'</span>'+
+      '<span class="n">'+esc(x.st.naam)+'</span>'+
+      '<span class="l">'+esc(x.st.landnaam)+' · '+esc(x.st.h)+'</span>'+
+      '<span class="s">'+esc(x.st.s.join(' · '))+'</span>'+
+      '<span class="m">'+esc(x.r.slice(0,3).join(' · ')||'past het dichtst bij je antwoorden')+
+      '</span><div class="wens-rij">'+
+      '<button class="lp sel" onclick="fdNaarStreek(\''+x.st.land+'\','+x.st.i+')">'+
+      'bekijk op de kaart →</button></div></div>').join('')+
+    '<button class="bp-knop leeg" style="width:100%;margin-top:6px" onclick="fdStap=1;fdTeken()">'+
+    'try something else</button>';
+}
+function fdNaarStreek(land,i){
+  if(fdA.proc!=='egaal'&&BP_INFO[land].proc.includes(fdA.proc))bpProc=fdA.proc;
+  fdNaar(land,i); go('beanpick');
+}
+function fdKies(k,v){fdA[k]=v;fdTeken();}
+function fdFam(f){
+  const l=fdA.fams||(fdA.fams=[]), i=l.indexOf(f);
+  if(i>=0)l.splice(i,1); else if(l.length<3)l.push(f);
+  fdTeken();
+}
+function fdVerder(){ if(fdStap<4)fdStap++; else fdStap=5; fdTeken(); }
+
 let bpNaarStreek=false;   // net binnengekomen bij een streek: schuif hem in beeld
 function bpTeken(behoudScroll){
   const el=document.getElementById('bp-screen'); if(!el)return;
@@ -8364,6 +8777,7 @@ function bpTeken(behoudScroll){
   el.innerHTML=(bpNiv==='wereld')?bpWereld():(bpNiv==='deel'?bpDeelScherm():bpLandScherm());
   el.scrollTop=y;
   bpVenster();
+  if(bpNiv==='wereld'&&fdQ.trim())fdSchilder();
   if(bpNaarStreek){
     bpNaarStreek=false;
     const op=el.querySelector('.bp-streek.op');
@@ -8520,6 +8934,7 @@ const FEATURES=[
   {id:'drawdown', n:'drawdown & bed', d:'log how long it drained and what the bed looked like', def:true, cat:'app'},
   {id:'filtercompass', n:'filter compass', d:'what you tasted, plotted — with one next change', def:true, cat:'app'},
   {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true, cat:'app'},
+  {id:'finder', n:'taste finder', d:'search the world map by taste, or let five questions narrow it to three regions', def:true, cat:'people'},
   {id:'beanpick', n:'bean chooser', d:'a drawn world map: from a coffee country down to a region, and what to look for on the bag', def:true, cat:'people'},
   {id:'wheelbig', n:'big flavour wheel', d:'tap a family and the wheel opens up — berry becomes blueberry, raspberry, cherry', def:false, cat:'app'},
   {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true, cat:'app'},
