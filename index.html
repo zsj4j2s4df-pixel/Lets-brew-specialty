@@ -358,6 +358,29 @@
   .fd-res .m{display:block;margin-top:5px;font-size:14px;color:var(--ink-soft);
     border-top:1.5px dashed var(--line);padding-top:4px;}
   .fd-teller{text-align:center;font-size:14px;color:var(--ink-soft);margin:-6px 0 13px;}
+  /* ---- het AI-antwoord: kaart, uitleg of gewoon tekst ---- */
+  .fd-soort{display:inline-block;background:var(--card-2);border:1.5px solid var(--line);
+    border-radius:12px;padding:2px 9px;font-size:13px;color:var(--ink-soft);margin-bottom:7px;}
+  .fd-zin{font-size:17px;line-height:1.45;margin-bottom:10px;}
+  .fd-lap{background:var(--card);border:2px dashed var(--line);border-radius:18px;
+    padding:11px 14px;margin-bottom:11px;font-size:16px;line-height:1.5;}
+  .fd-lap p{margin:0 0 8px;}
+  .fd-lap p:last-child{margin:0;}
+  /* een verwijzing naar ergens in de app: dezelfde streep als voorheen, maar aan te tikken */
+  .fd-link{background:none;border:none;padding:0;font:inherit;color:var(--ink);
+    border-bottom:2px solid var(--accent-soft);cursor:pointer;}
+  .fd-link:after{content:' ›';color:var(--accent-soft);}
+  .fd-verder{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 12px;}
+  .fd-verder button{background:none;border:1.5px solid var(--line);border-radius:15px;
+    padding:5px 11px;font:inherit;font-size:15px;color:var(--ink-soft);cursor:pointer;}
+  /* het balkje dat je terugbrengt naar je antwoord, boven de tabbalk */
+  .fd-pil{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:60;
+    display:flex;align-items:center;gap:4px;background:var(--accent-soft);color:var(--cream);
+    border:2px solid var(--ink);border-radius:20px;filter:url(#wobble);padding:7px 8px 7px 14px;
+    font-family:'Caveat',cursive;font-weight:700;font-size:20px;cursor:pointer;
+    white-space:nowrap;max-width:calc(100% - 40px);}
+  .fd-pil .weg{background:none;border:none;color:var(--cream);font:inherit;font-size:19px;
+    padding:0 6px;cursor:pointer;opacity:.8;}
   /* uitklapbare uitleg: standaard dicht, dus het scherm blijft leeg voor wie het al weet */
   .uitklapper{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
     background:none;border:none;padding:1px 2px 10px;font:inherit;font-size:16px;
@@ -2824,6 +2847,7 @@ function go(p,isBack){
   if(p==='finder')fdTeken();
   if(p==='profile')renderProfile();
   applyAIVisibility();
+  try{fdPil();}catch(e){}
   document.querySelector('.phone').scrollTop=0;
 }
 function goBack(){
@@ -7926,6 +7950,7 @@ function bpWereld(){
     '<div class="bp-legenda"><span><i></i> nog niet gehad</span>'+
     '<span><i class="had"></i> al eens gehad'+(gehad.size?(' ('+gehad.size+')'):'')+'</span>'+
     ((state.wishlist||[]).length?'<span><i class="wenskleur"></i> op je lijstje</span>':'')+'</div>'+
+    fdUitBlokHTML()+
     bpPlankBlok()+
     Object.keys(BP_DELEN).map(d=>
       '<button class="bp-kies" onclick="bpKies(\'deel\',\''+d+'\')">'+
@@ -8531,10 +8556,13 @@ function fdMijnSmaken(){
 }
 
 /* ---- de stand van de zoeker ---- */
-let fdQ='', fdAI=false, fdStap=0, fdBezig=false, fdAIuit='';
+let fdQ='', fdAI=false, fdStap=0, fdBezig=false;
+/* het laatste AI-antwoord blijft staan zolang je niets nieuws typt -- ook als je
+   ondertussen ergens anders in de app kijkt en terugkomt */
+let fdAntw=null, fdTerug=null;
 let fdA={meth:null,fams:null,zuur:null,proc:'egaal',avontuur:null};
 function fdReset(){
-  fdStap=0; fdAIuit='';
+  fdStap=0;
   fdA={meth:fdMijnMethode(),fams:fdMijnSmaken(),zuur:null,proc:'egaal',avontuur:null};
 }
 
@@ -8558,7 +8586,7 @@ const FD_STAPPEN=[
       {v:'natural',n:'natural',u:'de kers droogt om de boon: fruit, wijn, meer body'},
       {v:'honey',n:'honey',u:'ertussenin — zoeter, zachter zuur'},
       {v:'egaal',n:'no preference',u:'laat de smaak beslissen'}]},
-  {k:'avontuur',v:'How far from home?',
+  {k:'avontuur',v:'Familiar, or something new?',
    w:'Vertrouwd blijft bij landen die al eens op je plank stonden, nieuw zoekt er juist '+
      'buiten, en verras springt naar een werelddeel waar je nog nooit zat. De app kijkt '+
      'daarvoor naar je eigen bonen en brews — heb je er nog geen, dan telt deze vraag niet mee.',
@@ -8636,53 +8664,162 @@ function fdZoek(q){
 
 /* ---- met AI: hij vult alleen de filters in. Het antwoord komt nog steeds uit
    diezelfde 119 streken, niet uit het model. ---- */
+/* ---- waar een antwoord naartoe mag verwijzen ----
+   Alleen deze plekken. Verzint de AI een andere bestemming, dan valt de link eruit
+   en blijft de tekst gewoon staan. */
+const FD_DOELEN={
+  dialin:'dial in', form:'log a brew', brews:'your brews', beans:'your beans',
+  methods:'brew methods', recipe:'recipes', gallery:'pouring shapes', cupping:'cupping',
+  learn:'learn', 'learn-filter':'filter lesson', 'learn-barista':'barista lesson',
+  'learn-academy':'academy', 'learn-latte':'latte art', profile:'profile',
+  choosebean:'which bean', finder:'the five steps',
+};
+
+/* De 119 streken als menukaart voor de AI. Hij mag alleen kiezen wat hier staat,
+   en wat hij noemt controleren we daarna nog een keer tegen BP_INFO. */
+function fdMenu(){
+  return fdStreken().map(st=>st.land+':'+st.i+' | '+st.naam+' ('+st.landnaam+') | '+st.h+
+    ' | '+st.s.join(', ')+' | '+st.proc.join('/')).join('\n');
+}
+/* Wat de app al van je weet. Zonder dit kan hij "als mijn oude El Salvador" niet lezen. */
+function fdIk(){
+  const r=[];
+  const bonen=(state.beans||[]).slice(0,12).map(b=>{
+    const st=bpRegios(b).map(bpRegioTekst).join(' · ');
+    return (b.name||'?')+(st?(' — '+st):'')+(b.process?(' — '+b.process):'')+
+      (b.roastLevel?(' — '+b.roastLevel):'');
+  });
+  if(bonen.length)r.push('Op je plank: '+bonen.join(' | '));
+  const wens=(state.wishlist||[]).slice(0,8).map(w=>w.naam||w.name).filter(Boolean);
+  if(wens.length)r.push('Op je wenslijstje: '+wens.join(', '));
+  const brews=(state.brews||[]).slice(0,10).map(b=>{
+    const m=methodById(b.method);
+    return (m?m.name:'?')+' · '+(b.beans||'?')+' · '+(b.dose||'?')+' g · '+(b.time||'?')+
+      (b.temp?(' · '+b.temp+'°C'):'')+(b.score?(' · '+b.score+'/10'):'');
+  });
+  if(brews.length)r.push('Je laatste brews (nieuwste eerst): '+brews.join(' | '));
+  const had=[...bpGehad()].map(id=>BP_LAND[id]?BP_LAND[id].naam:id);
+  if(had.length)r.push('Landen die al eens op je plank stonden: '+had.join(', '));
+  return r.length?r.join('\n'):'De app is nog leeg: geen bonen, geen brews.';
+}
+
+/* Wat er terugkomt is niet te vertrouwen tot het gecontroleerd is: elke streek moet
+   bestaan, elke link moet naar een bestaande pagina wijzen. */
+function fdKeur(d){
+  const soort=['kaart','uitleg','tekst'].includes(d.soort)?d.soort:'tekst';
+  const streken=(Array.isArray(d.streken)?d.streken:[]).map(x=>{
+    const [land,i]=String(x&&x.streek||'').split(':');
+    const inf=BP_INFO[land];
+    if(!inf||!inf.streken||!inf.streken[+i])return null;
+    return {land, i:+i, waarom:String(x.waarom||'').slice(0,160)};
+  }).filter(Boolean).slice(0,5);
+  return {
+    soort: streken.length?soort:(soort==='kaart'?'tekst':soort),
+    zin: String(d.zin||'').slice(0,400),
+    uitleg: (Array.isArray(d.uitleg)?d.uitleg:[]).map(p=>String(p||'').slice(0,600)).slice(0,4),
+    streken,
+    vervolg: (Array.isArray(d.vervolg)?d.vervolg:[]).map(v=>String(v||'').slice(0,80))
+      .filter(Boolean).slice(0,3),
+    links: (Array.isArray(d.links)?d.links:[]).map(l=>({
+      tekst:String(l&&l.tekst||''), naar:String(l&&l.naar||'')
+    })).filter(l=>l.tekst&&FD_DOELEN[l.naar]).slice(0,3),
+  };
+}
+
 async function fdAIZoek(){
   const t=fdQ.trim();
   if(!t||!aiReady())return;
-  fdBezig=true; fdSchilder();
+  fdBezig=true; fdAntw=null; fdSchilder();
   try{
-    const prompt='Iemand zoekt een zak specialty koffie en beschrijft wat hij wil: "'+t+'"\n'+
-      'Zet dat om in zoekwoorden voor een database van koffiestreken. Geef ALLEEN JSON terug, '+
-      'zonder uitleg: {"woorden":[],"fams":[],"zuur":"","meth":""}\n'+
-      'woorden = Nederlandse smaakwoorden, landnamen of processen uit de tekst.\n'+
-      'fams = nul tot drie van: '+FD_FAMS.join(', ')+'.\n'+
-      'zuur = "zacht", "balans" of "fel", of leeg.\n'+
-      'meth = "filter", "espresso" of leeg.';
-    const d=extractJSON(await callClaude([{role:'user',content:prompt}],400));
-    if(Array.isArray(d.fams)&&d.fams.length)fdA.fams=d.fams.filter(f=>FD_FAM[f]).slice(0,3);
-    if(d.zuur)fdA.zuur=d.zuur;
-    if(d.meth)fdA.meth=d.meth;
-    const w=(d.woorden||[]).filter(Boolean);
-    fdAIuit=[(fdA.fams||[]).map(f=>FD_FAM[f].n).join(' + '),d.zuur?(d.zuur+' zuur'):'',d.meth]
-      .filter(Boolean).join(', ');
-    if(w.length)fdQ=w.join(' ');
-  }catch(e){ fdAIuit='de AI kon er niets van maken — zoek gewoon op een woord'; }
+    const prompt=
+      'Je bent de koffiegids in een app met een getekende wereldkaart. Iemand vraagt:\n"'+t+'"\n\n'+
+      'DIT WEET DE APP VAN HEM:\n'+fdIk()+'\n\n'+
+      'DE STREKEN DIE DE APP KENT (id | streek (land) | hoogte | smaakwoorden | processen):\n'+
+      fdMenu()+'\n\n'+
+      'Antwoord in het Nederlands, in de toon van een rustige vakman: kort, concreet, geen '+
+      'verkooppraat. Geef ALLEEN JSON terug, zonder tekst eromheen:\n'+
+      '{"soort":"kaart|uitleg|tekst","zin":"","uitleg":[],"streken":[{"streek":"land:0","waarom":""}],'+
+      '"vervolg":[],"links":[{"tekst":"","naar":""}]}\n\n'+
+      'soort = "kaart" als streken het antwoord zijn, "uitleg" als hij iets wil begrijpen '+
+      '(geef dan ook streken als voorbeeld), "tekst" als er geen streek bij hoort.\n'+
+      'zin = één of twee zinnen, het antwoord zelf. Mag <b>…</b> bevatten voor nadruk.\n'+
+      'uitleg = nul tot vier alinea\'s, alleen bij soort "uitleg" of "tekst".\n'+
+      'streken = nul tot drie ids LETTERLIJK uit de lijst hierboven, elk met een eigen reden '+
+      'waarom juist die past bij zijn vraag. Verzin geen ids.\n'+
+      'vervolg = nul tot drie korte vervolgvragen die hij zou kunnen stellen.\n'+
+      'links = verwijs je in je tekst naar een plek in de app, zet die hier neer. tekst = de '+
+      'letterlijke woorden zoals ze in zin of uitleg staan; naar = een van: '+
+      Object.keys(FD_DOELEN).join(', ')+'.\n'+
+      'Weet je iets niet (prijzen, winkels, voorraad — de app kent geen webshops), zeg dat '+
+      'ronduit en beantwoord de helft die je wel kunt.';
+    fdAntw=fdKeur(extractJSON(await callClaude([{role:'user',content:prompt}],1600)));
+    if(!fdAntw.zin&&!fdAntw.uitleg.length&&!fdAntw.streken.length)fdAntw=null;
+  }catch(e){ fdAntw={soort:'tekst',zin:'Daar kwam ik niet uit. Probeer het anders te vragen, '+
+    'of zoek gewoon op een woord.',uitleg:[],streken:[],vervolg:[],links:[]}; }
   fdBezig=false; fdSchilder();
 }
 
 /* ---- de zoekbalk op het wereldscherm ---- */
 function fdBalkHTML(){
   if(!featOn('finder'))return '';
+  const vraagbaar=featOn('finderai');
   return '<div class="fd-zoek"><input id="fd-veld" value="'+esc(fdQ)+'" '+
-    'placeholder="'+(fdAI?'describe what you want…':'country, region, taste, process…')+'" '+
+    'placeholder="'+(fdAI?'ask me anything about coffee…':'country, region, taste, process…')+'" '+
     'oninput="fdTik(this.value)"'+(fdAI?' onkeydown="if(event.key===\'Enter\')fdAIZoek()"':'')+'>'+
     (fdQ?'<button class="wis" onclick="fdTik(\'\')">×</button>':'')+'</div>'+
-    '<div class="fd-ai"><button class="'+(fdAI?'aan':'')+'" onclick="fdAIAan()">'+
-    (fdAI?'AI on':'AI off')+'</button>'+
-    (fdAI?'typ een hele zin en druk op enter':'zoekt in 119 streken, ook zonder internet')+'</div>'+
-    '<div class="fd-uit" id="fd-uit">'+fdUitHTML()+'</div>'+
+    (vraagbaar?('<div class="fd-ai"><button class="'+(fdAI?'aan':'')+'" onclick="fdAIAan()">'+
+      (fdAI?'AI on':'AI off')+'</button>'+
+      (fdAI?'stel een hele vraag en druk op enter':'zoekt in 119 streken, ook zonder internet')+
+      '</div>'):'');
+}
+/* Het antwoord staat ónder de kaart, niet erboven: eerst zie je waar het over gaat,
+   daarna waarom. Anders duwt een lang antwoord de kaart van het scherm af. */
+function fdUitBlokHTML(){
+  if(!featOn('finder'))return '';
+  return '<div class="fd-uit" id="fd-uit">'+fdUitHTML()+'</div>'+
     '<button class="bp-knop" style="width:100%;margin-bottom:14px" onclick="fdOpen()">'+
     'find my bag — 5 steps ›</button>';
 }
+/* De onderstreepte woorden in een antwoord aantikbaar maken. Alleen de eerste keer
+   dat ze voorkomen, en alleen buiten een tag -- anders sloopt hij zijn eigen <b>. */
+function fdLinks(html,links){
+  (links||[]).forEach((l,n)=>{
+    const naald=l.tekst.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp('(?![^<]*>)'+naald,'i');
+    if(!re.test(html))return;
+    html=html.replace(re,m=>'<button class="fd-link" onclick="fdGaNaar(\''+l.naar+'\')">'+m+'</button>');
+  });
+  return html;
+}
+function fdAntwHTML(){
+  const a=fdAntw;
+  const label={kaart:'de kaart als antwoord',uitleg:'uitleg, met de kaart erbij',
+               tekst:'gewoon antwoord'}[a.soort];
+  let h='<span class="fd-soort">'+esc(label)+'</span>';
+  if(a.zin)h+='<div class="fd-zin">'+fdLinks(a.zin,a.links)+'</div>';
+  if(a.uitleg.length)h+='<div class="fd-lap">'+
+    a.uitleg.map(p=>'<p>'+fdLinks(p,a.links)+'</p>').join('')+'</div>';
+  h+=a.streken.map(x=>{
+    const inf=BP_INFO[x.land], st=inf.streken[x.i];
+    return '<button class="fd-res" onclick="fdNaar(\''+x.land+'\','+x.i+')">'+
+      '<span class="n">'+esc(st.n)+'</span>'+
+      '<span class="l">'+esc(BP_LAND[x.land].naam)+' · '+esc(st.h||inf.hoogte)+'</span>'+
+      '<span class="s">'+esc((st.s||[]).join(' · '))+'</span>'+
+      (x.waarom?('<span class="m">'+esc(x.waarom)+'</span>'):'')+'</button>';
+  }).join('');
+  if(a.vervolg.length)h+='<div class="fd-verder">'+a.vervolg.map(v=>
+    '<button onclick="fdVraag('+JSON.stringify(v).replace(/"/g,'&quot;')+')">'+
+    esc(v)+'</button>').join('')+'</div>';
+  return h;
+}
 function fdUitHTML(){
-  if(fdBezig)return '<div class="fd-niks"><span class="spin"></span> de AI leest je zin…</div>';
-  if(!fdQ.trim())return fdAIuit?('<div class="fd-vooraf">'+esc(fdAIuit)+'</div>'):'';
+  if(fdBezig)return '<div class="fd-niks"><span class="spin"></span> de AI leest je vraag…</div>';
+  if(fdAntw)return fdAntwHTML();
+  if(!fdQ.trim())return '';
   const rij=fdZoek(fdQ);
-  const kop=fdAIuit?('<div class="fd-vooraf">De AI las: <b>'+esc(fdAIuit)+'</b>. '+
-    'De streken hieronder komen uit de app zelf.</div>'):'';
-  if(!rij.length)return kop+'<div class="fd-niks">Niets gevonden. Probeer een smaakwoord '+
+  if(!rij.length)return '<div class="fd-niks">Niets gevonden. Probeer een smaakwoord '+
     'zoals <b>jasmijn</b> of <b>cacao</b>.</div>';
-  return kop+'<div class="fd-niks" style="padding:2px 0 8px">'+rij.length+' streken gevonden</div>'+
+  return '<div class="fd-niks" style="padding:2px 0 8px">'+rij.length+' streken gevonden</div>'+
     rij.slice(0,12).map(x=>
       '<button class="fd-res" onclick="fdNaar(\''+x.st.land+'\','+x.st.i+')">'+
       '<span class="n">'+esc(x.st.naam)+'</span>'+
@@ -8695,18 +8832,53 @@ function fdUitHTML(){
 function fdSchilder(){
   const uit=document.getElementById('fd-uit');
   if(uit)uit.innerHTML=fdUitHTML();
-  const raak=new Set(fdQ.trim()?fdZoek(fdQ).slice(0,14).map(x=>x.st.land):[]);
+  // een AI-antwoord wijst zijn eigen landen aan; anders doet het gewone zoeken dat
+  const raak=new Set(fdAntw?fdAntw.streken.map(x=>x.land)
+    :(fdQ.trim()?fdZoek(fdQ).slice(0,14).map(x=>x.st.land):[]));
   document.querySelectorAll('#bp-screen .bp-kaart path[data-land]').forEach(el=>{
     el.classList.toggle('raak',raak.has(el.getAttribute('data-land')));
   });
 }
 function fdTik(v){
-  fdQ=v; fdAIuit='';
+  fdQ=v; fdAntw=null;
   const veld=document.getElementById('fd-veld');
   if(veld&&veld.value!==v)veld.value=v;
   fdSchilder();
-  // het kruisje en de tips verschijnen pas bij de volgende hele tekening
+  // het kruisje verschijnt pas bij de volgende hele tekening
   if(!v&&veld)bpTeken(true);
+}
+/* Een vervolgvraag aantikken stelt hem meteen. */
+function fdVraag(v){
+  fdQ=v; fdAntw=null; bpTeken(true); fdAIZoek();
+}
+/* Een verwijzing in het antwoord: open die plek, en onthoud waar je vandaan kwam.
+   Zonder de terugweg ben je je antwoord kwijt zodra je ergens gaat kijken. */
+function fdGaNaar(naar){
+  if(!FD_DOELEN[naar])return;
+  fdTerug={van:'beanpick'};
+  go(naar);
+  fdPil();
+}
+function fdTerugNaarAntwoord(){
+  fdTerug=null;
+  bpNiv='wereld'; bpDeel=null; bpLandId=null; bpStreek=null;
+  bpView=BP_VIEWS.wereld.slice();
+  go('beanpick');
+  fdPil();
+}
+function fdPilWeg(){ fdTerug=null; fdPil(); }
+/* Het balkje boven de tabbalk. Eén element, dat komt en gaat. */
+function fdPil(){
+  let el=document.getElementById('fd-pil');
+  const toon=!!fdTerug&&currentPage!=='beanpick'&&currentPage!=='finder';
+  if(!toon){ if(el)el.remove(); return; }
+  if(!el){
+    el=document.createElement('div');
+    el.id='fd-pil'; el.className='fd-pil';
+    el.innerHTML='<span onclick="fdTerugNaarAntwoord()">‹ back to your answer</span>'+
+      '<button class="weg" onclick="fdPilWeg()" aria-label="sluiten">×</button>';
+    document.querySelector('.phone').appendChild(el);
+  }
 }
 function fdAIAan(){
   if(!fdAI&&!aiReady()){toast('zet AI aan onder profile');return;}
@@ -8803,7 +8975,7 @@ function bpTeken(behoudScroll){
   el.innerHTML=(bpNiv==='wereld')?bpWereld():(bpNiv==='deel'?bpDeelScherm():bpLandScherm());
   el.scrollTop=y;
   bpVenster();
-  if(bpNiv==='wereld'&&fdQ.trim())fdSchilder();
+  if(bpNiv==='wereld'&&(fdAntw||fdQ.trim()))fdSchilder();
   if(bpNaarStreek){
     bpNaarStreek=false;
     const op=el.querySelector('.bp-streek.op');
@@ -8961,6 +9133,7 @@ const FEATURES=[
   {id:'filtercompass', n:'filter compass', d:'what you tasted, plotted — with one next change', def:true, cat:'app'},
   {id:'wheel', n:'taste wheel', d:'tap flavours on a wheel instead of typing tags', def:true, cat:'app'},
   {id:'finder', n:'taste finder', d:'search the world map by taste, or let five questions narrow it to three regions', def:true, cat:'people'},
+  {id:'finderai', n:'ask the finder', d:'ask a real question and get a real answer — on the map, as an explanation, or just in words', def:true, cat:'people'},
   {id:'beanpick', n:'bean chooser', d:'a drawn world map: from a coffee country down to a region, and what to look for on the bag', def:true, cat:'people'},
   {id:'wheelbig', n:'big flavour wheel', d:'tap a family and the wheel opens up — berry becomes blueberry, raspberry, cherry', def:false, cat:'app'},
   {id:'freshgauge', n:'freshness gauge', d:'rest → peak → fading as a dial on each bean', def:true, cat:'app'},
