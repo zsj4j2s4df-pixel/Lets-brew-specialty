@@ -20,6 +20,7 @@ PREVIEW_BOUWER = os.path.join(
     os.path.dirname(HIER), "lets-brew-house-style", "scripts", "build-preview.py")
 PREVIEW = "/tmp/lets-brew-preview.html"
 LAAG = os.path.join(HIER, "annotate.html")
+DEMO = os.path.join(HIER, "demo-ai.html")
 UIT = "/tmp/lets-brew-review.html"
 
 
@@ -44,9 +45,14 @@ def main():
     if n != 1:
         print("let op: splash-vertraging niet gevonden, hij blijft 3 s")
 
-    # 4. de aanwijs-laag erachteraan; die wacht zelf op .phone
+    # 4. de coffee finder een voorgekookt AI-antwoord geven. Een artifact mag niet
+    #    naar buiten praten, dus zonder dit doet de zoekbalk op enter niets en valt
+    #    er aan het AI-antwoord niets aan te wijzen.
+    demo = open(DEMO, encoding="utf-8").read() if os.path.exists(DEMO) else ""
+
+    # 5. de aanwijs-laag erachteraan; die wacht zelf op .phone
     laag = open(LAAG, encoding="utf-8").read()
-    open(UIT, "w", encoding="utf-8").write(app + "\n" + laag)
+    open(UIT, "w", encoding="utf-8").write(app + "\n" + demo + "\n" + laag)
 
     kb = os.path.getsize(UIT) / 1024
     print("%s  (%.1f MB)" % (UIT, kb / 1024))

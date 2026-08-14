@@ -1,0 +1,83 @@
+<script>
+/* ---- de coffee finder in de nakijkversie ----
+   Een artifact mag niet naar buiten praten, dus er is hier geen Claude. Zonder
+   iets zou de zoekbalk op enter niets doen en valt er aan het AI-antwoord ook
+   niets aan te wijzen. Daarom geeft hij hier een voorgekookt antwoord: dezelfde
+   vorm, dezelfde opbouw, alleen de inhoud staat van tevoren klaar.
+
+   Dit bestand hoort ALLEEN in de nakijkversie. In de echte app doet fdAIZoek()
+   gewoon zijn werk. */
+(function(){
+  if(typeof fdKeur!=='function')return;
+
+  /* de knop mag hier altijd aan -- er is toch geen sleutel nodig */
+  window.fdAIAan=function(){ fdAI=!fdAI; bpTeken(true); };
+
+  /* drie antwoorden, één per vorm. Welke je krijgt hangt af van wat je typt,
+     zodat je alle drie kunt bekijken zonder dat je een sleutel nodig hebt. */
+  function kies(v){
+    const t=v.toLowerCase();
+
+    if(/zuur|dun|fout|scherp|bitter|waarom smaakt/.test(t))return {
+      soort:'tekst',
+      zin:'Waarschijnlijk niets aan de boon — Kenia hóórt fel te zijn. <b>Dun</b> erbij '+
+          'wijst op onderextractie, niet op de zak.',
+      uitleg:['Je laatste drie V60’s met deze zak liepen in 2:35 tot 2:45 op 18 g. Dat is '+
+              'snel voor Kenia: je haalt het zoet er niet uit en dan blijft het zuur alleen over.',
+              'Maal een stap fijner tot je rond 3:00 à 3:15 uitkomt, en giet de bloom met wat '+
+              'meer water zodat het bed echt nat is. Blijft het dun, ga dan van 1:16 naar 1:15. '+
+              'De maalstand die daarbij hoort staat in je dial in.'],
+      streken:[],
+      vervolg:['zet dit om in een dial in','laat Kenia zien op de kaart'],
+      links:[{tekst:'dial in',naar:'dialin'}]};
+
+    if(/wat is|hoe werkt|natural|washed|honey|proces|leg uit|waarom/.test(t))return {
+      soort:'uitleg',
+      zin:'Natural betekent dat de kers met vrucht en al om de boon heen droogt.',
+      uitleg:['Bij <b>washed</b> spoelt het vruchtvlees er meteen af: je proeft de streek zelf, '+
+              'schoon en rechtlijnig. Bij <b>natural</b> ligt de hele kers wekenlang te drogen '+
+              'en trekken die suikers de boon in.',
+              'In de kop merk je dat als meer body, meer zoet, en fruit dat richting bessen of '+
+              'wijn gaat. Het zuur wordt er niet minder van, maar wel minder scherp omlijnd. '+
+              'Het is ook het risicovolste proces: gaat het drogen mis, dan smaakt het gegist.',
+              'Op de zak staat het bij het proces. Staat er niets, dan is het meestal washed. '+
+              'Wil je het naast elkaar proeven, dan is een cupping de eerlijkste manier.'],
+      streken:[{streek:'ethiopie:3',waarom:'het schoolvoorbeeld: bosbes en rode wijn, allemaal droog gedroogd'},
+               {streek:'brazilie:0',waarom:'hier is bijna alles natural, maar dan chocolade en noot in plaats van fruit'}],
+      vervolg:['laat me alleen washed zien','en wat is honey dan?'],
+      links:[{tekst:'cupping',naar:'cupping'}]};
+
+    if(/nooit|nieuw|verras|avontuur|anders/.test(t))return {
+      soort:'kaart',
+      zin:'Op je plank stonden El Salvador, Ethiopië en Brazilië. Deze drie liggen in een hoek '+
+          'waar je nog nooit zat, en sluiten toch aan bij waar jij het hoogst scoorde: '+
+          '<b>bloemig</b> en <b>fris fruit</b>.',
+      uitleg:[],
+      streken:[{streek:'burundi:0',waarom:'rode bes en jasmijn op 1600 m — dichtbij je Ethiopië, ander hoekje'},
+               {streek:'malawi:0',waarom:'citroen en zwarte thee; bijna niemand heeft dit ooit gehad'},
+               {streek:'panama:0',waarom:'jasmijn en bergamot, de bloemigste kant van Midden-Amerika'}],
+      vervolg:['welke is het makkelijkst te vinden?','zet dit om in vijf stappen'],
+      links:[{tekst:'je plank',naar:'beans'}]};
+
+    return {
+      soort:'kaart',
+      zin:'Je <b>Apaneca-Ilamatepec</b> was zoet en rond: karamel, rode appel, amandel, gewassen, '+
+          'rond 1500 m. Dit zijn de drie die daar het dichtst bij liggen — en bewust geen El Salvador.',
+      uitleg:[],
+      streken:[{streek:'honduras:0',waarom:'zelfde hoogte, zelfde gewassen zoetheid: citrus, karamel, honing'},
+               {streek:'costarica:1',waarom:'rode appel en karamel als in je oude zak; honey maakt hem iets ronder'},
+               {streek:'colombia:0',waarom:'dezelfde kant op, met wat meer fruit erbij als je een stap wilt zetten'}],
+      vervolg:['en welke daarvan is het minst zuur?','zet dit om in vijf stappen'],
+      links:[{tekst:'Apaneca-Ilamatepec',naar:'beans'}]};
+  }
+
+  window.fdAIZoek=async function(){
+    const t=(fdQ||'').trim();
+    if(!t)return;
+    fdBezig=true; fdAntw=null; fdSchilder();
+    await new Promise(r=>setTimeout(r,700));   // net zo lang als een echt antwoord duurt
+    fdAntw=fdKeur(kies(t));
+    fdBezig=false; fdSchilder();
+  };
+})();
+</script>
