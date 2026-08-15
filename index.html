@@ -1128,6 +1128,18 @@
   .pc-step.nu{background:var(--card-2);border-color:var(--ink);filter:url(#wobble);cursor:pointer;}
   .pc-step.nu .ps-t,.pc-step.nu .ps-d{color:var(--ink);}
   .pc-step.klaar{opacity:.45;}
+  /* het omkeren is het enige moment dat je iets met het apparaat zelf doet --
+     dus krijgt het een eigen kleur, ook als het al geweest is */
+  .pc-step.keer{background:var(--accent-soft);border-color:var(--ink);filter:url(#wobble);}
+  .pc-step.keer .ps-k,.pc-step.keer .ps-t,.pc-step.keer .ps-d{color:var(--cream);}
+  .pc-step.keer.klaar{opacity:.5;}
+  .pc-step.keer .ps-k svg{width:19px;height:19px;vertical-align:-3px;margin-right:5px;
+    fill:none;stroke:var(--cream);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .pcs.keer{color:var(--accent-soft);}
+  .pcs.keer .k{font-weight:700;}
+  #pc-art.kantelt svg{animation:bwkantel .65s ease-in-out;}
+  @keyframes bwkantel{from{transform:rotate(180deg);}to{transform:rotate(0);}}
+  @media (prefers-reduced-motion:reduce){#pc-art.kantelt svg{animation:none;}}
   /* een afgeronde stap die al voorbij is: alleen nog een streep */
   .pc-mini{height:0;border-top:2px solid var(--line);filter:url(#wobble);
     margin:7px 22px 8px;opacity:.6;}
@@ -1534,6 +1546,9 @@
         <div class="field"><label>temp (&deg;C)</label><input id="rec-temp" type="number" inputmode="decimal"></div>
         <div class="field"><label>grind</label><input id="rec-maling" placeholder="e.g. medium"></div>
       </div>
+      <div class="field" id="rec-houding-veld" style="display:none"><label>which way up</label>
+        <div class="link-pick" id="rec-houding"></div>
+        <div class="fx-note" id="rec-houding-note"></div></div>
       <div class="field"><label>grind setting</label>
         <input id="rec-stand" placeholder="on your grinder, e.g. 22 clicks">
         <div class="link-pick" id="rec-molens"></div>
@@ -2552,10 +2567,22 @@ function recipeById(id){
 function recipeFam(r){return (r&&r.fam)||'filter';}
 const ALLE_RECEPTEN=()=>FILTER_RECIPES.concat(ESPRESSO_RECIPES);
 // gewichten uitrekenen voor jouw dose; hendels verschuiven de 4:6-verdeling
+/* Staat er een gramgetal in de omschrijving van een stap, dan is dat geschreven
+   voor de dosis waarmee het recept gemaakt is. Zet je met een andere dosis, dan
+   schuift de kolom mee maar de zin niet -- en dan zegt "giet 33 g" iets anders
+   dan de 54 g ernaast. Dus schalen we de getallen in de tekst met dezelfde
+   factor als de kolom. */
+function schaalGrammen(t,s){
+  if(!t||!(s>0)||Math.abs(s-1)<0.01)return t;
+  return String(t).replace(/(\d+(?:[.,]\d+)?)\s*(gram\b|g\b)/gi,(m,n,e)=>
+    Math.round(parseFloat(String(n).replace(',','.'))*s)+' '+e);
+}
 function recipeSteps(r,dose,hendels){
   if(!r)return [];
   const water=Math.round((dose||r.dose)*r.ratio);
-  let st=r.stappen.map(x=>Object.assign({},x));
+  const basis=Math.round((r.dose||dose||1)*r.ratio);   // waar de tekst voor geschreven is
+  const schaal=basis?water/basis:1;
+  let st=r.stappen.map(x=>Object.assign({},x,{d:schaalGrammen(x.d,schaal)}));
   if(r.hendels&&hendels){
     // eerste 40 %: zoeter = een kleiner eerste gietje, zuurder = een groter
     const zoet=Math.max(0,Math.min(1,hendels.zoet==null?0.5:hendels.zoet));
@@ -3602,7 +3629,19 @@ function methodForRecipe(r){
    voorstel doen; in beide gevallen sta jij erin met de hand. Intern bewaren we
    elk gietdoel als deel van het totaal, zodat het meeschaalt als je een andere
    dose gebruikt dan waarmee je het opschreef.                              */
-const STAP_SOORTEN=['bloom','giet','swirl','roer','wacht','pers','doorloop'];
+const STAP_SOORTEN=['bloom','giet','swirl','roer','wacht','keer','pers','doorloop'];
+/* Zet je omgekeerd, dan is er precies één moment dat er echt iets gebeurt: het
+   omkeren. Dat moet je niet hoeven lezen -- je moet het zien. */
+const HOUDINGEN=[
+  {v:'normaal', n:'regular', u:'kopje eronder, water loopt meteen door het filter'},
+  {v:'omgekeerd', n:'inverted', u:'op de zuiger, alles weekt tot jij omkeert'},
+];
+function isAeropress(mid){return brewerArtKey(mid)==='aeropress';}
+/* een omdraaiend pijltje, met de hand getekend zoals de rest */
+const PIJL_OM='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 9.4 Q6.4 4.6 11.6 4.1 Q17 3.9 18.7 8.6"/>'+
+  '<path d="M18.9 4.6 Q19 7.6 18.8 8.9 Q16.6 9 14.4 8.7"/>'+
+  '<path d="M18.8 14.6 Q17.6 19.4 12.4 19.9 Q7 20.1 5.3 15.4"/>'+
+  '<path d="M5.1 19.4 Q5 16.4 5.2 15.1 Q7.4 15 9.6 15.3"/></svg>';
 let recBewerk=null;      // {id, mid, stappen:[{t,g,k,d}]}
 let recTerug=null;       // waar je vandaan kwam: daar hoor je na het opslaan weer
 let recVers=null;        // net geschreven recept; dat mag het formulier overschrijven
@@ -3618,6 +3657,7 @@ function openRecipe(id,mid){
     setVal('rec-naam',best.naam);setVal('rec-dose',best.dose);setVal('rec-water',water);
     setVal('rec-temp',best.temp);setVal('rec-maling',best.maling);setVal('rec-over',best.over||'');
     setVal('rec-stand',best.stand||'');setVal('rec-tijd',best.tijd||'');recBewerk.molen=best.molen||null;
+    recBewerk.houding=best.houding||'normaal';
   }else{
     // beginnen vanaf het recept dat nu geselecteerd staat, scheelt overtypen
     const basis=best||recipeById((state.lastRecipe||{})[methode])||recipesFor(methode)[0];
@@ -3633,10 +3673,11 @@ function openRecipe(id,mid){
     setVal('rec-stand',(basis&&basis.stand)||(vorige?vorige.grind:''));
     setVal('rec-tijd',(basis&&basis.tijd)||'');
     recBewerk.molen=(basis&&basis.molen)||(filterMolens()[0]||{}).name||null;
+    recBewerk.houding=(basis&&basis.houding)||'normaal';
   }
   document.getElementById('rec-title').textContent=(best&&best.eigen)?'edit recipe':'own recipe';
   document.getElementById('rec-del').style.display=(best&&best.eigen)?'block':'none';
-  recMethods();recMolens();recSteps();applyAIVisibility();
+  recMethods();recMolens();recHouding();recSteps();applyAIVisibility();
   const ai=document.getElementById('rec-ai');
   if(ai)ai.style.display=(methodFamily(recBewerk.mid)==='espresso')?'none':'';
   go('recipe');
@@ -3663,6 +3704,35 @@ function recMolens(){
 function recPickMolen(naam){
   recBewerk.molen=(recBewerk.molen===naam)?null:naam;recMolens();
 }
+/* Normaal of omgekeerd -- alleen bij een aeropress, want alleen daar bestaat de
+   keuze. Kies je omgekeerd, dan hoort er een keer-stap in het schema; die zetten
+   we erin als hij er nog niet staat, vlak voor het persen. */
+function recHouding(){
+  const veld=document.getElementById('rec-houding-veld');if(!veld)return;
+  const aan=isAeropress(recBewerk.mid);
+  veld.style.display=aan?'block':'none';
+  if(!aan)return;
+  if(!recBewerk.houding)recBewerk.houding='normaal';
+  document.getElementById('rec-houding').innerHTML=HOUDINGEN.map(h=>
+    '<button class="lp '+(recBewerk.houding===h.v?'sel':'')+'" onclick="recPickHouding(\''+h.v+'\')">'+
+    h.n+'</button>').join('');
+  const h=HOUDINGEN.find(x=>x.v===recBewerk.houding)||HOUDINGEN[0];
+  document.getElementById('rec-houding-note').textContent=h.u;
+}
+function recPickHouding(v){
+  recBewerk.houding=v;
+  const heeft=recBewerk.stappen.some(x=>x.k==='keer');
+  if(v==='omgekeerd'&&!heeft){
+    // vlak voor de eerste pers, of anders achteraan
+    const i=recBewerk.stappen.findIndex(x=>x.k==='pers');
+    const t=(i>0)?recBewerk.stappen[i-1].t+10:(recBewerk.stappen.length?
+      recBewerk.stappen[recBewerk.stappen.length-1].t+10:60);
+    recBewerk.stappen.push({t,g:'',k:'keer',d:'Zet je kopje erop en keer hem in één beweging om.'});
+    recBewerk.stappen.sort((a,b)=>a.t-b.t);
+  }
+  if(v==='normaal')recBewerk.stappen=recBewerk.stappen.filter(x=>x.k!=='keer');
+  recHouding();recSteps();
+}
 function recMethods(){
   const el=document.getElementById('rec-methods');if(!el)return;
   el.innerHTML=state.methods.filter(m=>m.on).map(m=>
@@ -3671,7 +3741,7 @@ function recMethods(){
   recFamilie();
 }
 function recPickMethod(id){
-  recBewerk.mid=id;recMethods();recMolens();
+  recBewerk.mid=id;recMethods();recMolens();recHouding();
   const ai=document.getElementById('rec-ai');
   if(ai)ai.style.display=(methodFamily(id)==='espresso')?'none':'';
 }
@@ -3749,6 +3819,7 @@ function saveRecipe(){
     maling:(document.getElementById('rec-maling').value||'').trim()||'medium',
     stand:(document.getElementById('rec-stand').value||'').trim(),
     molen:recBewerk.molen||null,
+    houding:isAeropress(recBewerk.mid)?(recBewerk.houding||'normaal'):null,
     over:(document.getElementById('rec-over').value||'').trim()||'your own schedule',
     voor:[recBewerk.mid],stappen};
   if(!Array.isArray(state.recipes))state.recipes=[];
@@ -3791,10 +3862,19 @@ async function aiRecipeSchema(){
       'Geef ALLEEN JSON zonder markdown: {"temp":93,"maling":"medium","stand":"","over":"","stappen":[{"t":"0:00","k":"bloom","g":45,"d":""}]}. '+
       'maling = omschrijving in woorden (bijvoorbeeld medium-grof). stand = KORTE maalstand voor het invulveld'+
       (molen?(' op de '+molen):'')+' (alleen een getal of klikken, GEEN uitleg en GEEN merknaam). '+
-      't = tijd vanaf start als mm:ss. k = een van: bloom, giet, swirl, roer, wacht, pers, doorloop. '+
+      't = tijd vanaf start als mm:ss. k = een van: '+STAP_SOORTEN.join(', ')+'. '+
       'g = het TOTAAL aan water dat er na die stap in zit (dus oplopend, laatste giet = '+water+'); '+
-      'laat g weg bij een stap waarbij je niet giet. d = korte instructie in het Nederlands, max 12 woorden. '+
-      'Vier tot zeven stappen, eindig met een doorloop-stap. over = \u00e9\u00e9n korte zin over dit recept.';
+      'laat g weg bij een stap waarbij je niet giet. d = korte instructie in het Nederlands, max 12 woorden, '+
+      'ZONDER gramgetallen -- het aantal gram staat al in g en wordt ernaast getoond. '+
+      'Vier tot zeven stappen, eindig met een doorloop-stap. over = \u00e9\u00e9n korte zin over dit recept.'+
+      (isAeropress(recBewerk.mid)?('\nDeze zetter staat '+
+        (recBewerk.houding==='omgekeerd'?'OMGEKEERD':'NORMAAL')+'. '+
+        (recBewerk.houding==='omgekeerd'
+          ? 'Bij omgekeerd staat hij op de zuiger en weekt alles tot jij hem omdraait: zet daarom '+
+            '\u00e9\u00e9n stap met k="keer" op het moment dat het filterdopje erop gaat en hij op het '+
+            'kopje wordt omgekeerd, en laat het persen daarna volgen. Geef die stap geen g.'
+          : 'Bij normaal staat hij op het kopje en loopt het water meteen door het filter; gebruik dus '+
+            'GEEN keer-stap.')):'');
     const d=extractJSON(await callClaude([{role:'user',content:prompt}],900));
     if(d.temp)setVal('rec-temp',d.temp);
     if(d.maling)setVal('rec-maling',d.maling);
@@ -3822,6 +3902,9 @@ const BREWER_ART={
   chemex:{h:44,l:124,art:'<svg viewBox="0 0 240 224"><defs><clipPath id="bw-clip"><path d="M56 44 L184 44 L138 124 L102 124 Z"/></clipPath></defs><g id="bw-stream" class="bw-stream"><path d="M120 6 Q122 26 120 44"/><path class="b" d="M123 10 Q121 28 123 42"/></g><rect id="bw-fill" x="50" y="124" width="140" height="0" clip-path="url(#bw-clip)"/><path d="M46 38 Q120 29 194 39"/><path class="b" d="M50 42 Q120 34 190 43"/><path d="M52 41 Q78 84 100 128"/><path class="b" d="M56 43 Q81 85 102 130"/><path d="M188 42 Q162 84 140 128"/><path class="b" d="M184 44 Q159 85 138 130"/><path class="soft2" d="M58 48 Q120 41 182 49"/><path class="bed" d="M76 78 Q120 71 164 79"/><path d="M92 122 Q120 117 148 123"/><path d="M90 138 Q120 133 150 139"/><path class="b" d="M94 126 Q120 122 146 127"/><path class="b" d="M93 134 Q120 130 147 135"/><path class="soft2" d="M118 128 Q126 124 134 131 Q128 136 120 132 Q112 137 106 131 Q113 124 120 129"/><path d="M100 136 Q74 170 76 194"/><path class="b" d="M104 138 Q80 170 81 192"/><path d="M140 136 Q166 170 164 194"/><path class="b" d="M136 138 Q160 170 159 192"/><path d="M78 196 Q120 214 162 196"/><path class="b" d="M86 200 Q120 210 154 200"/><path class="soft2" d="M84 178 Q120 172 156 179"/><path d="M186 44 Q202 52 198 66" opacity="0.75"/></svg>'},
   kalita:{h:58,l:142,art:'<svg viewBox="0 0 240 224"><defs><clipPath id="bw-clip"><path d="M56 58 L184 58 L150 142 L90 142 Z"/></clipPath></defs><g id="bw-stream" class="bw-stream"><path d="M120 6 Q122 26 120 44"/><path class="b" d="M123 10 Q121 28 123 42"/></g><rect id="bw-fill" x="50" y="142" width="140" height="0" clip-path="url(#bw-clip)"/><path d="M46 52 Q120 43 194 53"/><path class="b" d="M50 56 Q120 48 190 57"/><path d="M52 55 Q68 102 86 146"/><path class="b" d="M56 57 Q71 103 88 148"/><path d="M188 56 Q172 102 154 146"/><path class="b" d="M184 58 Q169 103 152 148"/><path d="M84 146 Q120 152 156 146"/><path class="b" d="M88 149 Q120 154 152 149"/><path class="soft2" d="M62 68 Q70 104 82 140"/><path class="soft2" d="M92 64 Q94 102 98 140"/><path class="soft2" d="M148 64 Q146 102 142 140"/><path class="soft2" d="M178 68 Q170 104 158 140"/><path class="bed" d="M74 94 Q120 87 166 95"/><path d="M72 164 Q120 157 168 165"/><path class="b" d="M76 168 Q120 162 164 168"/><path d="M74 166 Q78 194 88 206"/><path d="M166 166 Q162 194 152 206"/><path d="M86 205 Q120 213 154 205"/><path class="b" d="M92 208 Q120 213 148 208"/></svg>'},
   aeropress:{h:62,l:168,art:'<svg viewBox="0 0 240 224"><defs><clipPath id="bw-clip"><path d="M84 62 L156 62 L156 168 L84 168 Z"/></clipPath></defs><g id="bw-stream" class="bw-stream"><path d="M120 6 Q122 26 120 44"/><path class="b" d="M123 10 Q121 28 123 42"/></g><rect id="bw-fill" x="80" y="168" width="80" height="0" clip-path="url(#bw-clip)"/><path d="M78 56 Q120 49 162 57"/><path class="b" d="M82 60 Q120 54 158 61"/><path d="M80 58 Q78 114 82 170"/><path class="b" d="M84 62 Q82 114 85 167"/><path d="M160 58 Q162 114 158 170"/><path class="b" d="M156 62 Q158 114 155 167"/><path d="M80 170 Q120 176 160 170"/><path d="M104 54 Q106 32 104 14"/><path class="b" d="M108 52 Q110 32 108 16"/><path d="M136 54 Q134 32 136 14"/><path class="b" d="M132 52 Q130 32 132 16"/><path d="M94 16 Q120 8 146 17"/><path class="b" d="M98 20 Q120 13 142 20"/><path class="soft2" d="M84 84 Q94 82 104 84"/><path class="soft2" d="M84 106 Q94 104 104 106"/><path class="soft2" d="M84 128 Q94 126 104 128"/><path class="bed" d="M88 150 Q120 145 152 151"/><path d="M76 174 Q120 181 164 174"/><path class="b" d="M82 178 Q120 184 158 178"/><path d="M84 184 Q120 190 156 184"/><path d="M86 188 Q90 206 100 214"/><path d="M154 188 Q150 206 140 214"/><path d="M98 213 Q120 219 142 213"/></svg>'},
+  /* de omgekeerde aeropress: de zuiger staat op het aanrecht, de kamer erboven,
+     de open kant naar boven. Het water zit dus op de rubber, niet op het filter. */
+  aeropress_om:{h:56,l:156,art:'<svg viewBox="0 0 240 224"><defs><clipPath id="bw-clip"><path d="M84 56 L156 56 L156 156 L84 156 Z"/></clipPath></defs><g id="bw-stream" class="bw-stream"><path d="M120 4 Q122 24 120 42"/><path class="b" d="M123 8 Q121 26 123 40"/></g><rect id="bw-fill" x="80" y="156" width="80" height="0" clip-path="url(#bw-clip)"/><path d="M78 50 Q120 43 162 51"/><path class="b" d="M82 54 Q120 48 158 55"/><path d="M80 52 Q78 106 82 160"/><path class="b" d="M84 56 Q82 106 85 157"/><path d="M160 52 Q162 106 158 160"/><path class="b" d="M156 56 Q158 106 155 157"/><path class="soft2" d="M84 74 Q94 72 104 74"/><path class="soft2" d="M84 98 Q94 96 104 98"/><path class="soft2" d="M84 122 Q94 120 104 122"/><path class="bed" d="M88 146 Q120 141 152 147"/><path d="M80 160 Q120 167 160 160"/><path class="b" d="M84 164 Q120 170 156 164"/><path d="M84 172 Q120 178 156 172"/><path class="b" d="M88 176 Q120 181 152 176"/><path d="M104 176 Q102 188 104 198"/><path class="b" d="M108 178 Q106 188 108 197"/><path d="M136 176 Q138 188 136 198"/><path class="b" d="M132 178 Q134 188 132 197"/><path d="M92 198 Q120 205 148 198"/><path d="M86 207 Q120 214 154 207"/><path class="b" d="M92 210 Q120 215 148 210"/><path class="soft2" d="M50 216 Q120 221 190 216"/></svg>'},
   switch:{h:58,l:150,art:'<svg viewBox="0 0 240 224"><defs><clipPath id="bw-clip"><path d="M54 58 L186 58 L131 150 L109 150 Z"/></clipPath></defs><g id="bw-stream" class="bw-stream"><path d="M120 6 Q122 26 120 44"/><path class="b" d="M123 10 Q121 28 123 42"/></g><rect id="bw-fill" x="50" y="150" width="140" height="0" clip-path="url(#bw-clip)"/><path d="M44 52 Q120 43 196 53"/><path class="b" d="M48 56 Q120 48 192 57"/><path d="M50 55 Q82 106 112 156"/><path class="b" d="M54 57 Q85 107 114 158"/><path d="M190 56 Q158 106 128 156"/><path class="b" d="M186 58 Q155 107 126 158"/><path d="M110 152 Q120 157 130 152"/><path class="soft2" d="M56 62 Q120 55 184 63"/><path class="soft2" d="M120 64 Q120 106 120 150"/><path class="bed" d="M74 96 Q120 89 166 97"/><g id="bw-valve"><path d="M132 148 Q152 142 158 130"/><path class="b" d="M134 152 Q154 146 160 134"/><path d="M160 122 Q168 128 162 136 Q153 133 157 124"/></g><path d="M188 66 Q214 74 210 96 Q206 114 184 116"/><path d="M72 168 Q120 161 168 169"/><path class="b" d="M76 172 Q120 166 164 172"/><path d="M74 170 Q78 198 88 210"/><path d="M166 170 Q162 198 152 210"/><path d="M86 209 Q120 217 154 209"/><path class="b" d="M92 212 Q120 217 148 212"/></svg>'},
 };
 // welke tekening hoort bij deze methode?
@@ -3832,10 +3915,27 @@ function brewerArtKey(methodId){
   if(naam.includes('press'))return 'aeropress';
   return 'v60';
 }
+/* Staat hij omgekeerd, dan blijft dat zo tot de keer-stap geweest is. Daarna
+   staat hij gewoon rechtop -- en dat verschil zie je gebeuren. */
+function pourOmgekeerd(){
+  const r=recipeById(pc.rid);
+  if(!r||r.houding!=='omgekeerd')return false;
+  const i=pc.steps.findIndex(x=>x.k==='keer');
+  if(i<0)return true;
+  return pourCur()<=i;      // vanaf de keer-stap zelf staat hij weer rechtop
+}
 function renderBrewerArt(){
   const el=document.getElementById('pc-art');if(!el)return;
-  const k=brewerArtKey(pc.mid);
-  if(el.dataset.k!==k){el.innerHTML=BREWER_ART[k].art;el.dataset.k=k;}
+  let k=brewerArtKey(pc.mid);
+  if(k==='aeropress'&&pourOmgekeerd())k='aeropress_om';
+  if(el.dataset.k!==k){
+    const draai=(el.dataset.k==='aeropress'||el.dataset.k==='aeropress_om')&&
+                (k==='aeropress'||k==='aeropress_om');
+    el.innerHTML=BREWER_ART[k].art;el.dataset.k=k;
+    if(draai){                       // de omslag: je ziet hem kantelen
+      el.classList.remove('kantelt');void el.offsetWidth;el.classList.add('kantelt');
+    }
+  }
   paintBrewer();
 }
 // waterstand + straal bijwerken
@@ -4051,7 +4151,7 @@ function pourSchema(){
   const el=document.getElementById('pc-schema');if(!el)return;
   if(!pc.steps.length){el.innerHTML='';return;}
   el.innerHTML='<div class="pcs-h"></div>'+pc.steps.map(st=>
-    '<div class="pcs"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
+    '<div class="pcs'+(st.k==='keer'?' keer':'')+'"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
     ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.g?st.g+' g':'')+'</span></div>').join('');
 }
 // welk recept staat er geladen -- en de rij om een ander te kiezen
@@ -4134,14 +4234,16 @@ function pourSteps(){
     const klaar=i<cur;
     // alles wat verder terug ligt dan de vorige stap wordt een streepje,
     // zodat de tekening in beeld blijft terwijl je giet
-    if(i<cur-1)return '<div class="pc-mini" title="'+esc(st.k)+' \u2014 done"></div>';
+    if(i<cur-1&&st.k!=='keer')return '<div class="pc-mini" title="'+esc(st.k)+' \u2014 done"></div>';
     const nu=(i===cur)&&pc.run;
     const cls=klaar?'klaar':(nu?'nu':'straks');
     const tijd=(klaar&&pc.marks[i]!=null)?pourFmt(pc.marks[i]):pourFmt(Math.max(0,at));
     const g=st.g?('<div class="ps-g">'+st.g+' g</div>'):'';
     const tik=nu?(' onclick="pourTick('+i+')"'):'';
-    return '<div class="pc-step '+cls+'"'+tik+'><div class="ps-t">'+tijd+'</div>'+
-      '<div class="ps-b"><div class="ps-k">'+esc(st.k)+'</div><div class="ps-d">'+esc(st.d)+'</div></div>'+g+'</div>';
+    const keer=st.k==='keer';
+    return '<div class="pc-step '+cls+(keer?' keer':'')+'"'+tik+'><div class="ps-t">'+tijd+'</div>'+
+      '<div class="ps-b"><div class="ps-k">'+(keer?(PIJL_OM+'turn it over'):esc(st.k))+'</div>'+
+      '<div class="ps-d">'+esc(st.d)+'</div></div>'+g+'</div>';
   }).join('');
   const of=document.getElementById('pc-of');
   if(!of)return;

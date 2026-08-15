@@ -144,6 +144,10 @@ suggestie. Leeg zolang je op die methode niets hebt afgetekend.
 `{id, name, family, methodId, dose, ratio, temp, grind, targetGrind, own}` —
 `own` is `true` voor recepten die je zelf schreef.
 
+Intern heeft een eigen recept ook `houding`: `"normaal"` of `"omgekeerd"` bij een
+aeropress, en `null` bij alle andere methodes. Staat hij op omgekeerd, dan zit er
+een stap met `k:"keer"` in `stappen` op het moment dat je hem omdraait.
+
 ### dialLog
 
 Elke poging apart, in de volgorde waarin je ze deed. Per boon + methode, laatste
