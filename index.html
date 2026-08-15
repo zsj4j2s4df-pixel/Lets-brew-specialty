@@ -1044,6 +1044,8 @@
   .rec-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
   .rec-row .r-t{width:58px;flex:none;}
   .rec-row .r-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+  .rec-row .r-rij{display:flex;gap:6px;}
+  .rec-row .r-rij select{flex:1;min-width:0;}
   .rec-row .r-g{width:62px;flex:none;}
   .rec-row input,.rec-row select{width:100%;background:var(--paper);border:2px solid var(--line);
     filter:url(#wobble);border-radius:12px;padding:8px 9px;font-family:inherit;font-size:16px;
@@ -1135,6 +1137,15 @@
   .pc-step.keer.klaar{opacity:.5;}
   .pc-step.keer .ps-k svg{width:19px;height:19px;vertical-align:-3px;margin-right:5px;
     fill:none;stroke:var(--cream);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  /* de klep van een Switch: alleen op de stap waar jij hem omdraait */
+  .ps-klep{display:inline-flex;align-items:center;gap:5px;background:var(--accent-soft);
+    color:var(--cream);border:2px solid var(--ink);border-radius:12px;filter:url(#wobble);
+    padding:1px 10px 2px;font-family:'Caveat',cursive;font-weight:700;font-size:18px;
+    line-height:1.3;margin-bottom:3px;}
+  .ps-klep svg{width:15px;height:15px;flex:none;fill:none;stroke:var(--cream);
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .pc-step.klept{border-color:var(--ink);}
+  .pcs.klept .k b{color:var(--accent-soft);font-weight:400;}
   .pcs.keer{color:var(--accent-soft);}
   .pcs.keer .k{font-weight:700;}
   #pc-art.kantelt svg{animation:bwkantel .65s ease-in-out;}
@@ -2471,13 +2482,13 @@ const FILTER_RECIPES=[
      {t:170, p:0,    k:'doorloop', d:'laten zakken — droog rond 3:30'}]},
 
   {id:'switch', naam:'Switch hybride', voor:['switch','v60'], dose:15, ratio:16.7, temp:94, maling:'medium',
-   over:'Eerst open percoleren voor helderheid, daarna dicht laten staan voor zoetheid en body.',
+   over:'Eerst dicht laten weken voor zoet en body, daarna open laten lopen voor helderheid.',
    stappen:[
-     {t:0,   p:0.20, k:'bloom', d:'klep dicht — giet 3× je dose op en laat bloeien'},
-     {t:45,  p:0.60, k:'giet',  d:'klep open — giet in cirkels bij'},
-     {t:80,  p:1.00, k:'giet',  d:'vul aan tot je eindgewicht'},
-     {t:100, p:0,    k:'wacht', d:'klep dicht — laat het staan en afkoelen'},
-     {t:150, p:0,    k:'doorloop', d:'klep open — laten leeglopen'}]},
+     {t:0,   p:0.20, k:'bloom', klep:'dicht', d:'giet 3× je dose op en laat bloeien'},
+     {t:45,  p:0.60, k:'giet',  klep:'dicht', d:'giet in cirkels bij, alles blijft staan'},
+     {t:80,  p:1.00, k:'giet',  klep:'dicht', d:'vul aan tot je eindgewicht'},
+     {t:100, p:0,    k:'wacht', klep:'dicht', d:'laat het staan en trekken'},
+     {t:150, p:0,    k:'doorloop', klep:'open', d:'laten leeglopen tot het bed droogvalt'}]},
 
   {id:'aeropress', naam:'AeroPress standaard', voor:['aeropress'], dose:16, ratio:15, temp:88, maling:'medium-fijn',
    over:'Immersie met een duwtje. Kort en vergevingsgezind.',
@@ -3637,6 +3648,25 @@ const HOUDINGEN=[
   {v:'omgekeerd', n:'inverted', u:'op de zuiger, alles weekt tot jij omkeert'},
 ];
 function isAeropress(mid){return brewerArtKey(mid)==='aeropress';}
+/* Een Hario Switch is een V60 met een klep onderin. Dicht = het water blijft
+   staan (immersie: zoet en body), open = het loopt door (percolatie: helderheid).
+   De klep is dus geen aparte stap maar een stand die pér stap geldt. */
+function isSwitch(mid){return brewerArtKey(mid)==='switch';}
+const KLEP_STANDEN=[
+  {v:'',      n:'klep —'},
+  {v:'dicht', n:'klep dicht'},
+  {v:'open',  n:'klep open'},
+];
+/* dicht = een gesloten poortje met het water erbovenop, open = het poortje
+   staat uit elkaar en de druppel valt erdoor. Geen plusje, geen minnetje. */
+const KLEP_ICOON={
+  dicht:'<svg viewBox="0 0 24 24" aria-hidden="true">'+
+    '<path d="M12 3.4 Q16 8.6 12.2 12 Q8.2 8.8 11.9 3.6"/>'+
+    '<path d="M3.6 15.4 Q12 14.4 20.4 15.5"/></svg>',
+  open:'<svg viewBox="0 0 24 24" aria-hidden="true">'+
+    '<path d="M3.6 8.4 Q6.4 7.9 8.8 8.3"/><path d="M15.2 8.3 Q17.8 7.9 20.4 8.4"/>'+
+    '<path d="M12 12.4 Q16 17.6 12.2 21 Q8.2 17.8 11.9 12.6"/></svg>',
+};
 /* een omdraaiend pijltje, met de hand getekend zoals de rest */
 const PIJL_OM='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 9.4 Q6.4 4.6 11.6 4.1 Q17 3.9 18.7 8.6"/>'+
   '<path d="M18.9 4.6 Q19 7.6 18.8 8.9 Q16.6 9 14.4 8.7"/>'+
@@ -3653,7 +3683,7 @@ function openRecipe(id,mid){
   if(best&&best.eigen){
     const water=Math.round(best.dose*best.ratio);
     recBewerk={id:best.id,mid:best.mid,
-      stappen:best.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,d:x.d}))};
+      stappen:best.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,klep:x.klep||'',d:x.d}))};
     setVal('rec-naam',best.naam);setVal('rec-dose',best.dose);setVal('rec-water',water);
     setVal('rec-temp',best.temp);setVal('rec-maling',best.maling);setVal('rec-over',best.over||'');
     setVal('rec-stand',best.stand||'');setVal('rec-tijd',best.tijd||'');recBewerk.molen=best.molen||null;
@@ -3663,7 +3693,7 @@ function openRecipe(id,mid){
     const basis=best||recipeById((state.lastRecipe||{})[methode])||recipesFor(methode)[0];
     const water=basis?Math.round(basis.dose*basis.ratio):250;
     recBewerk={id:null,mid:methode,
-      stappen:basis?basis.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,d:x.d})):[]};
+      stappen:basis?basis.stappen.map(x=>({t:x.t,g:x.p?Math.round(water*x.p):'',k:x.k,klep:x.klep||'',d:x.d})):[]};
     setVal('rec-naam',basis?('my '+basis.naam.toLowerCase()):'my recipe');
     setVal('rec-dose',basis?basis.dose:15);setVal('rec-water',water);
     setVal('rec-temp',basis?basis.temp:94);setVal('rec-maling',basis?basis.maling:'medium');
@@ -3741,7 +3771,7 @@ function recMethods(){
   recFamilie();
 }
 function recPickMethod(id){
-  recBewerk.mid=id;recMethods();recMolens();recHouding();
+  recBewerk.mid=id;recMethods();recMolens();recHouding();recSteps();
   const ai=document.getElementById('rec-ai');
   if(ai)ai.style.display=(methodFamily(id)==='espresso')?'none':'';
 }
@@ -3764,14 +3794,20 @@ function recWater(){
 function recRatio(){recWater();}
 function recSteps(){
   const el=document.getElementById('rec-steps');if(!el)return;
+  const klep=isSwitch(recBewerk.mid);   // alleen een Switch heeft een klep
   if(!recBewerk.stappen.length){el.innerHTML='<div class="rec-empty">no steps yet &mdash; add one, or let AI draft it</div>';return;}
   el.innerHTML=recBewerk.stappen.map((st,i)=>`<div class="rec-row">
     <div class="r-t"><input value="${esc(pourFmt(st.t||0))}" inputmode="numeric" placeholder="0:00"
       oninput="formatTime(this)" onblur="recSet(${i},'t',this.value)"></div>
     <div class="r-mid">
-      <select onchange="recSet(${i},'k',this.value)">
-        ${STAP_SOORTEN.map(k=>`<option value="${k}" ${st.k===k?'selected':''}>${k}</option>`).join('')}
-      </select>
+      <div class="r-rij">
+        <select onchange="recSet(${i},'k',this.value)">
+          ${STAP_SOORTEN.map(k=>`<option value="${k}" ${st.k===k?'selected':''}>${k}</option>`).join('')}
+        </select>
+        ${klep?`<select class="r-klep" onchange="recSet(${i},'klep',this.value)">
+          ${KLEP_STANDEN.map(o=>`<option value="${o.v}" ${(st.klep||'')===o.v?'selected':''}>${o.n}</option>`).join('')}
+        </select>`:''}
+      </div>
       <input value="${esc(st.d||'')}" placeholder="what do you do?" oninput="recSet(${i},'d',this.value)">
     </div>
     <div class="r-g"><input value="${st.g===''||st.g==null?'':st.g}" type="number" inputmode="numeric"
@@ -3811,7 +3847,8 @@ function saveRecipe(){
   if(!recBewerk.stappen.length){toast('add at least one step');return;}
   const stappen=recBewerk.stappen.slice().sort((a,b)=>a.t-b.t).map(st=>({
     t:st.t||0, p:(st.g===''||st.g==null)?0:Math.max(0,Math.min(1.5,st.g/water)),
-    k:st.k||'giet', d:(st.d||'').trim()||st.k||'giet'}));
+    k:st.k||'giet', klep:(isSwitch(recBewerk.mid)&&st.klep)||null,
+    d:(st.d||'').trim()||st.k||'giet'}));
   const r={id:recBewerk.id||('r_'+uid().slice(0,6)),eigen:true,mid:recBewerk.mid,
     fam:methodFamily(recBewerk.mid),
     tijd:(document.getElementById('rec-tijd').value||'').trim(),
@@ -3860,6 +3897,7 @@ async function aiRecipeSchema(){
       '.'+gearPromptBlock(recBewerk.mid)+beanPromptBlock(bean)+'\n'+APP_RULES+'\n'+FILTER_RULES+'\n'+SCHEMA_RULES+'\n'+
       (molen?('De gebruiker maalt met: '+molen+'. Geef de maalstand in de schaal van die molen (klikken of getal) en noem geen andere molen.\n'):'')+
       'Geef ALLEEN JSON zonder markdown: {"temp":93,"maling":"medium","stand":"","over":"","stappen":[{"t":"0:00","k":"bloom","g":45,"d":""}]}. '+
+      (isSwitch(recBewerk.mid)?'Zet bij ELKE stap ook "klep":"dicht" of "klep":"open". ':'')+
       'maling = omschrijving in woorden (bijvoorbeeld medium-grof). stand = KORTE maalstand voor het invulveld'+
       (molen?(' op de '+molen):'')+' (alleen een getal of klikken, GEEN uitleg en GEEN merknaam). '+
       't = tijd vanaf start als mm:ss. k = een van: '+STAP_SOORTEN.join(', ')+'. '+
@@ -3867,6 +3905,13 @@ async function aiRecipeSchema(){
       'laat g weg bij een stap waarbij je niet giet. d = korte instructie in het Nederlands, max 12 woorden, '+
       'ZONDER gramgetallen -- het aantal gram staat al in g en wordt ernaast getoond. '+
       'Vier tot zeven stappen, eindig met een doorloop-stap. over = \u00e9\u00e9n korte zin over dit recept.'+
+      (isSwitch(recBewerk.mid)?('\nDeze zetter is een Hario Switch: een V60 met een klep onderin. '+
+        'Klep DICHT = het water blijft staan (immersie: meer zoet, meer body, vergevingsgezinder). '+
+        'Klep OPEN = het loopt door (percolatie: meer helderheid en definitie). De klep is een stand, '+
+        'geen aparte stap: geef bij elke stap de stand die er tijdens die stap geldt. Het gangbare '+
+        'recept houdt hem dicht voor de bloom en een weekfase en opent hem daarna om leeg te laten '+
+        'lopen; open beginnen en aan het eind sluiten mag ook, dat wordt romiger maar minder scherp. '+
+        'Zorg dat hij aan het eind OPEN staat, anders loopt de koffie nooit in de kop.'):'')+
       (isAeropress(recBewerk.mid)?('\nDeze zetter staat '+
         (recBewerk.houding==='omgekeerd'?'OMGEKEERD':'NORMAAL')+'. '+
         (recBewerk.houding==='omgekeerd'
@@ -3884,6 +3929,7 @@ async function aiRecipeSchema(){
       t:parseTimeSec(String(x.t||'0:00'))||0,
       g:(x.g==null||x.g==='')?'':Math.round(parseFloat(x.g)||0),
       k:STAP_SOORTEN.includes(x.k)?x.k:'giet',
+      klep:(isSwitch(recBewerk.mid)&&['open','dicht'].includes(x.klep))?x.klep:'',
       d:(x.d||'').trim()}));
     if(!rijen.length)throw new Error('geen stappen');
     recBewerk.stappen=rijen.sort((a,b)=>a.t-b.t);
@@ -3917,6 +3963,23 @@ function brewerArtKey(methodId){
 }
 /* Staat hij omgekeerd, dan blijft dat zo tot de keer-stap geweest is. Daarna
    staat hij gewoon rechtop -- en dat verschil zie je gebeuren. */
+/* Op welke stappen draai jij de klep om? Alleen daar hoort hij in beeld -- een
+   badge op elke stap zou alleen maar ruis zijn. */
+function pourKlepDraait(){
+  let vorige=null;
+  return pc.steps.map(st=>{
+    const k=st.klep||'';
+    if(!k)return '';
+    const wissel=(k!==vorige); vorige=k;
+    return wissel?k:'';
+  });
+}
+/* De stand op stap i: de laatst vastgelegde klep vanaf hier terugkijkend. */
+function pourKlepStand(i){
+  for(let j=Math.min(i,pc.steps.length-1);j>=0;j--)
+    if(pc.steps[j].klep)return pc.steps[j].klep;
+  return '';
+}
 function pourOmgekeerd(){
   const r=recipeById(pc.rid);
   if(!r||r.houding!=='omgekeerd')return false;
@@ -3956,7 +4019,11 @@ function paintBrewer(){
   if(stream)stream.classList.toggle('on',!!(pc.run&&pourGieten(pc.el)));
   const st=pc.steps[pourCur()];
   const v=el.querySelector('#bw-valve');
-  if(v)v.classList.toggle('dicht',!!(st&&st.k==='wacht'));
+  if(v){
+    // staat de klep in het recept, dan is dat leidend; anders de oude gok
+    const stand=pourKlepStand(pourCur());
+    v.classList.toggle('dicht',stand?(stand==='dicht'):!!(st&&st.k==='wacht'));
+  }
 }
 /* ---------------- de kaartenstapel ----------------
    Bij filter wordt het formulier een stapel kaarten: dicht is elke kaart één
@@ -4150,8 +4217,11 @@ function renderPour(){
 function pourSchema(){
   const el=document.getElementById('pc-schema');if(!el)return;
   if(!pc.steps.length){el.innerHTML='';return;}
-  el.innerHTML='<div class="pcs-h"></div>'+pc.steps.map(st=>
-    '<div class="pcs'+(st.k==='keer'?' keer':'')+'"><span class="t">'+pourFmt(st.t)+'</span><span class="k">'+esc(st.k)+
+  const draait=pourKlepDraait();
+  el.innerHTML='<div class="pcs-h"></div>'+pc.steps.map((st,i)=>
+    '<div class="pcs'+(st.k==='keer'?' keer':'')+(draait[i]?' klept':'')+'"><span class="t">'+
+    pourFmt(st.t)+'</span><span class="k">'+
+    (draait[i]?('<b>klep '+draait[i]+'</b> \u00b7 '):'')+esc(st.k)+
     ' \u2014 '+esc(st.d)+'</span><span class="g">'+(st.g?st.g+' g':'')+'</span></div>').join('');
 }
 // welk recept staat er geladen -- en de rij om een ander te kiezen
@@ -4229,20 +4299,26 @@ function pourSteps(){
     return;
   }
   const cur=pourCur();
+  const draait=pourKlepDraait();
   el.innerHTML=pc.steps.map((st,i)=>{
     const at=st.t+pc.shift;
     const klaar=i<cur;
     // alles wat verder terug ligt dan de vorige stap wordt een streepje,
     // zodat de tekening in beeld blijft terwijl je giet
-    if(i<cur-1&&st.k!=='keer')return '<div class="pc-mini" title="'+esc(st.k)+' \u2014 done"></div>';
+    if(i<cur-1&&st.k!=='keer'&&!draait[i])
+      return '<div class="pc-mini" title="'+esc(st.k)+' \u2014 done"></div>';
     const nu=(i===cur)&&pc.run;
     const cls=klaar?'klaar':(nu?'nu':'straks');
     const tijd=(klaar&&pc.marks[i]!=null)?pourFmt(pc.marks[i]):pourFmt(Math.max(0,at));
     const g=st.g?('<div class="ps-g">'+st.g+' g</div>'):'';
     const tik=nu?(' onclick="pourTick('+i+')"'):'';
     const keer=st.k==='keer';
-    return '<div class="pc-step '+cls+(keer?' keer':'')+'"'+tik+'><div class="ps-t">'+tijd+'</div>'+
-      '<div class="ps-b"><div class="ps-k">'+(keer?(PIJL_OM+'turn it over'):esc(st.k))+'</div>'+
+    const kl=draait[i];
+    const klepBadge=kl?('<div class="ps-klep '+kl+'">'+KLEP_ICOON[kl]+
+      (kl==='dicht'?'klep dicht':'klep open')+'</div>'):'';
+    return '<div class="pc-step '+cls+(keer?' keer':'')+(kl?' klept':'')+'"'+tik+
+      '><div class="ps-t">'+tijd+'</div>'+
+      '<div class="ps-b">'+klepBadge+'<div class="ps-k">'+(keer?(PIJL_OM+'turn it over'):esc(st.k))+'</div>'+
       '<div class="ps-d">'+esc(st.d)+'</div></div>'+g+'</div>';
   }).join('');
   const of=document.getElementById('pc-of');
@@ -5929,7 +6005,9 @@ const LESSONS={
   filter:[
     {type:'draw',h:'percolatie of immersie',svg:'<svg viewBox="0 0 300 158"><path d="M18 34 Q60 28 104 34"/><path class="b" d="M21 37 Q60 31 101 37"/><path d="M20 36 Q40 84 54 116"/><path class="b" d="M23 38 Q42 85 56 118"/><path d="M102 36 Q82 84 68 116"/><path class="b" d="M99 38 Q80 85 66 118"/><path d="M54 116 Q61 120 68 116"/><path class="hi" d="M31 54 Q61 49 91 54"/><path class="hi dash" d="M48 60 Q50 88 56 114"/><path class="hi dash" d="M76 60 Q74 88 68 114"/><path class="hi" d="M59 122 Q62 130 60 138"/><path class="hi" d="M55 132 L60 140 L65 131"/><text x="14" y="154">percolatie</text><path d="M198 34 Q240 28 284 34"/><path class="b" d="M201 37 Q240 31 281 37"/><path d="M200 36 Q220 84 234 116"/><path class="b" d="M203 38 Q222 85 236 118"/><path d="M282 36 Q262 84 248 116"/><path class="b" d="M279 38 Q260 85 246 118"/><path d="M234 116 Q241 120 248 116"/><path class="hi" d="M210 50 Q241 45 272 50"/><path class="hi b" d="M220 76 Q241 72 262 76"/><path class="hi b" d="M228 94 Q241 91 254 94"/><path d="M232 122 Q241 118 250 122"/><path class="hi" d="M240 126 Q248 130 240 136"/><text x="214" y="154">immersie</text></svg>',
      c:'de twee families waar elk filterrecept tussenin zit',
-     t:'Bij percolatie (V60, Chemex, Kalita) stroomt het water door het bed heen: elke druppel maakt \u00e9\u00e9n reis en de contacttijd bepaal je met je maling. Bij immersie (AeroPress, French press, cold brew) staat alles even lang onder water, wat een stuk vergevingsgezinder is. De Hario Switch doet allebei: eerst open percoleren voor helderheid, daarna dicht voor zoetheid en body.'},
+     t:'Bij percolatie (V60, Chemex, Kalita) stroomt het water door het bed heen: elke druppel maakt \u00e9\u00e9n reis, en de contacttijd bepaal je met je maling. Bij immersie (AeroPress, French press, cold brew) staat alles even lang onder water. Dat is vergevingsgezinder, want een paar seconden meer of minder verandert weinig \u2014 bij percolatie wel.'},
+    {type:'p',h:'wat dat met je smaak doet',t:'Bij percolatie is het water dat langs de koffie stroomt steeds vers, dus blijft het gretig oplossen. Je haalt er de vluchtige, lichte dingen het beste uit: bloemig, citrus, thee \u2014 en de kop is helder, met een dunner mondgevoel, want het papier ziet elke druppel \u00e9\u00e9n keer. Bij immersie raakt het water rond de koffie langzaam verzadigd en stopt de extractie zichzelf af. Dat levert minder scherpe randen op en meer zoet, body en rondheid, maar ook minder definitie: het fijne onderscheid tussen twee bloemige bonen vlakt af. Vandaar de vuistregel \u2014 wil je een boon lezen, percoleer; wil je hem lekker en vergevingsgezind, dompel onder.'},
+    {type:'p',h:'de Hario Switch: allebei, in \u00e9\u00e9n brouwsel',t:'De Switch is een V60 met een klep onderin, en dat maakt het geen derde methode maar een schuifknop tussen de twee. Klep dicht = immersie: het water blijft staan en je bouwt zoet en body op. Klep open = percolatie: het loopt door en je wint helderheid. Het gangbare recept sluit de klep voor de bloom en een weekfase, en opent hem daarna om leeg te laten lopen \u2014 zo krijg je de zoetheid van een immersie met de helderheid van een dripper. Draai je de volgorde om (eerst open, aan het eind dicht), dan hou je juist de laatste, zwakkere loop vast en wordt het romiger maar minder scherp. Op je Switch is de klep dus een smaakknop, en hij staat in de pour coach bij elke stap.'},
     {type:'p',h:'de vier knoppen',t:'Je stuurt een filterkop met vier dingen: maling, ratio, temperatuur en gietschema. De maling is verreweg de sterkste \u2014 begin daar, en verander \u00e9\u00e9n ding tegelijk. Anders weet je achteraf niet wat het deed.'},
     {type:'p',h:'ratio en maling doen niet hetzelfde',t:'De ratio bepaalt hoe sterk je kop is; de maling bepaalt hoe ver je extraheert. Slap maar niet bitter? Dat is de ratio: minder water of meer koffie, richting 1:15. Zuur of juist bitter? Dat is de maling. Het standaardvertrekpunt is 1:16, met 1:15 voor steviger en 1:17 voor helderder.'},
     {type:'draw',h:'waarom je bloomt',svg:'<svg viewBox="0 0 300 160"><path d="M18 40 Q56 34 94 40"/><path class="b" d="M21 43 Q56 37 91 43"/><path d="M20 42 Q36 84 46 112"/><path d="M92 42 Q76 84 66 112"/><path class="hi" d="M28 36 Q38 6 56 4 Q74 5 84 36"/><path class="hi b" d="M32 34 Q42 12 56 10 Q70 11 80 34"/><path class="hi" d="M46 14 Q52 20 48 26"/><text x="16" y="134">vers: bolt op</text><text x="16" y="149">3× dose, 45 s</text><path class="dash" d="M112 66 Q136 62 160 66"/><path d="M153 60 L162 66 L153 72"/><path d="M182 40 Q220 34 258 40"/><path class="b" d="M185 43 Q220 37 255 43"/><path d="M184 42 Q200 84 210 112"/><path d="M256 42 Q240 84 230 112"/><path class="hi" d="M194 34 Q220 26 246 34"/><text x="180" y="134">oud: blijft vlak</text><text x="180" y="149">2× dose, 30 s</text></svg>',
