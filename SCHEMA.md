@@ -148,6 +148,11 @@ Intern heeft een eigen recept ook `houding`: `"normaal"` of `"omgekeerd"` bij ee
 aeropress, en `null` bij alle andere methodes. Staat hij op omgekeerd, dan zit er
 een stap met `k:"keer"` in `stappen` op het moment dat je hem omdraait.
 
+Bij een Hario Switch draagt elke stap in `stappen` daarnaast een `klep`:
+`"dicht"` (het water blijft staan — immersie) of `"open"` (het loopt door —
+percolatie), en `null` bij elke andere methode. Het is een stand, geen
+gebeurtenis: de app laat hem alleen zien op de stap waar hij verandert.
+
 ### dialLog
 
 Elke poging apart, in de volgorde waarin je ze deed. Per boon + methode, laatste
