@@ -43,12 +43,22 @@
   padding:10px 13px;font-size:15px;line-height:1.35;margin-bottom:12px;}
 .waarsch b{font-family:'Caveat',cursive;font-size:21px;display:block;line-height:1.1;
   margin-bottom:1px;}
-.strook{display:flex;align-items:center;gap:8px;background:var(--card);
-  border:2px solid var(--line);border-radius:16px;padding:7px 11px;font-size:14px;
-  color:var(--ink-soft);filter:url(#wobble);margin-bottom:10px;}
-.strook .op{width:34px;height:7px;border:1.5px solid var(--line);border-radius:4px;
-  position:relative;overflow:hidden;flex:none;}
-.strook .op i{position:absolute;inset:0 82% 0 0;background:#a8603f;}
+/* ---- de melding: twee keer, en dan niet meer ---- */
+.pop-laag{position:absolute;inset:0;background:rgba(58,48,42,.44);
+  display:flex;align-items:center;justify-content:center;padding:20px;}
+.pop{width:100%;background:var(--paper);border:2px solid var(--ink);border-radius:24px;
+  padding:14px 16px 13px;filter:url(#wobble);}
+.pop .k{font-family:'Caveat',cursive;font-size:28px;line-height:1.05;}
+.pop .m{font-size:15px;line-height:1.35;margin-top:2px;}
+.pop .m b{white-space:nowrap;}
+.meter{height:10px;border:2px solid var(--line);border-radius:6px;position:relative;
+  overflow:hidden;margin:10px 0 3px;}
+.meter i{position:absolute;top:0;bottom:0;left:0;background:var(--accent-soft);}
+.meter i.rood{background:#a8603f;}
+.pop .schaal{display:flex;justify-content:space-between;font-size:12px;
+  color:var(--ink-soft);}
+.pop .knoppen{display:flex;gap:8px;margin-top:12px;}
+.pop .knoppen .knop{padding:9px;font-size:16px;}
 
 .schuif{display:flex;align-items:center;gap:10px;padding:9px 13px;margin-bottom:10px;}
 .schuif .tx{flex:1;font-size:15px;line-height:1.3;}
@@ -202,13 +212,14 @@
 </div>
 
 <div class="mk-sect">
-  <h2>2 · waar je het merkt zonder te zoeken</h2>
-  <p>Niemand opent instellingen om te kijken hoe het ervoor staat. De waarschuwing
-    hoort dus te komen waar je hem uitgeeft: één regel boven de AI-knop, en pas
-    vanaf 20%. Daarboven zie je hem nooit.</p>
-  <p>En als het écht op is bij Anthropic — jouw plafond staat daar los van — krijg je
-    nu <code>api 400</code> te zien. Dat wordt de zin die er in het antwoord van
-    Anthropic zelf bij zat.</p>
+  <h2>2 · twee meldingen, en daarna niets meer</h2>
+  <p>Eén keer bij <b>20%</b>, één keer bij <b>10%</b>. Daarna zwijgt de app tot de
+    nieuwe maand — ook als je doorgaat tot nul. Geen strookjes boven knoppen, geen
+    stipjes in de menubalk, geen herinneringen: de kaart in instellingen staat er
+    altijd voor als je wilt kijken.</p>
+  <p>De melding komt waar je op dat moment bent, want hij komt vlak nadat een
+    AI-antwoord binnen is. <i>ok</i> laat hem verdwijnen; <i>settings</i> brengt je
+    naar de kaart. Op de 1e van de maand staan ze allebei weer scherp.</p>
 </div>
 
 <div class="mk-rij">
@@ -223,24 +234,62 @@
           <div style="font-size:16px;margin-top:3px">what should I buy if I liked
             that Ethiopian but want less acidity?</div>
         </div>
-        <div class="strook"><span class="op"><i></i></span>
-          AI budget nearly up — about 12 questions left</div>
-        <button class="knop" style="font:inherit;color:var(--cream)">ask the finder</button>
+        <div class="sketch card" style="margin-bottom:11px">
+          <div style="font-size:15px">Try a washed Colombian from Huila — same clarity,
+            softer acid. On the map it sits…</div>
+        </div>
+        <button class="knop" style="font:inherit;color:var(--cream)">ask again</button>
+      </div>
+      <div class="nav"><span>home</span><span>brews</span><span class="on">beans</span>
+        <span>learn</span><span>me</span></div>
+      <div class="pop-laag"><div class="pop">
+        <div class="k">a fifth of your AI budget left</div>
+        <div class="m"><b>$1.00</b> of your $5.00 is left this month — about
+          <b>45 questions</b> like that one.</div>
+        <div class="meter"><i style="right:80%"></i></div>
+        <div class="schaal"><span>$0</span><span>$5.00 · resets 1 Sept</span></div>
+        <div class="m" style="margin-top:8px;color:var(--ink-soft);font-size:14px">
+          You'll hear this once more at 10%, then not again this month.</div>
+        <div class="knoppen">
+          <button class="knop leeg" style="font:inherit;color:var(--ink)">settings</button>
+          <button class="knop" style="font:inherit;color:var(--cream)">ok</button>
+        </div>
+      </div></div>
+    </div>
+    <figcaption><b>melding 1 — bij 20%</b>, vlak na een antwoord, waar je ook bent</figcaption>
+  </figure>
 
-        <div class="eyebrow"><span>en als het tegoed écht op is</span>
-          <span>nu: <code>api 400</code></span></div>
-        <div class="sketch card" style="border-color:#a8603f;margin-bottom:0">
-          <div class="hand" style="font-size:22px;line-height:1.1">Anthropic says no</div>
-          <div style="font-size:15px;margin-top:2px">Your credit balance is too low to
-            access the Anthropic API.</div>
-          <div class="zacht" style="margin-top:5px">top up at console.anthropic.com,
-            then try again</div>
+  <figure class="mk-fig">
+    <div class="phone">
+      <div class="statusbar">9:41</div>
+      <div class="screen">
+        <div class="kop-rij"><div class="t">Beans</div><div class="r">+ new</div></div>
+        <div class="sketch card" style="margin:8px 0 11px">
+          <div class="hand" style="font-size:23px;line-height:1.1">Finca La Ilusión</div>
+          <div class="zacht">El Salvador · Apaneca-Ilamatepec · washed bourbon</div>
+          <div class="chips" style="margin-top:7px">
+            <span class="chip">red apple</span><span class="chip">brown sugar</span>
+            <span class="chip">almond</span></div>
+          <div class="zacht" style="margin-top:7px">read off the label ✓</div>
         </div>
       </div>
       <div class="nav"><span>home</span><span>brews</span><span class="on">beans</span>
         <span>learn</span><span>me</span></div>
+      <div class="pop-laag"><div class="pop">
+        <div class="k">a tenth left — last word on it</div>
+        <div class="m"><b>$0.50</b> left this month, about <b>22 questions</b>. From here
+          the app stays quiet, whether you stop or spend the rest.</div>
+        <div class="meter"><i class="rood" style="right:90%"></i></div>
+        <div class="schaal"><span>$0</span><span>$5.00 · resets 1 Sept</span></div>
+        <div class="m" style="margin-top:8px;color:var(--ink-soft);font-size:14px">
+          Settings → AI has the full picture whenever you want it.</div>
+        <div class="knoppen">
+          <button class="knop leeg" style="font:inherit;color:var(--ink)">settings</button>
+          <button class="knop" style="font:inherit;color:var(--cream)">ok</button>
+        </div>
+      </div></div>
     </div>
-    <figcaption><b>in beeld waar je hem uitgeeft</b> — één regel, pas onder de 20%</figcaption>
+    <figcaption><b>melding 2 — bij 10%</b>, en daarna is het stil tot de 1e</figcaption>
   </figure>
 
   <figure class="mk-fig">
@@ -283,6 +332,22 @@
 </div>
 
 <div class="mk-sect">
+  <h2>3 · en als je tegoed bij Anthropic écht op is</h2>
+  <p>Dat staat los van jouw plafond, en dat merk je nu aan <code>api 400</code> — een
+    getal waar niemand iets aan heeft. In het antwoord van Anthropic zit een gewone
+    zin die uitlegt wat er aan de hand is; die laten we zien in plaats van de code:</p>
+  <div class="mk-let" style="border-color:#a8603f">
+    <b style="font-family:'Caveat',cursive;font-size:23px;display:block;line-height:1.1">Anthropic
+      says no</b>
+    Your credit balance is too low to access the Anthropic API.<br>
+    <span class="zacht">top up at console.anthropic.com, then try again</span>
+  </div>
+  <p>Dat is geen melding die de app zelf verzint — het is letterlijk wat Anthropic
+    terugstuurde. Verder verandert er niets: de AI-knoppen blijven staan en doen het
+    weer zodra je hebt bijgevuld.</p>
+</div>
+
+<div class="mk-sect">
   <h2>Wat ik anders deed dan je vroeg</h2>
   <ul>
     <li><b>Het grote getal blijft geld, maar eronder staan vragen.</b> $3,71 zegt je
@@ -293,8 +358,11 @@
       eigenlijk stelt.</li>
     <li><b>Erbij: waar het heen ging.</b> Als het te snel gaat wil je weten welke knop
       het opmaakte. Dat weet de app toch al, want ze roept elke knop zelf aan.</li>
-    <li><b>De melding komt niet in instellingen.</b> Eén regel boven de AI-knop zelf,
-      pas onder de 20%, en nooit als er ruimte zat is. Voor iemand die net begint
+    <li><b>De melding zegt hoeveel vragen, niet hoeveel procent.</b> "20% over" moet
+      je omrekenen; "nog ongeveer 45 vragen" niet. Het percentage bepaalt wánneer hij
+      komt, het aantal vragen staat er in.</li>
+    <li><b>Twee keer, en dan stil.</b> Bij 20% en bij 10%, verder niets — geen strook
+      boven de AI-knop, geen stipje in de menubalk. Voor iemand die net begint
       verandert er dus niets aan het scherm.</li>
   </ul>
 </div>
