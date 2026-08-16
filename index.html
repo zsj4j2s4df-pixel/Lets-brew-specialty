@@ -658,7 +658,7 @@
   .set-body{flex:1;}
   .set-t{font-size:25px;line-height:1;}
   .set-d{color:var(--ink-soft);font-size:16px;line-height:1.4;}
-  #ai-key{width:100%;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:11px 14px;font-family:monospace;font-size:15px;color:var(--ink);}
+  #ai-key,.ai-veld{width:100%;background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:11px 14px;font-family:monospace;font-size:15px;color:var(--ink);}
   #reminder-time{background:var(--paper);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:9px 14px;font-family:'Patrick Hand',cursive;font-size:19px;color:var(--ink);}
   #ai-key:focus{outline:none;border-color:var(--ink);}
   .profile-btn{width:100%;background:var(--card);border:2px solid var(--line);filter:url(#wobble);border-radius:14px;padding:12px;font-family:'Caveat',cursive;font-weight:700;font-size:21px;color:var(--ink);cursor:pointer;margin-bottom:10px;}
@@ -1201,6 +1201,9 @@
   .aib-chips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 2px;}
   .aib-chips .lp{padding:8px 14px;font-size:17px;}
   .aib-chips .lp.sel{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--cream);}
+  .aib-prijs{display:flex;gap:10px;}
+  .aib-prijs label{flex:1;display:flex;align-items:center;gap:7px;
+    color:var(--ink-soft);font-size:15px;}
   .aib-laag{position:fixed;inset:0;background:rgba(58,48,42,.45);display:flex;
     align-items:center;justify-content:center;z-index:70;padding:22px;}
   .aib-pop{width:100%;max-width:390px;background:var(--paper);border:2px solid var(--ink);
@@ -2003,9 +2006,11 @@
         </div>
         <div class="adv-body">
         <div id="ai-key-wrap" class="hidden">
-          <div class="set-d" style="margin:6px 0 8px">paste your own API key here. it stays on this device only.</div>
+          <div class="set-d" style="margin:6px 0 8px">pick who answers, then paste that provider’s own API key. it stays on this device only.</div>
+          <div class="aib-chips" id="ai-prov-chips"></div>
           <input id="ai-key" type="password" placeholder="sk-ant-..." onchange="saveKey()">
           <div class="set-d" id="ai-key-status" style="margin-top:6px"></div>
+          <div id="ai-model-wrap"></div>
           <div id="ai-bud-wrap" class="aib"></div>
         </div>
         <div class="set-d" id="ai-off-note" style="margin-top:8px">AI is off. turn it on and enter a key to use label scanning and recipes. without a key the rest of the app works fine.</div>
@@ -3037,7 +3042,7 @@ async function quickBrew(){
       ('\n'+APP_RULES+'\n'+BEAN_GRIND_RULES+'\n'+(esp?ESPRESSO_RULES:FILTER_RULES)+'\n')+
       `Geef ALLEEN JSON terug zonder markdown: {"bean":"","title":"","drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","tags":["",""],"steps":["",""],"tip":""}. `+
       `bean = exacte naam van de gekozen boon uit de lijst (of korte omschrijving als er geen voorraad is). title = korte pakkende naam. drink = melkdranknaam of "espresso" (laat leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord — GEEN uitleg of merknaam). grindNote = korte uitleg over de maling (mag molen noemen). dose/yield in gram, temp in °C, ratio als 1:x, time als mm:ss. Kort en praktisch, in het Nederlands.`;
-    const txt=await callClaude([{role:"user",content:prompt}],900,'brew');
+    const txt=await askAI([{role:"user",content:prompt}],900,'brew');
     const d=extractJSON(txt);
     let bean=null;
     if(d.bean){const bn=(''+d.bean).toLowerCase().trim();
@@ -3348,7 +3353,7 @@ async function updateDialIn(beanId,method){
       `Oordeel over de laatste ${esp?'shot':'kop'}: ${richting}.\n`+
       (esp?'':`De doorlooptijd (van de laatste giet tot het bed droogvalt) weegt zwaarder dan de totale tijd.\n`)+
       `Geef de beste maalstand voor de VOLGENDE poging, in exact die richting. Geef ALLEEN JSON zonder markdown: {"grind":"","reason":""}. grind = KORTE maalstand (getal/klikken of relatief zoals "+1" of "-0.5", passend bij de schaal die de gebruiker gebruikt; GEEN uitleg). reason = één korte zin met de juiste richting (bv. "te weinig opbrengst → grover"). Nederlands.`;
-    const txt=await callClaude([{role:"user",content:prompt}],250,'brew');
+    const txt=await askAI([{role:"user",content:prompt}],250,'brew');
     const d=extractJSON(txt);
     if(d&&d.grind){
       bean.dialIn={method,grind:conciseGrind(d.grind),reason:(d.reason||'').trim(),ts:Date.now()};
@@ -3988,7 +3993,7 @@ async function aiRecipeSchema(){
             'vluchtige smaken, maar je hebt de weektijd minder in de hand en onderextractie ligt op de '+
             'loer. Houd het daarom kort en werk liever met een iets fijnere maling dan met lang wachten. '+
             'Gebruik GEEN keer-stap.')):'');
-    const d=extractJSON(await callClaude([{role:'user',content:prompt}],900,'brew'));
+    const d=extractJSON(await askAI([{role:'user',content:prompt}],900,'brew'));
     if(d.temp)setVal('rec-temp',d.temp);
     if(d.maling)setVal('rec-maling',d.maling);
     if(d.stand)setVal('rec-stand',conciseGrind(d.stand));
@@ -5766,38 +5771,105 @@ function delBean(id){
   save();renderBeans();toast('🗑 bean deleted');
 }
 
-/* ---------------- AI: etiket scannen ---------------- */
-async function callClaude(messages, maxTokens, bron){
-  if(!aiEnabled()||!getKey())throw new Error('AI uit of geen sleutel');
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true",
-      "x-api-key":getKey(),"anthropic-version":"2023-06-01"},
-    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:maxTokens||1000,messages})
+/* ---------------- welke AI antwoordt --------------------------------------
+   De app praat vanuit de browser rechtstreeks met de aanbieder die JIJ kiest.
+   Elke aanbieder wil zijn eigen vorm: Anthropic wil `messages` met `max_tokens`
+   en geeft `content[]` terug, OpenAI wil chat/completions met een Bearer-token
+   en geeft `choices[0].message.content` terug. Binnenin houdt de app één vorm
+   aan -- die van Anthropic -- en vertaalt per aanbieder. Wil je er een derde
+   bij, dan is dat één regel in deze lijst.                                    */
+function naarOpenAI(messages){
+  return messages.map(m=>{
+    if(typeof m.content==='string')return {role:m.role,content:m.content};
+    const delen=(m.content||[]).map(c=>{
+      if(!c)return null;
+      if(c.type==='text')return {type:'text',text:c.text};
+      if(c.type==='image'&&c.source&&c.source.type==='base64')
+        return {type:'image_url',image_url:{url:'data:'+c.source.media_type+';base64,'+c.source.data}};
+      return null;
+    }).filter(Boolean);
+    return {role:m.role,content:delen};
   });
-  if(!res.ok)throw new Error(await apiFout(res));
+}
+const AI_AANBIEDERS=[
+  {id:'anthropic',naam:'Anthropic',merk:'Claude',hint:'sk-ant-...',
+   model:'claude-sonnet-4-6',prijs:{in:3,uit:15},waar:'console.anthropic.com',
+   url:()=>'https://api.anthropic.com/v1/messages',
+   kop:k=>({'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true',
+            'x-api-key':k,'anthropic-version':'2023-06-01'}),
+   lijf:(m,mx,model,stream)=>{
+     const b={model:model,max_tokens:mx,messages:m};
+     if(stream)b.stream=true;
+     return b;},
+   lees:d=>Array.isArray(d.content)
+     ?d.content.filter(i=>i&&i.type==='text').map(i=>i.text).join('\n')
+     :(typeof d.content==='string'?d.content:''),
+   verbruik:d=>d.usage,
+   // bij een stream komt het verbruik in twee stukken: de invoer meteen, de uitvoer aan het eind
+   stroom:(ev,v)=>{
+     if(ev.type==='message_start'&&ev.message&&ev.message.usage)Object.assign(v,ev.message.usage);
+     if(ev.type==='message_delta'&&ev.usage&&ev.usage.output_tokens!=null)v.output_tokens=ev.usage.output_tokens;
+     return (ev.type==='content_block_delta'&&ev.delta&&ev.delta.text)?ev.delta.text:'';}},
+
+  {id:'openai',naam:'OpenAI',merk:'GPT',hint:'sk-...',
+   model:'gpt-4o-mini',prijs:{in:0.15,uit:0.6},waar:'platform.openai.com',
+   url:()=>'https://api.openai.com/v1/chat/completions',
+   kop:k=>({'Content-Type':'application/json','Authorization':'Bearer '+k}),
+   lijf:(m,mx,model,stream,oud)=>{
+     const b={model:model,messages:naarOpenAI(m)};
+     b[oud?'max_tokens':'max_completion_tokens']=mx;
+     if(stream){b.stream=true;b.stream_options={include_usage:true};}
+     return b;},
+   lees:d=>(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||'',
+   verbruik:d=>d.usage&&{input_tokens:d.usage.prompt_tokens,output_tokens:d.usage.completion_tokens},
+   stroom:(ev,v)=>{
+     if(ev.usage)Object.assign(v,{input_tokens:ev.usage.prompt_tokens,output_tokens:ev.usage.completion_tokens});
+     const c=ev.choices&&ev.choices[0];
+     return (c&&c.delta&&c.delta.content)||'';}},
+];
+function aiProv(){return localStorage.getItem('scc_ai_prov')||'anthropic';}
+function aiAanbieder(id){return AI_AANBIEDERS.find(x=>x.id===(id||aiProv()))||AI_AANBIEDERS[0];}
+// de sleutel van Anthropic stond er al onder de oude naam -- die laten we staan
+function aiSleutelNaam(id){id=id||aiProv();return id==='anthropic'?'scc_ai_key':'scc_ai_key_'+id;}
+function aiModel(id){id=id||aiProv();return (localStorage.getItem('scc_ai_model_'+id)||'').trim()||aiAanbieder(id).model;}
+// dollar per token; wat jij in de app zet wint van wat de app dacht te weten
+function aiTarief(id){
+  id=id||aiProv();
+  try{const t=JSON.parse(localStorage.getItem('scc_ai_prijs_'+id)||'null');
+    if(t&&t.in>=0&&t.uit>=0)return {in:t.in/1e6,uit:t.uit/1e6};}catch(e){}
+  const p=aiAanbieder(id).prijs;
+  return {in:p.in/1e6,uit:p.uit/1e6};
+}
+
+/* ---------------- AI: één aanroep, welke aanbieder er ook staat ---------- */
+async function askAI(messages, maxTokens, bron){
+  if(!aiEnabled()||!getKey())throw new Error('AI uit of geen sleutel');
+  const a=aiAanbieder(),mx=maxTokens||1000;
+  let res=await fetch(a.url(),{method:"POST",headers:a.kop(getKey()),
+    body:JSON.stringify(a.lijf(messages,mx,aiModel(),false,false))});
+  if(!res.ok){
+    const m=await apiFout(res);
+    // sommige modellen willen max_tokens, andere max_completion_tokens -- één keer omdraaien
+    if(res.status===400&&/max_(completion_)?tokens/.test(m)){
+      res=await fetch(a.url(),{method:"POST",headers:a.kop(getKey()),
+        body:JSON.stringify(a.lijf(messages,mx,aiModel(),false,true))});
+      if(!res.ok)throw new Error(await apiFout(res));
+    }else throw new Error(m);
+  }
   const data=await res.json();
-  try{aiTel(data.usage,bron);setTimeout(aiMeldNa,900);}catch(e){}
-  let out='';
-  if(Array.isArray(data.content)){
-    out=data.content.filter(i=>i&&i.type==='text').map(i=>i.text).join('\n');
-  }else if(typeof data.content==='string'){out=data.content;}
+  try{aiTel(a.verbruik(data),bron);setTimeout(aiMeldNa,900);}catch(e){}
+  const out=a.lees(data);
   if(!out)throw new Error('leeg antwoord');
   return out;
 }
 // streamende variant: roept onDelta(volledigeTekst) aan terwijl het antwoord binnenkomt
-async function callClaudeStream(messages, maxTokens, onDelta, bron){
+async function askAIStream(messages, maxTokens, onDelta, bron){
   if(!aiEnabled()||!getKey())throw new Error('AI uit of geen sleutel');
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true",
-      "x-api-key":getKey(),"anthropic-version":"2023-06-01"},
-    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:maxTokens||600,stream:true,messages})
-  });
+  const a=aiAanbieder();
+  const res=await fetch(a.url(),{method:"POST",headers:a.kop(getKey()),
+    body:JSON.stringify(a.lijf(messages,maxTokens||600,aiModel(),true,false))});
   if(!res.ok||!res.body)throw new Error(res.body?await apiFout(res):('api '+res.status));
   const reader=res.body.getReader();const dec=new TextDecoder();let buf='',full='';
-  // bij een stream komt het verbruik in twee stukken: de invoer meteen, de
-  // uitvoer pas aan het eind
   const verbruik={input_tokens:0,output_tokens:0};
   while(true){
     const {done,value}=await reader.read();if(done)break;
@@ -5807,12 +5879,8 @@ async function callClaudeStream(messages, maxTokens, onDelta, bron){
       const line=buf.slice(0,nl).trim();buf=buf.slice(nl+1);
       if(!line.startsWith('data:'))continue;
       const payload=line.slice(5).trim();if(!payload||payload==='[DONE]')continue;
-      try{const ev=JSON.parse(payload);
-        if(ev.type==='content_block_delta'&&ev.delta&&ev.delta.text){full+=ev.delta.text;if(onDelta)onDelta(full);}
-        if(ev.type==='message_start'&&ev.message&&ev.message.usage)
-          Object.assign(verbruik,ev.message.usage);
-        if(ev.type==='message_delta'&&ev.usage&&ev.usage.output_tokens!=null)
-          verbruik.output_tokens=ev.usage.output_tokens;
+      try{const stuk=a.stroom(JSON.parse(payload),verbruik);
+        if(stuk){full+=stuk;if(onDelta)onDelta(full);}
       }catch(e){}
     }
   }
@@ -5820,12 +5888,15 @@ async function callClaudeStream(messages, maxTokens, onDelta, bron){
   if(!full)throw new Error('leeg antwoord');
   return full;
 }
-/* Anthropic stuurt bij een fout een gewone zin mee die uitlegt wat er mis is --
-   "Your credit balance is too low", bijvoorbeeld. Die is meer waard dan het
-   nummer dat de app tot nu toe liet zien.                                     */
+/* Een aanbieder stuurt bij een fout een gewone zin mee die uitlegt wat er mis
+   is -- "Your credit balance is too low", bijvoorbeeld. Die is meer waard dan
+   het nummer dat de app tot nu toe liet zien.                                */
 async function apiFout(res){
   let m='';
-  try{const e=await res.json();m=(e&&e.error&&e.error.message)||'';}catch(_){}
+  try{const e=await res.json();
+    m=(e&&e.error&&(e.error.message||e.error))||'';
+    if(typeof m!=='string')m='';
+  }catch(_){}
   return m?(m+' (api '+res.status+')'):('api '+res.status);
 }
 function extractJSON(txt){
@@ -5885,7 +5956,7 @@ async function scanLabel(ev){
     const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
     const media=file.type||'image/jpeg';
     const prompt='Dit is een foto van een etiket van een zak specialty koffie. Lees alle informatie en geef ALLEEN een JSON-object terug, zonder uitleg, zonder markdown. Velden (laat leeg als onbekend): {"name":"","roaster":"","origin":"","process":"","variety":"","altitude":"","roasternotes":"","roast":"","fam":"","url":""}. roasternotes = de smaakomschrijving van de brander, komma-gescheiden. url = de officiele website van de brander: als die letterlijk op de zak staat gebruik die, anders geef de meest waarschijnlijke officiele website-URL van deze brander op basis van wat je weet (bv. https://merknaam.com). Laat url alleen leeg als je echt geen idee hebt welke brander het is.\n'+BEAN_RULES;
-    const txt=await callClaude([{role:"user",content:[
+    const txt=await askAI([{role:"user",content:[
       {type:"image",source:{type:"base64",media_type:media,data:b64}},
       {type:"text",text:prompt}
     ]}],700,'bean');
@@ -5974,7 +6045,7 @@ async function beanUitLink(){
       'notes = twee zinnen over wat deze boon of deze streek bijzonder maakt.\n'+
       'land = het herkomstland; kies het uit deze lijst als het erbij staat: '+landen+'. '+
       'streek = de streek binnen dat land.\n'+LINK_RULES;
-    const d=extractJSON(await callClaude([{role:"user",content:prompt}],900,'bean'));
+    const d=extractJSON(await askAI([{role:"user",content:prompt}],900,'bean'));
     ['name','roaster','origin','process','variety','altitude'].forEach(k=>zetLeeg('b-'+k,d[k]));
     zetLeeg('b-roasternotes',d.roasternotes); zetLeeg('b-notes',d.notes);
     const roast=(d.roastlevel||'').toLowerCase().trim();
@@ -6010,7 +6081,7 @@ async function enrichBean(){
   try{
     const known=`naam: ${name||'?'}; roaster: ${roaster||'?'}; origin: ${origin||'?'}; website: ${url||'?'}; proces: ${get('b-process')||'?'}; variëteit: ${get('b-variety')||'?'}; hoogte: ${get('b-altitude')||'?'}`;
     const prompt=`Je bent een specialty-koffie expert. Voor deze specifieke boon van deze roaster, vul de ontbrekende informatie zo volledig mogelijk aan op basis van wat algemeen bekend is over deze boon, roaster en herkomst. Verzin niets: laat een veld leeg als je het echt niet weet. Bekend:\n${known}\nGeef ALLEEN JSON terug zonder markdown: {"origin":"","process":"","variety":"","altitude":"","roasternotes":"","notes":""}. roasternotes = smaakprofiel (komma-gescheiden). notes = korte extra omschrijving (max 2 zinnen) over deze boon/herkomst. Vul alleen velden in waar je iets aan toevoegt.\n${BEAN_RULES}`;
-    const txt=await callClaude([{role:"user",content:prompt}],700,'bean');
+    const txt=await askAI([{role:"user",content:prompt}],700,'bean');
     const d=extractJSON(txt);
     // alleen invullen waar nu nog leeg, behalve notes/roasternotes die mogen aanvullen
     if(d.origin&&!get('b-origin'))setText('b-origin',d.origin);
@@ -6021,7 +6092,7 @@ async function enrichBean(){
     if(d.notes)setText('b-notes',d.notes);
     status.textContent='✓ enriched — please check everything';
   }catch(e){
-    status.textContent='couldn\'t fetch extra info (only works in Claude with AI on)';
+    status.textContent='couldn\'t fetch extra info — check your AI key in settings';
   }
 }
 
@@ -6036,7 +6107,7 @@ async function aiRecipe(beanId,methodId){
     const espM=methodFamily(m)==='espresso';
     const milk=espM?` Je mag een melkdrank kiezen (espresso, flat white, cappuccino, latte, cortado, macchiato, americano); zet dan de melkstappen in "steps" en de dranknaam in "drink".`:'';
     const prompt=`Je bent een specialty-barista. Geef een concreet zetrecept voor de methode "${m.name}" voor deze boon.\n${info}${beanPromptBlock(bean)}\n${gearPromptBlock(m.id)}${milk}${'\n'+APP_RULES+'\n'+BEAN_GRIND_RULES+'\n'+(espM?ESPRESSO_RULES:FILTER_RULES)+'\n'}Geef ALLEEN JSON terug zonder markdown: {"drink":"","dose":"","yield":"","ratio":"","grind":"","grindNote":"","temp":"","time":"","steps":["",""],"tip":""}. drink = melkdranknaam of "espresso" (leeg bij filter). grind = KORTE maalstand voor het invulveld (alleen getal/klikken of één woord, GEEN uitleg/merknaam). grindNote = korte uitleg over de maling. Houd het kort en praktisch, Nederlands. dose/yield in gram, temp in °C, ratio als 1:x.`;
-    const txt=await callClaude([{role:"user",content:prompt}],900,'brew');
+    const txt=await askAI([{role:"user",content:prompt}],900,'brew');
     const d=extractJSON(txt);
     let html='<div class="recipe-card sketch" style="background:var('+m.tint+')">';
     html+='<div class="hand" style="font-size:26px">recept · '+esc(m.name)+'</div>';
@@ -6051,7 +6122,7 @@ async function aiRecipe(beanId,methodId){
     html+='</div>';
     if(box)box.innerHTML=html;
   }catch(e){
-    if(box)box.innerHTML='<div class="recipe-card sketch soft">couldn\'t make a recipe — this only works as an artifact in Claude.</div>';
+    if(box)box.innerHTML='<div class="recipe-card sketch soft">couldn\'t make a recipe — check your AI key in settings.</div>';
   }
 }
 function useRecipe(beanId){
@@ -6219,7 +6290,7 @@ async function learnMoreAsk(elId,bi,deepen){
       (deepen?"Verdiep dit onderwerp met 3–5 concrete, extra inzichten die verder gaan dan de tekst hierboven.":
               ("Beantwoord deze vraag van de lerende: \""+vraag+"\"."))+
       " Schrijf in het Nederlands, kort en praktisch, max 6 zinnen. Geen inleiding — direct de kennis.";
-    const txt=await callClaude([{role:"user",content:sys}],600,'learn');
+    const txt=await askAI([{role:"user",content:sys}],600,'learn');
     const skey=learnMoreKey(elId,bi);
     const arr=JSON.parse(localStorage.getItem(skey)||'[]');
     arr.push({q:(deepen?'verdieping ✦':vraag),a:(txt||'').trim(),ts:Date.now()});
@@ -6383,10 +6454,10 @@ async function askCoach(){
         "Ken je hun molen mét bereik, houd een voorgestelde stap dan in verhouding tot die schaal.\n"+
         "Verzin nooit gegevens die er niet staan; staat iets er niet, zeg dat dan.\n\n"+ctx+"\n"):"")+
       "\nVraag: "+q;
-    const txt=await callClaude([{role:"user",content:sys}],600,'brew');
+    const txt=await askAI([{role:"user",content:sys}],600,'brew');
     a.innerHTML='<div class="recipe-card sketch" style="background:var(--v60)">'+esc(txt).replace(/\n/g,'<br>')+'</div>';
   }catch(e){
-    a.innerHTML='<div class="recipe-card sketch soft">kon de coach niet bereiken — werkt alleen als artifact in Claude.</div>';
+    a.innerHTML='<div class="recipe-card sketch soft">couldn’t reach the coach — check your AI key in settings.</div>';
   }
 }
 
@@ -6410,7 +6481,7 @@ async function brewsletter(){
   const best=scored.slice().sort((a,b)=>b.score-a.score)[0];
   const beansUsed=[...new Set(week.map(b=>b.beans).filter(Boolean))];
   let line='';
-  if(aiReady()){try{line=(await callClaude([{role:"user",content:
+  if(aiReady()){try{line=(await askAI([{role:"user",content:
     `Schrijf één warme, korte zin (Nederlands, max 14 woorden) als afsluiter van iemands koffieweek: ${week.length} brews, favoriete methode ${topM?topM.name:'?'}, gemiddeld ${avg.toFixed(1)}/10.`}],80,'recap')).trim();}catch(e){}}
   try{await document.fonts.load('700 60px Caveat');await document.fonts.load('30px "Patrick Hand"');}catch(e){}
   const W=900,H=1100,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
@@ -6456,7 +6527,7 @@ async function tasteMemory(){
   if(byO.length)html+='origins: '+byO.map(([k,a])=>esc(k)+' '+a.toFixed(1)).join(' · ')+'<br>';
   el.innerHTML=html||'not enough linked bean data yet.';
   if(aiReady()&&html){
-    try{const txt=await callClaude([{role:"user",content:
+    try{const txt=await askAI([{role:"user",content:
       'Dit zijn iemands gemiddelde koffiescores. Trek er in het Nederlands één vriendelijk, concreet inzicht uit (max 2 zinnen) en één aanrader:\n'+el.innerText}],250,'recap');
       el.innerHTML=html+'<br>✦ '+esc((txt||'').trim()).replace(/\n/g,'<br>');
     }catch(e){}
@@ -7318,7 +7389,7 @@ async function latteCoach(id){
       : ' De barista gaf niet op welke vorm het moest worden; beschrijf dan wat je ziet.';
     const prompt='Dit is een foto van latte art van een thuisbarista.'+doel+
       ' Geef vriendelijke, concrete feedback in het Nederlands (max 4 zinnen): wat gaat goed, en \u00e9\u00e9n duidelijk verbeterpunt over melktextuur, giethoogte of trekbeweging.';
-    const txt=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:media,data:b64}},{type:"text",text:prompt}]}],400,'pour');
+    const txt=await askAI([{role:"user",content:[{type:"image",source:{type:"base64",media_type:media,data:b64}},{type:"text",text:prompt}]}],400,'pour');
     sh.fb=(txt||'').trim();latteOpen[sh.id]=true;save();renderGallery();
   }catch(e){toast("couldn't reach the coach");}
 }
@@ -9018,7 +9089,7 @@ async function fdAIZoek(){
       Object.keys(FD_DOELEN).join(', ')+'.\n'+
       'Weet je iets niet (prijzen, winkels, voorraad — de app kent geen webshops), zeg dat '+
       'ronduit en beantwoord de helft die je wel kunt.';
-    fdAntw=fdKeur(extractJSON(await callClaude([{role:'user',content:prompt}],1600,'finder')));
+    fdAntw=fdKeur(extractJSON(await askAI([{role:'user',content:prompt}],1600,'finder')));
     if(!fdAntw.zin&&!fdAntw.uitleg.length&&!fdAntw.streken.length)fdAntw=null;
   }catch(e){ fdAntw={soort:'tekst',zin:'Daar kwam ik niet uit. Probeer het anders te vragen, '+
     'of zoek gewoon op een woord.',uitleg:[],streken:[],vervolg:[],links:[]}; }
@@ -9450,15 +9521,14 @@ function renderFeatures(){
 
 /* ---------------- AI-instellingen ---------------- */
 function aiEnabled(){return localStorage.getItem('scc_ai_on')==='1';}
-function getKey(){return localStorage.getItem('scc_ai_key')||'';}
+function getKey(id){return localStorage.getItem(aiSleutelNaam(id))||'';}
 function aiReady(){return aiEnabled()&&!!getKey();}
 function renderProfile(){
   const on=aiEnabled();
   document.getElementById('ai-toggle').classList.toggle('on',on);
   document.getElementById('ai-key-wrap').classList.toggle('hidden',!on);
   document.getElementById('ai-off-note').classList.toggle('hidden',on);
-  document.getElementById('ai-key').value=getKey();
-  document.getElementById('ai-key-status').textContent=getKey()?'✓ key saved':'no key entered yet';
+  try{renderAiProv();}catch(e){}
   const ss=document.getElementById('save-status');
   if(ss)ss.textContent='saved now: '+state.brews.length+' brews · '+state.beans.length+' beans · '+state.methods.length+' methods';
   renderReminder();
@@ -9706,9 +9776,10 @@ function toggleAI(){
 }
 function saveKey(){
   const v=document.getElementById('ai-key').value.trim();
-  localStorage.setItem('scc_ai_key',v);
-  document.getElementById('ai-key-status').textContent=v?'✓ key saved':'no key entered yet';
-  applyAIVisibility();try{renderAiBudget();}catch(e){}toast('✓ key saved');
+  localStorage.setItem(aiSleutelNaam(),v);
+  applyAIVisibility();
+  try{renderAiProv();renderAiBudget();}catch(e){}
+  toast(v?'✓ key saved':'key cleared');
 }
 /* ---------------- AI-budget: wat de AI deze maand kostte -------------------
    Anthropic geeft met een gewone sleutel nergens terug hoeveel tegoed er nog op
@@ -9717,14 +9788,16 @@ function saveKey(){
    het aantal tekens erin en eruit. Daarmee telt de app precies wat ZIJ uitgeeft,
    en zet dat af tegen een plafond dat jij zelf kiest. De lijn loopt dus naar jouw
    plafond, niet naar je echte saldo -- dat laatste zou verzonnen zijn.        */
-const AI_TARIEF={in:3/1e6, uit:15/1e6};              // sonnet 4.6, dollar per token
 const AI_BRONNEN=[['finder','ask the finder'],['bean','beans & labels'],
   ['brew','brew tips & recipes'],['learn','learn: tell me more'],
   ['pour','pour photos'],['recap','weekly recap'],['other','other answers']];
 const AI_KORT={finder:'finder<br>questions',bean:'label<br>scans',brew:'brew<br>tips',
   learn:'learn<br>answers',pour:'pour<br>photos',recap:'recaps',other:'other<br>answers'};
-// wat zo'n vraag ongeveer kost zolang je er zelf nog te weinig van gedaan hebt
-const AI_SCHAT={finder:.022,bean:.009,brew:.006,learn:.008,pour:.014,recap:.007,other:.008};
+// hoe groot zo'n vraag ongeveer is, zolang je er zelf nog te weinig van gedaan
+// hebt om een gemiddelde te vertrouwen. In tekens, niet in geld -- wat het kost
+// hangt af van de aanbieder die je koos
+const AI_SCHAT={finder:[4000,700],bean:[1600,280],brew:[600,280],learn:[900,350],
+  pour:[1800,570],recap:[700,320],other:[900,350]};
 const AI_PLAFONDS=[2,5,10];
 
 const aiGeld=v=>'$'+(Math.round(v*100)/100).toFixed(2);
@@ -9735,6 +9808,10 @@ function aiBud(){
   if(state.ai.maand!==aiMaand()){
     state.ai.maand=aiMaand();state.ai.dagen={};state.ai.bron={};state.ai.gemeld={};
   }
+  // toen er nog maar één aanbieder was stond de bron er zonder naam voor
+  for(const k in state.ai.bron)if(k.indexOf(':')<0){
+    state.ai.bron['anthropic:'+k]=state.ai.bron[k];delete state.ai.bron[k];
+  }
   return state.ai;
 }
 function aiBesteed(){const d=aiBud().dagen;let t=0;for(const k in d)t+=d[k];return t;}
@@ -9742,8 +9819,10 @@ function aiOver(){const a=aiBud();return a.budget==null?null:Math.max(0,a.budget
 // de prijs van zo'n vraag: eerst je eigen cijfers, en pas een schatting zolang
 // je er nog te weinig gedaan hebt om een gemiddelde te vertrouwen
 function aiPerVraag(bron){
-  const b=aiBud().bron[bron];
-  return (b&&b.n>=3&&b.d>0)?b.d/b.n:(AI_SCHAT[bron]||AI_SCHAT.other);
+  const b=aiBud().bron[aiProv()+':'+bron];
+  if(b&&b.n>=3&&b.d>0)return b.d/b.n;
+  const t=aiTarief(),g=AI_SCHAT[bron]||AI_SCHAT.other;
+  return g[0]*t.in+g[1]*t.uit;
 }
 function aiTel(usage,bron){
   if(!usage)return;
@@ -9752,11 +9831,14 @@ function aiTel(usage,bron){
   // erbij zodat een gecachete aanroep later niet per ongeluk gratis lijkt
   const inTok=(usage.input_tokens||0)+(usage.cache_creation_input_tokens||0)+
               (usage.cache_read_input_tokens||0);
-  const d=inTok*AI_TARIEF.in+(usage.output_tokens||0)*AI_TARIEF.uit;
+  const t=aiTarief();
+  const d=inTok*t.in+(usage.output_tokens||0)*t.uit;
   if(!(d>0))return;
   const dag=new Date().getDate();
   a.dagen[dag]=(a.dagen[dag]||0)+d;
-  const k=AI_BRONNEN.some(x=>x[0]===bron)?bron:'other';
+  // per aanbieder apart bijhouden: een vraag aan de een kost iets heel anders
+  // dan dezelfde vraag aan de ander
+  const k=aiProv()+':'+(AI_BRONNEN.some(x=>x[0]===bron)?bron:'other');
   if(!a.bron[k])a.bron[k]={n:0,d:0};
   a.bron[k].n++;a.bron[k].d+=d;
   save();
@@ -9800,6 +9882,49 @@ function aiPop(n){
   el.classList.remove('hidden');
 }
 function aiPopWeg(){const el=document.getElementById('aibud-pop');if(el)el.classList.add('hidden');}
+function renderAiProv(){
+  const c=document.getElementById('ai-prov-chips');if(!c)return;
+  const nu=aiProv(),a=aiAanbieder();
+  c.innerHTML=AI_AANBIEDERS.map(x=>'<button class="lp'+(x.id===nu?' sel':'')+
+    '" onclick="setAiProv(\''+x.id+'\')">'+esc(x.naam)+'</button>').join('');
+  const k=document.getElementById('ai-key');
+  if(k){k.placeholder=a.hint;k.value=getKey();}
+  const st=document.getElementById('ai-key-status');
+  if(st)st.textContent=getKey()?('✓ '+a.naam+' key saved'):('no '+a.naam+' key yet');
+  const m=document.getElementById('ai-model-wrap');
+  if(!m)return;
+  if(!getKey()){m.innerHTML='';return;}
+  const t=aiTarief();
+  m.innerHTML='<div class="set-d" style="margin:13px 0 4px">which model answers</div>'+
+    '<input class="ai-veld" id="ai-model" value="'+esc(aiModel())+'" placeholder="'+
+      esc(a.model)+'" onchange="setAiModel(this.value)">'+
+    '<div class="set-d" style="margin:13px 0 4px">what that model costs per million tokens. '+
+      'the app counts your spending with these two numbers — check them at '+esc(a.waar)+
+      ' and correct them here.</div>'+
+    '<div class="aib-prijs">'+
+      '<label>in <input class="ai-veld" id="ai-prijs-in" type="number" inputmode="decimal" '+
+        'step="0.01" min="0" value="'+(t.in*1e6)+'" onchange="setAiPrijs()"></label>'+
+      '<label>out <input class="ai-veld" id="ai-prijs-uit" type="number" inputmode="decimal" '+
+        'step="0.01" min="0" value="'+(t.uit*1e6)+'" onchange="setAiPrijs()"></label></div>';
+}
+function setAiProv(id){
+  if(!AI_AANBIEDERS.some(x=>x.id===id))return;
+  localStorage.setItem('scc_ai_prov',id);
+  renderAiProv();renderAiBudget();applyAIVisibility();
+  toast(aiAanbieder().naam+(getKey()?' — key saved':' — paste a key'));
+}
+function setAiModel(v){
+  localStorage.setItem('scc_ai_model_'+aiProv(),(v||'').trim());
+  renderAiProv();renderAiBudget();toast('✓ model: '+aiModel());
+}
+function setAiPrijs(){
+  const i=document.getElementById('ai-prijs-in'),u=document.getElementById('ai-prijs-uit');
+  if(!i||!u)return;
+  const a=parseFloat(i.value),b=parseFloat(u.value);
+  if(!(a>=0)||!(b>=0)){toast('those need to be numbers');return;}
+  localStorage.setItem('scc_ai_prijs_'+aiProv(),JSON.stringify({in:a,uit:b}));
+  renderAiBudget();toast('✓ rate saved');
+}
 function setAiBudget(v){
   const a=aiBud();
   a.budget=(v==null?null:+v);
@@ -9859,7 +9984,8 @@ function renderAiBudget(){
   const a=aiBud(),bud=a.budget,besteed=aiBesteed(),over=aiOver(),nu=new Date();
   const dag=nu.getDate();
   const op=bud!=null&&besteed>=bud*.8;
-  let h='<div class="set-d" style="margin-bottom:2px">this month, so far</div>';
+  let h='<div class="set-d" style="margin-bottom:2px">this month, so far · '+
+    esc(aiModel())+'</div>';
   h+='<div class="aib-groot'+(op?' op':'')+'">'+(bud!=null
       ?aiGeld(over)+' <span class="van">of '+aiGeld(bud)+'</span>'
       :aiGeld(besteed)+' <span class="van">spent</span>')+'</div>';
@@ -9868,20 +9994,24 @@ function renderAiBudget(){
   h+='<div class="aib-lijn">'+aiLijnSVG()+'</div>';
   // hoeveel is dat nog in vragen? Eerst de knoppen die je zelf het meest gebruikt
   if(bud!=null){
-    const gebruikt=AI_BRONNEN.filter(b=>a.bron[b[0]]&&a.bron[b[0]].n)
-      .sort((x,y)=>a.bron[y[0]].n-a.bron[x[0]].n).map(b=>b[0]);
+    const gebruikt=AI_BRONNEN.filter(b=>a.bron[aiProv()+':'+b[0]])
+      .sort((x,y)=>a.bron[aiProv()+':'+y[0]].n-a.bron[aiProv()+':'+x[0]].n).map(b=>b[0]);
     const toon=(gebruikt.concat(['finder','bean','brew']).filter((v,i,z)=>z.indexOf(v)===i)).slice(0,3);
     h+='<div class="aib-vert">'+toon.map(k=>'<div><div class="n">'+
       Math.round(over/aiPerVraag(k))+'</div><div class="l">'+AI_KORT[k]+'</div></div>').join('')+'</div>';
   }
   // waar het heen ging
-  const rijen=AI_BRONNEN.filter(b=>a.bron[b[0]]&&a.bron[b[0]].d>0)
-    .sort((x,y)=>a.bron[y[0]].d-a.bron[x[0]].d);
+  // over alle aanbieders bij elkaar: het gaat om waar JIJ het aan uitgaf
+  const tel={};
+  for(const k in a.bron){const n=k.split(':')[1];
+    if(!tel[n])tel[n]={n:0,d:0};tel[n].n+=a.bron[k].n;tel[n].d+=a.bron[k].d;}
+  const rijen=AI_BRONNEN.filter(b=>tel[b[0]]&&tel[b[0]].d>0)
+    .sort((x,y)=>tel[y[0]].d-tel[x[0]].d);
   if(rijen.length){
-    const max=a.bron[rijen[0][0]].d;
+    const max=tel[rijen[0][0]].d;
     h+='<div class="eyebrow" style="margin-top:14px"><span>where it went</span></div>'+
        '<div class="aib-bron">'+rijen.map(b=>{
-      const r=a.bron[b[0]];
+      const r=tel[b[0]];
       return '<div class="r"><div class="w">'+esc(b[1])+' <span class="set-d" style="display:inline">'+
         r.n+'×</span><div class="b" style="width:'+Math.max(6,Math.round(r.d/max*100))+
         '%"></div></div><div class="g">'+aiGeld(r.d)+'</div></div>';

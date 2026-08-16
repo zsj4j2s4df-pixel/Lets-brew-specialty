@@ -210,16 +210,20 @@ mee alsof het een eenheid is.
 
 ## Wat er met opzet niet in zit
 
-De sleutel van de AI (`localStorage.scc_ai_key`) staat niet in de back-up en niet
-in deze laag.
+De sleutels van de AI staan niet in de back-up en niet in deze laag. Elke
+aanbieder heeft zijn eigen plek in `localStorage`: `scc_ai_key` voor Anthropic
+(die naam stond er al) en `scc_ai_key_<aanbieder>` voor de rest. Welke aanbieder
+actief is staat in `scc_ai_prov`, met daarnaast per aanbieder een modelnaam
+(`scc_ai_model_<aanbieder>`) en het tarief dat jij invulde
+(`scc_ai_prijs_<aanbieder>`, dollar per miljoen tekens).
 
 Hetzelfde geldt voor de AI-teller onder `state.ai`. Die houdt per maand bij wat
 de app zelf aan Claude uitgaf — `{budget, maand, dagen:{dag:dollars},
-bron:{naam:{n,d}}, gemeld:{p20,p10}}`, waarbij `budget` het plafond in dollars is
+bron:{"aanbieder:naam":{n,d}}, gemeld:{p20,p10}}`, waarbij `budget` het plafond in dollars is
 dat je zelf koos (`null` = geen plafond). Het is geen koffiegegeven en het geldt
 alleen voor dít toestel, dus het hoort niet in een graaf die je doorstuurt.
 
-Het bedrag komt uit het `usage`-blok dat Anthropic bij elk antwoord meestuurt,
-tegen het tarief van het model dat de app gebruikt. Je werkelijke tegoed bij
-Anthropic staat er níét in: dat is met een gewone API-sleutel nergens op te
+Het bedrag komt uit het `usage`-blok dat de aanbieder bij elk antwoord
+meestuurt, tegen het tarief dat bij die aanbieder staat ingevuld. Je werkelijke
+tegoed staat er níét in: dat is met een gewone API-sleutel nergens op te
 vragen.
