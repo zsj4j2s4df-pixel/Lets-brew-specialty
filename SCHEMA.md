@@ -207,3 +207,19 @@ zijn beide `null`.
 dertig standen over hetzelfde bereik waar de andere er honderd heeft, dus een
 getal betekent alleen iets samen met de molen erachter (`gear`). Reken er niet
 mee alsof het een eenheid is.
+
+## Wat er met opzet niet in zit
+
+De sleutel van de AI (`localStorage.scc_ai_key`) staat niet in de back-up en niet
+in deze laag.
+
+Hetzelfde geldt voor de AI-teller onder `state.ai`. Die houdt per maand bij wat
+de app zelf aan Claude uitgaf — `{budget, maand, dagen:{dag:dollars},
+bron:{naam:{n,d}}, gemeld:{p20,p10}}`, waarbij `budget` het plafond in dollars is
+dat je zelf koos (`null` = geen plafond). Het is geen koffiegegeven en het geldt
+alleen voor dít toestel, dus het hoort niet in een graaf die je doorstuurt.
+
+Het bedrag komt uit het `usage`-blok dat Anthropic bij elk antwoord meestuurt,
+tegen het tarief van het model dat de app gebruikt. Je werkelijke tegoed bij
+Anthropic staat er níét in: dat is met een gewone API-sleutel nergens op te
+vragen.
