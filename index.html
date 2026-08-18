@@ -8068,7 +8068,9 @@ function bpLandView(id){
 
 let bpView=BP_VIEWS.wereld.slice(), bpTween=null;
 function bpVenster(){
-  const svg=document.querySelector('.bp-kaart'); if(!svg)return;
+  // let op: het vijf-stappenscherm heeft óók een .bp-kaart, en die staat eerder
+  // in het document. Zonder #bp-screen ervoor maat je de verkeerde kaart op
+  const svg=document.querySelector('#bp-screen .bp-kaart'); if(!svg)return;
   svg.setAttribute('viewBox',bpView.map(n=>n.toFixed(2)).join(' '));
   bpMaten(svg);
 }
@@ -8076,9 +8078,19 @@ function bpVenster(){
    even groot zijn. Hoeveel schermpixels één eenheid is hangt van de zoom af,
    dus rekenen we dat na elke stap terug. */
 function bpMaten(svg){
-  const r=svg.getBoundingClientRect(); if(!r.width)return;
-  const v=bpView, s=Math.min(r.width/v[2], r.height/v[3]);
+  const r=svg.getBoundingClientRect();
+  // Staat de kaart nog niet in beeld, dan meet je nul. Daar stapte hij vroeger
+  // uit -- en bleef de tekst op de standaardmaat staan. Die telt in kaart-
+  // eenheden, dus op een ingezoomd land werd één streeknaam schermvullend.
+  // Nu rekenen we door met een aanname, en meten we opnieuw zodra het wél kan.
+  const breed=r.width||svg.clientWidth||(svg.parentElement&&svg.parentElement.clientWidth)||358;
+  const hoog=r.height||svg.clientHeight||breed*0.62;
+  const v=bpView, s=Math.min(breed/v[2], hoog/v[3]);
   if(!(s>0))return;
+  if(!r.width){
+    const n=(+svg.dataset.meet||0)+1;
+    if(n<=20){svg.dataset.meet=n;requestAnimationFrame(()=>{if(svg.isConnected)bpMaten(svg);});}
+  }else if(svg.dataset.meet)delete svg.dataset.meet;
   svg.querySelectorAll('.lbl').forEach(t=>{
     t.style.fontSize=((t.classList.contains('groot')?15.5:11.5)/s)+'px';
     t.style.strokeWidth=(2.8/s)+'px';
