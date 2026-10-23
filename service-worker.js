@@ -1,28 +1,32 @@
-const CACHE = 'scc-v93';
+const CACHE = 'scc-v94';
 const ASSETS = [
-  './','./index.html','./manifest.json',
+  './','./index.html','./security.js','./manifest.json',
   './icon-192.png','./icon-512.png','./logo.png',
   './m-espresso.png','./m-espresso-2.png','./m-espresso-3.png',
   './m-aeropress.png','./m-v60.png','./m-mokkapot.png','./m-senseo.png','./splash-1.png','./splash-2.png','./splash-3.png','./splash-4.png','./m-chemex.png'
 ];
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).catch(() => {}));
-  self.skipWaiting();
+self.addEventListener('install',e=>{
+  e.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(ASSETS);await self.skipWaiting();})());
 });
-self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((keys) =>
-    Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))));
-  self.clients.claim();
+self.addEventListener('activate',e=>{
+  e.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>/^scc-v\d+$/.test(k)&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());
 });
-self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('api.anthropic.com')) return;
-  e.respondWith(
-    fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-      return res;
-    }).catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
-  );
+self.addEventListener('fetch',e=>{
+  const url=new URL(e.request.url),base=new URL('./',self.location.href);
+  // Never intercept AI, push subscriptions, cross-origin calls or writes.
+  if(e.request.method!=='GET'||url.origin!==base.origin)return;
+  const isAsset=ASSETS.some(path=>new URL(path,base).pathname===url.pathname);
+  if(!isAsset)return;
+  e.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    try{
+      const response=await fetch(e.request);
+      if(response.ok){const write=cache.put(new URL(url.pathname,base.origin).href,response.clone()).catch(()=>{});e.waitUntil(write);}
+      return response;
+    }catch{
+      return await cache.match(new URL(url.pathname,base.origin).href)||Response.error();
+    }
+  })());
 });
 
 // melding aangetikt -> app openen/focussen en een nieuwe brew voorstellen

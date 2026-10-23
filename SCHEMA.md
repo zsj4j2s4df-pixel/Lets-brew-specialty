@@ -41,11 +41,11 @@ LetsBrew.graph()           // alles in één keer
 `since` mag een ISO-string of een timestamp in ms zijn. Brews komen altijd
 nieuwste eerst.
 
-### 2. `postMessage` — vanuit een ander venster of een iframe
+### 2. `postMessage` — vanuit een venster op dezelfde origin
 
 ```js
 frame.contentWindow.postMessage(
-  { lb:'query', id:'1', method:'brews', arg:{ beanId:'abc', limit:10 } }, '*');
+  { lb:'query', id:'1', method:'brews', arg:{ beanId:'abc', limit:10 } }, location.origin);
 
 window.addEventListener('message', e => {
   if (e.data && e.data.lb === 'result' && e.data.id === '1') {
@@ -58,9 +58,12 @@ window.addEventListener('message', e => {
 antwoord is `{lb:'result', id, schema, data, error}`; bij een onbekende methode
 staat `data` op `null` en zegt `error` welke naam niet klopt.
 
-> Let op: browsers scheiden opslag per site. Zet je de app in een iframe op een
-> **ander** domein, dan krijgt hij zijn eigen lege IndexedDB en krijg je lege
-> lijsten terug. Zet de pagina die meeleest dus op hetzelfde domein als de app.
+> Veiligheidsgrens: alleen berichten vanaf exact dezelfde origin (schema,
+> host én poort) worden beantwoord. Andere websites mogen het logboek niet
+> opvragen. Controleer als ontvanger ook `e.origin` en `e.source`. Antwoorden
+> gaan naar de gecontroleerde origin, nooit naar `*`. Met de nieuwe
+> beveiligingsheaders mag de app niet in een iframe worden ingebed; gebruik
+> voor een koppeling op dezelfde origin `window.open` of de bestands-export.
 
 ### 3. `?api=graph` — als losse JSON-pagina
 

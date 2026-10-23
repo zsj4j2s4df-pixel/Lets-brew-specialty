@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; manifest-src 'self'; worker-src 'self'">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lets Brew Specialty</title>
@@ -2006,7 +2008,7 @@
         </div>
         <div class="adv-body">
         <div id="ai-key-wrap" class="hidden">
-          <div class="set-d" style="margin:6px 0 8px">pick who answers, then paste that provider’s own API key. it stays on this device only.</div>
+          <div class="set-d" style="margin:6px 0 8px">pick who answers, then paste that provider’s own API key. it stays in this tab only. paste it again after reloading; it is never included in a back-up.</div>
           <div class="aib-chips" id="ai-prov-chips"></div>
           <input id="ai-key" type="password" placeholder="sk-ant-..." onchange="saveKey()">
           <div class="set-d" id="ai-key-status" style="margin-top:6px"></div>
@@ -2149,6 +2151,7 @@
 <div class="toast" id="toast"></div>
 <div id="print-area"></div>
 
+<script src="security.js"></script>
 <script>
 /* ---------------- data + opslag ---------------- */
 const BREW_GUIDES={
@@ -2692,9 +2695,9 @@ function libraryFor(m){
 function methodImg(m){ return (m&&(m.customImg||m.img))||''; }
 // render een methode-icoon (afbeelding met glyph-fallback), grootte px
 function iconHTML(m,size){
-  const src=methodImg(m);
-  if(src) return `<img src="${src}" style="max-height:${size}px;max-width:100%;mix-blend-mode:multiply" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'glyph',textContent:'${(m&&m.glyph)||'☕'}'}))">`;
-  return `<span class="glyph">${(m&&m.glyph)||'☕'}</span>`;
+  const src=BrewSecurity.imageUrl(methodImg(m)),glyph=esc((m&&m.glyph)||'☕');
+  if(src)return `<img src="${esc(src)}" style="max-height:${size}px;max-width:100%;mix-blend-mode:multiply" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="glyph" hidden>${glyph}</span>`;
+  return `<span class="glyph">${glyph}</span>`;
 }
 // handgetekende huisstijl-actie-icoontjes (inline SVG, losse schetsstijl)
 const ICO={
@@ -2769,6 +2772,7 @@ function idbSet(key,val){
     tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error||new Error('idb-set'));
   }));
 }
+let storageBlocked=false;
 let hadOpgeslagenData=false;   // draaide deze telefoon de app al eerder?
 async function load(){
   let s=null;
@@ -2784,7 +2788,7 @@ async function load(){
       }
     }catch(e){}
   }
-  if(s&&s.methods&&s.brews){hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();try{bpMigreerWensen();}catch(e){}return;}
+  if(s&&s.methods&&s.brews){try{BrewSecurity.validateImport(s,{backup:true});}catch(e){storageBlocked=true;throw e;}hadOpgeslagenData=true;state=s;if(!state.beans)state.beans=[];if(!state.gear)state.gear=[];mergeMethodImages();try{bpMigreerWensen();}catch(e){}return;}
   state={methods:JSON.parse(JSON.stringify(DEFAULT_METHODS)),brews:demoBrews(),beans:demoBeans(),gear:[],prepItems:JSON.parse(JSON.stringify(DEFAULT_PREP))};
   save();
 }
@@ -2865,6 +2869,7 @@ function isDialInBrew(x){
   return methodFamily(x.method)==='espresso' && !x.score && (!x.title || x.title===(x.drink||''));
 }
 function save(){
+  if(storageBlocked){toast('Stored data need checking. Export a backup before changing anything.');return;}
   // schrijf naar IndexedDB: veel grotere quota dan localStorage, geschikt voor foto's
   showSaved();
   try{
@@ -3597,7 +3602,7 @@ function bedNL(id){const b=BED_SHAPES.find(x=>x.id===id);return b?(b.nl||b.n):''
 function renderGearChips(){
   const el=document.getElementById('f-gearchips');if(!el)return;
   el.innerHTML=gearVoor(formMethod).filter(g=>g.kind!=='grinder').map(g=>
-    `<button type="button" class="lp" onclick="fillGear('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
+    `<button type="button" class="lp" onclick="fillGear(${jsArg(g.name)})">${esc(g.name)}</button>`).join('');
 }
 function fillGear(naam){
   const br=document.getElementById('f-brewer');
@@ -3617,7 +3622,7 @@ function renderFormMolens(){
   if(formMolen&&!lijst.some(g=>g.name===formMolen))formMolen=null;
   if(!formMolen&&!molenZelf&&lijst.length===1)formMolen=lijst[0].name;
   el.innerHTML=lijst.map(g=>
-    `<button type="button" class="lp ${g.name===formMolen?'sel':''}" onclick="pickFormMolen('${esc(g.name).replace(/'/g,"&#39;")}')">${esc(g.name)}</button>`).join('');
+    `<button type="button" class="lp ${g.name===formMolen?'sel':''}" onclick="pickFormMolen(${jsArg(g.name)})">${esc(g.name)}</button>`).join('');
   if(note)note.textContent=lijst.length?'':
     'no grinder in your gear yet — add one under profile → gear with its grind range';
   renderGrindNote();
@@ -3794,7 +3799,7 @@ function recMolens(){
     return;
   }
   el.innerHTML=lijst.map(g=>
-    `<button class="lp ${recBewerk&&recBewerk.molen===g.name?'sel':''}" onclick="recPickMolen('${esc(g.name).replace(/'/g,'&#39;')}')">${esc(g.name)}</button>`).join('');
+    `<button class="lp ${recBewerk&&recBewerk.molen===g.name?'sel':''}" onclick="recPickMolen(${jsArg(g.name)})">${esc(g.name)}</button>`).join('');
   if(note)note.textContent='the number you actually dial \u2014 tap which grinder it belongs to';
 }
 function recPickMolen(naam){
@@ -4901,22 +4906,22 @@ function openDetail(id){
   const grid = fam==='filter' ? `
       <div class="stat-ratio">ratio ${ratioTxt} · score ${scoreTxt}/10</div>
       <div class="stat-grid">
-        <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
-        <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
-        <div class="stat"><div class="k">bloom</div><div class="v hand">${bloomTxt||'—'}</div></div>
+        <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?esc(b.dose)+' g':'—'}</div></div>
+        <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?esc(b.yield)+' g':'—'}</div></div>
+        <div class="stat"><div class="k">bloom</div><div class="v hand">${esc(bloomTxt||'—')}</div></div>
         <div class="stat"><div class="k">time</div><div class="v hand">${esc(b.time||'—')}</div></div>
         ${b.draw?'<div class="stat"><div class="k">drawdown</div><div class="v hand">'+esc(b.draw)+'</div></div>':''}
         ${b.bed?'<div class="stat"><div class="k">bed</div><div class="v hand">'+esc(bedName(b.bed))+'</div></div>':''}
         <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
-        <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
+        <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?esc(b.temp)+'°C':'—'}</div></div>
       </div>` : `
       <div class="stat-ratio">ratio ${ratioTxt} · score ${scoreTxt}/10</div>
       <div class="stat-grid">
-        <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?b.dose+' g':'—'}</div></div>
-        <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?b.yield+' g':'—'}</div></div>
+        <div class="stat"><div class="k">dose in</div><div class="v hand">${b.dose?esc(b.dose)+' g':'—'}</div></div>
+        <div class="stat"><div class="k">yield out</div><div class="v hand">${b.yield?esc(b.yield)+' g':'—'}</div></div>
         <div class="stat"><div class="k">shot time</div><div class="v hand">${esc(b.time||'—')}</div></div>
         <div class="stat"><div class="k">grind</div><div class="v hand">${malingVal}</div></div>
-        <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?b.temp+'°C':'—'}</div></div>
+        <div class="stat"><div class="k">temp</div><div class="v hand">${b.temp?esc(b.temp)+'°C':'—'}</div></div>
       </div>`;
   document.getElementById('detail-body').innerHTML=`
     <div class="detail-top"><button onclick="go('home')">‹</button>
@@ -4993,10 +4998,11 @@ async function shareOneBrew(id){
 // brew-bestand van iemand anders importeren (samenvoegen, niet vervangen)
 function importBrewsFile(ev){
   const file=ev.target.files&&ev.target.files[0];if(!file)return;
+  try{BrewSecurity.checkFile(file);}catch(e){toast(e.message);ev.target.value='';return;}
   const r=new FileReader();
   r.onload=()=>{
     try{
-      const d=JSON.parse(r.result);
+      const d=BrewSecurity.validateImport(JSON.parse(r.result));
       const inkomend = d.type==='lbs-brews'&&Array.isArray(d.brews) ? d.brews
                      : Array.isArray(d.brews) ? d.brews : null;
       if(!inkomend)throw new Error('geen brews');
@@ -5079,10 +5085,11 @@ function shareOneBean(id){
 // bonen-bestand van iemand anders importeren (samenvoegen, niet vervangen)
 function importBeansFile(ev){
   const file=ev.target.files&&ev.target.files[0];if(!file)return;
+  try{BrewSecurity.checkFile(file);}catch(e){toast(e.message);ev.target.value='';return;}
   const r=new FileReader();
   r.onload=()=>{
     try{
-      const d=JSON.parse(r.result);
+      const d=BrewSecurity.validateImport(JSON.parse(r.result));
       // accepteer zowel het bonen-pakket als een volledige back-up
       const inkomend = d.type==='lbs-beans'&&Array.isArray(d.beans) ? d.beans
                      : Array.isArray(d.beans) ? d.beans : null;
@@ -5115,10 +5122,11 @@ function importBeansFile(ev){
 // een bij een brew meegestuurde boon komt automatisch mee en blijft gekoppeld.
 function importFriend(ev){
   const file=ev.target.files&&ev.target.files[0];if(!file)return;
+  try{BrewSecurity.checkFile(file);}catch(e){toast(e.message);ev.target.value='';return;}
   const r=new FileReader();
   r.onload=()=>{
     try{
-      const d=normaliseerData(JSON.parse(r.result));
+      const d=normaliseerData(BrewSecurity.validateImport(JSON.parse(r.result)));
       let addedBrews=0,addedBeans=0,skippedBeans=0;
       const idMap={};                         // oud boon-id -> nieuw boon-id
       const addBean=(nb)=>{
@@ -5230,7 +5238,7 @@ function renderMethods(){
           ${cnt>0?`<a class="bean-link" onclick="showMethodBrews('${m.id}')">${cnt} brew${cnt===1?'':'s'} →</a>`:'no brews yet'}
           · <a class="bean-link" onclick="openImgPicker('${m.id}')">drawing</a>
         </div>
-        <div style="font-size:14px;color:var(--ink-soft);margin-top:2px">family: <a class="bean-link" onclick="toggleMethodFamily('${m.id}')">${methodFamily(m)} ⇄</a></div>
+        <div style="font-size:14px;color:var(--ink-soft);margin-top:2px">family: <a class="bean-link" onclick="toggleMethodFamily('${m.id}')">${esc(methodFamily(m))} ⇄</a></div>
         ${gearRowHTML(m)}
         <input type="file" id="mm-edit-img-${m.id}" accept="image/*" style="display:none" onchange="replaceMethodImg('${m.id}',event)">
       </div>
@@ -5551,7 +5559,7 @@ function beanCardHTML(b){
         <button class="icon-btn" title="edit" onclick="editBean('${b.id}')">${ICO.edit}</button>
         <button class="icon-btn" title="delete" onclick="delBean('${b.id}')">${ICO.del}</button>
       </div></div>
-    ${b.photo?'<img src="'+b.photo+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:14px;border:2px solid var(--line);margin:6px 0">':''}
+    ${b.photo?'<img src="'+esc(BrewSecurity.imageUrl(b.photo))+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:14px;border:2px solid var(--line);margin:6px 0">':''}
     <div class="bm">${[b.roaster,b.origin,b.process,b.variety].filter(Boolean).map(esc).join(' · ')||'—'}
       ${b.altitude?'<br>altitude: '+esc(b.altitude)+' m':''}
       ${b.roastdate?'<br>roast: '+esc(b.roastdate)+(fresh?' · '+esc(fresh.label):''):''}
@@ -5559,7 +5567,7 @@ function beanCardHTML(b){
       ${methodLine}
       ${dialLineHTML(b)}
       ${b.notes?'<br>'+esc(b.notes):''}
-      ${b.url?'<br>🔗 <a class="bean-link" href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">view online</a>':''}
+      ${BrewSecurity.safeLink(b.url)?'<br>🔗 <a class="bean-link" href="'+esc(BrewSecurity.safeLink(b.url))+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">view online</a>':''}
       ${(featOn('cost')&&b.price&&b.bagsize)?'<br>≈ €'+((b.price/b.bagsize)*18).toFixed(2)+' per cup (18 g) · €'+(+b.price).toFixed(2)+' / '+b.bagsize+' g':''}
       <br>${cnt} brew${cnt===1?'':'s'} linked</div>
     ${freshGaugeHTML(b)}
@@ -5657,7 +5665,7 @@ function editBean(id){
   const er=document.getElementById('enrich-row');if(er)er.style.display='none';
   beanPhoto=null; // alleen nieuwe foto vervangt de bestaande
   const lp=document.getElementById('label-preview');
-  if(lp)lp.innerHTML=b.photo?'<img src="'+b.photo+'" style="max-height:140px;border-radius:14px;border:2px solid var(--line)">':'';
+  if(lp)lp.innerHTML=b.photo?'<img src="'+esc(BrewSecurity.imageUrl(b.photo))+'" style="max-height:140px;border-radius:14px;border:2px solid var(--line)">':'';
   beanFormMethods=(Array.isArray(b.methods)&&b.methods.length?[...b.methods]:(b.method?[b.method]:[]));
   beanFormFam=b.fam||null;renderBeanFam();
   beanFormRoast=b.roast||null;renderBeanRoast();
@@ -7347,7 +7355,7 @@ function renderGallery(){
     const kop=timeAgo(sh.ts);
     if(!open)return `<div class="settings-card sketch soft">
       <div class="lshot-row" onclick="latteToggle('${sh.id}')">
-        <img class="lshot-thumb" src="${sh.img}">
+        <img class="lshot-thumb" src="${esc(BrewSecurity.imageUrl(sh.img))}">
         <div class="lshot-main">
           <div class="lshot-when">${esc(kop)}${sh.shape?' <span class="lshot-shape">· '+esc(sh.shape)+'</span>':''}</div>
           <div class="lshot-fb">${sh.fb?'✦ '+esc(sh.fb):'no feedback yet'}</div>
@@ -7360,7 +7368,7 @@ function renderGallery(){
         <div class="lshot-main"><div class="lshot-when">${esc(kop)}${sh.shape?' <span class="lshot-shape">· '+esc(sh.shape)+'</span>':''}</div></div>
         <span class="bchev">▾</span>
       </div>
-      <img src="${sh.img}" style="width:100%;border-radius:14px;border:2px solid var(--line);margin-top:8px">
+      <img src="${esc(BrewSecurity.imageUrl(sh.img))}" style="width:100%;border-radius:14px;border:2px solid var(--line);margin-top:8px">
       ${sh.fb?'<div class="set-d" style="margin-top:6px;color:var(--ink)">✦ '+esc(sh.fb).replace(/\n/g,'<br>')+'</div>':''}
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="recipe-btn ai-only ${aiReady()?'':'hidden'}" style="margin-top:0;flex:1" onclick="latteCoach('${sh.id}')">✦ laat de coach kijken</button>
@@ -8549,7 +8557,7 @@ function bpWensHTML(){
         (w.notitie?('<br>'+esc(w.notitie)):'')+'</div>'+
       '<div class="wens-rij">'+
       '<button class="lp sel" onclick="bpGekocht(\''+w.id+'\')">gekocht ✓</button>'+
-      (w.url?('<a class="lp" href="'+esc(w.url)+'" target="_blank" rel="noopener">bekijk de zak ↗</a>'):'')+
+      (BrewSecurity.safeLink(w.url)?('<a class="lp" href="'+esc(BrewSecurity.safeLink(w.url))+'" target="_blank" rel="noopener">bekijk de zak ↗</a>'):'')+
       '<button class="lp" onclick="bpWijzigWens(\''+w.id+'\')">wijzig</button>'+
       '<button class="lp" onclick="bpVanLijst(\''+w.id+'\')">×</button>'+
       '</div></div>';
@@ -9533,7 +9541,12 @@ function renderFeatures(){
 
 /* ---------------- AI-instellingen ---------------- */
 function aiEnabled(){return localStorage.getItem('scc_ai_on')==='1';}
-function getKey(id){return localStorage.getItem(aiSleutelNaam(id))||'';}
+// Keep provider secrets in memory; migrate an old stored key for this tab only.
+const sessionAiKeys=Object.create(null);
+for(const provider of ['anthropic','openai']){
+  try{sessionAiKeys[provider]=localStorage.getItem(aiSleutelNaam(provider))||'';localStorage.removeItem(aiSleutelNaam(provider));}catch{sessionAiKeys[provider]='';}
+}
+function getKey(id){return sessionAiKeys[id||aiProv()]||'';}
 function aiReady(){return aiEnabled()&&!!getKey();}
 function renderProfile(){
   const on=aiEnabled();
@@ -9788,10 +9801,11 @@ function toggleAI(){
 }
 function saveKey(){
   const v=document.getElementById('ai-key').value.trim();
-  localStorage.setItem(aiSleutelNaam(),v);
+  sessionAiKeys[aiProv()]=v;
+  localStorage.removeItem(aiSleutelNaam());
   applyAIVisibility();
   try{renderAiProv();renderAiBudget();}catch(e){}
-  toast(v?'✓ key saved':'key cleared');
+  toast(v?'✓ key available in this tab':'key cleared');
 }
 /* ---------------- AI-budget: wat de AI deze maand kostte -------------------
    Anthropic geeft met een gewone sleutel nergens terug hoeveel tegoed er nog op
@@ -9902,7 +9916,7 @@ function renderAiProv(){
   const k=document.getElementById('ai-key');
   if(k){k.placeholder=a.hint;k.value=getKey();}
   const st=document.getElementById('ai-key-status');
-  if(st)st.textContent=getKey()?('✓ '+a.naam+' key saved'):('no '+a.naam+' key yet');
+  if(st)st.textContent=getKey()?('✓ '+a.naam+' key in this tab only'):('no '+a.naam+' key yet');
   const m=document.getElementById('ai-model-wrap');
   if(!m)return;
   if(!getKey()){m.innerHTML='';return;}
@@ -9923,7 +9937,7 @@ function setAiProv(id){
   if(!AI_AANBIEDERS.some(x=>x.id===id))return;
   localStorage.setItem('scc_ai_prov',id);
   renderAiProv();renderAiBudget();applyAIVisibility();
-  toast(aiAanbieder().naam+(getKey()?' — key saved':' — paste a key'));
+  toast(aiAanbieder().naam+(getKey()?' — key in this tab':' — paste a key'));
 }
 function setAiModel(v){
   localStorage.setItem('scc_ai_model_'+aiProv(),(v||'').trim());
@@ -10046,7 +10060,7 @@ function applyAIVisibility(){
 }
 
 /* ---------------- export / import ---------------- */
-const APP_VERSION='2026.08';
+const APP_VERSION='2026.10-security1';
 /* ================= de datalaag =================================================
    Binnen in de app is `state` gegroeid zoals het uitkwam. Dat is prima om mee te
    werken, maar niets om andere software aan vast te knopen: verandert er iets aan
@@ -10164,16 +10178,16 @@ window.LetsBrew=Object.freeze({
    window.open opent, kan hem hetzelfde vragen. Vraag erin, antwoord eruit. */
 window.addEventListener('message',ev=>{
   const q=ev.data;
-  if(!q||q.lb!=='query'||!ev.source)return;
+  if(ev.origin!==location.origin||!q||q.lb!=='query'||!ev.source)return;
   let data=null,fout=null;
   try{
     const api=window.LetsBrew;
-    const fn=api[q.method];
+    const fn=Object.hasOwn(api,q.method)?api[q.method]:undefined;
     data=(typeof fn==='function')?fn(q.arg):(fn===undefined?null:fn);
     if(fn===undefined)fout='unknown method: '+q.method;
   }catch(e){fout=e.message;}
   ev.source.postMessage({lb:'result',id:q.id||null,schema:LB_SCHEMA,
-    data:fout?null:data,error:fout},'*');
+    data:fout?null:data,error:fout},ev.origin);
 });
 function apiStat(){
   const el=document.getElementById('api-stat');if(!el)return;
@@ -10217,8 +10231,9 @@ function apiPagina(){
   document.close();
   return true;
 }
-function exportData(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+async function exportData(){
+  const original=storageBlocked?await idbGet(IDB_KEY):state;
+  const blob=new Blob([JSON.stringify(original,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.download='lets-brew-specialty-backup.json';a.click();
@@ -10226,13 +10241,14 @@ function exportData(){
 }
 function importData(ev){
   const file=ev.target.files&&ev.target.files[0];if(!file)return;
+  try{BrewSecurity.checkFile(file);}catch(e){toast(e.message);ev.target.value='';return;}
   const r=new FileReader();
   r.onload=()=>{
-    try{const d=JSON.parse(r.result);
+    try{const d=BrewSecurity.validateImport(JSON.parse(r.result),{backup:true});
       if(!d.methods||!d.brews)throw new Error('ongeldig');
       if(!d.beans)d.beans=[];
       if(!confirm('this replaces your current data. continue?')){ev.target.value='';return;}
-      state=normaliseerData(d);
+      state=normaliseerData(d);storageBlocked=false;
       mergeMethodImages();          // dezelfde opschoning als bij het opstarten
       save();toast('✓ data imported');renderAll();go('home');
     }catch(e){toast('couldn\'t read the file');}
@@ -10276,6 +10292,7 @@ function nieuwsMisschien(){
   setTimeout(toonNieuws,900);
 }
 /* ---------------- util ---------------- */
+function jsArg(value){return esc(JSON.stringify(String(value??'')));}
 function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 let toastT;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
@@ -10289,7 +10306,7 @@ const loadPromise=load();
 if(navigator.storage&&navigator.storage.persist){
   navigator.storage.persist().catch(()=>{});
 }
-loadPromise.then(()=>{if(apiPagina())return;try{applyFeatures();}catch(e){}try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}});
+loadPromise.then(()=>{if(apiPagina())return;try{applyFeatures();}catch(e){}try{applyAIVisibility();}catch(e){}try{checkReminderOnOpen();}catch(e){}}).catch(()=>toast('Stored data need checking. Export a backup via profile.'));
 
 // app geopend vanuit een melding? -> pas na het laden/splash een nieuwe brew voorstellen
 let pendingQuickBrew=/[?&]quickbrew=1/.test(location.search);

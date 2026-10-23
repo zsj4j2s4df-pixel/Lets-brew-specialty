@@ -1,0 +1,2 @@
+const{defineConfig,devices}=require('@playwright/test');
+module.exports=defineConfig({testDir:'./tests',testMatch:'*.spec.cjs',workers:1,timeout:45000,projects:[{name:'mobile-chromium',use:{...devices['iPhone 13'],browserName:'chromium'}},{name:'mobile-webkit',use:{...devices['iPhone 13'],browserName:'webkit'}}],use:{baseURL:'http://localhost:4175',headless:true},webServer:{command:'node scripts/test-server.mjs',url:'http://localhost:4175',reuseExistingServer:false}});

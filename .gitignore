@@ -1,1 +1,7 @@
 docs/video/__pycache__/
+node_modules/
+test-results/
+playwright-report/
+.wrangler/
+.env
+.env.*
