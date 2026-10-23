@@ -2776,7 +2776,8 @@ let storageBlocked=false;
 let hadOpgeslagenData=false;   // draaide deze telefoon de app al eerder?
 async function load(){
   let s=null;
-  try{s=await idbGet(IDB_KEY);}catch(e){s=null;}
+  try{s=await idbGet(IDB_KEY);}catch(e){storageBlocked=true;throw e;}
+  if(s!=null&&!(s&&s.methods&&s.brews)){storageBlocked=true;throw new Error('Unsupported stored data; export a backup before changing anything.');}
   // eenmalige migratie vanuit oude localStorage-opslag; daarna localStorage
   // leegmaken zodat de ~5MB-limiet daar geen schrijfacties meer blokkeert
   if(!(s&&s.methods&&s.brews)){
