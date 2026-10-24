@@ -40,3 +40,9 @@ test('cron skips old unsafe endpoints, never follows redirects and retries faile
  const original=globalThis.fetch,calls=[];let status=503;globalThis.fetch=async(url,options)=>{calls.push({url,redirect:options.redirect});return new Response('',{status});};
  try{for(const code of [503,200]){status=code;let done;push.scheduled({},e,{waitUntil:p=>done=p});await done;if(code===503)assert.equal(JSON.parse(e.rows.get('sub:safe')).lastSent,'');else assert.match(JSON.parse(e.rows.get('sub:safe')).lastSent,/^\d{4}-\d{2}-\d{2}$/);}assert.equal(calls.length,2);for(const call of calls){assert.equal(call.url,endpoint);assert.equal(call.redirect,'manual');}}finally{globalThis.fetch=original;}
 });
+
+test('unconfigured push storage returns a controlled response and an incomplete cron sends nothing',async()=>{
+ const response=await push.fetch(req({subscription:{endpoint}}),{});assert.equal(response.status,503);assert.equal((await response.json()).error,'push storage is not configured');
+ const unsubscribe=new Request('https://push.example/unsubscribe',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({endpoint})});assert.equal((await push.fetch(unsubscribe,{})).status,503);
+ let scheduled=false;push.scheduled({},{},{waitUntil:()=>scheduled=true});assert.equal(scheduled,false);
+});

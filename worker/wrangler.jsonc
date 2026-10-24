@@ -5,8 +5,9 @@
   // dashboard (zie README.md), dan zet je de variabelen, de KV-binding en de
   // cron daar en blijft dit bestand ongebruikt.
   "name": "lets-brew-push",
+  "account_id": "7d5fa36f0987a01dcf47b34791495fa6",
   "main": "src/index.js",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2026-10-24",
 
   // cron: elke 5 minuten kijken wie er (in zijn eigen tijdzone) aan de beurt is
   "ratelimits": [{"name":"RATE_LIMITER","namespace_id":"430284717","simple":{"limit":20,"period":60}}],
