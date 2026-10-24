@@ -1,5 +1,9 @@
 # Lets Brew Specialty: veiligheid, navigatie en vervolgstappen
 
+> Dit is het oorspronkelijke onderzoek. De structuur, contextuele AI, eigen-key
+> live spraak en module-/cacheverbeteringen zijn op 24 oktober uitgewerkt in de
+> vervolgwijziging; zie [README](../README.md) voor de huidige werking en beperkingen.
+
 Onderzocht op 23 oktober 2026. Basiscommit: `3036a8b57d4915792033f0016f255d9ec19274c7`.
 De onderzochte live app is https://letsbrewspecialty.jesseboontje.workers.dev/.
 Het opgehaalde HTML-bestand kwam overeen met de repository bij aanvang.

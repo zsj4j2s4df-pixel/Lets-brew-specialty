@@ -1,6 +1,6 @@
-const CACHE = 'scc-v94';
+const CACHE = 'scc-v96';
 const ASSETS = [
-  './','./index.html','./security.js','./manifest.json',
+  './','./index.html','./security.js','./app-core.js','./styles.css','./pwa.js','./brew-model.js','./brew-workspace.js','./brew-voice.js','./voice-contract.mjs','./manifest.json',
   './icon-192.png','./icon-512.png','./logo.png',
   './m-espresso.png','./m-espresso-2.png','./m-espresso-3.png',
   './m-aeropress.png','./m-v60.png','./m-mokkapot.png','./m-senseo.png','./splash-1.png','./splash-2.png','./splash-3.png','./splash-4.png','./m-chemex.png'
@@ -19,6 +19,8 @@ self.addEventListener('fetch',e=>{
   if(!isAsset)return;
   e.respondWith((async()=>{
     const cache=await caches.open(CACHE);
+    const cached=await cache.match(new URL(url.pathname,base.origin).href);
+    if(cached)return cached;
     try{
       const response=await fetch(e.request);
       if(response.ok){const write=cache.put(new URL(url.pathname,base.origin).href,response.clone()).catch(()=>{});e.waitUntil(write);}

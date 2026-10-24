@@ -12,7 +12,7 @@ logboek. Nieuwe gegevens komen alleen binnen via de schermen zelf of via
 
 ## Versie
 
-`schema: 1`. Bij een verandering die bestaande lezers breekt gaat dat nummer
+`schema: 2`. Bij een verandering die bestaande lezers breekt gaat dat nummer
 omhoog; velden erbij mag binnen dezelfde versie. Controleer `schema` voordat je
 de rest leest.
 
@@ -21,8 +21,8 @@ de rest leest.
 ### 1. `window.LetsBrew` — op dezelfde pagina
 
 ```js
-LetsBrew.schema            // 1
-LetsBrew.appVersion        // "2026.08"
+LetsBrew.schema            // 2
+LetsBrew.appVersion        // "2026.10-workspace2"
 
 LetsBrew.methods()         // alle zetmethodes
 LetsBrew.beans()           // alle bonen
@@ -230,3 +230,16 @@ Het bedrag komt uit het `usage`-blok dat de aanbieder bij elk antwoord
 meestuurt, tegen het tarief dat bij die aanbieder staat ingevuld. Je werkelijke
 tegoed staat er níét in: dat is met een gewone API-sleutel nergens op te
 vragen.
+
+## Scheiding vanaf versie 2
+
+Bonen, zetmethodes, recepten en gemeten brews zijn aparte entiteiten. Iedere
+nieuwe dial-in-poging heeft een eigen brew-id; oude brews verdwijnen niet als
+een zak leeg is. `kind` onderscheidt een poging van een afgeronde kop.
+`recipeId`, `recipeSnapshot` en `beanSnapshot` leggen de relatie en de toenmalige
+gegevens vast. Geen recept bij een historisch record betekent onbekend, niet
+‘het huidige standaardrecept’. De interne staat heeft `dataVersion: 2`.
+
+De koffiecoach gebruikt een kleinere read-only context van dit model. Er is
+geen extern schrijftoegankelijke databrug of SQL-tool. AI-voorstellen gaan via
+dezelfde receptenbibliotheek en worden alleen na gebruikersbevestiging bewaard.

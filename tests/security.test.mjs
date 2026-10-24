@@ -31,7 +31,7 @@ test('valid subscriptions retain daily delivery marker and minimize stored subsc
 async function sw(){const handlers={},deleted=[],writes=[];const context={URL,Response,self:{location:{href:'https://app.test/service-worker.js'},clients:{claim:async()=>{}},addEventListener:(name,fn)=>handlers[name]=fn},caches:{keys:async()=>['another-app','scc-v93','scc-v94'],delete:async k=>deleted.push(k),open:async()=>({put:async(...args)=>writes.push(args),match:async()=>undefined})},fetch:async()=>new Response('ok')};vm.runInNewContext(await readFile(new URL('../service-worker.js',import.meta.url),'utf8'),context);return{handlers,deleted,writes};}
 test('service worker ignores API traffic, writes, unknown resources and preserves unrelated caches',async()=>{
  const {handlers,deleted}=await sw();for(const [url,method]of[['https://api.openai.com/v1/chat/completions','POST'],['https://api.anthropic.com/v1/messages','POST'],['https://app.test/private.json','GET'],['https://push.test/subscribe','POST']]){let intercepted=false;handlers.fetch({request:new Request(url,{method}),respondWith:()=>intercepted=true});assert.equal(intercepted,false);}
- let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(deleted,['scc-v93']);
+ let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(deleted,['scc-v93','scc-v94']);
 });
 test('cron skips old unsafe endpoints, never follows redirects and retries failed delivery',async()=>{
  const e=env(),now=new Date(),time=String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0');

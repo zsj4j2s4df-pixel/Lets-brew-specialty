@@ -35,7 +35,7 @@ globalThis.BrewSecurity=(()=>{
   }
   if(backup&&(!Array.isArray(data.methods)||!Array.isArray(data.brews)))fail();
   // These are strings in the app's editable fields, never markup or objects.
-  for(const row of [...(data.methods||[]),...(data.brews||[]),...(data.beans||[]),...(data.gear||[])]){
+  for(const row of [...(data.methods||[]),...(data.brews||[]),...(data.beans||[]),...(data.gear||[]),...(data.recipes||[]),...(data.latteShots||[]),...(data.prepItems||[])]){
    for(const field of ['name','title','roaster','origin','process','notes','roasternotes','glyph','grind','time'])if(row[field]!=null&&typeof row[field]!=='string')fail();
    if(row.id!==undefined&&!identifier(row.id))fail();
    if(row.family!==undefined&&!['espresso','filter'].includes(row.family))fail();

@@ -9,6 +9,7 @@
   "compatibility_date": "2025-01-01",
 
   // cron: elke 5 minuten kijken wie er (in zijn eigen tijdzone) aan de beurt is
+  "ratelimits": [{"name":"RATE_LIMITER","namespace_id":"430284717","simple":{"limit":20,"period":60}}],
   "triggers": {
     "crons": ["*/5 * * * *"]
   },
