@@ -1236,3 +1236,6 @@
 .sketch.soft{--sketch-stroke:var(--line);border-color:transparent;}
 .sketch::before{content:"";position:absolute;inset:-2px;border:2px solid var(--sketch-stroke);border-radius:inherit;filter:url(#wobble);pointer-events:none;}
 .ws-card{overflow-wrap:anywhere;}
+
+#page-recipes label{display:block;font-size:16px;margin:12px 0 6px;}
+#ws-recipe-method,#ws-recipe-search{display:block;box-sizing:border-box;width:100%;min-height:44px;font-family:inherit;font-size:16px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);}
