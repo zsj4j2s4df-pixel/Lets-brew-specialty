@@ -118,3 +118,25 @@ push-dienst afwijst (404 of 410 — app verwijderd) wordt meteen opgeruimd.
 
 Ruim binnen de gratis tier voor persoonlijk gebruik. De cron doet vrijwel niets
 tenzij er iemand aan de beurt is.
+
+
+## Beveiligingsaanpassingen 23 oktober 2026
+
+De app-origins zijn beperkt via `ALLOWED_ORIGINS` (komma-gescheiden; standaard
+`https://letsbrewspecialty.jesseboontje.workers.dev`). CORS is geen authenticatie:
+een externe client kan een Origin-header namaken. Voor een publiek gebruikte
+server moet daarom ook een quota/rate-limitbeleid worden ingesteld. De code
+ondersteunt een optionele `RATE_LIMITER`-binding; die is hier nog niet provisioned.
+
+Alleen HTTPS-endpoints van FCM, Mozilla Push, Apple Web Push en Windows Notify
+zijn toegestaan. De cron controleert ook oude opgeslagen endpoints opnieuw en
+volgt geen redirects bij het verzenden van de VAPID-autorisatie. De Worker bewaart
+voor deze payloadloze push alleen het endpoint, niet de ontvangen sleutels.
+JSON is maximaal 16 KiB; tijd en tijdzone worden gecontroleerd. De dagelijkse
+verzendmarkering blijft bij abonnementsupdates behouden en wordt alleen na een
+succesvolle push bijgewerkt. Dit voorkomt dubbele meldingen of het overslaan
+van herpogingen na een mislukte push.
+
+Deze broncodewijziging is lokaal getest. De gekoppelde Cloudflare-account bevat
+geen Lets Brew deployment; uitrollen naar de bestaande host vereist toegang tot
+die account. Er zijn geen secrets gewijzigd en geen abonnementen verstuurd.

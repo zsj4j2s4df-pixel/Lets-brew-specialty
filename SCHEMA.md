@@ -12,7 +12,7 @@ logboek. Nieuwe gegevens komen alleen binnen via de schermen zelf of via
 
 ## Versie
 
-`schema: 1`. Bij een verandering die bestaande lezers breekt gaat dat nummer
+`schema: 2`. Bij een verandering die bestaande lezers breekt gaat dat nummer
 omhoog; velden erbij mag binnen dezelfde versie. Controleer `schema` voordat je
 de rest leest.
 
@@ -21,8 +21,8 @@ de rest leest.
 ### 1. `window.LetsBrew` — op dezelfde pagina
 
 ```js
-LetsBrew.schema            // 1
-LetsBrew.appVersion        // "2026.08"
+LetsBrew.schema            // 2
+LetsBrew.appVersion        // "2026.10-workspace2"
 
 LetsBrew.methods()         // alle zetmethodes
 LetsBrew.beans()           // alle bonen
@@ -41,11 +41,11 @@ LetsBrew.graph()           // alles in één keer
 `since` mag een ISO-string of een timestamp in ms zijn. Brews komen altijd
 nieuwste eerst.
 
-### 2. `postMessage` — vanuit een ander venster of een iframe
+### 2. `postMessage` — vanuit een venster op dezelfde origin
 
 ```js
 frame.contentWindow.postMessage(
-  { lb:'query', id:'1', method:'brews', arg:{ beanId:'abc', limit:10 } }, '*');
+  { lb:'query', id:'1', method:'brews', arg:{ beanId:'abc', limit:10 } }, location.origin);
 
 window.addEventListener('message', e => {
   if (e.data && e.data.lb === 'result' && e.data.id === '1') {
@@ -58,9 +58,12 @@ window.addEventListener('message', e => {
 antwoord is `{lb:'result', id, schema, data, error}`; bij een onbekende methode
 staat `data` op `null` en zegt `error` welke naam niet klopt.
 
-> Let op: browsers scheiden opslag per site. Zet je de app in een iframe op een
-> **ander** domein, dan krijgt hij zijn eigen lege IndexedDB en krijg je lege
-> lijsten terug. Zet de pagina die meeleest dus op hetzelfde domein als de app.
+> Veiligheidsgrens: alleen berichten vanaf exact dezelfde origin (schema,
+> host én poort) worden beantwoord. Andere websites mogen het logboek niet
+> opvragen. Controleer als ontvanger ook `e.origin` en `e.source`. Antwoorden
+> gaan naar de gecontroleerde origin, nooit naar `*`. Met de nieuwe
+> beveiligingsheaders mag de app niet in een iframe worden ingebed; gebruik
+> voor een koppeling op dezelfde origin `window.open` of de bestands-export.
 
 ### 3. `?api=graph` — als losse JSON-pagina
 
@@ -227,3 +230,16 @@ Het bedrag komt uit het `usage`-blok dat de aanbieder bij elk antwoord
 meestuurt, tegen het tarief dat bij die aanbieder staat ingevuld. Je werkelijke
 tegoed staat er níét in: dat is met een gewone API-sleutel nergens op te
 vragen.
+
+## Scheiding vanaf versie 2
+
+Bonen, zetmethodes, recepten en gemeten brews zijn aparte entiteiten. Iedere
+nieuwe dial-in-poging heeft een eigen brew-id; oude brews verdwijnen niet als
+een zak leeg is. `kind` onderscheidt een poging van een afgeronde kop.
+`recipeId`, `recipeSnapshot` en `beanSnapshot` leggen de relatie en de toenmalige
+gegevens vast. Geen recept bij een historisch record betekent onbekend, niet
+‘het huidige standaardrecept’. De interne staat heeft `dataVersion: 2`.
+
+De koffiecoach gebruikt een kleinere read-only context van dit model. Er is
+geen extern schrijftoegankelijke databrug of SQL-tool. AI-voorstellen gaan via
+dezelfde receptenbibliotheek en worden alleen na gebruikersbevestiging bewaard.
