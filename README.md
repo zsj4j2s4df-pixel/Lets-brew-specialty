@@ -91,13 +91,19 @@ bestaande logo wordt als cachebaar bestand hergebruikt. De geforceerde splash va
 3,75 seconden vervalt. De service worker gebruikt een coherent, versiegebonden
 app-pakket; nieuwe versies worden atomair geïnstalleerd en na activatie herladen.
 
-De juiste Cloudflare-account moet toegang tot de bestaande
-`letsbrewspecialty.jesseboontje.workers.dev`-deployment hebben. De account die in
-het onderzoek beschikbaar was bevatte die deployment niet. Maak geen vervangende
-host op een andere origin zonder een plan voor de bestaande browsergegevens.
-Gebruik in de bestaande deployment deze `wrangler.jsonc` met `npm run build` als
-buildstap, zodat ook de spraakroute draait; alleen statische bestanden uploaden
-installeert die route niet. Er hoeft geen server-side API-sleutel te worden gezet.
+De app is op 24 oktober 2026 gepubliceerd op de bestaande origin
+`https://letsbrewspecialty.jesseboontje.workers.dev` in de Jesse Boontje-account.
+De account-id staat expliciet in de Wrangler-configuratie. De productie-trigger
+bouwt met `npm run build` en publiceert alleen `main` met `npx wrangler deploy`.
+Andere branches gebruiken `npx wrangler versions upload`: zij vervangen de
+liveversie niet. Alleen statische bestanden uploaden installeert de spraakroute
+niet. Er hoeft geen server-side API-sleutel te worden gezet.
+
+De liveversie doorstond 28 mobiele Chromium/WebKit-controles, plus afzonderlijke
+controles op de API-grens, publieke bestanden en offline herstart. Zie het
+[uitrolverslag](docs/uitrol-2026-10-24.md). De aparte push-service heeft wel de
+beveiligde code en een limiter, maar nog geen opslagbinding, VAPID-configuratie
+of actieve cron; dagelijkse achtergrondmeldingen zijn daarom nog niet actief.
 
 Referenties: [OpenAI WebRTC](https://developers.openai.com/api/docs/guides/realtime-webrtc),
 [client secrets](https://developers.openai.com/api/reference/resources/realtime/subresources/client_secrets/methods/create),

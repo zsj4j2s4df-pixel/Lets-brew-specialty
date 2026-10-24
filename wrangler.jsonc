@@ -1,5 +1,6 @@
 {
   "name": "letsbrewspecialty",
+  "account_id": "7d5fa36f0987a01dcf47b34791495fa6",
   "main": "site-worker.mjs",
   "compatibility_date": "2026-10-24",
   "ratelimits": [{"name":"RATE_LIMITER","namespace_id":"430284716","simple":{"limit":10,"period":60}}],

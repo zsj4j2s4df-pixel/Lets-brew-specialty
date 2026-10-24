@@ -125,8 +125,9 @@ tenzij er iemand aan de beurt is.
 De app-origins zijn beperkt via `ALLOWED_ORIGINS` (komma-gescheiden; standaard
 `https://letsbrewspecialty.jesseboontje.workers.dev`). CORS is geen authenticatie:
 een externe client kan een Origin-header namaken. Voor een publiek gebruikte
-server moet daarom ook een quota/rate-limitbeleid worden ingesteld. De code
-ondersteunt een optionele `RATE_LIMITER`-binding; die is hier nog niet provisioned.
+server moet daarom ook een quota/rate-limitbeleid worden ingesteld. De live
+`RATE_LIMITER`-binding begrenst sinds 24 oktober 2026 tot 20 writes per minuut
+per IP per Cloudflare-locatie.
 
 Alleen HTTPS-endpoints van FCM, Mozilla Push, Apple Web Push en Windows Notify
 zijn toegestaan. De cron controleert ook oude opgeslagen endpoints opnieuw en
@@ -137,6 +138,10 @@ verzendmarkering blijft bij abonnementsupdates behouden en wordt alleen na een
 succesvolle push bijgewerkt. Dit voorkomt dubbele meldingen of het overslaan
 van herpogingen na een mislukte push.
 
-Deze broncodewijziging is lokaal getest. De gekoppelde Cloudflare-account bevat
-geen Lets Brew deployment; uitrollen naar de bestaande host vereist toegang tot
-die account. Er zijn geen secrets gewijzigd en geen abonnementen verstuurd.
+De beveiligde code is op 24 oktober 2026 gepubliceerd op
+`https://lets-brew-push.jesseboontje.workers.dev`. De bestaande deployment had geen
+opslagbinding, VAPID-configuratie of cron. Die configuratie is niet verzonnen of
+automatisch geactiveerd: zonder opslag geven geldige abonnementsaanvragen een
+gecontroleerde 503; een onvolledige cron verzendt niets. Er zijn geen secrets
+gewijzigd en geen meldingen verstuurd. De voorbeeldwaarden in `wrangler.jsonc`
+moeten voor een toekomstige volledige inrichting eerst worden vervangen.

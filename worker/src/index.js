@@ -47,6 +47,7 @@ export default {
       if(!sub||!safePushEndpoint(sub.endpoint))return json({error:'invalid push endpoint'},400,cors);
       if(body.time!==undefined&&!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(body.time))return json({error:'invalid time'},400,cors);
       if(body.tz!==undefined&&(typeof body.tz!=='string'||body.tz.length>100||safeTz(body.tz)!==body.tz))return json({error:'invalid time zone'},400,cors);
+      if(!env.SUBS)return json({error:'push storage is not configured'},503,cors);
       const recordKey='sub:'+(await hashKey(sub.endpoint));let previous=null;try{previous=JSON.parse(await env.SUBS.get(recordKey));}catch{}
       const rec = {
         subscription: {endpoint:sub.endpoint},
@@ -64,6 +65,7 @@ export default {
       try{body=await readBody(request);}catch(e){return json({error:e.message},e.status||400,cors);}
       const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
       if(!safePushEndpoint(ep))return json({error:'invalid push endpoint'},400,cors);
+      if(!env.SUBS)return json({error:'push storage is not configured'},503,cors);
       if (ep) await env.SUBS.delete('sub:' + (await hashKey(ep)));
       return json({ ok: true }, 200, cors);
     }
@@ -72,6 +74,7 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
+    if(!env.SUBS||!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_JWK||!env.VAPID_SUBJECT)return;
     ctx.waitUntil(sendDue(env));
   },
 };
