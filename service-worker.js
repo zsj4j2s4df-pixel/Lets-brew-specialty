@@ -1,12 +1,30 @@
-const CACHE = 'scc-v96';
+const CACHE = 'scc-v97';
 const ASSETS = [
   './','./index.html','./security.js','./app-core.js','./styles.css','./pwa.js','./brew-model.js','./brew-workspace.js','./brew-voice.js','./voice-contract.mjs','./manifest.json',
   './icon-192.png','./icon-512.png','./logo.png',
   './m-espresso.png','./m-espresso-2.png','./m-espresso-3.png',
   './m-aeropress.png','./m-v60.png','./m-mokkapot.png','./m-senseo.png','./splash-1.png','./splash-2.png','./splash-3.png','./splash-4.png','./m-chemex.png'
 ];
+// Cloudflare redirects /index.html to /. Safari rejects redirected responses
+// returned by a service worker for a navigation (redirect mode "manual").
+// Rebuild the final same-origin response so only the page, not its redirect
+// history, is stored or returned. Also handles a legacy cached response.
+function pageResponse(response){
+  return response.redirected
+    ? new Response(response.body,{status:response.status,statusText:response.statusText,headers:response.headers})
+    : response;
+}
 self.addEventListener('install',e=>{
-  e.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(ASSETS);await self.skipWaiting();})());
+  e.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    await Promise.all(ASSETS.map(async path=>{
+      const url=new URL(path,self.location.href);
+      const response=await fetch(new Request(url,{cache:'reload'}));
+      if(!response.ok||new URL(response.url).origin!==url.origin)throw Error('App asset unavailable');
+      await cache.put(url.href,pageResponse(response));
+    }));
+    await self.skipWaiting();
+  })());
 });
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>/^scc-v\d+$/.test(k)&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());
@@ -20,13 +38,14 @@ self.addEventListener('fetch',e=>{
   e.respondWith((async()=>{
     const cache=await caches.open(CACHE);
     const cached=await cache.match(new URL(url.pathname,base.origin).href);
-    if(cached)return cached;
+    if(cached)return pageResponse(cached);
     try{
-      const response=await fetch(e.request);
+      const response=pageResponse(await fetch(e.request));
       if(response.ok){const write=cache.put(new URL(url.pathname,base.origin).href,response.clone()).catch(()=>{});e.waitUntil(write);}
       return response;
     }catch{
-      return await cache.match(new URL(url.pathname,base.origin).href)||Response.error();
+      const fallback=await cache.match(new URL(url.pathname,base.origin).href);
+      return fallback?pageResponse(fallback):Response.error();
     }
   })());
 });
@@ -39,7 +58,7 @@ self.addEventListener('notificationclick', (e) => {
     for (const c of all) {
       if ('focus' in c) { c.postMessage({ type: 'quick-brew' }); return c.focus(); }
     }
-    if (self.clients.openWindow) return self.clients.openWindow('./index.html?quickbrew=1');
+    if (self.clients.openWindow) return self.clients.openWindow('./?quickbrew=1');
   })());
 });
 

@@ -2,7 +2,7 @@
   "name": "Lets Brew Specialty",
   "short_name": "Lets Brew",
   "description": "brew. record. share. — specialty coffee tracker",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
